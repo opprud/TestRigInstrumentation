@@ -1,0 +1,35 @@
+{
+  "name": "Standard Test Profile",
+  "description": "Typical bearing test sequence with varying RPM and temperature",
+  "duration_minutes": 30,
+  "setpoints": {
+    "rpm": [
+      {"time_sec": 0, "value": 1000},
+      {"time_sec": 100, "value": 1000},
+      {"time_sec": 200, "value": 1500},
+      {"time_sec": 300, "value": 1500},
+      {"time_sec": 400, "value": 2000},
+      {"time_sec": 500, "value": 2000},
+      {"time_sec": 600, "value": 1500},
+      {"time_sec": 700, "value": 1000},
+      {"time_sec": 800, "value": 1000}
+    ],
+    "temperature": [
+      {"time_sec": 0, "value": 40},
+      {"time_sec": 120, "value": 40},
+      {"time_sec": 240, "value": 60},
+      {"time_sec": 360, "value": 60},
+      {"time_sec": 480, "value": 80},
+      {"time_sec": 600, "value": 80},
+      {"time_sec": 720, "value": 60},
+      {"time_sec": 840, "value": 40}
+    ]
+  },
+  "acquisition": {
+    "scope_points": 250000,
+    "samples_per_step": 3,
+    "interval_sec": 3,
+    "waveform_format": "WORD",
+    "acq_type": "HRES"
+  }
+}

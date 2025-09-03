@@ -1,0 +1,10 @@
+python-dateutil
+numpy
+pyvisa-py
+h5py
+pyserial
+plotly
+scipy
+fastapi
+uvicorn[standard]
+pymodbus

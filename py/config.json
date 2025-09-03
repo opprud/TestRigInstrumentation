@@ -1,0 +1,51 @@
+{
+  "scope_ip": "169.254.5.204",
+  "acquisition": {
+    "points": 250000,
+    "samples": 3,
+    "interval_sec": 3,
+    "waveform_format": "WORD",
+    "points_mode": "RAW",    
+    "trigger_sweep": "AUTO",  
+    "acq_type": "HRES"        
+  },
+
+  "channels": [
+    {
+      "name": "AE",
+      "source": "CHAN1",
+      "enabled": true,
+      "notes": "Kistler acoustic emission probe"
+    },
+    {
+      "name": "Accel",
+      "source": "CHAN2",
+      "enabled": true,
+      "notes": "Piezo accelerometer"
+    },
+    {
+      "name": "UL",
+      "source": "CHAN3",
+      "enabled": true,
+      "notes": "Ultrasound"
+    },
+    {
+      "name": "Temp",
+      "source": "CHAN4",
+      "enabled": true,
+      "notes": "Temperature"
+    }
+  ],
+
+  "store": {
+    "output_file": "data/data2.h5",
+    "timestamped": true,
+    "compress": "none", 
+    "chunk": false,
+    "attrs": {
+      "project": "ForeverBearing",
+      "operator": "morten",
+      "scope_model": "MSO-X 2024A"
+    }
+  }
+}

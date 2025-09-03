@@ -1,0 +1,35 @@
+{
+  "name": "High Stress Test Profile",
+  "description": "Aggressive test with high RPM and temperature variations",
+  "duration_minutes": 25,
+  "setpoints": {
+    "rpm": [
+      {"time_sec": 0, "value": 1500},
+      {"time_sec": 60, "value": 2500},
+      {"time_sec": 180, "value": 3000},
+      {"time_sec": 300, "value": 2800},
+      {"time_sec": 420, "value": 3200},
+      {"time_sec": 540, "value": 2000},
+      {"time_sec": 660, "value": 1800},
+      {"time_sec": 780, "value": 1500}
+    ],
+    "temperature": [
+      {"time_sec": 0, "value": 50},
+      {"time_sec": 90, "value": 70},
+      {"time_sec": 210, "value": 90},
+      {"time_sec": 330, "value": 95},
+      {"time_sec": 450, "value": 100},
+      {"time_sec": 570, "value": 85},
+      {"time_sec": 690, "value": 65},
+      {"time_sec": 810, "value": 50}
+    ]
+  },
+  "acquisition": {
+    "scope_points": 500000,
+    "samples_per_step": 5,
+    "interval_sec": 2,
+    "waveform_format": "WORD",
+    "acq_type": "AVER",
+    "averages": 16
+  }
+}
