@@ -1,0 +1,116 @@
+2025-09-05 13:29:12,497 - pyvisa - DEBUG - No visa library specified, trying to find alternatives.
+2025-09-05 13:29:12,497 - pyvisa - DEBUG - Environment variable PYVISA_LIBRARY is unset.
+2025-09-05 13:29:12,503 - pyvisa - DEBUG - Not loading dll_extra_paths because we are not on Windows
+2025-09-05 13:29:12,504 - pyvisa - DEBUG - Automatically found library files: [None, None, None, None, None]
+2025-09-05 13:29:12,504 - pyvisa - DEBUG - No user defined library files
+2025-09-05 13:29:12,504 - pyvisa - DEBUG - Did not find IVI binary
+2025-09-05 13:29:12,509 - pyvisa - DEBUG - SerialSession was correctly imported.
+2025-09-05 13:29:12,509 - pyvisa - DEBUG - USBSession and USBRawSession were not imported No module named 'usb'.
+2025-09-05 13:29:12,515 - pyvisa - DEBUG - TCPIPSession was correctly imported.
+2025-09-05 13:29:12,515 - pyvisa - DEBUG - PrologixASRLIntfcSession and PrologixTCPIPIntfcSession were correctly imported.
+2025-09-05 13:29:12,515 - pyvisa - DEBUG - GPIBSession was not imported No module named 'gpib'.
+2025-09-05 13:29:12,516 - pyvisa - DEBUG - pyvisa-py is available.
+2025-09-05 13:29:12,516 - pyvisa - DEBUG - Created library wrapper for py
+2025-09-05 13:29:12,516 - pyvisa - DEBUG - Created ResourceManager with session 4258044
+2025-09-05 13:29:12,516 - pyvisa - INFO - PyVISA version: 1.15.0
+2025-09-05 13:29:12,516 - pyvisa - INFO - VISA backend: Visa Library at py
+2025-09-05 13:29:12,516 - pyvisa - DEBUG - No visa library specified, trying to find alternatives.
+2025-09-05 13:29:12,516 - pyvisa - DEBUG - Environment variable PYVISA_LIBRARY is unset.
+2025-09-05 13:29:12,516 - pyvisa - DEBUG - Not loading dll_extra_paths because we are not on Windows
+2025-09-05 13:29:12,517 - pyvisa - DEBUG - Automatically found library files: [None, None, None, None, None]
+2025-09-05 13:29:12,517 - pyvisa - DEBUG - No user defined library files
+2025-09-05 13:29:12,517 - pyvisa - DEBUG - Did not find IVI binary
+2025-09-05 13:29:12,517 - pyvisa - DEBUG - pyvisa-py is available.
+2025-09-05 13:29:12,517 - pyvisa - DEBUG - Reusing ResourceManager with session 4258044
+2025-09-05 13:29:12,517 - pyvisa - DEBUG - TCPIP0::169.254.47.193::inst0::INSTR - opening ...
+2025-09-05 13:29:12,517 - pyvisa - DEBUG - RawTCPClient: connecting to socket at (169.254.47.193, 111)
+2025-09-05 13:29:12,518 - pyvisa - DEBUG - Make call <PortMapperVersion.get_port: 3>, (395183, 1, 6, 0), <bound method PortMapperPacker.pack_mapping of <pyvisa_py.protocols.rpc.PortMapperPacker object at 0x102b309e0>>, <bound method Unpacker.unpack_uint of <pyvisa_py.protocols.rpc.PortMapperUnpacker object at 0x102b59dc0>>
+2025-09-05 13:29:12,518 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53807), raddr=('169.254.47.193', 111)>: b'\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x01\x86\xa0\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x06\x00\x00\x00\x00'
+2025-09-05 13:29:12,518 - pyvisa - DEBUG - RawTCPClient: procedure type 3
+2025-09-05 13:29:12,518 - pyvisa - DEBUG - Start receiving at least 1 packages
+2025-09-05 13:29:12,524 - pyvisa - DEBUG - received b'\x80\x00\x00\x1c'
+2025-09-05 13:29:12,524 - pyvisa - DEBUG - received b'\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xc0\x00'
+2025-09-05 13:29:12,524 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53807), raddr=('169.254.47.193', 111)>: bytearray(b'\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xc0\x00')
+2025-09-05 13:29:12,524 - pyvisa - DEBUG - RawTCPClient: closing socket
+2025-09-05 13:29:12,524 - pyvisa - DEBUG - RawTCPClient: connecting to socket at (169.254.47.193, 49152)
+2025-09-05 13:29:12,525 - pyvisa - DEBUG - Make call 10, (916681074, 0, 10000, 'inst0'), <bound method Vxi11Packer.pack_create_link_parms of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_create_link_resp of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:12,525 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b"\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x006\xa3qr\x00\x00\x00\x00\x00\x00'\x10\x00\x00\x00\x05inst0\x00\x00\x00"
+2025-09-05 13:29:12,525 - pyvisa - DEBUG - RawTCPClient: procedure type 10
+2025-09-05 13:29:12,535 - pyvisa - DEBUG - received b'\x80\x00\x00('
+2025-09-05 13:29:12,535 - pyvisa - DEBUG - received b'\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x00\xc0\n\xff\xff\xff\xff'
+2025-09-05 13:29:12,535 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x00\xc0\n\xff\xff\xff\xff')
+2025-09-05 13:29:12,535 - pyvisa - DEBUG - TCPIP0::169.254.47.193::inst0::INSTR - is open with session 2053523
+2025-09-05 13:29:12,535 - pyvisa - DEBUG - Make call 15, (43109760, 0, 10000, 20000), <bound method Vxi11Packer.pack_device_generic_parms of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_device_error of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:12,535 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b"\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x00\x00\x00\x00\x00'\x10\x00\x00N "
+2025-09-05 13:29:12,535 - pyvisa - DEBUG - RawTCPClient: procedure type 15
+2025-09-05 13:29:16,404 - pyvisa - DEBUG - received b'\x80\x00\x00\x1c'
+2025-09-05 13:29:16,404 - pyvisa - DEBUG - received b'\x00\x00\x00\x02\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+2025-09-05 13:29:16,404 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\x02\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+2025-09-05 13:29:16,404 - pyvisa - DEBUG - Make call 11, (43109760, 20000, 10000, 8, b'*CLS\n'), <bound method Vxi11Packer.pack_device_write_parms of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_device_write_resp of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:16,404 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b"\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x00N \x00\x00'\x10\x00\x00\x00\x08\x00\x00\x00\x05*CLS\n\x00\x00\x00"
+2025-09-05 13:29:16,404 - pyvisa - DEBUG - RawTCPClient: procedure type 11
+2025-09-05 13:29:16,881 - pyvisa - DEBUG - received b'\x80\x00\x00 '
+2025-09-05 13:29:16,881 - pyvisa - DEBUG - received b'\x00\x00\x00\x03\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05'
+2025-09-05 13:29:16,881 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\x03\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05')
+2025-09-05 13:29:16,881 - pyvisa - DEBUG - Make call 11, (43109760, 20000, 10000, 8, b'SYST:ERR?\n'), <bound method Vxi11Packer.pack_device_write_parms of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_device_write_resp of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:16,881 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b"\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x00N \x00\x00'\x10\x00\x00\x00\x08\x00\x00\x00\nSYST:ERR?\n\x00\x00"
+2025-09-05 13:29:16,882 - pyvisa - DEBUG - RawTCPClient: procedure type 11
+2025-09-05 13:29:16,887 - pyvisa - DEBUG - received b'\x80\x00\x00 '
+2025-09-05 13:29:16,887 - pyvisa - DEBUG - received b'\x00\x00\x00\x04\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\n'
+2025-09-05 13:29:16,887 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\x04\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\n')
+2025-09-05 13:29:16,888 - pyvisa - DEBUG - TCPIP0::169.254.47.193::inst0::INSTR - reading 1048576 bytes (last status <StatusCode.success_max_count_read: 1073676294>)
+2025-09-05 13:29:16,888 - pyvisa - DEBUG - Make call 12, (43109760, 1048576, 20000, 10000, 128, 10), <bound method Vxi11Packer.pack_device_read_parms of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_device_read_resp of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:16,888 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b"\x00\x00\x00\x05\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x0c\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x10\x00\x00\x00\x00N \x00\x00'\x10\x00\x00\x00\x80\x00\x00\x00\n"
+2025-09-05 13:29:16,888 - pyvisa - DEBUG - RawTCPClient: procedure type 12
+2025-09-05 13:29:16,911 - pyvisa - DEBUG - received b'\x80\x00\x00p'
+2025-09-05 13:29:16,911 - pyvisa - DEBUG - received b'\x00\x00\x00\x05\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00J+0,"No error"AGILENT TECHNOLOGIES,MSO-X 2024A,MY53510379,02.41.2015102200\n\x00\x00'
+2025-09-05 13:29:16,911 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\x05\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00J+0,"No error"AGILENT TECHNOLOGIES,MSO-X 2024A,MY53510379,02.41.2015102200\n\x00\x00')
+2025-09-05 13:29:16,912 - pyvisa - DEBUG - Make call 11, (43109760, 20000, 10000, 8, b'*IDN?\n'), <bound method Vxi11Packer.pack_device_write_parms of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_device_write_resp of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:16,912 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b"\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x00N \x00\x00'\x10\x00\x00\x00\x08\x00\x00\x00\x06*IDN?\n\x00\x00"
+2025-09-05 13:29:16,912 - pyvisa - DEBUG - RawTCPClient: procedure type 11
+2025-09-05 13:29:26,959 - pyvisa - DEBUG - received b'\x80\x00\x00 '
+2025-09-05 13:29:26,959 - pyvisa - DEBUG - received b'\x00\x00\x00\x06\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06'
+2025-09-05 13:29:26,960 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\x06\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06')
+2025-09-05 13:29:26,960 - pyvisa - DEBUG - TCPIP0::169.254.47.193::inst0::INSTR - reading 1048576 bytes (last status <StatusCode.success_max_count_read: 1073676294>)
+2025-09-05 13:29:26,960 - pyvisa - DEBUG - Make call 12, (43109760, 1048576, 20000, 10000, 128, 10), <bound method Vxi11Packer.pack_device_read_parms of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_device_read_resp of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:26,960 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b"\x00\x00\x00\x07\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x0c\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x10\x00\x00\x00\x00N \x00\x00'\x10\x00\x00\x00\x80\x00\x00\x00\n"
+2025-09-05 13:29:26,961 - pyvisa - DEBUG - RawTCPClient: procedure type 12
+2025-09-05 13:29:26,984 - pyvisa - DEBUG - received b'\x80\x00\x00d'
+2025-09-05 13:29:26,984 - pyvisa - DEBUG - received b'\x00\x00\x00\x07\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00=AGILENT TECHNOLOGIES,MSO-X 2024A,MY53510379,02.41.2015102200\n\x00\x00\x00'
+2025-09-05 13:29:26,984 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\x07\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00=AGILENT TECHNOLOGIES,MSO-X 2024A,MY53510379,02.41.2015102200\n\x00\x00\x00')
+2025-09-05 13:29:26,984 - pyvisa - DEBUG - Make call 11, (43109760, 20000, 10000, 8, b'SYST:ERR?\n'), <bound method Vxi11Packer.pack_device_write_parms of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_device_write_resp of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:26,985 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b"\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x00N \x00\x00'\x10\x00\x00\x00\x08\x00\x00\x00\nSYST:ERR?\n\x00\x00"
+2025-09-05 13:29:26,985 - pyvisa - DEBUG - RawTCPClient: procedure type 11
+2025-09-05 13:29:26,986 - pyvisa - DEBUG - received b'\x80\x00\x00 '
+2025-09-05 13:29:26,986 - pyvisa - DEBUG - received b'\x00\x00\x00\x08\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\n'
+2025-09-05 13:29:26,986 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\x08\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\n')
+2025-09-05 13:29:26,987 - pyvisa - DEBUG - TCPIP0::169.254.47.193::inst0::INSTR - reading 1048576 bytes (last status <StatusCode.success_max_count_read: 1073676294>)
+2025-09-05 13:29:26,987 - pyvisa - DEBUG - Make call 12, (43109760, 1048576, 20000, 10000, 128, 10), <bound method Vxi11Packer.pack_device_read_parms of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_device_read_resp of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:26,987 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b"\x00\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x0c\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x10\x00\x00\x00\x00N \x00\x00'\x10\x00\x00\x00\x80\x00\x00\x00\n"
+2025-09-05 13:29:26,987 - pyvisa - DEBUG - RawTCPClient: procedure type 12
+2025-09-05 13:29:26,991 - pyvisa - DEBUG - received b'\x80\x00\x00@'
+2025-09-05 13:29:26,991 - pyvisa - DEBUG - received b'\x00\x00\x00\t\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x19-410,"Query INTERRUPTED"\n\x00\x00\x00'
+2025-09-05 13:29:26,992 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\t\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x19-410,"Query INTERRUPTED"\n\x00\x00\x00')
+2025-09-05 13:29:26,992 - pyvisa - DEBUG - Make call 11, (43109760, 20000, 10000, 8, b'SYST:ERR?\n'), <bound method Vxi11Packer.pack_device_write_parms of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_device_write_resp of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:26,992 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b"\x00\x00\x00\n\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x00N \x00\x00'\x10\x00\x00\x00\x08\x00\x00\x00\nSYST:ERR?\n\x00\x00"
+2025-09-05 13:29:26,992 - pyvisa - DEBUG - RawTCPClient: procedure type 11
+2025-09-05 13:29:26,993 - pyvisa - DEBUG - received b'\x80\x00\x00 '
+2025-09-05 13:29:26,993 - pyvisa - DEBUG - received b'\x00\x00\x00\n\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\n'
+2025-09-05 13:29:26,993 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\n\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\n')
+2025-09-05 13:29:26,994 - pyvisa - DEBUG - TCPIP0::169.254.47.193::inst0::INSTR - reading 1048576 bytes (last status <StatusCode.success_max_count_read: 1073676294>)
+2025-09-05 13:29:26,994 - pyvisa - DEBUG - Make call 12, (43109760, 1048576, 20000, 10000, 128, 10), <bound method Vxi11Packer.pack_device_read_parms of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_device_read_resp of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:26,994 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b"\x00\x00\x00\x0b\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x0c\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80\x00\x10\x00\x00\x00\x00N \x00\x00'\x10\x00\x00\x00\x80\x00\x00\x00\n"
+2025-09-05 13:29:26,994 - pyvisa - DEBUG - RawTCPClient: procedure type 12
+2025-09-05 13:29:26,997 - pyvisa - DEBUG - received b'\x80\x00\x004'
+2025-09-05 13:29:26,997 - pyvisa - DEBUG - received b'\x00\x00\x00\x0b\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x0e+0,"No error"\n\x00\x00'
+2025-09-05 13:29:26,997 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\x0b\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x0e+0,"No error"\n\x00\x00')
+2025-09-05 13:29:27,002 - pyvisa - DEBUG - Closing ResourceManager (session: 4258044)
+2025-09-05 13:29:27,002 - pyvisa - DEBUG - TCPIP0::169.254.47.193::inst0::INSTR - closing
+2025-09-05 13:29:27,003 - pyvisa - DEBUG - Make call 23, 43109760, <bound method Vxi11Packer.pack_device_link of <pyvisa_py.protocols.vxi11.Vxi11Packer object at 0x1023ae0f0>>, <bound method Vxi11Unpacker.unpack_device_error of <pyvisa_py.protocols.vxi11.Vxi11Unpacker object at 0x102389250>>
+2025-09-05 13:29:27,003 - pyvisa - DEBUG - Sending record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: b'\x00\x00\x00\x0c\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x07\xaf\x00\x00\x00\x01\x00\x00\x00\x17\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x91\xcd\x80'
+2025-09-05 13:29:27,003 - pyvisa - DEBUG - RawTCPClient: procedure type 23
+2025-09-05 13:29:27,020 - pyvisa - DEBUG - received b'\x80\x00\x00\x1c'
+2025-09-05 13:29:27,020 - pyvisa - DEBUG - received b'\x00\x00\x00\x0c\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+2025-09-05 13:29:27,020 - pyvisa - DEBUG - Received record through <socket.socket fd=4, family=2, type=1, proto=0, laddr=('169.254.28.216', 53808), raddr=('169.254.47.193', 49152)>: bytearray(b'\x00\x00\x00\x0c\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+2025-09-05 13:29:27,020 - pyvisa - DEBUG - RawTCPClient: closing socket
+2025-09-05 13:29:27,021 - pyvisa - DEBUG - TCPIP0::169.254.47.193::inst0::INSTR - is closed

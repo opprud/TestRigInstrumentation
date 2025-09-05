@@ -1,0 +1,61 @@
+{
+  "name": "Lubricatio Test Profile",
+  "description": "Iterates Kappa over the range 111 to 222",
+  "duration_minutes": 110,
+  "setpoints": {
+    "rpm": [
+      {"time_sec": 0, "value": 800},
+      {"time_sec": 300, "value": 800},
+      {"time_sec": 600, "value": 800},
+      {"time_sec": 900, "value": 800},
+      {"time_sec": 1500, "value": 800},
+      {"time_sec": 1800, "value": 800},
+      {"time_sec": 2100, "value": 800},
+      {"time_sec": 2400, "value": 800},
+      {"time_sec": 2700, "value": 800},
+      {"time_sec": 3000, "value": 800},
+      {"time_sec": 3300, "value": 1800},
+      {"time_sec": 3600, "value": 1800},
+      {"time_sec": 3900, "value": 1800},
+      {"time_sec": 4200, "value": 1800},
+      {"time_sec": 4500, "value": 1800},
+      {"time_sec": 4800, "value": 1800},
+      {"time_sec": 5100, "value": 1800},
+      {"time_sec": 5400, "value": 1800},
+      {"time_sec": 5700, "value": 1800},
+      {"time_sec": 6000, "value": 1800},
+      {"time_sec": 6300, "value": 1800}
+   ],
+    "temperature": [
+      {"time_sec": 0, "value": 40},
+      {"time_sec": 300, "value": 40},
+      {"time_sec": 600, "value": 40},
+      {"time_sec": 900, "value": 40},
+      {"time_sec": 1500, "value": 40},
+      {"time_sec": 1800, "value": 40},
+      {"time_sec": 2100, "value": 40},
+      {"time_sec": 2400, "value": 40},
+      {"time_sec": 2700, "value": 40},
+      {"time_sec": 3000, "value": 40},
+      {"time_sec": 3300, "value": 40},
+      {"time_sec": 3600, "value": 80},
+      {"time_sec": 3700, "value": 80},
+      {"time_sec": 4000, "value": 80},
+      {"time_sec": 4300, "value": 80},
+      {"time_sec": 4600, "value": 80},
+      {"time_sec": 4900, "value": 80},
+      {"time_sec": 5200, "value": 80},
+      {"time_sec": 5500, "value": 80},
+      {"time_sec": 5800, "value": 80},
+      {"time_sec": 6100, "value": 80},
+      {"time_sec": 6400, "value": 80}
+    ]
+  },
+  "acquisition": {
+    "scope_points": 1000000,
+    "samples_per_step": 2,
+    "interval_sec": 5,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  }
+}

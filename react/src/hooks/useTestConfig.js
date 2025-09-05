@@ -62,12 +62,29 @@ export function useTestConfig(configPath = '/config/test-profile.json') {
     return beforePoint.value + (valueDiff * timeRatio);
   };
 
+  // Get the actual test duration from config
+  const getTestDuration = () => {
+    if (!config || !config.setpoints) return 900; // default 15 minutes
+    
+    const rpmDuration = config.setpoints.rpm?.length > 0 
+      ? Math.max(...config.setpoints.rpm.map(p => p.time_sec))
+      : 0;
+    const tempDuration = config.setpoints.temperature?.length > 0
+      ? Math.max(...config.setpoints.temperature.map(p => p.time_sec))
+      : 0;
+    
+    return Math.max(rpmDuration, tempDuration, 60); // minimum 1 minute
+  };
+
   // Convert setpoints to chart format with optional manual overrides
-  const getChartData = (maxTime = 900, overrides = {}) => {
+  const getChartData = (maxTime = null, overrides = {}) => {
     if (!config) return { rpm: [], temperature: [] };
     
+    // Use actual test duration if maxTime not provided
+    const actualMaxTime = maxTime || getTestDuration();
+    
     const timeStep = 10; // 10 second intervals for chart
-    const points = Math.ceil(maxTime / timeStep) + 1;
+    const points = Math.ceil(actualMaxTime / timeStep) + 1;
     
     const rpmData = [];
     const tempData = [];
@@ -111,6 +128,7 @@ export function useTestConfig(configPath = '/config/test-profile.json') {
     error,
     getValueAtTime,
     getChartData,
+    getTestDuration,
     loadConfig
   };
 }

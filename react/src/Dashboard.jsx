@@ -3,6 +3,7 @@ import { useTestConfig } from "./hooks/useTestConfig";
 import { useHDF5Status } from "./hooks/useHDF5Status";
 import { useHardwareStatus } from "./hooks/useHardwareStatus";
 import { useTelemetry } from "./hooks/useTelemetry";
+import { useWaveform } from "./hooks/useWaveform";
 import { ConfigSelector } from "./components/ConfigSelector";
 import { HDF5Status } from "./components/HDF5Status";
 import { HardwareStatus } from "./components/HardwareStatus";
@@ -80,14 +81,32 @@ function SectionTitle({ children, right }) {
 
 // --- Timeline (desired vs actual) ---
 function SetpointChart({ data, desiredKey = "desired", actualKey = "actual", yLabel = "Value" }) {
+  // Smart time formatting based on duration
+  const formatTime = (seconds) => {
+    if (seconds >= 3600) { // >= 1 hour
+      return `${(seconds / 3600).toFixed(1)}h`;
+    } else if (seconds >= 60) { // >= 1 minute  
+      return `${(seconds / 60).toFixed(0)}m`;
+    } else {
+      return `${seconds}s`;
+    }
+  };
+
   return (
     <div className="h-40">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 5, right: 12, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="t" tickFormatter={(v) => `${v}s`} interval="preserveStartEnd" />
+          <XAxis 
+            dataKey="t" 
+            tickFormatter={formatTime} 
+            interval="preserveStartEnd" 
+          />
           <YAxis width={50} />
-          <RTooltip formatter={(v) => v.toFixed ? v.toFixed(2) : v} labelFormatter={(v)=>`t=${v}s`} />
+          <RTooltip 
+            formatter={(v) => v.toFixed ? v.toFixed(2) : v} 
+            labelFormatter={(v) => `Time: ${formatTime(v)}`} 
+          />
           <Line type="monotone" dataKey={desiredKey} strokeWidth={2} dot={false} />
           <Line type="monotone" dataKey={actualKey} strokeWidth={2} strokeDasharray="4 2" dot={false} />
         </LineChart>
@@ -109,13 +128,19 @@ export default function Dashboard() {
   const [previewChannel, setPreviewChannel] = useState("CHAN1");
   
   // Load test configuration from JSON file
-  const { config, loading: configLoading, error: configError, getChartData, loadConfig } = useTestConfig();
+  const { config, loading: configLoading, error: configError, getChartData, getTestDuration, loadConfig } = useTestConfig();
   
   // HDF5 file status
   const { fileInfo, startRecording, stopRecording, resetFile } = useHDF5Status();
   
   // Hardware connection status
   const { hardwareInfo, isScanning, scanHardware } = useHardwareStatus();
+
+  // Waveform data from oscilloscope
+  const { waveformData, loading: waveformLoading, error: waveformError, refreshWaveform } = useWaveform();
+
+  // Note: Waveform data is now fetched manually only (via refresh button)
+  // No auto-refresh to avoid heavy MSO-X data acquisition
 
   // Get timeline data from config with manual overrides
   const { rpm: rpmTimeline, temperature: tempTimeline } = useMemo(() => {
@@ -141,7 +166,7 @@ export default function Dashboard() {
       overrides.manualTemp = manualTemp;
     }
     
-    return getChartData(900, overrides); // 900 seconds (15 minutes) max time
+    return getChartData(null, overrides); // Use actual test duration from config
   }, [config, configLoading, configError, getChartData, planEnabled, manualRpm, manualTemp]);
 
   return (
@@ -326,19 +351,28 @@ export default function Dashboard() {
                 }>
                   Waveform Preview ({previewChannel})
                 </SectionTitle>
-                <div className="h-48">
+                <div className="h-48 relative">
+                  {waveformLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+                      <div className="text-sm text-muted-foreground">Loading waveform...</div>
+                    </div>
+                  )}
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={Array.from({length:300}, (_,i)=>({
-                      x: i/30, 
-                      y: previewChannel === "CHAN1" ? Math.sin(i/20) + Math.random()*0.1 :
-                         previewChannel === "CHAN2" ? Math.cos(i/15) * 0.5 + Math.random()*0.05 :
-                         previewChannel === "CHAN3" ? Math.sin(i/25) * 1.2 + Math.random()*0.2 :
-                         Math.sin(i/40) * 0.3 + Math.random()*0.02
-                    }))}>
+                    <LineChart data={waveformData?.data || []}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="x" tickFormatter={(v) => `${v.toFixed(1)}s`} />
-                      <YAxis tickFormatter={(v) => `${v.toFixed(2)}V`} />
-                      <RTooltip formatter={(v) => [`${v.toFixed(3)}V`, previewChannel]} labelFormatter={(v) => `Time: ${v}s`} />
+                      <XAxis 
+                        dataKey="x" 
+                        tickFormatter={(v) => `${v.toFixed(1)}ms`} 
+                        label={{ value: 'Time (ms)', position: 'insideBottom', offset: -5 }}
+                      />
+                      <YAxis 
+                        tickFormatter={(v) => `${v.toFixed(3)}V`}
+                        label={{ value: 'Voltage (V)', angle: -90, position: 'insideLeft' }}
+                      />
+                      <RTooltip 
+                        formatter={(v) => [`${v.toFixed(4)}V`, previewChannel]} 
+                        labelFormatter={(v) => `Time: ${v.toFixed(2)}ms`} 
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="y" 
@@ -355,8 +389,26 @@ export default function Dashboard() {
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="text-xs text-muted-foreground mt-2">
-                  Showing simulated {previewChannel} data. Colors match MSO-X scope channels.
+                <div className="text-xs text-muted-foreground mt-2 flex justify-between items-center">
+                  <div>
+                    {waveformError ? (
+                      <span className="text-destructive">⚠️ {waveformError}</span>
+                    ) : waveformData ? (
+                      <span>
+                        📡 {waveformData.channel} data: {waveformData.points} pts, {Math.round(waveformData.sampleRate/1000)}kHz
+                        {waveformData.acquisitionInfo?.mode === 'MOCK' && ' (mock)'}
+                      </span>
+                    ) : (
+                      <span>Click refresh to capture waveform from {previewChannel}</span>
+                    )}
+                  </div>
+                  <button 
+                    onClick={() => refreshWaveform(previewChannel)}
+                    className="text-xs hover:text-foreground transition-colors bg-secondary/50 hover:bg-secondary px-2 py-1 rounded"
+                    disabled={waveformLoading}
+                  >
+                    {waveformLoading ? '⏳ Capturing...' : '🔄 Capture'}
+                  </button>
                 </div>
               </CardContent>
             </Card>

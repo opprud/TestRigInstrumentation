@@ -154,7 +154,7 @@ async def send_rp2040_command(command: RP2040Command):
         
         # Send command
         with serial.Serial(port, 115200, timeout=2.0) as ser:
-            ser.write(f'{command.command}\\r\\n'.encode())
+            ser.write(f'{command.command}\r\n'.encode())
             time.sleep(0.1)
             
             response = ser.readline().decode('ascii', errors='ignore').strip()
@@ -191,12 +191,12 @@ async def get_rp2040_status():
         
         with serial.Serial(port, 115200, timeout=2.0) as ser:
             # Get load reading
-            ser.write(b'LOAD?\\r\\n')
+            ser.write(b'LOAD?\r\n')
             time.sleep(0.1)
             load_response = ser.readline().decode('ascii', errors='ignore').strip()
             
             # Get speed reading
-            ser.write(b'SPEED?\\r\\n')
+            ser.write(b'SPEED?\r\n')
             time.sleep(0.1)
             speed_response = ser.readline().decode('ascii', errors='ignore').strip()
             
@@ -404,6 +404,120 @@ async def get_omron_status():
             "error": str(e),
             "timestamp": datetime.now().isoformat()
         }
+
+@app.get("/api/scope/waveform")
+async def get_scope_waveform(channel: str = "CHAN1", points: int = 1000):
+    """
+    Get waveform data from oscilloscope channel.
+    
+    Args:
+        channel: Channel to capture (CHAN1, CHAN2, CHAN3, CHAN4)
+        points: Number of points to capture (max 62500)
+    """
+    try:
+        import pyvisa
+        import json
+        
+        # Load config to get scope IP
+        config_path = Path(__file__).parent / "config.json"
+        if not config_path.exists():
+            raise HTTPException(status_code=500, detail="Config file not found")
+            
+        with open(config_path) as f:
+            config = json.load(f)
+        
+        scope_ip = config.get("scope_ip", "169.254.47.193")
+        
+        # Connect to oscilloscope
+        rm = pyvisa.ResourceManager('@py')
+        scope = rm.open_resource(f'TCPIP::{scope_ip}::INSTR')
+        scope.timeout = 10000
+        
+        try:
+            # Clear any existing errors and reset scope state
+            scope.write('*CLS')  # Clear status
+            scope.query('*OPC?')  # Wait for operation complete
+            
+            # Check for errors
+            error_response = scope.query('SYST:ERR?')
+            if not error_response.startswith('0,"No error"'):
+                print(f"Warning: Scope error before acquisition: {error_response}")
+            
+            # Configure waveform acquisition with proper sequencing
+            scope.write(f':WAV:SOUR {channel}')
+            scope.write(':WAV:MODE RAW')
+            scope.write(':WAV:FORMAT WORD')
+            scope.write(f':WAV:POINTS {min(points, 62500)}')  # Limit to scope maximum
+            
+            # Wait for settings to take effect
+            scope.query('*OPC?')
+            
+            # Get preamble for scaling
+            preamble = scope.query(':WAV:PRE?').strip().split(',')
+            
+            # Parse preamble (Keysight format) with error handling
+            try:
+                format_type = int(preamble[0])  # 0=BYTE, 1=WORD, 4=ASCII
+                acq_type = int(preamble[1])     # 0=NORMAL, 1=PEAK, 2=AVERAGE
+                points_count = int(preamble[2])  # Number of data points
+                avg_count = int(preamble[3])     # Average count
+                x_increment = float(preamble[4]) # Time between points (s)
+                x_origin = float(preamble[5])    # Time of first point (s)
+                x_reference = int(preamble[6])   # Sample number of x_origin
+                y_increment = float(preamble[7]) # Voltage per LSB
+                y_origin = float(preamble[8])    # Voltage at center screen
+                y_reference = int(preamble[9])   # Sample value at y_origin
+            except (ValueError, IndexError) as e:
+                raise HTTPException(status_code=500, detail=f"Failed to parse preamble: {preamble[:100]}... Error: {e}")
+            
+            # Get raw waveform data
+            raw_data = scope.query_binary_values(':WAV:DATA?', datatype='h', is_big_endian=True)
+            
+            # Convert to voltage and time arrays with error handling
+            try:
+                voltage_data = [(point - y_reference) * y_increment + y_origin for point in raw_data]
+                time_data = [x_origin + (i - x_reference) * x_increment for i in range(len(raw_data))]
+                
+                # Validate data
+                if not voltage_data or not time_data:
+                    raise ValueError("Empty data arrays")
+                    
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Data conversion failed: {e}. Raw data length: {len(raw_data) if raw_data else 0}")
+            
+            # Prepare data for React (limit to reasonable size for web)
+            max_web_points = min(len(voltage_data), 2000)  # Limit for web display
+            step = len(voltage_data) // max_web_points if len(voltage_data) > max_web_points else 1
+            
+            web_voltage = voltage_data[::step][:max_web_points]
+            web_time = time_data[::step][:max_web_points]
+            
+            return {
+                "channel": channel,
+                "points_requested": points,
+                "points_captured": len(raw_data),
+                "points_returned": len(web_voltage),
+                "sample_rate_hz": 1.0 / x_increment if x_increment > 0 else 0,
+                "time_span_s": (time_data[-1] - time_data[0]) if len(time_data) > 1 else 0,
+                "voltage_range_v": [min(voltage_data), max(voltage_data)] if voltage_data else [0, 0],
+                "waveform": [
+                    {"x": t, "y": v} for t, v in zip(web_time, web_voltage)
+                ],
+                "timestamp": datetime.now().isoformat(),
+                "acquisition_info": {
+                    "format": "WORD",
+                    "mode": "RAW",
+                    "avg_count": avg_count,
+                    "x_increment": x_increment,
+                    "y_increment": y_increment
+                }
+            }
+            
+        finally:
+            scope.close()
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Oscilloscope waveform capture failed: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

@@ -28,6 +28,7 @@ import pyvisa
 DEVICE_IDS = {
     'rp2040': [
         {'vid': 0x2E8A, 'pid': 0x0005, 'desc': 'Raspberry Pi RP2040'},
+        {'vid': 0x2E8A, 'pid': 0x000A, 'desc': 'Seeed Studio XIAO RP2040'},
         {'vid': 0x2886, 'pid': 0x8027, 'desc': 'Seeed Studio XIAO RP2040'},
     ],
     'ftdi': [
@@ -81,13 +82,13 @@ def test_rp2040_connection(port_device, timeout=2.0):
     try:
         with serial.Serial(port_device, 115200, timeout=timeout) as ser:
             # Send PING command
-            ser.write(b'PING\\r\\n')
+            ser.write(b'PING\r\n')
             time.sleep(0.1)
             
             response = ser.readline().decode('ascii', errors='ignore').strip()
             if response.startswith('OK PONG'):
                 # Get device info
-                ser.write(b'INFO\\r\\n')
+                ser.write(b'INFO\r\n')
                 time.sleep(0.1)
                 info_response = ser.readline().decode('ascii', errors='ignore').strip()
                 

@@ -1,7 +1,7 @@
 {
   "name": "Standard Test Profile",
   "description": "Typical bearing test sequence with varying RPM and temperature",
-  "duration_minutes": 30,
+  "duration_minutes": 15,
   "setpoints": {
     "rpm": [
       {"time_sec": 0, "value": 1000},

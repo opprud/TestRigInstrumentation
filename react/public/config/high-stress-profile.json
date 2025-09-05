@@ -1,7 +1,7 @@
 {
   "name": "High Stress Test Profile",
   "description": "Aggressive test with high RPM and temperature variations",
-  "duration_minutes": 25,
+  "duration_minutes": 14,
   "setpoints": {
     "rpm": [
       {"time_sec": 0, "value": 1500},

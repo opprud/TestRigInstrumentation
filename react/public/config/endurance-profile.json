@@ -1,7 +1,7 @@
 {
   "name": "Endurance Test Profile",
   "description": "Long-term steady-state test for bearing endurance evaluation",
-  "duration_minutes": 60,
+  "duration_minutes": 61,
   "setpoints": {
     "rpm": [
       {"time_sec": 0, "value": 1800},
