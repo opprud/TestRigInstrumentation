@@ -16,6 +16,7 @@ import asyncio
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
+import threading
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,6 +26,7 @@ from pydantic import BaseModel
 from hardware_discovery import discover_hardware
 from test_hardware import main as test_ports
 from omron_temp_poll import E5CCTool
+from rs510_vfd_control import RS510VFDController, VFDCommand, VFDState
 
 app = FastAPI(
     title="Test Rig API",
@@ -65,9 +67,31 @@ class OmronCommand(BaseModel):
     value: Optional[float] = None  # For write_sv
     port: Optional[str] = None
 
+class VFDCommand(BaseModel):
+    action: str  # 'status', 'start_forward', 'start_reverse', 'stop', 'emergency_stop', 'set_frequency'
+    frequency_hz: Optional[float] = None  # For set_frequency and start commands
+    port: Optional[str] = None
+    slave_id: Optional[int] = 1
+
+class VFDStatusResponse(BaseModel):
+    frequency_hz: float
+    frequency_command_hz: float
+    run_command: str
+    status: str
+    output_current_a: float
+    dc_bus_voltage_v: float
+    fault_code: int
+    temperature_c: float
+    is_running: bool
+    is_fault: bool
+    timestamp: str
+
 # --- Global State ---
 _last_hardware_scan = None
 _hardware_cache_duration = 30  # seconds
+
+# Global lock for oscilloscope access to prevent concurrent SCPI commands
+_scope_lock = threading.Lock()
 
 # --- API Endpoints ---
 
@@ -405,35 +429,234 @@ async def get_omron_status():
             "timestamp": datetime.now().isoformat()
         }
 
+# --- RS510 VFD Control Endpoints ---
+
+@app.get("/api/vfd/status")
+async def get_vfd_status():
+    """Get current RS510 VFD status and readings."""
+    try:
+        # Find FTDI port (same as Omron)
+        hardware_info = discover_hardware()
+        ftdi_ports = hardware_info.get('ports', {}).get('ftdi', [])
+        if not ftdi_ports:
+            return {
+                "status": "no_device",
+                "error": "No FTDI device found for RS485 communication"
+            }
+        
+        port = ftdi_ports[0]['device']
+        
+        # Create VFD controller
+        vfd = RS510VFDController(
+            port=port,
+            slave_id=1,  # Default VFD address
+            baudrate=9600,  # Standard VFD baud rate
+            timeout=2.0,
+            debug=False
+        )
+        
+        if not vfd.connect():
+            return {
+                "status": "connection_failed",
+                "error": "Failed to connect to RS510 VFD",
+                "port": port
+            }
+        
+        try:
+            # Get VFD status
+            state = vfd.get_status()
+            
+            return {
+                "status": "connected",
+                "port": port,
+                "slave_id": 1,
+                "frequency_hz": state.frequency_hz,
+                "frequency_command_hz": state.frequency_command_hz,
+                "run_command": state.run_command.name,
+                "vfd_status": state.status.name,
+                "output_current_a": state.output_current_a,
+                "dc_bus_voltage_v": state.dc_bus_voltage_v,
+                "fault_code": state.fault_code,
+                "temperature_c": state.temperature_c,
+                "is_running": state.is_running,
+                "is_fault": state.is_fault,
+                "timestamp": state.timestamp
+            }
+            
+        finally:
+            vfd.disconnect()
+            
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+@app.post("/api/vfd/control")
+async def control_vfd(command: VFDCommand):
+    """Control RS510 VFD - start, stop, set frequency, etc."""
+    try:
+        # Find FTDI port
+        hardware_info = discover_hardware()
+        ftdi_ports = hardware_info.get('ports', {}).get('ftdi', [])
+        if not ftdi_ports:
+            return {
+                "status": "no_device",
+                "error": "No FTDI device found for RS485 communication"
+            }
+        
+        port = command.port or ftdi_ports[0]['device']
+        slave_id = command.slave_id or 1
+        
+        # Create VFD controller
+        vfd = RS510VFDController(
+            port=port,
+            slave_id=slave_id,
+            baudrate=9600,
+            timeout=2.0,
+            debug=False
+        )
+        
+        if not vfd.connect():
+            return {
+                "status": "connection_failed",
+                "error": "Failed to connect to RS510 VFD",
+                "port": port
+            }
+        
+        try:
+            success = False
+            result_msg = ""
+            
+            # Execute command
+            if command.action == "status":
+                # Just return status
+                state = vfd.get_status()
+                return {
+                    "status": "success",
+                    "action": command.action,
+                    "data": {
+                        "frequency_hz": state.frequency_hz,
+                        "frequency_command_hz": state.frequency_command_hz,
+                        "run_command": state.run_command.name,
+                        "vfd_status": state.status.name,
+                        "is_running": state.is_running,
+                        "is_fault": state.is_fault,
+                        "fault_code": state.fault_code,
+                        "timestamp": state.timestamp
+                    }
+                }
+                
+            elif command.action == "set_frequency":
+                if command.frequency_hz is None:
+                    return {
+                        "status": "error",
+                        "error": "Frequency value required for set_frequency command"
+                    }
+                success = vfd.set_frequency(command.frequency_hz)
+                result_msg = f"Set frequency to {command.frequency_hz} Hz"
+                
+            elif command.action == "start_forward":
+                success = vfd.start_forward(command.frequency_hz)
+                freq_msg = f" at {command.frequency_hz} Hz" if command.frequency_hz else ""
+                result_msg = f"Started motor forward{freq_msg}"
+                
+            elif command.action == "start_reverse":
+                success = vfd.start_reverse(command.frequency_hz)
+                freq_msg = f" at {command.frequency_hz} Hz" if command.frequency_hz else ""
+                result_msg = f"Started motor reverse{freq_msg}"
+                
+            elif command.action == "stop":
+                success = vfd.stop()
+                result_msg = "Stopped motor (controlled deceleration)"
+                
+            elif command.action == "emergency_stop":
+                success = vfd.emergency_stop()
+                result_msg = "Emergency stop executed"
+                
+            else:
+                return {
+                    "status": "error",
+                    "error": f"Unknown action: {command.action}"
+                }
+            
+            if success:
+                # Get updated status after command
+                time.sleep(0.1)  # Brief delay for VFD to process command
+                state = vfd.get_status()
+                
+                return {
+                    "status": "success",
+                    "action": command.action,
+                    "message": result_msg,
+                    "current_state": {
+                        "frequency_hz": state.frequency_hz,
+                        "frequency_command_hz": state.frequency_command_hz,
+                        "is_running": state.is_running,
+                        "is_fault": state.is_fault,
+                        "vfd_status": state.status.name
+                    },
+                    "timestamp": datetime.now().isoformat()
+                }
+            else:
+                return {
+                    "status": "command_failed",
+                    "error": f"VFD did not acknowledge command: {command.action}",
+                    "action": command.action
+                }
+                
+        finally:
+            vfd.disconnect()
+            
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "action": command.action,
+            "timestamp": datetime.now().isoformat()
+        }
+
 @app.get("/api/scope/waveform")
-async def get_scope_waveform(channel: str = "CHAN1", points: int = 1000):
+async def get_scope_waveform(channel: str = "CHAN1", points: int = None):
     """
-    Get waveform data from oscilloscope channel.
+    Get waveform data from oscilloscope channel for dashboard preview.
+    Uses dashboard_preview settings from config for optimal performance.
     
     Args:
         channel: Channel to capture (CHAN1, CHAN2, CHAN3, CHAN4)
-        points: Number of points to capture (max 62500)
+        points: Number of points to capture (defaults to dashboard_preview.points from config)
     """
-    try:
-        import pyvisa
-        import json
-        
-        # Load config to get scope IP
-        config_path = Path(__file__).parent / "config.json"
-        if not config_path.exists():
-            raise HTTPException(status_code=500, detail="Config file not found")
-            
-        with open(config_path) as f:
-            config = json.load(f)
-        
-        scope_ip = config.get("scope_ip", "169.254.47.193")
-        
-        # Connect to oscilloscope
-        rm = pyvisa.ResourceManager('@py')
-        scope = rm.open_resource(f'TCPIP::{scope_ip}::INSTR')
-        scope.timeout = 10000
-        
+    # Use lock to prevent concurrent oscilloscope access
+    with _scope_lock:
         try:
+            import pyvisa
+            import json
+            
+            # Load config to get scope IP
+            config_path = Path(__file__).parent / "config.json"
+            if not config_path.exists():
+                raise HTTPException(status_code=500, detail="Config file not found")
+                
+            with open(config_path) as f:
+                config = json.load(f)
+            
+            scope_ip = config.get("scope_ip", "169.254.47.193")
+            
+            # Use dashboard preview settings if points not specified
+            if points is None:
+                preview_config = config.get("dashboard_preview", {})
+                points = preview_config.get("points", 1000)
+            
+            # Ensure we don't exceed scope limits  
+            points = min(points, 62500)
+            
+            # Connect to oscilloscope with optimized settings
+            rm = pyvisa.ResourceManager('@py')
+            scope = rm.open_resource(f'TCPIP::{scope_ip}::INSTR')
+            scope.timeout = 15000  # Increased timeout for dashboard preview
+            scope.write_termination = '\n'
+            scope.read_termination = '\n'
             # Clear any existing errors and reset scope state
             scope.write('*CLS')  # Clear status
             scope.query('*OPC?')  # Wait for operation complete
@@ -443,13 +666,15 @@ async def get_scope_waveform(channel: str = "CHAN1", points: int = 1000):
             if not error_response.startswith('0,"No error"'):
                 print(f"Warning: Scope error before acquisition: {error_response}")
             
-            # Configure waveform acquisition with proper sequencing
+            # Configure waveform acquisition with proper sequencing and delays
             scope.write(f':WAV:SOUR {channel}')
-            scope.write(':WAV:MODE RAW')
-            scope.write(':WAV:FORMAT WORD')
-            scope.write(f':WAV:POINTS {min(points, 62500)}')  # Limit to scope maximum
+            scope.query('*OPC?')  # Wait after source selection
             
-            # Wait for settings to take effect
+            scope.write(':WAV:MODE RAW')
+            scope.write(':WAV:FORMAT WORD')  
+            scope.write(f':WAV:POINTS {points}')  # Use calculated points from config
+            
+            # Wait for all settings to take effect
             scope.query('*OPC?')
             
             # Get preamble for scaling
@@ -509,15 +734,17 @@ async def get_scope_waveform(channel: str = "CHAN1", points: int = 1000):
                     "mode": "RAW",
                     "avg_count": avg_count,
                     "x_increment": x_increment,
-                    "y_increment": y_increment
+                    "y_increment": y_increment,
+                    "preview_mode": True,
+                    "decimation_ratio": config.get("dashboard_preview", {}).get("decimation_ratio", 250)
                 }
             }
             
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Oscilloscope waveform capture failed: {str(e)}")
         finally:
-            scope.close()
-            
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Oscilloscope waveform capture failed: {str(e)}")
+            if 'scope' in locals():
+                scope.close()
 
 if __name__ == "__main__":
     import uvicorn

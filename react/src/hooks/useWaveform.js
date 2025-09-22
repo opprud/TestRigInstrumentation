@@ -5,8 +5,17 @@ export function useWaveform() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastChannel, setLastChannel] = useState('CHAN1');
+  const [lastFetch, setLastFetch] = useState(0);
 
   const fetchWaveform = async (channel = 'CHAN1', points = 1000) => {
+    // Throttle requests to prevent MSO "query interrupted" - minimum 2 seconds between calls
+    const now = Date.now();
+    if (now - lastFetch < 2000) {
+      console.log('Throttling waveform request - too soon after last call');
+      return;
+    }
+    setLastFetch(now);
+    
     setLoading(true);
     setError(null);
     setLastChannel(channel);

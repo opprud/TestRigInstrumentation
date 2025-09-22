@@ -10,6 +10,15 @@
     "acq_type": "HRES"        
   },
 
+  "dashboard_preview": {
+    "points": 1000,
+    "samples": 1,
+    "decimation_ratio": 250,
+    "fast_mode": true,
+    "throttle_ms": 2000,
+    "notes": "Lightweight acquisition for dashboard preview - adjustable decimation rate and throttling"
+  },
+
   "channels": [
     {
       "name": "AE",
