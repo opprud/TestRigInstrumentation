@@ -24,7 +24,6 @@ from pydantic import BaseModel
 
 # Import our hardware discovery functions
 from hardware_discovery import discover_hardware
-from test_hardware import main as test_ports
 from omron_temp_poll import E5CCTool
 from rs510_vfd_control import RS510VFDController, VFDCommand, VFDState
 
@@ -317,15 +316,16 @@ async def send_omron_command(command: OmronCommand):
             port = ftdi_ports[0]['device']
         
         # Create E5CC tool instance
-        # Using default settings from omron_temp_poll.py
+        # Using shared modbus-compatible settings
+        # Note: Both E5CC and VFD will use shared modbus connection
         tool = E5CCTool(
             port=port,
-            baudrate=57600,
-            parity='E',
+            baudrate=9600,    # Standardized baudrate for shared connection
+            parity='N',       # Standardized parity for shared connection
             bytesize=8,
             stopbits=1,
-            timeout=1.5,
-            unit_id=4,
+            timeout=2.0,      # Increased timeout for shared connection
+            unit_id=4,        # E5CC unit ID
             pv_address=0x2000,
             sv_address=0x2103,
             scale=1.0,
@@ -389,15 +389,15 @@ async def get_omron_status():
         
         port = ftdi_ports[0]['device']
         
-        # Create E5CC tool
+        # Create E5CC tool with shared modbus settings
         tool = E5CCTool(
             port=port,
-            baudrate=57600,
-            parity='E',
+            baudrate=9600,    # Standardized baudrate for shared connection
+            parity='N',       # Standardized parity for shared connection
             bytesize=8,
             stopbits=1,
-            timeout=1.5,
-            unit_id=4,
+            timeout=2.0,      # Increased timeout for shared connection
+            unit_id=4,        # E5CC unit ID
             pv_address=0x2000,
             sv_address=0x2103,
             scale=1.0,
@@ -449,7 +449,7 @@ async def get_vfd_status():
         # Create VFD controller
         vfd = RS510VFDController(
             port=port,
-            slave_id=1,  # Default VFD address
+            slave_id=3,  # Default RS510 VFD address (check your VFD configuration)
             baudrate=9600,  # Standard VFD baud rate
             timeout=2.0,
             debug=False
@@ -469,7 +469,7 @@ async def get_vfd_status():
             return {
                 "status": "connected",
                 "port": port,
-                "slave_id": 1,
+                "slave_id": 3,
                 "frequency_hz": state.frequency_hz,
                 "frequency_command_hz": state.frequency_command_hz,
                 "run_command": state.run_command.name,
@@ -507,7 +507,7 @@ async def control_vfd(command: VFDCommand):
             }
         
         port = command.port or ftdi_ports[0]['device']
-        slave_id = command.slave_id or 1
+        slave_id = command.slave_id or 3  # Default RS510 VFD address
         
         # Create VFD controller
         vfd = RS510VFDController(
@@ -583,6 +583,7 @@ async def control_vfd(command: VFDCommand):
             
             if success:
                 # Get updated status after command
+                import time
                 time.sleep(0.1)  # Brief delay for VFD to process command
                 state = vfd.get_status()
                 

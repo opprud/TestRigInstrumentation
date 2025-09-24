@@ -1,0 +1,51 @@
+{
+  "description": "Shared Modbus configuration for test rig devices",
+  "connection": {
+    "port": "/dev/tty.usbserial-FTDI485",
+    "baudrate": 9600,
+    "parity": "N",
+    "bytesize": 8,
+    "stopbits": 1,
+    "timeout": 2.0
+  },
+  "devices": {
+    "omron_e5cc": {
+      "description": "Omron E5CC Temperature Controller",
+      "unit_id": 4,
+      "registers": {
+        "pv_address": "0x2000",
+        "sv_address": "0x2103"
+      },
+      "scale": 1.0,
+      "notes": [
+        "May require different settings - check E5CC manual",
+        "Original settings: baudrate=57600, parity='E'",
+        "If communication fails, try unit_id=2 or original settings"
+      ]
+    },
+    "rs510_vfd": {
+      "description": "RS PRO RS510 VFD Motor Controller",
+      "unit_id": 3,
+      "registers": {
+        "run_command": "0x2501",
+        "frequency_cmd": "0x2502",
+        "base_freq": "0x000B",
+        "max_freq": "0x000C",
+        "accel_time": "0x000E",
+        "decel_time": "0x000F",
+        "fault_code": "0x0015"
+      },
+      "notes": [
+        "Check VFD configuration for actual unit_id",
+        "Default unit_id could be 1, 2, or 3",
+        "Verify register addresses in RS510 manual"
+      ]
+    }
+  },
+  "shared_connection_notes": [
+    "Both devices now share the same FTDI485 adapter",
+    "Communication is thread-safe and serialized",
+    "Settings must be compatible between both devices",
+    "If one device requires different settings, use separate adapters"
+  ]
+}

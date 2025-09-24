@@ -4,10 +4,10 @@ RS510 Frequency Converter Control (Modbus RTU via RS485)
 
 RS PRO RS510 Series VFD control via Modbus RTU.
 Supports motor speed control, start/stop, and monitoring.
+Uses shared Modbus connection manager to avoid conflicts with other devices.
 """
 
 import argparse
-import inspect
 import json
 import sys
 import time
@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
-from pymodbus.client import ModbusSerialClient
+from shared_modbus_manager import get_shared_modbus_manager, ModbusConfig
 
 
 class VFDCommand(Enum):
@@ -27,14 +27,22 @@ class VFDCommand(Enum):
 
 @dataclass
 class VFDState:
-    frequency_cmd_hz: float = 0.0
-    frequency_out_hz: float = 0.0
+    frequency_cmd_hz: float = 0.0  # Command frequency
+    frequency_out_hz: float = 0.0  # Actual output frequency
+    frequency_hz: float = 0.0      # Alias for output frequency (API compatibility)
+    frequency_command_hz: float = 0.0  # Alias for command frequency (API compatibility)
     base_freq_hz: float = 0.0
     max_freq_hz: float = 0.0
     accel_time_s: float = 0.0
     decel_time_s: float = 0.0
     run_command: VFDCommand = VFDCommand.STOP
+    status: VFDCommand = VFDCommand.STOP  # Alias for run_command (API compatibility)
+    output_current_a: float = 0.0
+    dc_bus_voltage_v: float = 0.0
     fault_code: int = 0
+    temperature_c: float = 0.0
+    is_running: bool = False
+    is_fault: bool = False
     timestamp: str = ""
 
 
@@ -49,64 +57,49 @@ class RS510VFDController:
 
     def __init__(self, port: str, slave_id: int = 3, baudrate: int = 9600,
                  timeout: float = 1.0, debug: bool = True):
-        self.port = port
+        # Create shared Modbus configuration with improved timeout handling
+        self.modbus_config = ModbusConfig(
+            port=port,
+            baudrate=baudrate,
+            parity="N",
+            bytesize=8,
+            stopbits=1,
+            timeout=timeout,
+            debug=debug,
+            max_retries=2,           # Fewer retries for faster failure detection
+            retry_delay=0.3,         # Shorter delay between retries
+            connection_timeout=3.0,  # Shorter connection timeout
+            health_check_interval=5.0  # More frequent health checks
+        )
+
+        # Get shared manager instance
+        self.manager = get_shared_modbus_manager(self.modbus_config)
+
         self.slave_id = slave_id
-        self.baudrate = baudrate
-        self.timeout = timeout
         self.debug = debug
-        self.client = None
-        self._unit_kwarg = None
+
+        if self.debug:
+            print(f"[DEBUG] RS510 VFD using shared Modbus manager for unit {slave_id}")
 
     def connect(self) -> bool:
-        self.client = ModbusSerialClient(
-            port=self.port,
-            baudrate=self.baudrate,
-            bytesize=8,
-            parity="N",
-            stopbits=1,
-            timeout=self.timeout
-        )
-        if not self.client.connect():
-            return False
-        self._unit_kwarg = self._detect_unit_kwarg()
+        # Connection is managed by the shared manager
         return True
 
     def disconnect(self):
-        if self.client:
-            self.client.close()
-
-    def _detect_unit_kwarg(self) -> Optional[str]:
-        sig = inspect.signature(self.client.read_holding_registers)
-        for key in ("unit", "slave", "device_id"):
-            if key in sig.parameters:
-                return key
-        return None
+        # Don't close the shared connection - it will be managed by the manager
+        pass
 
     def _read(self, address: int) -> Optional[int]:
-        if not self.client or not self._unit_kwarg:
-            return None
-        try:
-            kwargs = {self._unit_kwarg: self.slave_id}
-            rr = self.client.read_holding_registers(address=address, count=1, **kwargs)
-            if rr.isError():
-                return None
-            return rr.registers[0]
-        except Exception as e:
-            if self.debug:
-                print(f"Read error {hex(address)}: {e}")
-            return None
+        result = self.manager.read_holding_register(self.slave_id, address)
+        if result is None and self.debug:
+            print(f"Read error {hex(address)}: Failed to read from RS510 unit {self.slave_id}")
+        return result
 
     def _write(self, address: int, value: int) -> bool:
-        if not self.client or not self._unit_kwarg:
-            return False
-        try:
-            kwargs = {self._unit_kwarg: self.slave_id}
-            rr = self.client.write_register(address, value, **kwargs)
-            return not rr.isError()
-        except Exception as e:
-            if self.debug:
-                print(f"Write error {hex(address)}: {e}")
-            return False
+        success = self.manager.write_holding_register(self.slave_id, address, value)
+        if not success and self.debug:
+            print(f"Write error {hex(address)}: Failed to write to RS510 unit {self.slave_id}")
+        return success
 
     def set_frequency(self, hz: float) -> bool:
         value = int(hz * 100)
@@ -126,13 +119,28 @@ class RS510VFDController:
         if hz is not None:
             self.set_frequency(hz)
         return self.set_run_command(VFDCommand.RUN_FORWARD)
+
+    def start_reverse(self, hz: Optional[float] = None) -> bool:
+        if hz is not None:
+            self.set_frequency(hz)
+        return self.set_run_command(VFDCommand.RUN_REVERSE)
+
+    def emergency_stop(self) -> bool:
+        return self.set_run_command(VFDCommand.EMERGENCY_STOP)
         
     def get_status(self) -> VFDState:
         st = VFDState(timestamp=time.strftime("%Y-%m-%d %H:%M:%S"))
 
+        # Read command frequency
         val = self._read(self.REG_FREQUENCY_CMD)
         if val is not None:
             st.frequency_cmd_hz = val / 100.0
+            st.frequency_command_hz = st.frequency_cmd_hz  # API alias
+
+        # For now, assume output frequency equals command frequency
+        # TODO: Add actual output frequency register if available
+        st.frequency_out_hz = st.frequency_cmd_hz
+        st.frequency_hz = st.frequency_out_hz  # API alias
 
         val = self._read(self.REG_BASE_FREQ)
         if val is not None:
@@ -154,6 +162,7 @@ class RS510VFDController:
         if val is not None:
             try:
                 st.run_command = VFDCommand(val)
+                st.status = st.run_command  # API alias
             except ValueError:
                 pass
 
@@ -161,11 +170,28 @@ class RS510VFDController:
         if val is not None:
             st.fault_code = val
 
+        # Set derived status flags
+        st.is_running = st.run_command in (VFDCommand.RUN_FORWARD, VFDCommand.RUN_REVERSE)
+        st.is_fault = st.fault_code != 0
+
+        # TODO: Add registers for these values if available in the VFD manual
+        st.output_current_a = 0.0  # Register address unknown
+        st.dc_bus_voltage_v = 0.0  # Register address unknown
+        st.temperature_c = 0.0     # Register address unknown
+
         return st
 
     def get_status_json(self) -> str:
         st = self.get_status()
-        return json.dumps(st.__dict__, indent=2)
+        # Convert enums to strings for JSON serialization
+        status_dict = st.__dict__.copy()
+        status_dict['run_command'] = st.run_command.name if st.run_command else None
+        status_dict['status'] = st.status.name if st.status else None
+        return json.dumps(status_dict, indent=2)
+
+    def get_health_status(self) -> dict:
+        """Get connection health status."""
+        return self.manager.get_health_status()
 
 
 def print_status_human(state: VFDState):
@@ -192,6 +218,7 @@ def main():
     g = p.add_mutually_exclusive_group()
     g.add_argument("--status", action="store_true")
     g.add_argument("--json", action="store_true")
+    g.add_argument("--health", action="store_true", help="Show connection health")
     g.add_argument("--start", type=float, help="Start forward at freq (Hz)")
     g.add_argument("--stop", action="store_true")
 
@@ -209,6 +236,9 @@ def main():
         elif args.stop:
             vfd.stop()
             print("Motor stop sent")
+        elif args.health:
+            health = vfd.get_health_status()
+            print(json.dumps(health, indent=2))
         elif args.json:
             print(vfd.get_status_json())
         else:

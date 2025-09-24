@@ -5,30 +5,16 @@ Omron E5CC temperature tool (Modbus RTU, pymodbus)
 - Read PV (process value) from 0x2000 (default)
 - Read/Write SV (setpoint) at 0x2103 (default)
 - Default scale = 1.0 (whole-degree). Use --scale 0.1 if your E5CC is in 0.1°C mode.
-- Adaptive to pymodbus 2.x/3.x (unit/slave/device_id kwarg detection)
+- Uses shared Modbus connection manager to avoid conflicts with other devices
 """
 
 import argparse
-import inspect
 import json
 import sys
 import time
 from typing import Optional, Tuple
 
-from pymodbus.client import ModbusSerialClient
-
-
-def detect_unit_kwarg(client: ModbusSerialClient) -> Optional[str]:
-    """Return 'unit', 'slave', or 'device_id' if present in read_holding_registers signature; else None."""
-    try:
-        sig = inspect.signature(client.read_holding_registers)
-        params = sig.parameters
-        for key in ("unit", "slave", "device_id"):
-            if key in params:
-                return key
-    except Exception:
-        pass
-    return None
+from shared_modbus_manager import get_shared_modbus_manager, ModbusConfig
 
 
 class E5CCTool:
@@ -46,16 +32,19 @@ class E5CCTool:
         scale: float,
         debug: bool = False,
     ):
-        self.client = ModbusSerialClient(
+        # Create shared Modbus configuration
+        self.modbus_config = ModbusConfig(
             port=port,
             baudrate=baudrate,
             parity=parity,
             bytesize=bytesize,
             stopbits=stopbits,
             timeout=timeout,
+            debug=debug
         )
-        if not self.client.connect():
-            raise RuntimeError(f"Could not connect on {port}")
+
+        # Get shared manager instance
+        self.manager = get_shared_modbus_manager(self.modbus_config)
 
         self.unit_id = unit_id
         self.pv_address = pv_address
@@ -63,33 +52,24 @@ class E5CCTool:
         self.scale = scale
         self.debug = debug
 
-        # detect kwarg for addressing
-        self._addr_kw = detect_unit_kwarg(self.client)
         if self.debug:
-            print(f"[DEBUG] addressing kwarg: {self._addr_kw or '(positional)'}", file=sys.stderr)
+            print(f"[DEBUG] E5CC using shared Modbus manager for unit {unit_id}", file=sys.stderr)
 
     def close(self):
-        self.client.close()
+        # Don't close the shared connection - it will be managed by the manager
+        pass
 
     # ---------- low-level helpers ----------
     def _read_u16(self, address: int) -> int:
-        kw = {}
-        if self._addr_kw:
-            kw[self._addr_kw] = self.unit_id
-        rr = self.client.read_holding_registers(address=address, count=1, **kw)
-        if hasattr(rr, "isError") and rr.isError():
-            raise RuntimeError(str(rr))
-        if not hasattr(rr, "registers") or not rr.registers:
-            raise RuntimeError("Empty Modbus response")
-        return int(rr.registers[0])
+        result = self.manager.read_holding_register(self.unit_id, address)
+        if result is None:
+            raise RuntimeError(f"Failed to read register 0x{address:04X} from E5CC unit {self.unit_id}")
+        return result
 
     def _write_u16(self, address: int, value: int):
-        kw = {}
-        if self._addr_kw:
-            kw[self._addr_kw] = self.unit_id
-        wr = self.client.write_register(address=address, value=value, **kw)
-        if hasattr(wr, "isError") and wr.isError():
-            raise RuntimeError(str(wr))
+        success = self.manager.write_holding_register(self.unit_id, address, value)
+        if not success:
+            raise RuntimeError(f"Failed to write register 0x{address:04X} to E5CC unit {self.unit_id}")
 
     # ---------- high-level ----------
     def read_pv_c(self) -> float:
@@ -111,12 +91,12 @@ def main():
     ap = argparse.ArgumentParser(description="Omron E5CC temperature tool (PV/SV) over Modbus RTU")
     # Serial
     ap.add_argument("--port", default="/dev/tty.usbserial-FT07QKDX", help="Serial port (e.g. /dev/ttyUSB0, COM3)")
-    ap.add_argument("--baudrate", type=int, default=57600, help="Baudrate (default: 57600)")
-    ap.add_argument("--parity", choices=["N", "E", "O"], default="E", help="Parity (default: E)")
+    ap.add_argument("--baudrate", type=int, default=9600, help="Baudrate (default: 9600, was 57600)")
+    ap.add_argument("--parity", choices=["N", "E", "O"], default="N", help="Parity (default: N, was E)")
     ap.add_argument("--bytesize", type=int, choices=[7, 8], default=8, help="Data bits (default: 8)")
     ap.add_argument("--stopbits", type=int, choices=[1, 2], default=1, help="Stop bits (default: 1)")
     ap.add_argument("--timeout", type=float, default=1.5, help="Timeout seconds (default: 1.5)")
-    ap.add_argument("--unit", type=int, default=2, help="Modbus unit/slave/device_id (default: 2)")
+    ap.add_argument("--unit", type=int, default=4, help="Modbus unit/slave/device_id (default: 4, was 2)")
 
     # Registers & scale
     ap.add_argument("--pv-address", type=lambda x: int(x, 0), default=0x2000, help="PV holding register (default: 0x2000)")
