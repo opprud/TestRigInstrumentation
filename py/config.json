@@ -1,5 +1,5 @@
 {
-  "scope_ip": "169.254.47.193",
+  "scope_ip": "169.254.196.182",
   "acquisition": {
     "points": 250000,
     "samples": 3,
@@ -46,10 +46,26 @@
     }
   ],
 
+  "telemetry": {
+    "enabled": false,
+    "rp2040_port": "/dev/tty.usbmodemXXXX",
+    "modbus_config": "modbus_config.json",
+    "notes": "Enable to collect load/speed/temperature data at each sweep. Configure ports as needed."
+  },
+
+  "test_parameters": {
+    "test_name": "Bearing endurance test",
+    "target_rpm": 1500,
+    "target_temperature_c": 60,
+    "expected_load_g": 200,
+    "duration_minutes": 60,
+    "notes": "Standard test configuration"
+  },
+
   "store": {
-    "output_file": "data/data2.h5",
+    "output_file": "data/data3.h5",
     "timestamped": true,
-    "compress": "none", 
+    "compress": "none",
     "chunk": false,
     "attrs": {
       "project": "ForeverBearing",

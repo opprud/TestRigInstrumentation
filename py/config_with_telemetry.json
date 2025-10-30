@@ -1,0 +1,50 @@
+{
+  "scope_ip": "169.254.196.182",
+
+  "acquisition": {
+    "points": 1000,
+    "samples": 2,
+    "interval_sec": 2,
+    "waveform_format": "WORD",
+    "points_mode": "NORM",
+    "trigger_sweep": "AUTO",
+    "acq_type": "NORM"
+  },
+
+  "channels": [
+    {
+      "name": "Accel",
+      "source": "CHAN2",
+      "enabled": true,
+      "notes": "Piezo accelerometer"
+    }
+  ],
+
+  "telemetry": {
+    "enabled": false,
+    "rp2040_port": "/dev/tty.usbmodemXXXX",
+    "modbus_config": "modbus_config.json",
+    "notes": "Set enabled=true and configure ports when hardware is connected"
+  },
+
+  "test_parameters": {
+    "test_name": "Bearing run-in test",
+    "target_rpm": 1500,
+    "target_temperature_c": 60,
+    "expected_load_g": 200,
+    "duration_minutes": 30,
+    "notes": "Initial test with metadata integration"
+  },
+
+  "store": {
+    "output_file": "data/test_with_telemetry.h5",
+    "timestamped": true,
+    "compress": "none",
+    "chunk": false,
+    "attrs": {
+      "project": "ForeverBearing",
+      "operator": "morten",
+      "test_type": "metadata_integration_test"
+    }
+  }
+}

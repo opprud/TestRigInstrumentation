@@ -27,6 +27,13 @@ import numpy as np
 import pyvisa
 import h5py
 
+# Optional: telemetry collection
+try:
+    from telemetry_collector import collect_all_telemetry
+    TELEMETRY_AVAILABLE = True
+except ImportError:
+    TELEMETRY_AVAILABLE = False
+
 # ------------------------ timezone ------------------------
 TZ = ZoneInfo("Europe/Copenhagen")
 def now_pair():
@@ -104,7 +111,10 @@ def open_scope(ip: str):
     scope.write_termination = '\n'
     scope.timeout = 20000
     scope.chunk_size = 1024 * 1024
-    scope.clear()
+    try:
+        scope.clear()
+    except Exception:
+        pass  # clear() can timeout on some instruments; not critical
     W(scope, "*CLS")
     print(Q(scope, "*IDN?").strip())
     return scope
@@ -221,6 +231,12 @@ def acquire_loop(config):
     store_cfg = config["store"]
     channels  = [c for c in config["channels"] if c.get("enabled", True)]
 
+    # Telemetry configuration (optional)
+    telemetry_cfg = config.get("telemetry", {})
+    rp2040_port = telemetry_cfg.get("rp2040_port")
+    modbus_config = telemetry_cfg.get("modbus_config")
+    collect_telemetry = telemetry_cfg.get("enabled", False) and TELEMETRY_AVAILABLE
+
     scope = open_scope(config["scope_ip"])
 
     # timestamped filename if requested
@@ -238,6 +254,12 @@ def acquire_loop(config):
         meta_grp.attrs["created_utc"]   = ts_utc
         meta_grp.attrs["scope_idn"]     = Q(scope, "*IDN?").strip()
         meta_grp.attrs["script"]        = "acquire_scope_data.py"
+        meta_grp.attrs["telemetry_enabled"] = collect_telemetry
+
+        # Store test parameters if provided
+        test_params = config.get("test_parameters")
+        if test_params:
+            meta_grp.attrs["test_parameters"] = json.dumps(test_params)
 
         sweeps_grp = h5f.create_group("sweeps")
 
@@ -258,6 +280,22 @@ def acquire_loop(config):
                 sweep_grp.attrs["acq_type"] = acq_type
                 if acq_type.upper().startswith("AVER"):
                     sweep_grp.attrs["averages"] = int(acq_cfg.get("averages", 8))
+
+            # Collect telemetry data (load, speed, temperature) if enabled
+            if collect_telemetry:
+                try:
+                    telemetry_data = collect_all_telemetry(
+                        rp2040_port=rp2040_port,
+                        modbus_config=modbus_config,
+                        include_timestamp=True
+                    )
+                    # Store telemetry as attributes on the sweep
+                    for key, value in telemetry_data.items():
+                        if value is not None:
+                            sweep_grp.attrs[f"telemetry_{key}"] = value
+                except Exception as e:
+                    if DEBUG:
+                        print(f"Warning: Telemetry collection failed for sweep {i}: {e}")
 
             for ch in channels:
                 alias = ch["name"]; src = ch["source"]; notes = ch.get("notes", "")

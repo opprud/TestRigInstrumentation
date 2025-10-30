@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+ENV/
+env/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data files (HDF5, CSV, etc.)
+# Ignore all files in data directories
+py/data/*
+data/*
+
+# But keep the .gitkeep files to preserve directory structure
+!py/data/.gitkeep
+!data/.gitkeep
+
+# Log files
+*.log
+py/*.log
+visa_io.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# React/Node
+node_modules/
+react/node_modules/
+react/dist/
+react/build/
+*.local
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/

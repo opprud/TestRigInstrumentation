@@ -1,0 +1,31 @@
+{
+  "scope_ip": "169.254.196.182",
+  "acquisition": {
+    "points": 1000,
+    "samples": 1,
+    "interval_sec": 1,
+    "waveform_format": "WORD",
+    "points_mode": "NORM",
+    "trigger_sweep": "AUTO",
+    "acq_type": "NORM"
+  },
+  "channels": [
+    {
+      "name": "Accel",
+      "source": "CHAN2",
+      "enabled": true,
+      "notes": "Test acquisition - Piezo accelerometer"
+    }
+  ],
+  "store": {
+    "output_file": "data/test_acquisition.h5",
+    "timestamped": true,
+    "compress": "none",
+    "chunk": false,
+    "attrs": {
+      "project": "ForeverBearing",
+      "operator": "test",
+      "test_type": "connection_test"
+    }
+  }
+}
