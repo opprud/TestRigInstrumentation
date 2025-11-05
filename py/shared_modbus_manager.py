@@ -16,6 +16,7 @@ from typing import Optional, Dict, Any
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pymodbus.client import ModbusSerialClient
+from hardware_utils import resolve_port
 
 
 @dataclass
@@ -44,6 +45,15 @@ class SharedModbusManager:
 
     def __init__(self, config: ModbusConfig):
         self.config = config
+
+        # Resolve port specification (handle "auto" detection)
+        self._resolved_port = resolve_port(config.port, device_type='ftdi', debug=config.debug)
+
+        if not self._resolved_port:
+            if config.debug:
+                print(f"[DEBUG] WARNING: Could not resolve port '{config.port}'")
+            self._resolved_port = config.port  # Fall back to original value
+
         self.client: Optional[ModbusSerialClient] = None
         self.lock = threading.RLock()  # Reentrant lock for nested calls
         self._is_connected = False
@@ -53,7 +63,10 @@ class SharedModbusManager:
         self._consecutive_failures = 0
 
         if config.debug:
-            print(f"[DEBUG] SharedModbusManager initialized for {config.port}")
+            if config.port == "auto":
+                print(f"[DEBUG] SharedModbusManager initialized with auto-detected port: {self._resolved_port}")
+            else:
+                print(f"[DEBUG] SharedModbusManager initialized for {self._resolved_port}")
 
     def _detect_unit_kwarg(self) -> Optional[str]:
         """Detect the correct kwarg for addressing (unit/slave/device_id)."""
@@ -97,12 +110,12 @@ class SharedModbusManager:
             return True
 
         if self.config.debug:
-            print(f"[DEBUG] Connecting to Modbus on {self.config.port}")
+            print(f"[DEBUG] Connecting to Modbus on {self._resolved_port}")
 
         # Create client if needed
         if not self.client:
             self.client = ModbusSerialClient(
-                port=self.config.port,
+                port=self._resolved_port,
                 baudrate=self.config.baudrate,
                 parity=self.config.parity,
                 bytesize=self.config.bytesize,
@@ -136,7 +149,7 @@ class SharedModbusManager:
             self._is_connected = False
             self._consecutive_failures += 1
             if self.config.debug:
-                print(f"[DEBUG] Failed to connect to Modbus on {self.config.port}")
+                print(f"[DEBUG] Failed to connect to Modbus on {self._resolved_port}")
             return False
 
     def _force_disconnect(self):
@@ -164,7 +177,7 @@ class SharedModbusManager:
             self._connection_count += 1
             try:
                 if not self._ensure_connected():
-                    raise RuntimeError(f"Cannot connect to Modbus on {self.config.port}")
+                    raise RuntimeError(f"Cannot connect to Modbus on {self._resolved_port}")
 
                 if self.config.debug:
                     print(f"[DEBUG] Connection acquired (count: {self._connection_count})")
@@ -320,7 +333,8 @@ class SharedModbusManager:
             "last_successful_op": self._last_successful_op,
             "seconds_since_success": now - self._last_successful_op,
             "connection_count": self._connection_count,
-            "port": self.config.port,
+            "port": self._resolved_port,
+            "port_config": self.config.port,  # Show original config value (e.g., "auto")
             "timeout": self.config.timeout,
             "max_retries": self.config.max_retries
         }

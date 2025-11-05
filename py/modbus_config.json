@@ -1,12 +1,13 @@
 {
   "description": "Shared Modbus configuration for test rig devices",
   "connection": {
-    "port": "/dev/tty.usbserial-FTDI485",
+    "port": "auto",
     "baudrate": 9600,
     "parity": "N",
     "bytesize": 8,
     "stopbits": 1,
-    "timeout": 2.0
+    "timeout": 2.0,
+    "notes": "Use 'auto' to auto-detect FTDI adapter, or specify explicit path like '/dev/tty.usbserial-FTDI485'"
   },
   "devices": {
     "omron_e5cc": {

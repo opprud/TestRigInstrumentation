@@ -379,7 +379,7 @@ void handle_line(char* line) {
 // ---------------------- setup/loop ----------------------
 void setup() {
   Serial.begin(SERIAL_BAUD);
-  while (!Serial) { delay(10); }
+  //while (!Serial) { delay(10); }
 
   // Load calibration from EEPROM (or defaults if invalid)
   float s; long t;
