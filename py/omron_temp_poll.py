@@ -96,7 +96,7 @@ def main():
     ap.add_argument("--bytesize", type=int, choices=[7, 8], default=8, help="Data bits (default: 8)")
     ap.add_argument("--stopbits", type=int, choices=[1, 2], default=1, help="Stop bits (default: 1)")
     ap.add_argument("--timeout", type=float, default=1.5, help="Timeout seconds (default: 1.5)")
-    ap.add_argument("--unit", type=int, default=4, help="Modbus unit/slave/device_id (default: 4, was 2)")
+    ap.add_argument("--unit", type=int, default=2, help="Modbus unit/slave/device_id (default: 2)")
 
     # Registers & scale
     ap.add_argument("--pv-address", type=lambda x: int(x, 0), default=0x2000, help="PV holding register (default: 0x2000)")

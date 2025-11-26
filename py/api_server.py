@@ -325,7 +325,7 @@ async def send_omron_command(command: OmronCommand):
             bytesize=8,
             stopbits=1,
             timeout=2.0,      # Increased timeout for shared connection
-            unit_id=4,        # E5CC unit ID
+            unit_id=2,        # E5CC unit ID
             pv_address=0x2000,
             sv_address=0x2103,
             scale=1.0,
@@ -397,7 +397,7 @@ async def get_omron_status():
             bytesize=8,
             stopbits=1,
             timeout=2.0,      # Increased timeout for shared connection
-            unit_id=4,        # E5CC unit ID
+            unit_id=2,        # E5CC unit ID
             pv_address=0x2000,
             sv_address=0x2103,
             scale=1.0,

@@ -242,9 +242,13 @@ def main():
             # Tare with no load
             _ = do_tare(ser)
             # Ask user to place weight; wait
+            print("Place weight of {:.3f} g on scale...".format(args.weight_g), file=sys.stderr)
+            print("Waiting {:.1f} seconds for settling...".format(args.settle_sec), file=sys.stderr)
             time.sleep(args.settle_sec)
             loaded = read_load(ser)
             raw_loaded = int(loaded.get("raw", 0))
+            print("Remove weight from scale...", file=sys.stderr)
+            print("Waiting {:.1f} seconds for settling...".format(args.settle_sec), file=sys.stderr)
             # Ask user to remove weight; wait
             time.sleep(args.settle_sec)
             tare_read = read_load(ser)

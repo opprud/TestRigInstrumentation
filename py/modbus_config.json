@@ -12,7 +12,7 @@
   "devices": {
     "omron_e5cc": {
       "description": "Omron E5CC Temperature Controller",
-      "unit_id": 4,
+      "unit_id": 2,
       "registers": {
         "pv_address": "0x2000",
         "sv_address": "0x2103"
