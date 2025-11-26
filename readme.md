@@ -1,105 +1,220 @@
 # MSO-X Data Acquisition & Telemetry
 
-Tools to acquire waveforms from a **Keysight/Agilent MSO-X 2024A** over SCPI/TCPIP, store them in **HDF5**, plot/analyze with Python, and augment each sweep with **telemetry** (load cell via HX711 on RP2040, tachometer RPM via RP2040, and temperature via Omron E5CC over RS-485/Modbus).
-
-## Features
-
-- **Oscilloscope capture** (SCPI/TCPIP via PyVISA)
-  - WORD (16-bit) or BYTE transfers, robust IEEE-488.2 block reads
-  - Fresh capture per sweep: `:DIGitize → *OPC? → :WAV:PRE? → :WAV:DATA?`
-  - Timezone-aware timestamps (CET/CEST) and UTC
-  - Optional acquisition modes: `NORM | HRES | AVER`
-- **Storage**: Compact, metadata-rich **HDF5**
-  - `/metadata` + `/sweeps/sweep_XXX/<alias>/{time,voltage}` + per-channel attrs
-  - Optional `/sweeps/sweep_XXX/telemetry/{load,speed,temperature}`
-- **Telemetry**
-  - **RP2040** (Arduino) firmware exposes ASCII protocol:
-    - `LOAD?`, `TARE`, `SPEED?`, `SETCAL`, `CAL?`, `SETTIME`, `SETPPR`, …
-    - EEPROM-emulated persistence for calibration (slope/tare)
-  - **Python host** (`rp2040_tool.py`) with guided calibration and **--json** output
-  - **Omron E5CC** temperature over Modbus/RS-485 (`e5cc_reader.py`)
-- **Plotting**: `plot_waveform.py`
-  - Time series, FFT, spectrogram
-  - Channel colors match MSO defaults (CH1 yellow, CH2 green, CH3 blue, CH4 red)
-  - Select channels by **alias** or by **scope source** (e.g., `CHAN1`)
-
+Tools to acquire high-fidelity waveforms from a **Keysight/Agilent MSO-X 2024A** using SCPI/TCPIP, store them in **HDF5**, and optionally attach **telemetry** (loadcell, RPM, temperature).  
+Now includes full **auto-detection** of the oscilloscope via `scope_utils.py`, with **preferred_port** override and **scope_cache.json** persistence.
 
 ---
 
-## Repository layout
+## 🚀 Features
 
-├── acquire_scope_data.py      # SCPI acquisition → HDF5 (with debug mode)
-├── plot_waveform.py           # Plot time/FFT/spectrogram from HDF5
-├── rp2040_tool.py             # Host tool for RP2040 (HX711 + tachometer)
-├── e5cc_reader.py             # Omron E5CC temperature via Modbus/RS-485
-├── firmware/
-│   └── rp2040_hx711_tacho/    # Arduino sketch with EEPROM calibration
-│       └── rp2040_hx711_tacho.ino
-├── config.json                # Example configuration
-├── requirements.txt
-└── README.md
+### 🟡 1) Oscilloscope acquisition (SCPI/TCPIP)
+- Auto-detection of MSO-X scope:
+  - Uses **scope_cache.json** if cached
+  - Tries **preferred_port** from config  
+  - Tries hostnames: `msox-2024a`, `scope.local`, …
+  - Falls back to network scan & VISA
+- Robust IEEE-488.2 block reads
+- Supports:
+  - `WORD` (16-bit) or `BYTE` waveform transfer
+  - `NORM`, `HRES`, `AVER` acquisition types
+  - `AUTO` or `NORM` trigger sweep
+- Fresh capture per sweep:  
+  `:DIGitize → *OPC? → :WAV:PRE? → :WAV:DATA?`
+- Timezone-aware timestamps (CET/CEST using tzdata) + UTC
 
 ---
 
-## Prerequisites & Setup
+## 📦 2) Storage (HDF5)
+Data is stored in a metadata-rich layout:
 
-The acquisition script is a plain Python tool; recommended usage is inside a **virtual environment** to keep dependencies clean.  
-
-### 1) Install Python
-- Requires **Python 3.10+** (tested on macOS/Linux; Windows also fine).
-```bash
-python3 --version
-
-python3 -m venv .venv
-# macOS/Linux
-source .venv/bin/activate
-# Windows PowerShell
-.\.venv\Scripts\Activate.ps1
-
-###  Install dependencies
-pip install -r requirements.txt
-
-
-
-## Config (config.json)
 ```
+/metadata
+/sweeps/sweep_000/<alias>/time
+/sweeps/sweep_000/<alias>/voltage
+```
+
+Each channel includes:
+- x_increment, y_increment
+- reference offsets
+- sample rate
+- points reported
+
+---
+
+## 📊 3) Telemetry (optional)
+Supports:
+- **RP2040 (Arduino)**:
+  - Load cell via HX711
+  - RPM tachometer
+  - Configurable EEPROM calibration
+  - ASCII command interface (`LOAD?`, `SPEED?`, `CAL?`, …)
+- **Omron E5CC** temperature via RS-485/Modbus
+
+Telemetry is attached to each sweep in HDF5.
+
+---
+
+## 📈 4) Plotting
+`plot_waveform.py` enables:
+- Time series plot
+- FFT
+- Spectrogram
+- Scope-style channel coloring
+
+---
+
+## 📁 Repository layout
+
+```
+acquire_scope_data.py      # SCPI → HDF5 acquisition (uses scope_utils.py)
+scope_utils.py             # Auto-detect, cache, socket/VISA abstraction
+plot_waveform.py
+rp2040_tool.py
+e5cc_reader.py
+firmware/
+  rp2040_hx711_tacho/
+      rp2040_hx711_tacho.ino
+config.json
+requirements.txt
+scope_cache.json           # Auto-generated: stores last known scope host + port
+README.md
+```
+
+---
+
+# ⚙️ Installation
+
+## 1) Install Python
+Requires **Python 3.11+** (recommended on Windows).
+
+```bash
+python --version
+```
+
+## 2) Install dependencies
+
+Windows:
+```bash
+py -3.11 -m pip install numpy h5py pyvisa tzdata
+```
+
+Linux/macOS:
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+---
+
+# 📝 Config (config.json)
+
+Below is a minimal working configuration using autodetect:
+
+```json
 {
-  "scope_ip": "169.254.86.40",
+  "scope": {
+    "preferred_port": 5025
+  },
+
   "acquisition": {
-    "points": 1000000,
-    "samples": 3,
+    "points": 2000,
+    "samples": 1,
     "interval_sec": 1.0,
-    "waveform_format": "WORD",    // WORD(16-bit) or BYTE
-    "points_mode": "NORM",        // RAW often rejected; NORM is safe
-    "trigger_sweep": "AUTO",      // AUTO or NORM
-    "acq_type": "NORM"            // NORM | HRES | AVER (+averages)
+    "waveform_format": "WORD",
+    "points_mode": "NORM",
+    "trigger_sweep": "AUTO",
+    "acq_type": "NORM"
   },
+
   "channels": [
-    { "name": "AE_probe", "source": "CHAN1", "enabled": true },
-    { "name": "Accel",    "source": "CHAN2", "enabled": true }
+    { "name": "CH1", "source": "CHAN1", "enabled": true }
   ],
-  "sensors": {
-    "rp2040": {
-      "port": "/dev/tty.usbmodemXXXX",
-      "baud": 115200,
-      "timeout_sec": 1.0
-    },
-    "speed":      { "source": "rp2040", "enabled": true },
-    "loadcell":   { "source": "rp2040", "enabled": true },
-    "temperature": {
-      "source": "modbus_e5cc", "enabled": false,
-      "serial_port": "/dev/ttyUSB0", "baud": 9600, "parity": "N", "stopbits": 1,
-      "slave_id": 1, "pv_register": 0, "pv_scale": 1.0
-    }
-  },
+
   "store": {
-    "output_file": "data/data.h5",
-    "timestamped": true,
+    "output_file": "data.h5",
+    "timestamped": false,
     "compress": "none",
-    "chunk": false,
-    "attrs": { "project": "ForeverBearing", "operator": "morten" }
+    "chunk": false
   }
 }
 ```
 
+## Notes:
+- `"preferred_port"` overrides the default port list.
+- `scope_cache.json` stores `{host, port}` from last successful detection.
+- If cached scope is online → immediate connect (< 50 ms).
+- If not → autodetect fallback methods will be used.
 
+---
+
+# ▶️ Running acquisition
+
+```bash
+python acquire_scope_data.py config.json
+```
+
+Optional debug mode:
+
+```bash
+python acquire_scope_data.py config.json --debug
+```
+
+Debug mode prints:
+- Autodetect steps  
+- Cache hits  
+- Network scan attempts  
+- VISA resources  
+- SCPI error traces  
+
+---
+
+# 🔧 How autodetect works (scope_utils.py)
+
+Priority:
+
+1. **scope_cache.json**  
+2. **preferred_port** + known hosts  
+3. VISA discovery  
+4. Subnet scan (`192.168.0.x`, `192.168.1.x`, `10.0.0.x`)
+
+The first successful connection is cached.
+
+---
+
+# 🛠️ Troubleshooting
+
+### "TimeoutError: timed out"
+Likely due to missing waveform data.
+
+Check:
+- CH1/CH2 is ON  
+- Scope in STOP  
+- Trigger Sweep = AUTO  
+- DIGITIZE produces waveform  
+
+### "tzdata not found"
+Install:
+
+```bash
+python -m pip install tzdata
+```
+
+### "No module named numpy"
+Install:
+
+```bash
+python -m pip install numpy
+```
+
+---
+
+# 🎉 Summary
+
+This repository now supports:
+
+- Fully automatic scope discovery  
+- Configurable port override  
+- Cached scope settings  
+- Fast reconnection  
+- Clean separation of acquisition, telemetry, plotting  
+- Stable waveform transfer with IEEE-488.2 parsing  
+- Windows and Linux compatibility  
