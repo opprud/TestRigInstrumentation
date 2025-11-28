@@ -56,8 +56,9 @@ def read_ieee_block(scope, cmd):
 def open_scope_with_autodetect(config):
     scope_cfg = config.get("scope", {})
     preferred_port = scope_cfg.get("preferred_port", None)
+    scope_ip = config.get("scope_ip", None)
 
-    mgr = ScopeManager(preferred_port=preferred_port)
+    mgr = ScopeManager(preferred_port=preferred_port, scope_ip=scope_ip)
 
     if mgr.scope is None:
         raise RuntimeError("Kan ikke autodetektere scope.")
@@ -158,6 +159,7 @@ def acquire_loop(config):
 
             for ch in channels:
                 alias = ch["name"]
+                print(f"  Reading channel {alias} ({ch['source']})...")
                 t, v, meta = read_waveform(scope, ch, acq_cfg)
 
                 grp = sweep.create_group(alias)

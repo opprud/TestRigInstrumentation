@@ -79,13 +79,57 @@ class SocketScope(BaseScope):
         s = self._open()
         try:
             s.sendall((cmd + "\n").encode("ascii"))
+
+            # Read IEEE 488.2 header: #<N><length><data>
+            # where N is number of digits in length
+            header = b""
+            while len(header) < 2:
+                header += s.recv(2 - len(header))
+
+            if not header.startswith(b"#"):
+                # Not a definite-length block, read until connection closes
+                chunks = [header]
+                while True:
+                    buf = s.recv(65536)
+                    if not buf:
+                        break
+                    chunks.append(buf)
+                return b"".join(chunks)
+
+            # Parse definite-length block
+            n_digits = int(chr(header[1]))
+            if n_digits == 0:
+                # Indefinite-length block, read until newline
+                chunks = [header]
+                while not chunks[-1].endswith(b"\n"):
+                    chunks.append(s.recv(65536))
+                return b"".join(chunks)
+
+            # Read length digits
+            length_str = b""
+            while len(length_str) < n_digits:
+                length_str += s.recv(n_digits - len(length_str))
+
+            data_length = int(length_str.decode())
+
+            # Read exactly data_length bytes
             chunks = []
-            while True:
-                buf = s.recv(65536)
-                if not buf:
+            bytes_received = 0
+            while bytes_received < data_length:
+                chunk = s.recv(min(65536, data_length - bytes_received))
+                if not chunk:
                     break
-                chunks.append(buf)
-            return b"".join(chunks)
+                chunks.append(chunk)
+                bytes_received += len(chunk)
+
+            # Read trailing newline if present
+            s.settimeout(0.1)
+            try:
+                s.recv(1)
+            except:
+                pass
+
+            return header + length_str + b"".join(chunks)
         finally:
             s.close()
 
@@ -167,12 +211,13 @@ class ScopeManager:
     Autodetect i denne rækkefølge:
 
     1) cache → host+port
-    2) config.json override-port + host candidates
-    3) VISA device
-    4) network scan
+    2) config.json scope_ip (if provided)
+    3) config.json override-port + host candidates
+    4) VISA device
+    5) network scan
     """
 
-    def __init__(self, preferred_port=None):
+    def __init__(self, preferred_port=None, scope_ip=None):
 
         self.scope = None
         self.host = None
@@ -195,7 +240,16 @@ class ScopeManager:
                     self.host, self.port = h, p
                     return
 
-        # 2) Manual host candidates (scope.local osv.)
+        # 2) Config scope_ip (if provided)
+        if scope_ip:
+            for p in self.port_list:
+                if try_connect_socket(scope_ip, p):
+                    self.scope = SocketScope(scope_ip, p)
+                    self.host, self.port = scope_ip, p
+                    save_cache(scope_ip, p)
+                    return
+
+        # 3) Manual host candidates (scope.local osv.)
         for host in DEFAULT_HOST_CANDIDATES:
             for p in self.port_list:
                 if try_connect_socket(host, p):
@@ -204,7 +258,7 @@ class ScopeManager:
                     save_cache(host, p)
                     return
 
-        # 3) VISA
+        # 4) VISA
         visa_res = detect_visa_scopes()
         if visa_res:
             try:
@@ -215,7 +269,7 @@ class ScopeManager:
             except:
                 pass
 
-        # 4) Full network scan
+        # 5) Full network scan
         host, p = scan_for_scopes(self.port_list)
         if host and p:
             self.scope = SocketScope(host, p)
