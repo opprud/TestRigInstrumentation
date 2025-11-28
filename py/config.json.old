@@ -1,14 +1,14 @@
 {
   "scope_ip": "a-mx2024a-10378.local",
   "acquisition": {
-    "points": 125000,
-    "samples":100,
-    "interval_sec": 5,
+    "points": 62000,
+    "samples": 3,
+    "interval_sec": 3,
     "waveform_format": "WORD",
     "points_mode": "RAW",
     "trigger_sweep": "AUTO",
     "acq_type": "HRES",
-    "notes": "MSO-X 2024A with 2 channels: max ~62k points per channel"
+    "notes": "MSO-X 2024A with 4 channels: max ~62k points per channel"
   },
 
   "dashboard_preview": {
@@ -32,6 +32,18 @@
       "source": "CHAN2",
       "enabled": true,
       "notes": "Piezo accelerometer"
+    },
+    {
+      "name": "UL",
+      "source": "CHAN3",
+      "enabled": true,
+      "notes": "Ultrasound"
+    },
+    {
+      "name": "Temp",
+      "source": "CHAN4",
+      "enabled": true,
+      "notes": "Temperature"
     }
   ],
 
@@ -52,7 +64,7 @@
   },
 
   "store": {
-    "output_file": "data/data8.hdf5",
+    "output_file": "data/data5.hdf5",
     "timestamped": true,
     "compress": "none",
     "chunk": false,

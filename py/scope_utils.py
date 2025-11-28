@@ -55,28 +55,48 @@ class SocketScope(BaseScope):
     def __init__(self, host, port):
         self.host = host
         self.port = port
+        self.socket = None
+        self._connect()
 
-    def _open(self):
-        return socket.create_connection((self.host, self.port), timeout=3.0)
+    def _connect(self):
+        """Establish persistent connection to scope"""
+        if self.socket:
+            try:
+                self.socket.close()
+            except:
+                pass
+        self.socket = socket.create_connection((self.host, self.port), timeout=10.0)
+
+    def _ensure_connected(self):
+        """Reconnect if connection is lost"""
+        if self.socket is None:
+            self._connect()
 
     def write(self, cmd: str):
-        s = self._open()
+        self._ensure_connected()
         try:
-            s.sendall((cmd + "\n").encode("ascii"))
-        finally:
-            s.close()
+            self.socket.sendall((cmd + "\n").encode("ascii"))
+        except (socket.timeout, OSError, ConnectionError) as e:
+            # Connection lost, try reconnecting once
+            self._connect()
+            self.socket.sendall((cmd + "\n").encode("ascii"))
 
     def query(self, cmd: str) -> str:
-        s = self._open()
+        self._ensure_connected()
         try:
-            s.sendall((cmd + "\n").encode("ascii"))
-            data = s.recv(65536)
+            self.socket.sendall((cmd + "\n").encode("ascii"))
+            data = self.socket.recv(65536)
             return data.decode(errors="ignore")
-        finally:
-            s.close()
+        except (socket.timeout, OSError, ConnectionError) as e:
+            # Connection lost, try reconnecting once
+            self._connect()
+            self.socket.sendall((cmd + "\n").encode("ascii"))
+            data = self.socket.recv(65536)
+            return data.decode(errors="ignore")
 
     def query_binary(self, cmd: str) -> bytes:
-        s = self._open()
+        self._ensure_connected()
+        s = self.socket
         try:
             s.sendall((cmd + "\n").encode("ascii"))
 
@@ -123,15 +143,68 @@ class SocketScope(BaseScope):
                 bytes_received += len(chunk)
 
             # Read trailing newline if present
+            old_timeout = s.gettimeout()
             s.settimeout(0.1)
             try:
                 s.recv(1)
             except:
                 pass
+            finally:
+                s.settimeout(old_timeout)
 
             return header + length_str + b"".join(chunks)
-        finally:
-            s.close()
+        except (socket.timeout, OSError, ConnectionError) as e:
+            # Connection lost, try reconnecting once
+            self._connect()
+            s = self.socket
+            # Retry the binary query
+            s.sendall((cmd + "\n").encode("ascii"))
+
+            header = b""
+            while len(header) < 2:
+                header += s.recv(2 - len(header))
+
+            if not header.startswith(b"#"):
+                chunks = [header]
+                while True:
+                    buf = s.recv(65536)
+                    if not buf:
+                        break
+                    chunks.append(buf)
+                return b"".join(chunks)
+
+            n_digits = int(chr(header[1]))
+            if n_digits == 0:
+                chunks = [header]
+                while not chunks[-1].endswith(b"\n"):
+                    chunks.append(s.recv(65536))
+                return b"".join(chunks)
+
+            length_str = b""
+            while len(length_str) < n_digits:
+                length_str += s.recv(n_digits - len(length_str))
+
+            data_length = int(length_str.decode())
+
+            chunks = []
+            bytes_received = 0
+            while bytes_received < data_length:
+                chunk = s.recv(min(65536, data_length - bytes_received))
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                bytes_received += len(chunk)
+
+            old_timeout = s.gettimeout()
+            s.settimeout(0.1)
+            try:
+                s.recv(1)
+            except:
+                pass
+            finally:
+                s.settimeout(old_timeout)
+
+            return header + length_str + b"".join(chunks)
 
 
 # ------------------- VisaScope -------------------

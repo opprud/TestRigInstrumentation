@@ -38,7 +38,7 @@ def inspect_hdf5(filepath):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python3 inspect_hdf5.py <file.h5>")
+        print("Usage: python3 inspect_hdf5.py <file.hdf5>")
         sys.exit(1)
 
     inspect_hdf5(sys.argv[1])

@@ -85,6 +85,7 @@ def read_waveform(scope, channel_cfg, acq_cfg):
 
     W(scope, ":DIGITIZE")
     Q(scope, "*OPC?")
+    time.sleep(0.1)  # Small delay to ensure scope is ready
 
     pre = Q(scope, ":WAV:PRE?").split(",")
 
@@ -123,7 +124,7 @@ def timestamped_path(base, ts_local):
     root, ext = os.path.splitext(base)
     dt = datetime.fromisoformat(ts_local)
     stamp = dt.strftime("%Y%m%d_%H%M%S")
-    return f"{root}_{stamp}{ext or '.h5'}"
+    return f"{root}_{stamp}{ext or '.hdf5'}"
 
 
 def acquire_loop(config):
