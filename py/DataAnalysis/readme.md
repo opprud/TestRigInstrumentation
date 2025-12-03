@@ -11,3 +11,4 @@ The file format is [hdf5](https://en.wikipedia.org/wiki/Hierarchical_Data_Format
 To examine the format, run `python inspect_hdf5.py <datafile>`
 
 To load the file, see example in `python plot_waveform.py <datafile>`
+
