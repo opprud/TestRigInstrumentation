@@ -157,6 +157,27 @@ def acquire_loop(config):
             if value is not None:
                 meta_grp.attrs[key] = value
 
+        # Add bearing information to metadata
+        if "bearing" in config:
+            bearing_grp = meta_grp.create_group("bearing")
+            for key, value in config["bearing"].items():
+                if value and value != "" and value != 0:  # Skip empty values
+                    bearing_grp.attrs[key] = value
+
+        # Add lubricant information to metadata
+        if "lubricant" in config:
+            lubricant_grp = meta_grp.create_group("lubricant")
+            for key, value in config["lubricant"].items():
+                if value and value != "" and value != 0:  # Skip empty values
+                    lubricant_grp.attrs[key] = value
+
+        # Add test parameters to metadata
+        if "test_parameters" in config:
+            test_grp = meta_grp.create_group("test_parameters")
+            for key, value in config["test_parameters"].items():
+                if value and value != "" and value != 0:  # Skip empty values
+                    test_grp.attrs[key] = value
+
         sweeps_grp = h5f.create_group("sweeps")
 
         samples = int(acq_cfg["samples"])

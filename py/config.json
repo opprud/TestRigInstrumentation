@@ -2,7 +2,7 @@
   "scope_ip": "a-mx2024a-10378.local",
   "acquisition": {
     "points": 125000,
-    "samples":5,
+    "samples": 25,
     "interval_sec": 5,
     "waveform_format": "WORD",
     "points_mode": "RAW",
@@ -22,16 +22,16 @@
 
   "channels": [
     {
-      "name": "AE",
+      "name": "Ultrasound",
       "source": "CHAN1",
       "enabled": true,
-      "notes": "Kistler acoustic emission probe"
+      "notes": "UE Altrasound sensor"
     },
     {
-      "name": "Accel",
+      "name": "AE",
       "source": "CHAN2",
       "enabled": true,
-      "notes": "Piezo accelerometer"
+      "notes": "Kistler acoustic emission probe"
     }
   ],
 
@@ -42,17 +42,55 @@
     "notes": "Enable to collect load/speed/temperature data at each sweep. Configure ports as needed."
   },
 
+  "bearing": {
+    "manufacturer": "SKF",
+    "model": "SYJ25",
+    "type": "Deep groove ball bearing",
+    "bore_mm": 25,
+    "dynamic load_rating_N": 14000,
+    "static_load_rating_N": 7800,
+    "Rolling elements": 9,
+    "Max speed_rpm": 7000,
+    "serial_number": "N/A",
+    "production_date": "N/A",
+    "material": "Chrome steel",
+    "cage_type": "Steel",
+    "seal_type": "Removed",
+    "notes": "Test bearing for ForeverBearing endurance testing"
+  },
+
+  "lubricant": {
+    "manufacturer": "Kerax",
+    "product_name": "Keratech 22",
+    "type": "Oil",
+    "base_oil": "Parafin Oil",
+    "viscosity_grade": "ISO VG 220",
+    "viscosity_40c_cst": 22,
+    "viscosity_100c_cst": 4.1,
+    "thickener": "N/A",
+    "additives": "None",
+    "nlgi_grade": "N/A",
+    "flash_point_c": 185,
+    "application_method": "Manual application",
+    "quantity_applied_ml": "0.5",
+    "batch_number": "N/A",
+    "application_date": "2025-12-03",
+    "notes": "Initial test, new bearing"
+  },
+
   "test_parameters": {
     "test_name": "Bearing endurance test",
-    "target_rpm": 1500,
-    "target_temperature_c": 60,
-    "expected_load_g": 200,
+    "target_rpm_low": 500,
+    "target_rpm_high": 3000,
+    "target_temperature_low_c": 40,
+    "target_temperature_high_c": 75,
+    "expected_load_g": 15000,
     "duration_minutes": 60,
-    "notes": "Standard test configuration"
+    "notes": "Standard test configuration, using RS VFD, no sine filter"
   },
 
   "store": {
-    "output_file": "data/data11.hdf5",
+    "output_file": "data/data12.hdf5",
     "timestamped": true,
     "compress": "none",
     "chunk": false,
