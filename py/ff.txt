@@ -1,0 +1,1896 @@
+
+Inspecting: data/firstOil_T75_20251203_153529.hdf5
+
+======================================================================
+📁 metadata
+  ├─ created_local: 2025-12-03T15:35:29.944393+01:00
+  ├─ created_utc: 2025-12-03T14:35:29.944541+00:00
+  ├─ modbus_config: modbus_config.json
+  ├─ omron_pv_address: 0x2000
+  ├─ omron_unit_id: 2
+  ├─ rp2040_port: /dev/tty.usbmodem2013101
+  ├─ scope_idn: AGILENT TECHNOLOGIES,MSO-X 2024A,MY53510378,02.41.2015102200
+  ├─ telemetry_enabled: True
+  📁 bearing
+    ├─ Max speed_rpm: 7000
+    ├─ Rolling elements: 9
+    ├─ bore_mm: 25
+    ├─ cage_type: Steel
+    ├─ dynamic load_rating_N: 14000
+    ├─ manufacturer: SKF
+    ├─ material: Chrome steel
+    ├─ model: SYJ25
+    ├─ notes: Test bearing for ForeverBearing endurance testing
+    ├─ production_date: N/A
+    ├─ seal_type: Removed
+    ├─ serial_number: N/A
+    ├─ static_load_rating_N: 7800
+    ├─ type: Deep groove ball bearing
+  📁 lubricant
+    ├─ additives: None
+    ├─ application_date: 2025-12-03
+    ├─ application_method: Manual application
+    ├─ base_oil: Parafin Oil
+    ├─ batch_number: N/A
+    ├─ flash_point_c: 185
+    ├─ manufacturer: Kerax
+    ├─ nlgi_grade: N/A
+    ├─ notes: Initial test, new bearing
+    ├─ product_name: Keratech 22
+    ├─ quantity_applied_ml: 0.5
+    ├─ thickener: N/A
+    ├─ type: Oil
+    ├─ viscosity_100c_cst: 4.1
+    ├─ viscosity_40c_cst: 22
+    ├─ viscosity_grade: ISO VG 220
+  📁 scope_settings
+    ├─ acq_mode: RTIM
+    ├─ acq_points: 250000
+    ├─ acq_sample_rate: 50000000.0
+    ├─ acq_type: HRES
+    ├─ timebase_mode: MAIN
+    ├─ timebase_position: 0.0
+    ├─ timebase_range: 0.005
+    ├─ timebase_reference: CENT
+    ├─ timebase_scale: 0.0005
+    ├─ trigger_coupling: DC
+    ├─ trigger_level: 0.009
+    ├─ trigger_mode: EDGE
+    ├─ trigger_slope: POS
+    ├─ trigger_source: CHAN2
+    ├─ trigger_sweep: NORM
+    📁 AE
+      ├─ bandwidth_limit: 0
+      ├─ coupling: DC
+      ├─ display: 1
+      ├─ impedance: ONEM
+      ├─ invert: 0
+      ├─ offset: -0.174
+      ├─ probe_attenuation: 1.0
+      ├─ range: 0.8
+      ├─ scale: 0.1
+      ├─ units: VOLT
+    📁 Ultrasound
+      ├─ bandwidth_limit: 0
+      ├─ coupling: DC
+      ├─ display: 1
+      ├─ impedance: ONEM
+      ├─ invert: 0
+      ├─ offset: 4.55
+      ├─ probe_attenuation: 1.0
+      ├─ range: 16.0
+      ├─ scale: 2.0
+      ├─ units: VOLT
+  📁 test_parameters
+    ├─ duration_minutes: 60
+    ├─ expected_load_g: 15000
+    ├─ notes: Standard test configuration, using RS VFD, no sine filter
+    ├─ target_rpm_high: 3000
+    ├─ target_rpm_low: 500
+    ├─ target_temperature_high_c: 75
+    ├─ target_temperature_low_c: 40
+    ├─ test_name: Bearing endurance test
+📁 sweeps
+  📁 sweep_000
+    ├─ load_g: 14299.991
+    ├─ load_raw: 4108332
+    ├─ load_timestamp_ms: 1166557
+    ├─ rpm: 2935.28
+    ├─ rpm_period_ms: 20.441
+    ├─ rpm_pulses: 11391
+    ├─ rpm_timestamp_ms: 1166592
+    ├─ temperature_c: 74.0
+    ├─ temperature_raw: 74
+    ├─ timestamp_local: 2025-12-03T15:35:30.498913+01:00
+    ├─ timestamp_utc: 2025-12-03T14:35:30.498937+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_001
+    ├─ load_g: 14356.621
+    ├─ load_raw: 4122035
+    ├─ load_timestamp_ms: 1172373
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 11675
+    ├─ rpm_timestamp_ms: 1172408
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:35:36.314370+01:00
+    ├─ timestamp_utc: 2025-12-03T14:35:36.314445+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_002
+    ├─ load_g: 14428.12
+    ├─ load_raw: 4139336
+    ├─ load_timestamp_ms: 1178127
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 11957
+    ├─ rpm_timestamp_ms: 1178161
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:35:42.068616+01:00
+    ├─ timestamp_utc: 2025-12-03T14:35:42.068703+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_003
+    ├─ load_g: 14280.254
+    ├─ load_raw: 4103556
+    ├─ load_timestamp_ms: 1184831
+    ├─ rpm: 2949.13
+    ├─ rpm_period_ms: 20.345
+    ├─ rpm_pulses: 12285
+    ├─ rpm_timestamp_ms: 1184866
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:35:48.773108+01:00
+    ├─ timestamp_utc: 2025-12-03T14:35:48.773189+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_004
+    ├─ load_g: 13788.585
+    ├─ load_raw: 3984585
+    ├─ load_timestamp_ms: 1192244
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 12648
+    ├─ rpm_timestamp_ms: 1192277
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:35:56.186669+01:00
+    ├─ timestamp_utc: 2025-12-03T14:35:56.186737+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_005
+    ├─ load_g: 14401.271
+    ├─ load_raw: 4132839
+    ├─ load_timestamp_ms: 1198003
+    ├─ rpm: 2934.13
+    ├─ rpm_period_ms: 20.449
+    ├─ rpm_pulses: 12929
+    ├─ rpm_timestamp_ms: 1198038
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:36:01.944312+01:00
+    ├─ timestamp_utc: 2025-12-03T14:36:01.944393+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_006
+    ├─ load_g: 14640.755
+    ├─ load_raw: 4190788
+    ├─ load_timestamp_ms: 1203759
+    ├─ rpm: 2934.99
+    ├─ rpm_period_ms: 20.443
+    ├─ rpm_pulses: 13211
+    ├─ rpm_timestamp_ms: 1203792
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:36:07.701148+01:00
+    ├─ timestamp_utc: 2025-12-03T14:36:07.701229+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_007
+    ├─ load_g: 14475.869
+    ├─ load_raw: 4150890
+    ├─ load_timestamp_ms: 1209960
+    ├─ rpm: 2948.84
+    ├─ rpm_period_ms: 20.347
+    ├─ rpm_pulses: 13515
+    ├─ rpm_timestamp_ms: 1209994
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:36:13.904285+01:00
+    ├─ timestamp_utc: 2025-12-03T14:36:13.904330+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_008
+    ├─ load_g: 14383.376
+    ├─ load_raw: 4128509
+    ├─ load_timestamp_ms: 1215767
+    ├─ rpm: 2934.99
+    ├─ rpm_period_ms: 20.443
+    ├─ rpm_pulses: 13799
+    ├─ rpm_timestamp_ms: 1215801
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:36:19.710607+01:00
+    ├─ timestamp_utc: 2025-12-03T14:36:19.710706+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_009
+    ├─ load_g: 14616.161
+    ├─ load_raw: 4184837
+    ├─ load_timestamp_ms: 1221525
+    ├─ rpm: 2934.85
+    ├─ rpm_period_ms: 20.444
+    ├─ rpm_pulses: 14081
+    ├─ rpm_timestamp_ms: 1221560
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:36:25.466834+01:00
+    ├─ timestamp_utc: 2025-12-03T14:36:25.466919+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_010
+    ├─ load_g: 14358.002
+    ├─ load_raw: 4122369
+    ├─ load_timestamp_ms: 1227276
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 14362
+    ├─ rpm_timestamp_ms: 1227311
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:36:31.218354+01:00
+    ├─ timestamp_utc: 2025-12-03T14:36:31.218443+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_011
+    ├─ load_g: 14598.139
+    ├─ load_raw: 4180476
+    ├─ load_timestamp_ms: 1233031
+    ├─ rpm: 2934.99
+    ├─ rpm_period_ms: 20.443
+    ├─ rpm_pulses: 14644
+    ├─ rpm_timestamp_ms: 1233066
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:36:36.972683+01:00
+    ├─ timestamp_utc: 2025-12-03T14:36:36.972761+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_012
+    ├─ load_g: 14505.356
+    ├─ load_raw: 4158025
+    ├─ load_timestamp_ms: 1238782
+    ├─ rpm: 2934.56
+    ├─ rpm_period_ms: 20.446
+    ├─ rpm_pulses: 14925
+    ├─ rpm_timestamp_ms: 1238816
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:36:42.729843+01:00
+    ├─ timestamp_utc: 2025-12-03T14:36:42.729930+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_013
+    ├─ load_g: 14491.813
+    ├─ load_raw: 4154748
+    ├─ load_timestamp_ms: 1244535
+    ├─ rpm: 2934.99
+    ├─ rpm_period_ms: 20.443
+    ├─ rpm_pulses: 15207
+    ├─ rpm_timestamp_ms: 1244571
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:36:48.479133+01:00
+    ├─ timestamp_utc: 2025-12-03T14:36:48.479230+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_014
+    ├─ load_g: 14494.078
+    ├─ load_raw: 4155296
+    ├─ load_timestamp_ms: 1250294
+    ├─ rpm: 2935.28
+    ├─ rpm_period_ms: 20.441
+    ├─ rpm_pulses: 15489
+    ├─ rpm_timestamp_ms: 1250329
+    ├─ temperature_c: 72.0
+    ├─ temperature_raw: 72
+    ├─ timestamp_local: 2025-12-03T15:36:54.238517+01:00
+    ├─ timestamp_utc: 2025-12-03T14:36:54.238603+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_015
+    ├─ load_g: 13980.874
+    ├─ load_raw: 4031114
+    ├─ load_timestamp_ms: 1256049
+    ├─ rpm: 2934.13
+    ├─ rpm_period_ms: 20.449
+    ├─ rpm_pulses: 15771
+    ├─ rpm_timestamp_ms: 1256082
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:36:59.991607+01:00
+    ├─ timestamp_utc: 2025-12-03T14:36:59.991681+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_016
+    ├─ load_g: 14496.513
+    ├─ load_raw: 4155885
+    ├─ load_timestamp_ms: 1262218
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 16073
+    ├─ rpm_timestamp_ms: 1262252
+    ├─ temperature_c: 72.0
+    ├─ temperature_raw: 72
+    ├─ timestamp_local: 2025-12-03T15:37:06.162098+01:00
+    ├─ timestamp_utc: 2025-12-03T14:37:06.162157+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_017
+    ├─ load_g: 14393.464
+    ├─ load_raw: 4130950
+    ├─ load_timestamp_ms: 1269294
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 16419
+    ├─ rpm_timestamp_ms: 1269329
+    ├─ temperature_c: 72.0
+    ├─ temperature_raw: 72
+    ├─ timestamp_local: 2025-12-03T15:37:13.236507+01:00
+    ├─ timestamp_utc: 2025-12-03T14:37:13.236598+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_018
+    ├─ load_g: 13728.558
+    ├─ load_raw: 3970060
+    ├─ load_timestamp_ms: 1275025
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 16700
+    ├─ rpm_timestamp_ms: 1275059
+    ├─ temperature_c: 72.0
+    ├─ temperature_raw: 72
+    ├─ timestamp_local: 2025-12-03T15:37:18.965913+01:00
+    ├─ timestamp_utc: 2025-12-03T14:37:18.965990+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_019
+    ├─ load_g: 14339.743
+    ├─ load_raw: 4117951
+    ├─ load_timestamp_ms: 1281255
+    ├─ rpm: 2934.85
+    ├─ rpm_period_ms: 20.444
+    ├─ rpm_pulses: 17005
+    ├─ rpm_timestamp_ms: 1281289
+    ├─ temperature_c: 72.0
+    ├─ temperature_raw: 72
+    ├─ timestamp_local: 2025-12-03T15:37:25.208019+01:00
+    ├─ timestamp_utc: 2025-12-03T14:37:25.208039+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_020
+    ├─ load_g: 14215.305
+    ├─ load_raw: 4087840
+    ├─ load_timestamp_ms: 1287837
+    ├─ rpm: 2949.42
+    ├─ rpm_period_ms: 20.343
+    ├─ rpm_pulses: 17327
+    ├─ rpm_timestamp_ms: 1287882
+    ├─ temperature_c: 72.0
+    ├─ temperature_raw: 72
+    ├─ timestamp_local: 2025-12-03T15:37:31.779242+01:00
+    ├─ timestamp_utc: 2025-12-03T14:37:31.779319+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_021
+    ├─ load_g: 14720.727
+    ├─ load_raw: 4210139
+    ├─ load_timestamp_ms: 1294207
+    ├─ rpm: 2935.28
+    ├─ rpm_period_ms: 20.441
+    ├─ rpm_pulses: 17639
+    ├─ rpm_timestamp_ms: 1294241
+    ├─ temperature_c: 72.0
+    ├─ temperature_raw: 72
+    ├─ timestamp_local: 2025-12-03T15:37:38.145231+01:00
+    ├─ timestamp_utc: 2025-12-03T14:37:38.145307+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_022
+    ├─ load_g: 14367.688
+    ├─ load_raw: 4124713
+    ├─ load_timestamp_ms: 1299959
+    ├─ rpm: 2934.42
+    ├─ rpm_period_ms: 20.447
+    ├─ rpm_pulses: 17920
+    ├─ rpm_timestamp_ms: 1299993
+    ├─ temperature_c: 72.0
+    ├─ temperature_raw: 72
+    ├─ timestamp_local: 2025-12-03T15:37:43.899942+01:00
+    ├─ timestamp_utc: 2025-12-03T14:37:43.900019+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_023
+    ├─ load_g: 14044.724
+    ├─ load_raw: 4046564
+    ├─ load_timestamp_ms: 1306199
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 18226
+    ├─ rpm_timestamp_ms: 1306236
+    ├─ temperature_c: 72.0
+    ├─ temperature_raw: 72
+    ├─ timestamp_local: 2025-12-03T15:37:50.145925+01:00
+    ├─ timestamp_utc: 2025-12-03T14:37:50.145988+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_024
+    ├─ load_g: 14490.805
+    ├─ load_raw: 4154504
+    ├─ load_timestamp_ms: 1311971
+    ├─ rpm: 2934.42
+    ├─ rpm_period_ms: 20.447
+    ├─ rpm_pulses: 18508
+    ├─ rpm_timestamp_ms: 1312005
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:37:55.911179+01:00
+    ├─ timestamp_utc: 2025-12-03T14:37:55.911241+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_025
+    ├─ load_g: 14077.161
+    ├─ load_raw: 4054413
+    ├─ load_timestamp_ms: 1317724
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 18790
+    ├─ rpm_timestamp_ms: 1317758
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:38:01.663362+01:00
+    ├─ timestamp_utc: 2025-12-03T14:38:01.663435+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_026
+    ├─ load_g: 13976.126
+    ├─ load_raw: 4029965
+    ├─ load_timestamp_ms: 1323979
+    ├─ rpm: 2934.85
+    ├─ rpm_period_ms: 20.444
+    ├─ rpm_pulses: 19096
+    ├─ rpm_timestamp_ms: 1324013
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:38:07.918561+01:00
+    ├─ timestamp_utc: 2025-12-03T14:38:07.918644+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_027
+    ├─ load_g: 14388.571
+    ├─ load_raw: 4129766
+    ├─ load_timestamp_ms: 1330310
+    ├─ rpm: 2949.13
+    ├─ rpm_period_ms: 20.345
+    ├─ rpm_pulses: 19406
+    ├─ rpm_timestamp_ms: 1330344
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:38:14.253003+01:00
+    ├─ timestamp_utc: 2025-12-03T14:38:14.253069+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_028
+    ├─ load_g: 14161.931
+    ├─ load_raw: 4074925
+    ├─ load_timestamp_ms: 1336090
+    ├─ rpm: 2948.98
+    ├─ rpm_period_ms: 20.346
+    ├─ rpm_pulses: 19689
+    ├─ rpm_timestamp_ms: 1336124
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:38:20.030037+01:00
+    ├─ timestamp_utc: 2025-12-03T14:38:20.030122+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_029
+    ├─ load_g: 14496.537
+    ├─ load_raw: 4155891
+    ├─ load_timestamp_ms: 1341836
+    ├─ rpm: 2948.26
+    ├─ rpm_period_ms: 20.351
+    ├─ rpm_pulses: 19970
+    ├─ rpm_timestamp_ms: 1341871
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:38:25.779274+01:00
+    ├─ timestamp_utc: 2025-12-03T14:38:25.779461+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_030
+    ├─ load_g: 14517.585
+    ├─ load_raw: 4160984
+    ├─ load_timestamp_ms: 1348092
+    ├─ rpm: 2934.99
+    ├─ rpm_period_ms: 20.443
+    ├─ rpm_pulses: 20277
+    ├─ rpm_timestamp_ms: 1348127
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:38:32.033059+01:00
+    ├─ timestamp_utc: 2025-12-03T14:38:32.033164+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_031
+    ├─ load_g: 13966.104
+    ├─ load_raw: 4027540
+    ├─ load_timestamp_ms: 1353853
+    ├─ rpm: 2934.99
+    ├─ rpm_period_ms: 20.443
+    ├─ rpm_pulses: 20559
+    ├─ rpm_timestamp_ms: 1353887
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:38:37.791144+01:00
+    ├─ timestamp_utc: 2025-12-03T14:38:37.791236+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_032
+    ├─ load_g: 14411.301
+    ├─ load_raw: 4135266
+    ├─ load_timestamp_ms: 1359605
+    ├─ rpm: 2934.56
+    ├─ rpm_period_ms: 20.446
+    ├─ rpm_pulses: 20840
+    ├─ rpm_timestamp_ms: 1359640
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:38:43.549584+01:00
+    ├─ timestamp_utc: 2025-12-03T14:38:43.549662+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_033
+    ├─ load_g: 14259.599
+    ├─ load_raw: 4098558
+    ├─ load_timestamp_ms: 1365365
+    ├─ rpm: 2948.4
+    ├─ rpm_period_ms: 20.35
+    ├─ rpm_pulses: 21122
+    ├─ rpm_timestamp_ms: 1365398
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:38:49.304221+01:00
+    ├─ timestamp_utc: 2025-12-03T14:38:49.304295+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_034
+    ├─ load_g: 13420.058
+    ├─ load_raw: 3895411
+    ├─ load_timestamp_ms: 1371541
+    ├─ rpm: 2934.99
+    ├─ rpm_period_ms: 20.443
+    ├─ rpm_pulses: 21425
+    ├─ rpm_timestamp_ms: 1371576
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:38:55.481817+01:00
+    ├─ timestamp_utc: 2025-12-03T14:38:55.481893+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_035
+    ├─ load_g: 14305.174
+    ├─ load_raw: 4109586
+    ├─ load_timestamp_ms: 1377276
+    ├─ rpm: 2934.56
+    ├─ rpm_period_ms: 20.446
+    ├─ rpm_pulses: 21705
+    ├─ rpm_timestamp_ms: 1377309
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:39:01.212934+01:00
+    ├─ timestamp_utc: 2025-12-03T14:39:01.213012+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_036
+    ├─ load_g: 13701.77
+    ├─ load_raw: 3963578
+    ├─ load_timestamp_ms: 1383023
+    ├─ rpm: 2934.99
+    ├─ rpm_period_ms: 20.443
+    ├─ rpm_pulses: 21987
+    ├─ rpm_timestamp_ms: 1383057
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:39:06.962661+01:00
+    ├─ timestamp_utc: 2025-12-03T14:39:06.962737+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_037
+    ├─ load_g: 14163.439
+    ├─ load_raw: 4075290
+    ├─ load_timestamp_ms: 1388782
+    ├─ rpm: 2948.98
+    ├─ rpm_period_ms: 20.346
+    ├─ rpm_pulses: 22269
+    ├─ rpm_timestamp_ms: 1388817
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:39:12.716327+01:00
+    ├─ timestamp_utc: 2025-12-03T14:39:12.716369+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_038
+    ├─ load_g: 14430.596
+    ├─ load_raw: 4139935
+    ├─ load_timestamp_ms: 1394961
+    ├─ rpm: 2934.27
+    ├─ rpm_period_ms: 20.448
+    ├─ rpm_pulses: 22571
+    ├─ rpm_timestamp_ms: 1394995
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:39:18.900344+01:00
+    ├─ timestamp_utc: 2025-12-03T14:39:18.900427+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_039
+    ├─ load_g: 13840.739
+    ├─ load_raw: 3997205
+    ├─ load_timestamp_ms: 1400686
+    ├─ rpm: 2935.28
+    ├─ rpm_period_ms: 20.441
+    ├─ rpm_pulses: 22852
+    ├─ rpm_timestamp_ms: 1400721
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:39:24.629799+01:00
+    ├─ timestamp_utc: 2025-12-03T14:39:24.629861+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_040
+    ├─ load_g: 14438.06
+    ├─ load_raw: 4141741
+    ├─ load_timestamp_ms: 1406435
+    ├─ rpm: 2934.99
+    ├─ rpm_period_ms: 20.443
+    ├─ rpm_pulses: 23133
+    ├─ rpm_timestamp_ms: 1406469
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:39:30.381895+01:00
+    ├─ timestamp_utc: 2025-12-03T14:39:30.381936+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_041
+    ├─ load_g: 14200.01
+    ├─ load_raw: 4084139
+    ├─ load_timestamp_ms: 1412645
+    ├─ rpm: 2934.56
+    ├─ rpm_period_ms: 20.446
+    ├─ rpm_pulses: 23437
+    ├─ rpm_timestamp_ms: 1412680
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:39:36.583389+01:00
+    ├─ timestamp_utc: 2025-12-03T14:39:36.583465+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_042
+    ├─ load_g: 13516.891
+    ├─ load_raw: 3918842
+    ├─ load_timestamp_ms: 1418459
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 23722
+    ├─ rpm_timestamp_ms: 1418494
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:39:42.401758+01:00
+    ├─ timestamp_utc: 2025-12-03T14:39:42.401786+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_043
+    ├─ load_g: 14289.564
+    ├─ load_raw: 4105809
+    ├─ load_timestamp_ms: 1424207
+    ├─ rpm: 2934.99
+    ├─ rpm_period_ms: 20.443
+    ├─ rpm_pulses: 24004
+    ├─ rpm_timestamp_ms: 1424243
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:39:48.142092+01:00
+    ├─ timestamp_utc: 2025-12-03T14:39:48.142173+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_044
+    ├─ load_g: 14070.322
+    ├─ load_raw: 4052758
+    ├─ load_timestamp_ms: 1429967
+    ├─ rpm: 2948.98
+    ├─ rpm_period_ms: 20.346
+    ├─ rpm_pulses: 24286
+    ├─ rpm_timestamp_ms: 1430004
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:39:53.907527+01:00
+    ├─ timestamp_utc: 2025-12-03T14:39:53.907570+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_045
+    ├─ load_g: 13393.229
+    ├─ load_raw: 3888919
+    ├─ load_timestamp_ms: 1435713
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 24567
+    ├─ rpm_timestamp_ms: 1435748
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:39:59.649170+01:00
+    ├─ timestamp_utc: 2025-12-03T14:39:59.649251+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_046
+    ├─ load_g: 14038.72
+    ├─ load_raw: 4045111
+    ├─ load_timestamp_ms: 1441464
+    ├─ rpm: 2935.13
+    ├─ rpm_period_ms: 20.442
+    ├─ rpm_pulses: 24849
+    ├─ rpm_timestamp_ms: 1441498
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:40:05.410096+01:00
+    ├─ timestamp_utc: 2025-12-03T14:40:05.410157+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_047
+    ├─ load_g: 14265.178
+    ├─ load_raw: 4099908
+    ├─ load_timestamp_ms: 1447220
+    ├─ rpm: 2934.99
+    ├─ rpm_period_ms: 20.443
+    ├─ rpm_pulses: 25131
+    ├─ rpm_timestamp_ms: 1447256
+    ├─ temperature_c: 73.0
+    ├─ temperature_raw: 73
+    ├─ timestamp_local: 2025-12-03T15:40:11.161395+01:00
+    ├─ timestamp_utc: 2025-12-03T14:40:11.161435+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_048
+    ├─ load_g: 14195.013
+    ├─ load_raw: 4082930
+    ├─ load_timestamp_ms: 1452981
+    ├─ rpm: 2935.28
+    ├─ rpm_period_ms: 20.441
+    ├─ rpm_pulses: 25413
+    ├─ rpm_timestamp_ms: 1453016
+    ├─ temperature_c: 74.0
+    ├─ temperature_raw: 74
+    ├─ timestamp_local: 2025-12-03T15:40:16.918222+01:00
+    ├─ timestamp_utc: 2025-12-03T14:40:16.918288+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+  📁 sweep_049
+    ├─ load_g: 14131.787
+    ├─ load_raw: 4067631
+    ├─ load_timestamp_ms: 1458729
+    ├─ rpm: 2935.28
+    ├─ rpm_period_ms: 20.441
+    ├─ rpm_pulses: 25694
+    ├─ rpm_timestamp_ms: 1458764
+    ├─ temperature_c: 74.0
+    ├─ temperature_raw: 74
+    ├─ timestamp_local: 2025-12-03T15:40:22.671546+01:00
+    ├─ timestamp_utc: 2025-12-03T14:40:22.671579+00:00
+    📁 AE
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN2
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 1.570352e-05
+      ├─ y_origin: -0.174
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+    📁 Ultrasound
+      ├─ points_reported: 7680
+      ├─ sample_rate: 1536000.2469396878
+      ├─ source: CHAN1
+      ├─ x_increment: 6.51041562e-07
+      ├─ x_origin: -0.0025
+      ├─ x_reference: 0.0
+      ├─ y_increment: 0.0003140703
+      ├─ y_origin: 4.55
+      ├─ y_reference: 0.0
+      📊 time (7680,) float64
+      📊 voltage (7680,) float64
+
+📌 Root attributes:
+======================================================================

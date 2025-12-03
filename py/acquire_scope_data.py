@@ -69,6 +69,95 @@ def open_scope_with_autodetect(config):
     return mgr
 
 
+def capture_scope_settings(scope, config):
+    """
+    Capture all relevant oscilloscope settings at acquisition start
+
+    Returns dict with timebase, channel, trigger, and acquisition settings
+    """
+    settings = {}
+
+    # Timebase settings
+    try:
+        settings["timebase_mode"] = Q(scope, ":TIM:MODE?").strip()
+        settings["timebase_scale"] = float(Q(scope, ":TIM:SCAL?").strip())
+        settings["timebase_position"] = float(Q(scope, ":TIM:POS?").strip())
+        settings["timebase_range"] = float(Q(scope, ":TIM:RANG?").strip())
+        settings["timebase_reference"] = Q(scope, ":TIM:REF?").strip()
+    except Exception as e:
+        print(f"⚠️  Warning: Could not read timebase settings: {e}")
+
+    # Acquisition settings
+    try:
+        settings["acq_type"] = Q(scope, ":ACQ:TYPE?").strip()
+        settings["acq_mode"] = Q(scope, ":ACQ:MODE?").strip()
+        settings["acq_sample_rate"] = float(Q(scope, ":ACQ:SRAT?").strip())
+        settings["acq_points"] = int(float(Q(scope, ":ACQ:POIN?").strip()))
+
+        # Average count if in average mode
+        acq_type = settings.get("acq_type", "")
+        if "AVER" in acq_type.upper():
+            settings["acq_average_count"] = int(Q(scope, ":ACQ:COUN?").strip())
+    except Exception as e:
+        print(f"⚠️  Warning: Could not read acquisition settings: {e}")
+
+    # Trigger settings
+    try:
+        settings["trigger_mode"] = Q(scope, ":TRIG:MODE?").strip()
+        settings["trigger_source"] = Q(scope, ":TRIG:SOUR?").strip()
+        settings["trigger_sweep"] = Q(scope, ":TRIG:SWE?").strip()
+
+        # Edge trigger specific settings
+        if "EDGE" in settings["trigger_mode"].upper():
+            settings["trigger_level"] = float(Q(scope, ":TRIG:LEV?").strip())
+            settings["trigger_slope"] = Q(scope, ":TRIG:EDGE:SLOP?").strip()
+            settings["trigger_coupling"] = Q(scope, ":TRIG:COUP?").strip()
+    except Exception as e:
+        print(f"⚠️  Warning: Could not read trigger settings: {e}")
+
+    # Channel-specific settings for each enabled channel
+    channels = config.get("channels", [])
+    for ch_cfg in channels:
+        if not ch_cfg.get("enabled", True):
+            continue
+
+        source = ch_cfg["source"]
+        ch_name = ch_cfg["name"]
+        ch_settings = {}
+
+        try:
+            # Check if channel is displayed
+            ch_settings["display"] = Q(scope, f":{source}:DISP?").strip()
+
+            # Vertical settings
+            ch_settings["scale"] = float(Q(scope, f":{source}:SCAL?").strip())
+            ch_settings["offset"] = float(Q(scope, f":{source}:OFFS?").strip())
+            ch_settings["range"] = float(Q(scope, f":{source}:RANG?").strip())
+
+            # Probe settings
+            ch_settings["probe_attenuation"] = float(Q(scope, f":{source}:PROB?").strip())
+
+            # Input settings
+            ch_settings["coupling"] = Q(scope, f":{source}:COUP?").strip()
+            ch_settings["impedance"] = Q(scope, f":{source}:IMP?").strip()
+
+            # Bandwidth limit
+            ch_settings["bandwidth_limit"] = Q(scope, f":{source}:BWL?").strip()
+
+            # Inversion
+            ch_settings["invert"] = Q(scope, f":{source}:INV?").strip()
+
+            # Units
+            ch_settings["units"] = Q(scope, f":{source}:UNIT?").strip()
+
+            settings[f"channel_{ch_name}"] = ch_settings
+
+        except Exception as e:
+            print(f"⚠️  Warning: Could not read settings for {source}: {e}")
+
+    return settings
+
+
 def read_waveform(scope, channel_cfg, acq_cfg):
     src = channel_cfg["source"]
     points = int(acq_cfg["points"])
@@ -177,6 +266,31 @@ def acquire_loop(config):
             for key, value in config["test_parameters"].items():
                 if value and value != "" and value != 0:  # Skip empty values
                     test_grp.attrs[key] = value
+
+        # Capture and store scope settings
+        print("Capturing oscilloscope settings...")
+        scope_settings = capture_scope_settings(scope, config)
+        if scope_settings:
+            scope_grp = meta_grp.create_group("scope_settings")
+
+            # Store top-level scope settings as attributes
+            for key, value in scope_settings.items():
+                if not key.startswith("channel_"):
+                    try:
+                        scope_grp.attrs[key] = value
+                    except Exception as e:
+                        print(f"⚠️  Warning: Could not store {key}: {e}")
+
+            # Store channel-specific settings in subgroups
+            for key, value in scope_settings.items():
+                if key.startswith("channel_"):
+                    ch_name = key.replace("channel_", "")
+                    ch_grp = scope_grp.create_group(ch_name)
+                    for setting_key, setting_val in value.items():
+                        try:
+                            ch_grp.attrs[setting_key] = setting_val
+                        except Exception as e:
+                            print(f"⚠️  Warning: Could not store {ch_name}.{setting_key}: {e}")
 
         sweeps_grp = h5f.create_group("sweeps")
 

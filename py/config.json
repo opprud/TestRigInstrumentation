@@ -2,7 +2,7 @@
   "scope_ip": "a-mx2024a-10378.local",
   "acquisition": {
     "points": 125000,
-    "samples": 25,
+    "samples": 50,
     "interval_sec": 5,
     "waveform_format": "WORD",
     "points_mode": "RAW",
@@ -90,7 +90,7 @@
   },
 
   "store": {
-    "output_file": "data/data12.hdf5",
+    "output_file": "data/firstOil_T75.hdf5",
     "timestamped": true,
     "compress": "none",
     "chunk": false,
