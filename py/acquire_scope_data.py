@@ -11,6 +11,7 @@ import numpy as np
 import h5py
 
 from scope_utils import ScopeManager
+from telemetry import TelemetryReader, add_telemetry_to_sweep
 
 TZ = ZoneInfo("Europe/Copenhagen")
 DEBUG = False
@@ -134,6 +135,10 @@ def acquire_loop(config):
 
     scope = open_scope_with_autodetect(config)
 
+    # Initialize telemetry reader
+    telemetry_cfg = config.get("telemetry", {})
+    telemetry = TelemetryReader(telemetry_cfg)
+
     ts_local, ts_utc = now_pair()
     out_path = store_cfg["output_file"]
 
@@ -147,6 +152,11 @@ def acquire_loop(config):
         meta_grp.attrs["created_utc"] = ts_utc
         meta_grp.attrs["scope_idn"] = Q(scope, "*IDN?").strip()
 
+        # Add telemetry metadata
+        for key, value in telemetry.get_metadata().items():
+            if value is not None:
+                meta_grp.attrs[key] = value
+
         sweeps_grp = h5f.create_group("sweeps")
 
         samples = int(acq_cfg["samples"])
@@ -157,6 +167,10 @@ def acquire_loop(config):
             sweep = sweeps_grp.create_group(f"sweep_{i:03d}")
             sweep.attrs["timestamp_local"] = ts_local
             sweep.attrs["timestamp_utc"] = ts_utc
+
+            # Read telemetry data for this sweep
+            telemetry_data = telemetry.read_all()
+            add_telemetry_to_sweep(sweep, telemetry_data)
 
             for ch in channels:
                 alias = ch["name"]
@@ -170,7 +184,19 @@ def acquire_loop(config):
                 for k, val in meta.items():
                     grp.attrs[k] = val
 
-            print(f"[{ts_local}] Sweep {i+1}/{samples}")
+            # Print sweep info with telemetry if available
+            info_str = f"[{ts_local}] Sweep {i+1}/{samples}"
+            if telemetry_data:
+                telem_info = []
+                if "load_g" in telemetry_data:
+                    telem_info.append(f"Load: {telemetry_data['load_g']:.1f}g")
+                if "rpm" in telemetry_data:
+                    telem_info.append(f"RPM: {telemetry_data['rpm']:.0f}")
+                if "temperature_c" in telemetry_data:
+                    telem_info.append(f"Temp: {telemetry_data['temperature_c']:.1f}°C")
+                if telem_info:
+                    info_str += f" ({', '.join(telem_info)})"
+            print(info_str)
 
             if i < samples - 1:
                 time.sleep(interval)
