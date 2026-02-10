@@ -8,6 +8,8 @@ import { FileText, RefreshCw, FolderOpen } from "lucide-react";
 const CONFIG_OPTIONS = [
   { path: '/config/test-profile.json', name: 'Standard Test' },
   { path: '/config/high-stress-profile.json', name: 'High Stress' },
+  { path: '/config/endurance-profile.json', name: 'Endurance' },
+  { path: '/config/lub1_validation.json', name: 'LUB1 Validation' },
   { path: 'custom', name: 'Custom Path...' },
 ];
 

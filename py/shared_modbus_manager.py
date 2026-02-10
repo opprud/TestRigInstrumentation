@@ -17,6 +17,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from pymodbus.client import ModbusSerialClient
 from hardware_utils import resolve_port
+import fasteners
+import os
 
 
 @dataclass
@@ -54,8 +56,12 @@ class SharedModbusManager:
                 print(f"[DEBUG] WARNING: Could not resolve port '{config.port}'")
             self._resolved_port = config.port  # Fall back to original value
 
+        # Interprocess lock must be based on resolved port
+        lock_name = str(self._resolved_port).replace("/", "_")
+        self._ip_lock = fasteners.InterProcessLock(f"/tmp/modbus_{lock_name}.lock")
+
         self.client: Optional[ModbusSerialClient] = None
-        self.lock = threading.RLock()  # Reentrant lock for nested calls
+        self.lock = threading.RLock()
         self._is_connected = False
         self._unit_kwarg: Optional[str] = None
         self._connection_count = 0
@@ -173,22 +179,30 @@ class SharedModbusManager:
                 # Use client for Modbus operations
                 result = client.read_holding_registers(...)
         """
-        with self.lock:
-            self._connection_count += 1
-            try:
-                if not self._ensure_connected():
-                    raise RuntimeError(f"Cannot connect to Modbus on {self._resolved_port}")
+        # Først interprocess lock (så andre processer ikke kan overlappe)
+        gotten = self._ip_lock.acquire(timeout=self.config.connection_timeout)
+        if not gotten:
+            raise RuntimeError("Could not acquire interprocess Modbus lock")
 
-                if self.config.debug:
-                    print(f"[DEBUG] Connection acquired (count: {self._connection_count})")
+        try:
+            with self.lock:
+                self._connection_count += 1
+                try:
+                    if not self._ensure_connected():
+                        raise RuntimeError(f"Cannot connect to Modbus on {self._resolved_port}")
 
-                yield self.client
+                    if self.config.debug:
+                        print(f"[DEBUG] Connection acquired (count: {self._connection_count})")
 
-            finally:
-                self._connection_count -= 1
-                if self.config.debug:
-                    print(f"[DEBUG] Connection released (count: {self._connection_count})")
+                    yield self.client
 
+                finally:
+                    self._connection_count -= 1
+                    if self.config.debug:
+                        print(f"[DEBUG] Connection released (count: {self._connection_count})")
+        finally:
+            self._ip_lock.release()  
+            
     def read_holding_register(self, slave_id: int, address: int) -> Optional[int]:
         """
         Read a single holding register from the specified slave.

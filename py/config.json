@@ -1,9 +1,9 @@
 {
   "scope_ip": "a-mx2024a-10378.local",
   "acquisition": {
-    "points": 250000,
-    "samples": 3,
-    "interval_sec": 3,
+    "points": 125000,
+    "samples": 250,
+    "interval_sec": 5,
     "waveform_format": "WORD",
     "points_mode": "RAW",    
     "trigger_sweep": "AUTO",  
@@ -27,7 +27,7 @@
       "notes": "Kistler acoustic emission probe"
     },
     {
-      "name": "Accel",
+      "name": "UL",
       "source": "CHAN2",
       "enabled": true,
       "notes": "Piezo accelerometer"
@@ -35,13 +35,13 @@
     {
       "name": "UL",
       "source": "CHAN3",
-      "enabled": true,
+      "enabled": false,
       "notes": "Ultrasound"
     },
     {
       "name": "Temp",
       "source": "CHAN4",
-      "enabled": true,
+      "enabled": false,
       "notes": "Temperature"
     }
   ],
@@ -54,16 +54,16 @@
   },
 
   "test_parameters": {
-    "test_name": "Bearing endurance test",
-    "target_rpm": 1500,
+    "test_name": "Oil & sensor test",
+    "target_rpm": 500,
     "target_temperature_c": 60,
     "expected_load_g": 200,
     "duration_minutes": 60,
-    "notes": "Standard test configuration"
+    "notes": "Standard t"
   },
 
   "store": {
-    "output_file": "data/data3.h5",
+    "output_file": "data/firstoil_2.h5",
     "timestamped": true,
     "compress": "none",
     "chunk": false,

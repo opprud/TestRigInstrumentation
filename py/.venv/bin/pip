@@ -1,4 +1,4 @@
-#!/Users/au263437/workspace/hih/projekter/ForeverBearing/workspace/TestRigInstrumentation/py/.venv/bin/python3
+#!/home/aau/projects/ForeverBearing/sw/TestRigInstrumentation/py/.venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

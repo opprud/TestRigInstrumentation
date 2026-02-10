@@ -1,1 +1,1 @@
-{"host": "192.168.0.100", "port": 5025}
+{"host": "ASRL/dev/ttyUSB0::INSTR", "port": "VISA"}
