@@ -22,6 +22,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
+import time
+import statistics
+from typing import Optional, Tuple
 
 
 @dataclass
@@ -106,19 +109,25 @@ class TestRunner:
         discover_serial_ports: Callable[[], Dict[str, Any]],
         E5CCTool,
         RS510VFDController,
+        run_id: Optional[str] = None,   # <-- NY
     ):
         self._rs485_lock = rs485_lock
         self._data_dir = data_dir
         self._discover_serial_ports = discover_serial_ports
         self._E5CCTool = E5CCTool
         self._RS510VFDController = RS510VFDController
-
+        self._run_id = run_id           # <-- NY
+        
     def _make_logfile(self, profile_name: Optional[str]) -> Path:
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # If run_id is supplied (e.g. from acquire_scope_data.py), make filename deterministic
+        # so JSONL can be paired 1:1 with HDF5.
+        ts = self._run_id or datetime.now().strftime("%Y%m%d_%H%M%S")
         safe_name = "_".join((profile_name or "run").split())
         self._data_dir.mkdir(parents=True, exist_ok=True)
-        return self._data_dir / f"{ts}_{safe_name}.jsonl"
 
+        # Use a stable prefix so it's easy to recognize in a run folder
+        return self._data_dir / f"telemetry_{ts}_{safe_name}.jsonl"
+        
     async def run(
         self,
         cfg: Dict[str, Any],
@@ -272,22 +281,85 @@ class TestRunner:
             except Exception:
                 rp_ser = None
 
+
+        MAX_RPM = 50000.0   # kun til sample-filtering (behold høj)
+        MIN_RPM = 0.0
+        N_SAMPLES = 5
+
+        # ---- Nye "real world" guardrails ----
+        REALISTIC_MAX_RPM = 6000.0      # sæt efter dit rig (fx 6000/10000)
+        REALISTIC_MIN_RPM = 0.0
+        MAX_RPM_SLEW_PER_SEC = 1500.0   # max rpm-ændring pr sekund (justér)
+
+        _last_good_rpm: Optional[float] = None
+        _last_good_t: Optional[float] = None
+
         def _read_rpm() -> Tuple[Optional[float], Optional[str]]:
+            nonlocal _last_good_rpm, _last_good_t  # <-- vigtigt (ikke global)
+
             if rp_ser is None:
-                return None, "rp2040_not_available"
+                return _last_good_rpm, "rp2040_not_available"
+
+            try:
+                vals = []
+                for _ in range(N_SAMPLES):
+                    try:
+                        rp_ser.reset_input_buffer()
+                    except Exception:
+                        pass
+
+                    rp_ser.write(b"SPEED?\r\n")
+                    time.sleep(0.07)
+
+                    line = rp_ser.readline().decode("ascii", errors="ignore").strip()
+                    v = _parse_first_float(line)
+                    if v is None:
+                        continue
+
+                    v = float(v)
+                    if MIN_RPM <= v <= MAX_RPM:
+                        vals.append(v)
+
+                if not vals:
+                    return _last_good_rpm, "bad_speed_response:no_valid_samples"
+
+                rpm = float(statistics.median(vals))
+                now = time.time()
+
+                # (A) Sanity range (realistisk)
+                if not (REALISTIC_MIN_RPM <= rpm <= REALISTIC_MAX_RPM):
+                    return _last_good_rpm, f"rpm_out_of_range:{rpm:.1f}"
+
+                # (B) Slew-rate limit (anti-spike)
+                if _last_good_rpm is not None and _last_good_t is not None:
+                    dt = max(1e-3, now - _last_good_t)
+                    max_change = MAX_RPM_SLEW_PER_SEC * dt
+                    if abs(rpm - _last_good_rpm) > max_change:
+                        return _last_good_rpm, f"rpm_slew_limited:{rpm:.1f}"
+
+                _last_good_rpm = rpm
+                _last_good_t = now
+                return rpm, None
+
+            except Exception as e:
+                return _last_good_rpm, str(e)
+
+        def _read_load() -> Optional[float]:
+            """Read load cell from RP2040 via LOAD? command."""
+            if rp_ser is None:
+                return None
             try:
                 rp_ser.reset_input_buffer()
-                rp_ser.write(b"SPEED?\r\n")
-                # short wait for response
-                import time
-                time.sleep(0.05)
+                rp_ser.write(b"LOAD?\r\n")
+                time.sleep(0.15)
                 line = rp_ser.readline().decode("ascii", errors="ignore").strip()
-                val = _parse_first_float(line)
-                if val is None:
-                    return None, f"bad_speed_response:{line}"
-                return float(val), None
-            except Exception as e:
-                return None, str(e)
+                import re as _re
+                m = _re.search(r"mass_g=([\d.]+)", line)
+                if m:
+                    return float(m.group(1))
+            except Exception:
+                pass
+            return None
 
         # Pre-set initial temperature (if available) to first scheduled or fallback
         initial_temp = _value_at(temp_schedule, 0.0)
@@ -338,6 +410,9 @@ class TestRunner:
 
             # Read tachometer RPM
             rpm_meas, rpm_err = _read_rpm()
+
+            # Read load cell
+            mass_g = _read_load()
             now_t = float(elapsed)
             if rpm_meas is not None:
                 last_good_rpm_t = now_t
@@ -449,6 +524,7 @@ class TestRunner:
                 "vfd_cmd_hz": last_hz_cmd,
                 "pi": {"err": err, "p": p_term, "i": i_term},
                 "temp_target": temp_target,
+                "mass_g": mass_g,
             }
 
             if rs485_port:
@@ -494,11 +570,19 @@ class TestRunner:
 
             update_cb(
                 {
-                    "elapsed_sec": float(elapsed),
-                    "current_step": sample_idx,
-                    "total_steps": total_steps,
-                    "log_path": str(log_path),
-                    "stop_reason": stop_reason,
+                    "elapsed_sec":    float(elapsed),
+                    "current_step":   sample_idx,
+                    "total_steps":    total_steps,
+                    "log_path":       str(log_path),
+                    "stop_reason":    stop_reason,
+                    "rpm_target":     rec.get("rpm_target"),
+                    "rpm_meas":       rec.get("rpm_meas"),
+                    "temp_target":    rec.get("temp_target"),
+                    "omron_pv_c":     rec.get("omron_pv_c"),
+                    "omron_sv_c":     rec.get("omron_sv_c"),
+                    "vfd_cmd_hz":     rec.get("vfd_cmd_hz"),
+                    "vfd_is_running": rec.get("vfd_is_running"),
+                    "mass_g":         rec.get("mass_g"),
                 }
             )
 

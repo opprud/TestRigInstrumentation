@@ -39,7 +39,7 @@ export function HDF5Status({ fileInfo, className }) {
 
   const storageProgress = getStorageProgress();
   const sampleProgress = getSampleProgress();
-  const isNearFull = storageProgress > 80 || sampleProgress > 80;
+  const isNearFull = storageProgress > 80;
 
   return (
     <Card className={className}>
@@ -84,26 +84,17 @@ export function HDF5Status({ fileInfo, className }) {
           />
         </div>
 
-        {/* Sample Count */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span>Samples</span>
-            <span className={isNearFull && sampleProgress > 80 ? "text-orange-600" : ""}>
-              {fileInfo.totalSamples?.toLocaleString()} / {fileInfo.maxSamples?.toLocaleString()}
-            </span>
-          </div>
-          <Progress 
-            value={sampleProgress} 
-            className="h-2"
-            indicatorClassName={sampleProgress > 90 ? "bg-red-500" : sampleProgress > 80 ? "bg-orange-500" : "bg-green-500"}
-          />
-        </div>
+
 
         {/* Sweep Info */}
-        <div className="grid grid-cols-3 gap-2 text-xs">
+        <div className="grid grid-cols-4 gap-2 text-xs">
           <div>
             <div className="text-muted-foreground">Sweeps</div>
             <div className="font-medium">{fileInfo.totalSweeps || 0}</div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Samples</div>
+            <div className="font-medium">{fileInfo.totalSamples?.toLocaleString() || 0}</div>
           </div>
           <div>
             <div className="text-muted-foreground">Channels</div>

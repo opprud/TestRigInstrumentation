@@ -13,10 +13,20 @@ Run with: uvicorn api_server:app --reload --host 0.0.0.0 --port 8000
 
 import json
 import asyncio
+import subprocess
+import sys
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, List, Any
 import threading
+
+# --- Optional: scope acquisition loop (HDF5) ---
+# We start this when frontend presses Start, mirroring acquire_scope_data.py main()
+try:
+    import acquire_scope_data as _acquire_scope_data
+except Exception:
+    _acquire_scope_data = None
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -110,105 +120,49 @@ from collections import deque
 _runner_task = None
 _runner_stop = None
 
-
-
-# --- Run logging (JSONL) ---
-_log_task: Optional[asyncio.Task] = None
-_log_path: Optional[Path] = None
-
-def _log_runs_dir() -> Path:
-    """Directory for per-run JSONL logs (py/data/runs)."""
-    d = Path(__file__).parent / "data" / "runs"
-    d.mkdir(parents=True, exist_ok=True)
-    return d
-
-async def _log_loop(sample_period_sec: float):
-    """Background logger that appends JSONL rows to the current run log.
-
-    It **does not** open RS485 itself; it just snapshots the last-known values
-    already produced by your existing polling endpoints (Omron/VFD/RP2040/etc.).
-    This keeps behavior unchanged and avoids reintroducing Errno 11.
-    """
-    global _log_path
-
-    if not _log_path:
-        return
-
-    # Write an initial header row (metadata)
-    try:
-        meta = {
-            "type": "run_start",
-            "ts": datetime.now().isoformat(),
-            "profile": _run_state.get("profile_name"),
-            "duration_sec": _run_state.get("duration_sec"),
-            "total_steps": _run_state.get("total_steps"),
-        }
-        _log_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(_log_path, "a", encoding="utf-8") as f:
-            f.write(json.dumps(meta, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
-
-    while True:
-        # Stop conditions
-        if _run_state.get("state") != "running":
-            break
-        if _runner_stop is not None:
-            try:
-                if hasattr(_runner_stop, "is_set") and _runner_stop.is_set():
-                    break
-            except Exception:
-                pass
-
-        # Update elapsed from started_at (same logic as /api/run/status)
-        try:
-            if _run_state.get("started_at"):
-                start_dt = datetime.fromisoformat(_run_state["started_at"])
-                _run_state["elapsed_sec"] = max(0.0, (datetime.now() - start_dt).total_seconds())
-        except Exception:
-            pass
-
-        row = {
-            "type": "sample",
-            "ts": datetime.now().isoformat(),
-            "run": {
-                "elapsed_sec": _run_state.get("elapsed_sec"),
-                "current_step": _run_state.get("current_step"),
-                "total_steps": _run_state.get("total_steps"),
-                "duration_sec": _run_state.get("duration_sec"),
-                "state": _run_state.get("state"),
-            },
-            "omron": dict(_omron_last_good) if isinstance(_omron_last_good, dict) else {},
-            "vfd": dict(_vfd_last_good) if isinstance(_vfd_last_good, dict) else {},
-        }
-
-        try:
-            with open(_log_path, "a", encoding="utf-8") as f:
-                f.write(json.dumps(row, ensure_ascii=False) + "\n")
-        except Exception:
-            # If we cannot write, don't kill the run; just stop logging
-            break
-
-        await asyncio.sleep(max(0.05, float(sample_period_sec)))
-
-    # Final row
-    try:
-        tail = {
-            "type": "run_end",
-            "ts": datetime.now().isoformat(),
-            "state": _run_state.get("state"),
-            "error": _run_state.get("error"),
-        }
-        if _log_path:
-            with open(_log_path, "a", encoding="utf-8") as f:
-                f.write(json.dumps(tail, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
 # live “tick” data til frontend
 _live_ticks = deque(maxlen=5000)  # gem de seneste N samples
 
 _run_task: asyncio.Task | None = None
 _run_stop_event = asyncio.Event()
+
+# --- Scope acquisition task state (runs acquire_scope_data.acquire_loop in a thread) ---
+_scope_acq_task: Optional[asyncio.Task] = None
+_scope_acq_last_error: Optional[str] = None
+_scope_acq_running: bool = False
+
+async def _scope_acq_runner(cfg: Dict[str, Any]):
+    """Run acquire_scope_data.acquire_loop(cfg) in a background thread.
+
+    This mirrors acquire_scope_data.py main() behavior (but cfg is already provided).
+    We hold _scope_lock while acquiring to avoid concurrent SCPI commands.
+    """
+    global _scope_acq_last_error, _scope_acq_running
+
+    if _acquire_scope_data is None:
+        _scope_acq_last_error = "acquire_scope_data.py not importable"
+        return
+
+    try:
+        _scope_acq_last_error = None
+        _scope_acq_running = True
+        # Make sure DEBUG exists (keeps parity with acquire_scope_data.py)
+        try:
+            _acquire_scope_data.DEBUG = bool((cfg.get("acquisition", {}) or {}).get("debug", False))
+        except Exception:
+            pass
+
+        def _do():
+            with _scope_lock:
+                _acquire_scope_data.acquire_loop(cfg)
+
+        await asyncio.to_thread(_do)
+
+    except Exception as e:
+        _scope_acq_last_error = str(e)
+    finally:
+        _scope_acq_running = False
+
 
 def _runs_dir() -> Path:
     d = Path(__file__).parent / "runs"
@@ -226,16 +180,37 @@ def _safe_float(x):
 
 # --- Simple Run State (minimal) ---
 _run_state = {
-    "state": "idle",          # idle | running | stopped
+    "state": "idle",          # idle | running | stopped | error
     "started_at": None,       # ISO timestamp string
     "elapsed_sec": 0.0,
     "duration_sec": 0,
     "current_step": 0,
     "total_steps": 0,
+    "sweep_current": 0,
+    "sweep_total": 0,
     "profile_name": None,
+    "run_folder": None,
+    "pid": None,
+    "stdout_tail": [],        # last N lines
     "error": None,
+    # Live telemetry — updated by reader thread from [runner] JSON lines
+    "live_telemetry": {
+        "rpm_target": None,
+        "rpm_meas": None,
+        "temp_target": None,
+        "omron_pv_c": None,
+        "omron_sv_c": None,
+        "vfd_cmd_hz": None,
+        "vfd_is_running": None,
+        "mass_g": None,
+        "ts": None,
+    },
 }
 
+# Subprocess-driven run (acquire_scope_data.py)
+_run_proc = None
+_run_proc_thread = None
+_run_proc_stop = None
 # --- Last-known caches to avoid RS485 re-open storms (Errno 11) ---
 _omron_last_good: Dict[str, Any] = {}
 _vfd_last_good: Dict[str, Any] = {}
@@ -380,6 +355,13 @@ async def send_rp2040_command(command: RP2040Command):
 
 @app.get("/api/rp2040/status")
 async def get_rp2040_status():
+    # PATCH: avoid opening serial when runner owns hardware
+    if _run_state.get("state") in ("running", "stopping"):
+        return {
+            "status": "runner_active",
+            "timestamp": datetime.now().isoformat()
+        }
+
     """Get RP2040 status + sensor readings (LOAD?/SPEED?) without calling discover_hardware()."""
     try:
         ports = discover_serial_ports()
@@ -492,24 +474,186 @@ async def list_system_ports():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list ports: {str(e)}")
 
+@app.get("/api/hdf5/status")
+async def get_hdf5_status():
+    """
+    Return real HDF5 file status for the current/latest run.
+    Reads file size, sweep count and channel count directly from disk.
+    """
+    import os
+
+    run_folder = _run_state.get("run_folder")
+    h5_path = None
+
+    # Try run_folder first (active or last run)
+    if run_folder:
+        try:
+            candidates = list(Path(run_folder).glob("scope_*.h5"))
+            if candidates:
+                h5_path = str(sorted(candidates)[-1])
+        except Exception:
+            pass
+
+    # Fallback: find latest .h5 in py/data/
+    if not h5_path:
+        try:
+            data_dir = Path(__file__).parent / "data"
+            candidates = list(data_dir.rglob("scope_*.h5")) + list(data_dir.glob("*.h5"))
+            if candidates:
+                h5_path = str(max(candidates, key=os.path.getmtime))
+        except Exception:
+            pass
+
+    if not h5_path or not os.path.exists(h5_path):
+        return {
+            "filename": None,
+            "created": None,
+            "isActive": _run_state.get("state") == "running",
+            "currentSizeBytes": 0,
+            "totalSweeps": 0,
+            "activeChannels": 0,
+            "recordingDuration": 0,
+            "error": "No HDF5 file found"
+        }
+
+    try:
+        size_bytes = os.path.getsize(h5_path)
+        mtime = os.path.getmtime(h5_path)
+        created = datetime.fromtimestamp(mtime).strftime("%d/%m/%Y, %H:%M:%S")
+        filename = os.path.basename(h5_path)
+
+        total_sweeps = _run_state.get("sweep_current", 0)
+
+        try:
+            cfg = json.load(open(Path(__file__).parent / "config.json"))
+            active_channels = len([c for c in cfg.get("channels", []) if c.get("enabled", True)])
+        except Exception:
+            active_channels = 0
+
+        recording_duration = int(_run_state.get("elapsed_sec", 0))
+
+        # Disk space
+        import shutil
+        disk = shutil.disk_usage(os.path.dirname(h5_path))
+
+        total_samples = total_sweeps * active_channels
+
+        return {
+            "filename": filename,
+            "created": created,
+            "isActive": _run_state.get("state") == "running",
+            "currentSizeBytes": size_bytes,
+            "diskFreeBytes": disk.free,
+            "diskTotalBytes": disk.total,
+            "totalSweeps": total_sweeps,
+            "totalSamples": total_samples,
+            "activeChannels": active_channels,
+            "recordingDuration": recording_duration,
+        }
+
+    except Exception as e:
+        return {
+            "filename": os.path.basename(h5_path) if h5_path else None,
+            "isActive": _run_state.get("state") == "running",
+            "currentSizeBytes": 0,
+            "totalSweeps": 0,
+            "activeChannels": 0,
+            "recordingDuration": 0,
+            "error": str(e)
+        }
+
+@app.get("/api/telemetry")
+async def get_telemetry():
+    """
+    Single telemetry endpoint for the UI.
+    - During a run: returns live_telemetry from _run_state (updated by reader thread from [runner] lines)
+    - When idle: reads directly from RP2040 and Omron hardware
+    """
+    # --- During a run: use live_telemetry from runner ---
+    if _run_state.get("state") in ("running", "stopping"):
+        t = _run_state.get("live_telemetry") or {}
+        return {
+            "source": "runner",
+            "state": _run_state.get("state"),
+            "rpm":    t.get("rpm_meas"),
+            "rpm_target": t.get("rpm_target"),
+            "tempC":  t.get("omron_pv_c"),
+            "temp_target": t.get("temp_target"),
+            "vfd_hz": t.get("vfd_cmd_hz"),
+            "vfd_running": t.get("vfd_is_running"),
+            "massG":  t.get("mass_g"),
+            "ts":     t.get("ts") or _now_iso(),
+        }
+
+    # --- Idle: read hardware directly ---
+    rpm   = None
+    massG = None
+    tempC = None
+
+    # RP2040
+    try:
+        ports = discover_serial_ports()
+        rp_ports = ports.get("rp2040", [])
+        if rp_ports:
+            port = rp_ports[0].get("device")
+            if port:
+                import serial as _serial
+                with _serial.Serial(port, 115200, timeout=2.0) as ser:
+                    import time as _time
+                    ser.write(b"SPEED?\r\n")
+                    _time.sleep(0.15)
+                    line = ser.readline().decode("ascii", errors="ignore").strip()
+                    import re as _re
+                    m = _re.search(r"rpm=([\d.]+)", line)
+                    if m:
+                        rpm = float(m.group(1))
+
+                    ser.write(b"LOAD?\r\n")
+                    _time.sleep(0.15)
+                    line = ser.readline().decode("ascii", errors="ignore").strip()
+                    m = _re.search(r"mass_g=([\d.]+)", line)
+                    if m:
+                        massG = float(m.group(1))
+    except Exception:
+        pass
+
+    # Omron temperature
+    try:
+        async with _rs485_lock:
+            ports = discover_serial_ports()
+            ftdi_ports = ports.get("ftdi", [])
+            if ftdi_ports:
+                port = ftdi_ports[0]["device"]
+                tool = E5CCTool(
+                    port=port, baudrate=9600, parity="N", bytesize=8, stopbits=1,
+                    timeout=2.0, unit_id=2, pv_address=0x2000, sv_address=0x2103,
+                    scale=1.0, debug=False
+                )
+                try:
+                    tempC = tool.read_pv_c()
+                finally:
+                    tool.close()
+    except Exception:
+        pass
+
+    return {
+        "source": "hardware",
+        "state": _run_state.get("state", "idle"),
+        "rpm":   rpm,
+        "tempC": tempC,
+        "massG": massG,
+        "ts":    _now_iso(),
+    }
+
 @app.get("/api/run/status")
 async def run_status():
-    """Return current run status for frontend (Step x/y + elapsed)."""
-    if _run_state["state"] == "running" and _run_state["started_at"]:
+    """Return current run status for frontend."""
+    if _run_state.get("state") == "running" and _run_state.get("started_at"):
         try:
             start_dt = datetime.fromisoformat(_run_state["started_at"])
             _run_state["elapsed_sec"] = max(0.0, (datetime.now() - start_dt).total_seconds())
         except Exception:
             pass
-
-        # Minimal step counter based on elapsed time
-        if _run_state["duration_sec"] > 0 and _run_state["total_steps"] > 0:
-            progress = min(1.0, _run_state["elapsed_sec"] / float(_run_state["duration_sec"]))
-            _run_state["current_step"] = max(
-                1,
-                min(_run_state["total_steps"], int(progress * _run_state["total_steps"]) + 1)
-            )
-
     return _run_state
 
 async def _run_sequence(cfg: Dict):
@@ -745,132 +889,302 @@ from shared_modbus_manager import reset_shared_modbus_manager   # <-- tilføj/im
 
 @app.post("/api/run/start")
 async def run_start(payload: Dict):
-    global _runner_task, _runner_stop, _log_task, _log_path
+    """
+    Start a full automated test by launching acquire_scope_data.py as a subprocess.
+
+    Expected payload from UI (existing):
+      - configPath: "/config/<profile>.json" (selected profile)
+      - (optional) config: object (ignored if configPath provided)
+      - (optional) debug: bool
+    """
+    global _run_proc, _run_proc_thread, _run_proc_stop
 
     try:
-        cfg = payload.get("config", payload)
+        # Resolve profile path (same folder as /api/config/profiles)
+        config_dir = Path(__file__).parent.parent / "react" / "public" / "config"
+
+        profile_path = payload.get("profilePath") or payload.get("configPath")
+        cfg_obj = payload.get("config")
+
+        resolved_profile = None
+        profile_name = None
+        duration_sec = 0
+
+        if isinstance(profile_path, str) and profile_path:
+            # UI sends "/config/<file>.json"
+            fname = profile_path.split("/")[-1]
+            candidate = config_dir / fname
+            if not candidate.exists():
+                raise HTTPException(status_code=404, detail=f"Profile not found: {fname}")
+            resolved_profile = candidate
+            with open(candidate, "r") as f:
+                cfg_obj = json.load(f)
+        elif isinstance(cfg_obj, dict):
+            # Fallback: accept inline config, write it to a temp profile file in config_dir
+            config_dir.mkdir(parents=True, exist_ok=True)
+            fname = f"inline_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            resolved_profile = config_dir / fname
+            with open(resolved_profile, "w") as f:
+                json.dump(cfg_obj, f, indent=2)
+        else:
+            raise HTTPException(status_code=400, detail="Missing configPath/profilePath or config object")
+
+        profile_name = (cfg_obj.get("name")
+                        or (cfg_obj.get("test_parameters", {}) or {}).get("test_name")
+                        or resolved_profile.stem)
 
         duration_min = (
-            cfg.get("duration_minutes")
-            or (cfg.get("test_parameters", {}) or {}).get("duration_minutes")
+            cfg_obj.get("duration_minutes")
+            or (cfg_obj.get("test_parameters", {}) or {}).get("duration_minutes")
             or 0
         )
         duration_sec = int(float(duration_min) * 60)
 
-        acq = cfg.get("acquisition", {}) or {}
-        interval_sec = float(acq.get("interval_sec") or 1.0)
-        samples_per_step = int(acq.get("samples_per_step") or 1)
-        if interval_sec <= 0:
-            interval_sec = 1.0
+        # Stop any existing run
+        await run_stop()
 
-        total_intervals = int((duration_sec + interval_sec - 1) // interval_sec) if duration_sec > 0 else 0
-        total_steps = int(total_intervals * max(1, samples_per_step)) if total_intervals > 0 else 0
-
-        # Stop evt. gammel task
-        if _runner_stop:
-            _runner_stop.set()
-        if _runner_task and not _runner_task.done():
-            try:
-                await asyncio.wait_for(_runner_task, timeout=2.0)
-            except Exception:
-                _runner_task.cancel()
-                try:
-                    await _runner_task   # <-- RET: var _run_task før
-                except Exception:
-                    pass
-
-        # Stop evt. gammel logger-task
-        if _log_task and not _log_task.done():
-            _log_task.cancel()
-            try:
-                await _log_task
-            except Exception:
-                pass
-        _log_task = None
-        _log_path = None
-
-        # <-- INDSÆT HER: tving RS485/Modbus porten lukket mellem runs
+        # Reset RS485/modbus manager between runs (if available)
         try:
             reset_shared_modbus_manager()
         except Exception:
             pass
 
-        # NULSTIL stop-event
-        _runner_stop = threading.Event()
-
+        # Prepare state
         _run_state.update({
             "state": "running",
             "started_at": datetime.now().isoformat(),
             "elapsed_sec": 0.0,
             "duration_sec": duration_sec,
-            "current_step": 1 if total_steps > 0 else 0,
-            "total_steps": total_steps,
-            "profile_name": cfg.get("name") or (cfg.get("test_parameters", {}) or {}).get("test_name"),
+            "current_step": 0,
+            "total_steps": 0,
+            "sweep_current": 0,
+            "sweep_total": 0,
+            "profile_name": profile_name,
+            "run_folder": None,
+            "pid": None,
+            "stdout_tail": [],
             "error": None,
         })
 
-        # Create JSONL run log + start logger task
-        profile_name = _run_state.get("profile_name") or "profile"
-        safe_name = "".join([c if c.isalnum() or c in ("-", "_") else "_" for c in str(profile_name)])
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        _log_path = _log_runs_dir() / f"{ts}_{safe_name}.jsonl"
-        _run_state["log_path"] = str(_log_path)
-        sample_period_sec = float(interval_sec) / float(max(1, samples_per_step))
-        _log_task = asyncio.create_task(_log_loop(sample_period_sec))
+        # Build command
+        py_dir = Path(__file__).parent
+        script = py_dir / "acquire_scope_data.py"
+        config_json = py_dir / "config.json"
 
-        # Start runner-tasken
-        _runner_task = asyncio.create_task(run_ticks(interval_sec))
+        if not script.exists():
+            raise HTTPException(status_code=500, detail=f"Missing {script}")
+        if not config_json.exists():
+            raise HTTPException(status_code=500, detail=f"Missing {config_json}")
+
+        cmd = [sys.executable, str(script), str(config_json), str(resolved_profile)]
+        if payload.get("debug", True):
+            cmd.append("--debug")
+
+        _run_proc_stop = threading.Event()
+
+        # Start subprocess
+        _run_proc = subprocess.Popen(
+            cmd,
+            cwd=str(py_dir),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            universal_newlines=True,
+            start_new_session=True,  # new process group for clean stop (SIGINT)
+        )
+        _run_state["pid"] = _run_proc.pid
+
+        # Reader thread updates _run_state by parsing stdout
+        def _reader():
+            try:
+                line_re_sweep = re.compile(r"Sweep\s+(\d+)/(\d+)")
+                line_re_run_folder = re.compile(r"^Run folder:\s*(.+)\s*$")
+                while True:
+                    if _run_proc_stop.is_set():
+                        break
+                    line = _run_proc.stdout.readline() if _run_proc and _run_proc.stdout else ""
+                    if not line:
+                        break
+                    line = line.rstrip("\n")
+                    # keep tail
+                    tail = _run_state.get("stdout_tail") or []
+                    tail.append(line)
+                    if len(tail) > 200:
+                        tail = tail[-200:]
+                    _run_state["stdout_tail"] = tail
+
+                    # parse runner JSON lines: [runner] {...}
+                    if line.startswith("[runner] "):
+                        try:
+                            j = json.loads(line[len("[runner] "):])
+                            if "elapsed_sec" in j:
+                                _run_state["elapsed_sec"] = float(j["elapsed_sec"])
+                            if "current_step" in j:
+                                _run_state["current_step"] = int(j["current_step"])
+                            if "total_steps" in j:
+                                _run_state["total_steps"] = int(j["total_steps"])
+                            if "log_path" in j:
+                                _run_state["log_path"] = j["log_path"]
+                            if j.get("stop_reason"):
+                                _run_state["stop_reason"] = j["stop_reason"]
+
+                            # Live telemetry fields from test_runner update_cb
+                            telem_keys = ("rpm_target", "rpm_meas", "temp_target",
+                                          "omron_pv_c", "omron_sv_c",
+                                          "vfd_cmd_hz", "vfd_is_running", "mass_g")
+                            telem = _run_state.get("live_telemetry", {})
+                            updated = False
+                            for k in telem_keys:
+                                if k in j:
+                                    telem[k] = j[k]
+                                    updated = True
+                            if updated:
+                                telem["ts"] = _now_iso()
+                                _run_state["live_telemetry"] = telem
+                        except Exception:
+                            pass
+
+                    m = line_re_sweep.search(line)
+                    if m:
+                        _run_state["sweep_current"] = int(m.group(1))
+                        _run_state["sweep_total"] = int(m.group(2))
+
+                    m2 = line_re_run_folder.search(line)
+                    if m2:
+                        _run_state["run_folder"] = m2.group(1).strip()
+
+                # process ended
+                if _run_proc:
+                    rc = _run_proc.poll()
+                else:
+                    rc = None
+
+                if rc is None:
+                    # reader ended unexpectedly; mark error
+                    _run_state["state"] = "error"
+                    _run_state["error"] = _run_state.get("error") or "runner output stream ended unexpectedly"
+                elif rc == 0:
+                    _run_state["state"] = "stopped"
+                else:
+                    _run_state["state"] = "error"
+                    _run_state["error"] = _run_state.get("error") or f"acquire_scope_data exited with code {rc}"
+            except Exception as e:
+                _run_state["state"] = "error"
+                _run_state["error"] = f"reader failed: {e}"
+            finally:
+                pass
+
+        _run_proc_thread = threading.Thread(target=_reader, daemon=True)
+        _run_proc_thread.start()
 
         return {"status": "ok", "run": _run_state}
 
+    except HTTPException:
+        raise
     except Exception as e:
-        _run_state.update({"state": "stopped", "error": f"run_start failed: {e}"})
+        _run_state.update({"state": "error", "error": f"run_start failed: {e}"})
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/api/run/stop")
 async def run_stop():
-    global _run_task, _run_stop_event
+    """
+    Stop the running acquire_scope_data.py subprocess cleanly so:
+      - motor/VFD stops (process exits)
+      - HDF5 is flushed/closed (SIGINT first)
 
-    if _run_stop_event:
-        _run_stop_event.set()
+    Requires the subprocess to be started with start_new_session=True so we can signal the process group.
+    """
+    global _run_proc, _run_proc_thread, _run_proc_stop
 
-    if _run_task and not _run_task.done():
-        try:
-            await asyncio.wait_for(_run_task, timeout=10.0)
-        except asyncio.TimeoutError:
-            _run_task.cancel()
+    # mark state
+    if _run_state.get("state") == "running":
+        _run_state["state"] = "stopping"
+        _run_state["stop_reason"] = _run_state.get("stop_reason") or "stopped_by_user"
+
+    proc = _run_proc
+    reader_thr = _run_proc_thread
+    stop_evt = _run_proc_stop
+
+    if proc and proc.poll() is None:
+        import os
+        import signal
+
+        def _wait(timeout_s: float) -> bool:
             try:
-                await _run_task
+                proc.wait(timeout=timeout_s)
+                return True
             except Exception:
-                pass
+                return False
+
+        pgid = None
+        try:
+            pgid = os.getpgid(proc.pid)
         except Exception:
-            # hvis den fejler, cancel og await alligevel
-            _run_task.cancel()
-            try:
-                await _run_task
-            except Exception:
-                pass
+            pgid = None
 
-    # VIGTIGT: tving RS485/modbus til at lukke mellem runs
-    # Stop logger task
-    if _log_task and not _log_task.done():
-        _log_task.cancel()
+        # 1) SIGINT (graceful)
         try:
-            await _log_task
+            if pgid is not None:
+                os.killpg(pgid, signal.SIGINT)
+            # PATCH: always signal main process as well
+            proc.send_signal(signal.SIGINT)
         except Exception:
             pass
-    _log_task = None
-    _log_path = None
+
+        _wait(20.0)
+
+        # 2) SIGTERM
+        if proc.poll() is None:
+            try:
+                if pgid is not None:
+                    os.killpg(pgid, signal.SIGTERM)
+                else:
+                    proc.terminate()
+            except Exception:
+                pass
+            _wait(5.0)
+
+        # 3) SIGKILL
+        if proc.poll() is None:
+            try:
+                if pgid is not None:
+                    os.killpg(pgid, signal.SIGKILL)
+                else:
+                    proc.kill()
+            except Exception:
+                pass
+            _wait(2.0)
+
+    # now safe to stop reader (do NOT stop it before signalling, otherwise you lose end logs)
+    try:
+        if stop_evt:
+            stop_evt.set()
+    except Exception:
+        pass
+
+    try:
+        if reader_thr and reader_thr.is_alive():
+            reader_thr.join(timeout=2.0)
+    except Exception:
+        pass
+
+    _run_proc = None
+    _run_proc_thread = None
+    _run_proc_stop = None
+    _run_state["pid"] = None
+    if _run_state.get("state") in ("running", "stopping"):
+        _run_state["state"] = "stopped"
 
     try:
         reset_shared_modbus_manager()
     except Exception:
         pass
 
-    _run_task = None
-    _run_state.update({"state": "stopped"})
     return {"status": "ok", "run": _run_state}
+
+
 
 @app.post("/api/omron/command")
 async def send_omron_command(command: OmronCommand):
@@ -951,6 +1265,13 @@ async def send_omron_command(command: OmronCommand):
 
 @app.get("/api/omron/status")
 async def get_omron_status():
+    # PATCH: runner owns RS485 when running
+    if _run_state.get("state") in ("running", "stopping"):
+        return dict(_omron_last_good) if _omron_last_good else {
+            "status": "runner_active",
+            "timestamp": datetime.now().isoformat()
+        }
+
     """Get current Omron E5CC temperature readings (PV and SV).
 
     Note: When a test is running, we avoid re-opening the RS485 port from polling
@@ -1041,6 +1362,13 @@ async def get_omron_status():
 
 @app.get("/api/vfd/status")
 async def get_vfd_status():
+    # PATCH: runner owns RS485 when running
+    if _run_state.get("state") in ("running", "stopping"):
+        return dict(_vfd_last_good) if _vfd_last_good else {
+            "status": "runner_active",
+            "timestamp": datetime.now().isoformat()
+        }
+
     """Get current RS510 VFD status and readings.
 
     During an active test we serve cached values to avoid RS485 re-open storms.

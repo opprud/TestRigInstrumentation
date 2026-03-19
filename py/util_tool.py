@@ -34,7 +34,7 @@ import serial  # pyserial
 
 # ------------------ serial helpers ------------------
 
-def open_port(port, baud=115200, timeout=1.0):
+def open_port(port, baud=115200, timeout=2.0):
     return serial.Serial(port=port, baudrate=baud, timeout=timeout)
 
 
@@ -44,7 +44,7 @@ def send_cmd(ser, cmd, expect_prefix=("OK", "ERR"), timeout=None):
     status is 'OK' or 'ERR' or None if timed out.
     """
     if timeout is None:
-        timeout = ser.timeout or 1.0
+        timeout = ser.timeout or 3.0
 
     ser.reset_input_buffer()
     ser.write((cmd + "\r\n").encode("ascii"))
@@ -149,15 +149,32 @@ def set_time_now(ser, unix_ms=None):
         raise RuntimeError(f"SETTIME failed: {stat} {head} {payload}")
     return {"status": "OK", "type": "SETTIME", "unix_ms": unix_ms}
 
+def read_speed(ser):
+    r = ser.write(b"SPEED?\r\n")
+    print(r)
+
+def read_speedold_2(ser):
+    stat, arg, payload = send_cmd(ser, "SPEED?", expect_arg="SPEED", timeout=2.0)
+    if stat != "OK":
+        raise RuntimeError(f"SPEED? failed: {stat} {arg} {payload}")
+    kv = parse_kv((arg + " " + payload).strip())
+    for k in ("rpm", "period_ms", "pulses", "ts"):
+        if k in kv:
+            kv[k] = as_number(kv[k])
+
+    return {"status": "OK", "type": "SPEED", **kv}
 
 def read_speed(ser):
     stat, head, payload = send_cmd(ser, "SPEED?")
+    print(f"RPM string: {payload}")
+
     if stat != "OK":
         raise RuntimeError(f"SPEED? failed: {stat} {head} {payload}")
     kv = parse_kv((head + " " + payload).strip())
     for k in ("rpm", "period_ms", "pulses", "ts"):
         if k in kv:
             kv[k] = as_number(kv[k])
+
     return {"status": "OK", "type": "SPEED", **kv}
 
 

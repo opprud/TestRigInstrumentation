@@ -1,95 +1,72 @@
 import { useState, useEffect, useRef } from 'react';
 
 export function useTelemetry() {
-  const [telemetry, setTelemetry] = useState({ 
-    ts: Date.now(), 
-    rpm: 0, 
-    tempC: 0, 
-    massG: 0 
+  const [telemetry, setTelemetry] = useState({
+    ts: Date.now(), rpm: 0, tempC: 0, massG: 0,
   });
   const [connected, setConnected] = useState(false);
   const intervalRef = useRef(null);
 
-  // Fetch real sensor data from the API
   const fetchTelemetryData = async () => {
     try {
-      // Fetch Omron temperature data
-      const omronResponse = await fetch('http://localhost:8000/api/omron/status');
-      const omronData = omronResponse.ok ? await omronResponse.json() : null;
-
-      // Fetch RP2040 data (speed and load)
-      const rp2040Response = await fetch('http://localhost:8000/api/rp2040/status');
-      const rp2040Data = rp2040Response.ok ? await rp2040Response.json() : null;
-
-      // Parse temperature
-      let tempC = 0;
-      if (omronData && omronData.status === 'connected') {
-        tempC = omronData.process_value_c || 0;
-      }
-
-      // Parse speed and load from RP2040
-      let rpm = 0;
-      let massG = 0;
-      if (rp2040Data && rp2040Data.status === 'connected') {
-        // Parse speed response (assuming format like "OK 1234")
-        if (rp2040Data.speed_reading) {
-          const speedMatch = rp2040Data.speed_reading.match(/(\d+\.?\d*)/);
-          if (speedMatch) {
-            rpm = parseFloat(speedMatch[1]);
-          }
+      // 1) Try new dedicated endpoint (new api_server)
+      const r1 = await fetch('http://localhost:8000/api/telemetry');
+      if (r1.ok) {
+        const data = await r1.json();
+        if (!data.detail) {  // "Not Found" returns {detail:...}
+          setTelemetry({ ts: Date.now(), rpm: data.rpm ?? 0, tempC: data.tempC ?? 0, massG: data.massG ?? 0 });
+          setConnected(true);
+          return;
         }
+      }
+    } catch (_) {}
 
-        // Parse load response (assuming format like "OK 567.8")
-        if (rp2040Data.load_reading) {
-          const loadMatch = rp2040Data.load_reading.match(/(\d+\.?\d*)/);
-          if (loadMatch) {
-            massG = parseFloat(loadMatch[1]);
+    try {
+      // 2) Try live_telemetry from run/status (works if new api_server but no /api/telemetry yet)
+      const r2 = await fetch('http://localhost:8000/api/run/status');
+      if (r2.ok) {
+        const run = await r2.json();
+        if (run.state === 'running' && run.live_telemetry) {
+          const t = run.live_telemetry;
+          if (t.rpm_meas != null || t.omron_pv_c != null) {
+            setTelemetry({ ts: Date.now(), rpm: t.rpm_meas ?? 0, tempC: t.omron_pv_c ?? 0, massG: 0 });
+            setConnected(true);
+            return;
           }
         }
       }
+    } catch (_) {}
 
-      // Update telemetry state
-      setTelemetry({
-        ts: Date.now(),
-        rpm: rpm,
-        tempC: tempC,
-        massG: massG
-      });
+    try {
+      // 3) Fallback: poll hardware endpoints directly (works when idle)
+      const [omronR, rpR] = await Promise.all([
+        fetch('http://localhost:8000/api/omron/status'),
+        fetch('http://localhost:8000/api/rp2040/status'),
+      ]);
+      const omron = omronR.ok ? await omronR.json() : null;
+      const rp    = rpR.ok   ? await rpR.json()    : null;
 
-      // Update connection status
-      const isConnected = (omronData?.status === 'connected') || (rp2040Data?.status === 'connected');
-      setConnected(isConnected);
-
-    } catch (error) {
-      console.error('Failed to fetch telemetry data:', error);
+      let rpm = 0, tempC = 0, massG = 0;
+      if (omron?.status === 'connected') tempC = omron.process_value_c ?? 0;
+      if (rp?.status === 'connected') {
+        const ms = rp.speed_reading?.match(/rpm=([\d.]+)/);
+        const ml = rp.load_reading?.match(/mass_g=([\d.]+)/);
+        if (ms) rpm   = parseFloat(ms[1]);
+        if (ml) massG = parseFloat(ml[1]);
+      }
+      setTelemetry({ ts: Date.now(), rpm, tempC, massG });
+      setConnected(omron?.status === 'connected' || rp?.status === 'connected');
+    } catch (e) {
+      console.error('Telemetry fetch failed:', e);
       setConnected(false);
-      
-      // Keep last values but update timestamp
-      setTelemetry(prev => ({
-        ...prev,
-        ts: Date.now()
-      }));
     }
   };
 
-  // Start periodic data fetching
   useEffect(() => {
-    // Initial fetch
     fetchTelemetryData();
-
-    // Set up interval for real-time updates
-    intervalRef.current = setInterval(fetchTelemetryData, 1000); // 1Hz updates
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
+    intervalRef.current = setInterval(fetchTelemetryData, 1000);
+    return () => clearInterval(intervalRef.current);
   }, []);
 
-  return { 
-    telemetry, 
-    connected,
-    refreshTelemetry: fetchTelemetryData
-  };
+  return { telemetry, connected, refreshTelemetry: fetchTelemetryData };
 }

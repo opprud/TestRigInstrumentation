@@ -1,9 +1,36 @@
 {
-  "scope_ip": "a-mx2024a-10378.local",
+  "scope_ip": "169.254.172.2",
+
+  "bearing": {
+    "manufacturer": "SKF",
+    "model": "SYJ25",
+    "material": "Chrome steel",
+    "bore_mm": 25,
+    "Rolling elements": 9,
+    "cage_type": "Steel",
+    "dynamic_load_rating_N": 14000,
+    "Max speed_rpm": 7000,
+    "notes": "Test bearing for ForeverBearing endurance testing"
+  },
+
+  "lubricant": {
+    "product_name": "Keratech 22",
+    "manufacturer": "Kerax",
+    "base_oil": "Parafin Oil",
+    "nlgi_grade": "N/A",
+    "additives": "None",
+    "flash_point_c": 185,
+    "quantity_applied_ml": "0.5",
+    "application_method": "Manual application",
+    "application_date": "2026-03-16",
+    "batch_number": "N/A",
+    "notes": "Initial test, new bearing"
+  },
+
   "acquisition": {
     "points": 125000,
-    "samples": 250,
-    "interval_sec": 5,
+    "samples": 500,
+    "interval_sec": 10,
     "waveform_format": "WORD",
     "points_mode": "RAW",    
     "trigger_sweep": "AUTO",  
@@ -50,7 +77,7 @@
     "enabled": false,
     "rp2040_port": "/dev/tty.usbmodemXXXX",
     "modbus_config": "modbus_config.json",
-    "notes": "Enable to collect load/speed/temperature data at each sweep. Configure ports as needed."
+    "notes": "Using RS VFD, no filter"
   },
 
   "test_parameters": {
@@ -63,7 +90,7 @@
   },
 
   "store": {
-    "output_file": "data/firstoil_2.h5",
+    "output_file": "data/firstoil_4.h5",
     "timestamped": true,
     "compress": "none",
     "chunk": false,

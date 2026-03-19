@@ -80,7 +80,7 @@ function SectionTitle({ children, right }) {
 }
 
 // --- Timeline (desired vs actual) ---
-function SetpointChart({ data, desiredKey = "desired", actualKey = "actual", yLabel = "Value", progressSec = null, progressSec2 = null, durationSec = null }) {
+function SetpointChart({ data, desiredKey = "desired", actualKey = "actual", yLabel = "Value", progressSec = null, durationSec = null }) {
   // Smart time formatting based on duration
   const formatTime = (seconds) => {
 	  const s = Math.max(0, Math.floor(Number(seconds) || 0));
@@ -134,9 +134,6 @@ function SetpointChart({ data, desiredKey = "desired", actualKey = "actual", yLa
           <Line type="monotone" dataKey={actualKey} strokeWidth={2} strokeDasharray="4 2" dot={false} />
           {Number.isFinite(progressSec) && (
             <ReferenceLine x={progressSec} stroke="red" strokeWidth={2} />
-          )}
-          {Number.isFinite(progressSec2) && (
-            <ReferenceLine x={progressSec2} stroke="red" strokeWidth={2} />
           )}
         </LineChart>
       </ResponsiveContainer>
@@ -297,7 +294,16 @@ export default function Dashboard() {
 
   const durationSec = useMemo(() => {
     if (!config) return 0;
-    // support both formats: duration_minutes at top, or test_parameters.duration_minutes
+    // Use actual max setpoint time if available — more accurate than duration_minutes
+    const rpmMax = config.setpoints?.rpm?.length
+      ? Math.max(...config.setpoints.rpm.map(p => p.time_sec ?? 0))
+      : 0;
+    const tempMax = config.setpoints?.temperature?.length
+      ? Math.max(...config.setpoints.temperature.map(p => p.time_sec ?? 0))
+      : 0;
+    const setpointMax = Math.max(rpmMax, tempMax);
+    if (setpointMax > 0) return setpointMax;
+    // Fallback to duration_minutes
     const dm = config.duration_minutes ?? config.test_parameters?.duration_minutes;
     return dm ? Number(dm) * 60 : 0;
   }, [config]);
@@ -555,14 +561,14 @@ export default function Dashboard() {
                   {config && <Badge variant="outline" className="text-xs">Config Profile</Badge>}
                   {!planEnabled && <Badge variant="destructive" className="text-xs">Manual Override</Badge>}
                 </SectionTitle>
-                <SetpointChart data={rpmTimeline} yLabel="rpm" desiredKey="desired" actualKey="actual" progressSec={planEnabled ? elapsedSec : null} progressSec2={planEnabled ? progressSecFromStep : null} durationSec={durationSec} />
+                <SetpointChart data={rpmTimeline} yLabel="rpm" desiredKey="desired" actualKey="actual" progressSec={planEnabled ? elapsedSec : null} durationSec={durationSec} />
                 <Separator />
                 <SectionTitle>
                   Setpoints: Temperature
                   {config && <Badge variant="outline" className="text-xs">Config Profile</Badge>}
                   {!planEnabled && <Badge variant="destructive" className="text-xs">Manual Override</Badge>}
                 </SectionTitle>
-                <SetpointChart data={tempTimeline} yLabel="°C" desiredKey="desired" actualKey="actual" progressSec={planEnabled ? elapsedSec : null} progressSec2={planEnabled ? progressSecFromStep : null} durationSec={durationSec} />
+                <SetpointChart data={tempTimeline} yLabel="°C" desiredKey="desired" actualKey="actual" progressSec={planEnabled ? elapsedSec : null} durationSec={durationSec} />
               </CardContent>
             </Card>
 
