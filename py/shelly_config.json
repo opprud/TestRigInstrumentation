@@ -1,0 +1,36 @@
+{
+  "mqtt": {
+    "host": "185.81.165.190",
+    "port": 1883,
+    "username": "mqttuser",
+    "password": "3711",
+    "client_id": "testrig_shelly"
+  },
+  "device_id": "shellypro4pm-c8f09e84cdf8",
+  "channels": [
+    {
+      "id": 0,
+      "name": "Heater",
+      "description": "Oil heater",
+      "enabled": true
+    },
+    {
+      "id": 1,
+      "name": "Channel 2",
+      "description": "Spare",
+      "enabled": true
+    },
+    {
+      "id": 2,
+      "name": "Channel 3",
+      "description": "Spare",
+      "enabled": true
+    },
+    {
+      "id": 3,
+      "name": "CPU",
+      "description": "Raspberry pi",
+      "enabled": true
+    }
+  ]
+}
