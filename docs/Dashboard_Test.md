@@ -1,61 +1,61 @@
 # ForeverBearing — Test Rig Instrumentation
 
-System til styring og dataopsamling for lejeudholdenhedstests. Kombinerer oscilloskop-opsamling (HDF5), motorregulering (VFD), temperaturstyring (Omron E5CC), lastsensor og tachometer (RP2040) samt effektstyring (Shelly Pro 4PM).
+System for control and data acquisition for bearing endurance tests. Combines oscilloscope acquisition (HDF5), motor control (VFD), temperature control (Omron E5CC), load sensor and tachometer (RP2040), and power control (Shelly Pro 4PM).
 
 ---
 
-## Indholdsfortegnelse
+## Table of Contents
 
-- [Systemarkitektur](#systemarkitektur)
+- [System Architecture](#system-architecture)
 - [Hardware](#hardware)
-- [Hurtig start](#hurtig-start)
+- [Quick Start](#quick-start)
 - [Installation](#installation)
-- [Konfiguration](#konfiguration)
-- [Kørsel af test](#kørsel-af-test)
-- [Shelly effektstyring](#shelly-effektstyring)
-- [Filstruktur](#filstruktur)
-- [HDF5 dataformat](#hdf5-dataformat)
+- [Configuration](#configuration)
+- [Running a Test](#running-a-test)
+- [Shelly Power Control](#shelly-power-control)
+- [File Structure](#file-structure)
+- [HDF5 Data Format](#hdf5-data-format)
 
 ---
 
-## Systemarkitektur
+## System Architecture
 
 ```
 Raspberry Pi
 ├── py/
 │   ├── api_server.py          ← FastAPI backend (port 8000)
-│   ├── acquire_scope_data.py  ← Osciloskop + HDF5 opsamling
-│   ├── test_runner.py         ← Testsekvens styring (RPM/temp PI-regulering)
-│   ├── config.json            ← Scope og hardware konfiguration
-│   └── shelly_config.json     ← Shelly MQTT konfiguration
+│   ├── acquire_scope_data.py  ← Oscilloscope + HDF5 acquisition
+│   ├── test_runner.py         ← Test sequence control (RPM/temp PI control)
+│   ├── config.json            ← Scope and hardware configuration
+│   └── shelly_config.json     ← Shelly MQTT configuration
 └── react/
     └── src/                   ← React dashboard (port 3000)
 ```
 
-**Dataflow under en test:**
+**Data flow during a test:**
 ```
-acquire_scope_data.py  →  HDF5 fil (scope sweeps + telemetri)
-test_runner.py         →  JSONL fil (RPM/temp samples)
-api_server.py          →  REST API → React Dashboard (live telemetri)
+acquire_scope_data.py  →  HDF5 file (scope sweeps + telemetry)
+test_runner.py         →  JSONL file (RPM/temp samples)
+api_server.py          →  REST API → React Dashboard (live telemetry)
 ```
 
 ---
 
 ## Hardware
 
-| Enhed | Interface | Funktion |
+| Device | Interface | Function |
 |---|---|---|
-| Keysight MSO-X 2024A | TCP/IP (port 5025) | Oscilloskop — AE + UL kanaler |
-| RS PRO RS510 VFD | RS485/Modbus (slave 3) | Motorstyring |
-| Omron E5CC | RS485/Modbus (slave 2) | Temperaturstyring |
-| Seeed XIAO RP2040 | USB Serial | Lastsensor + Tachometer |
-| Shelly Pro 4PM | MQTT | Effektstyring (4 kanaler) |
+| Keysight MSO-X 2024A | TCP/IP (port 5025) | Oscilloscope — AE + UL channels |
+| RS PRO RS510 VFD | RS485/Modbus (slave 3) | Motor control |
+| Omron E5CC | RS485/Modbus (slave 2) | Temperature control |
+| Seeed XIAO RP2040 | USB Serial | Load sensor + Tachometer |
+| Shelly Pro 4PM | MQTT | Power control (4 channels) |
 
 ---
 
-## Hurtig start
+## Quick Start
 
-### 1. Klon og start systemet
+### 1. Clone and start the system
 
 ```bash
 git clone <repo>
@@ -63,29 +63,29 @@ cd ForeverBearing/sw/TestRigInstrumentation
 bash start_system.sh
 ```
 
-Åbn browser:
+Open browser:
 - **Dashboard:** http://localhost:3000
-- **Effektstyring:** http://localhost:3000/shelly
+- **Power control:** http://localhost:3000/shelly
 - **API docs:** http://localhost:8000/docs
 
-### 2. Vælg testprofil i UI
+### 2. Select test profile in UI
 
-1. Gå til http://localhost:3000
-2. Vælg profil i "Configuration File" (fx *First-Oil Validation*)
-3. Tryk **Start**
-4. Følg live telemetri: RPM, temperatur, last
-5. Tryk **Stop** for at afslutte før tid — HDF5 filen gemmes automatisk
+1. Go to http://localhost:3000
+2. Select profile in "Configuration File" (e.g. *First-Oil Validation*)
+3. Press **Start**
+4. Monitor live telemetry: RPM, temperature, load
+5. Press **Stop** to end early — HDF5 file is saved automatically
 
-### 3. Kør test fra kommandolinje
+### 3. Run test from command line
 
 ```bash
 cd py
 source .venv/bin/activate
 
-# Med testprofil (automatisk RPM + temp)
+# With test profile (automatic RPM + temp)
 python3 acquire_scope_data.py config.json ../react/public/config/first-oil.json
 
-# Manuel mode (sæt RPM/temp selv på VFD/Omron)
+# Manual mode (set RPM/temp yourself on VFD/Omron)
 python3 acquire_scope_data.py config.json
 ```
 
@@ -93,28 +93,28 @@ python3 acquire_scope_data.py config.json
 
 ## Installation
 
-### Krav
+### Requirements
 
 - Python 3.10+
 - Node.js 18+
-- `mosquitto` klient (valgfrit, til debug)
+- `mosquitto` client (optional, for debug)
 
-### Automatisk installation
+### Automatic installation
 
-`start_system.sh` håndterer alt automatisk:
+`start_system.sh` handles everything automatically:
 
 ```bash
 bash start_system.sh
 ```
 
-Scriptet:
-1. Opretter Python virtual environment (`py/.venv`)
-2. Installerer Python afhængigheder fra `requirements.txt`
-3. Starter API server (port 8000)
-4. Installerer Node.js afhængigheder (første gang)
-5. Starter React dev server (port 3000)
+The script:
+1. Creates Python virtual environment (`py/.venv`)
+2. Installs Python dependencies from `requirements.txt`
+3. Starts API server (port 8000)
+4. Installs Node.js dependencies (first time)
+5. Starts React dev server (port 3000)
 
-### Manuel installation
+### Manual installation
 
 ```bash
 # Python
@@ -129,7 +129,7 @@ npm install
 npm run dev
 ```
 
-### Python afhængigheder (`requirements.txt`)
+### Python dependencies (`requirements.txt`)
 
 ```
 numpy, h5py, pyserial, pyvisa-py, pymodbus, fastapi, uvicorn, paho-mqtt
@@ -137,42 +137,42 @@ numpy, h5py, pyserial, pyvisa-py, pymodbus, fastapi, uvicorn, paho-mqtt
 
 ---
 
-## Konfiguration
+## Configuration
 
 ### `py/config.json`
 
-Hoved-konfiguration for scope, kanaler og test:
+Main configuration for scope, channels and test:
 
 ```json
 {
-  "scope_ip": "169.254.172.2",        ← Scope IP-adresse
+  "scope_ip": "169.254.172.2",        ← Scope IP address
   "channels": [
     {"name": "AE",  "source": "CHAN1", "enabled": true},
     {"name": "UL",  "source": "CHAN2", "enabled": true}
   ],
   "store": {
-    "output_file": "data/test.h5"     ← Output mappe
+    "output_file": "data/test.h5"     ← Output folder
   },
-  "bearing": { ... },                  ← Lejeparametre (gemmes i HDF5)
-  "lubricant": { ... }                 ← Smøremiddeldata (gemmes i HDF5)
+  "bearing": { ... },                  ← Bearing parameters (stored in HDF5)
+  "lubricant": { ... }                 ← Lubricant data (stored in HDF5)
 }
 ```
 
-### Testprofiler (`react/public/config/`)
+### Test profiles (`react/public/config/`)
 
-| Fil | Beskrivelse | Varighed |
+| File | Description | Duration |
 |---|---|---|
-| `first-oil.json` | Første olie test — RPM 500→3000 rpm | 170 min |
+| `first-oil.json` | First oil test — RPM 500→3000 rpm | 170 min |
 | `test-profile.json` | Standard test — RPM 1000→2000 rpm | 15 min |
-| `endurance-profile.json` | Udholdenhedstest — 1800→2200 rpm | 61 min |
-| `high-stress-profile.json` | Høj belastning — op til 3200 rpm | 14 min |
-| `lub1_validation.json` | Smøremiddel validering | 110 min |
+| `endurance-profile.json` | Endurance test — 1800→2200 rpm | 61 min |
+| `high-stress-profile.json` | High stress — up to 3200 rpm | 14 min |
+| `lub1_validation.json` | Lubricant validation | 110 min |
 
-**Profil struktur:**
+**Profile structure:**
 
 ```json
 {
-  "name": "Min Test",
+  "name": "My Test",
   "duration_minutes": 15,
   "setpoints": {
     "rpm": [
@@ -196,8 +196,8 @@ Hoved-konfiguration for scope, kanaler og test:
 }
 ```
 
-> **Vigtigt:** `duration_minutes` skal dække det maksimale `time_sec` i setpoints.
-> Gyldige `volt_range` værdier for MSO-X: 0.016, 0.04, 0.08, 0.2, 0.4, 0.8, 1.0, 2.0, 4.0, 8.0 (V)
+> **Important:** `duration_minutes` must cover the maximum `time_sec` in setpoints.
+> Valid `volt_range` values for MSO-X: 0.016, 0.04, 0.08, 0.2, 0.4, 0.8, 1.0, 2.0, 4.0, 8.0 (V)
 
 ### `py/shelly_config.json`
 
@@ -221,71 +221,71 @@ Hoved-konfiguration for scope, kanaler og test:
 
 ---
 
-## Kørsel af test
+## Running a Test
 
-### Fra UI
+### From UI
 
-1. Åbn http://localhost:3000
-2. Vælg profil → **Start**
-3. Live telemetri opdateres hvert sekund
-4. HDF5 filen vises i "HDF5 Data Log" med filstørrelse og sweep-tæller
-5. **Stop** gemmer filen og stopper motor + scope
+1. Open http://localhost:3000
+2. Select profile → **Start**
+3. Live telemetry updates every second
+4. HDF5 file is shown in "HDF5 Data Log" with file size and sweep counter
+5. **Stop** saves the file and stops motor + scope
 
-### Fra kommandolinje
+### From command line
 
 ```bash
 cd py && source .venv/bin/activate
 
-# Med profil (automatisk)
+# With profile (automatic)
 python3 acquire_scope_data.py config.json ../react/public/config/test-profile.json
 
-# Med debug output
+# With debug output
 python3 acquire_scope_data.py config.json ../react/public/config/test-profile.json --debug
 
-# Manuel (ingen profil)
+# Manual (no profile)
 python3 acquire_scope_data.py config.json
 ```
 
 ### Output
 
-Filer gemmes i `data/runs/<timestamp>/`:
+Files are saved in `data/runs/<timestamp>/`:
 
 ```
 data/runs/20260319_142500/
 ├── scope_20260319_142500.h5           ← HDF5 scope data + metadata
-└── telemetry_20260319_142500_*.jsonl  ← Telemetri log
+└── telemetry_20260319_142500_*.jsonl  ← Telemetry log
 ```
 
 ---
 
-## Shelly effektstyring
+## Shelly Power Control
 
 ### Web UI
 
-Åbn http://localhost:3000/shelly
+Open http://localhost:3000/shelly
 
-- Toggle knapper til on/off per kanal
-- Live effekt (W), strøm (mA), spænding (V)
-- Total aktiv effekt øverst
+- Toggle buttons for on/off per channel
+- Live power (W), current (mA), voltage (V)
+- Total active power at the top
 
-### Fra kommandolinje (anden PC)
+### From command line (another PC)
 
 ```bash
 pip install paho-mqtt
 python3 shelly_control.py --status
 
-python3 shelly_control.py --on cpu        # Tænd CPU (kanal 3)
-python3 shelly_control.py --off heater    # Sluk Heater (kanal 0)
-python3 shelly_control.py --on 2          # Tænd kanal 2
+python3 shelly_control.py --on cpu        # Turn on CPU (channel 3)
+python3 shelly_control.py --off heater    # Turn off Heater (channel 0)
+python3 shelly_control.py --on 2          # Turn on channel 2
 ```
 
-> Bruges til at genstarte Raspberry Pi'en hvis CPU kanalen er slukket.
+> Used to restart the Raspberry Pi if the CPU channel is switched off.
 
 ---
 
-## HDF5 dataformat
+## HDF5 Data Format
 
-Åbn filer med [myHDF5](https://myhdf5.hdfgroup.org) eller Python:
+Open files with [myHDF5](https://myhdf5.hdfgroup.org) or Python:
 
 ```python
 import h5py
@@ -298,51 +298,51 @@ with h5py.File("scope_20260319.h5", "r") as f:
     voltage = f["sweeps/sweep_000/AE/voltage"][:]
     time    = f["sweeps/sweep_000/AE/time"][:]
 
-    # Telemetri per sweep
+    # Telemetry per sweep
     rpm  = f["sweeps/sweep_000"].attrs["telem_rpm_meas"]
     temp = f["sweeps/sweep_000"].attrs["telem_omron_pv_c"]
 ```
 
-**Struktur:**
+**Structure:**
 
 ```
 scope_*.h5
 ├── metadata/
-│   ├── bearing/          ← Lejeparametre (fra config.json)
-│   ├── lubricant/        ← Smøremiddeldata (fra config.json)
+│   ├── bearing/          ← Bearing parameters (from config.json)
+│   ├── lubricant/        ← Lubricant data (from config.json)
 │   ├── scope_settings/
-│   │   ├── AE/           ← Kanal indstillinger (range, coupling osv.)
+│   │   ├── AE/           ← Channel settings (range, coupling etc.)
 │   │   └── UL/
-│   └── test_parameters/  ← Testparametre
+│   └── test_parameters/  ← Test parameters
 └── sweeps/
     ├── sweep_000/
     │   ├── AE/
-    │   │   ├── time      ← Tidsvektor (s)
-    │   │   └── voltage   ← Spændingsdata (V)
+    │   │   ├── time      ← Time vector (s)
+    │   │   └── voltage   ← Voltage data (V)
     │   └── UL/
     │       ├── time
     │       └── voltage
     │   attrs:
-    │       telem_rpm_meas      ← Målt RPM ved sweep
-    │       telem_omron_pv_c    ← Temperatur (°C)
-    │       telem_mass_g        ← Last (g)
-    │       telem_vfd_cmd_hz    ← VFD frekvens (Hz)
+    │       telem_rpm_meas      ← Measured RPM at sweep
+    │       telem_omron_pv_c    ← Temperature (°C)
+    │       telem_mass_g        ← Load (g)
+    │       telem_vfd_cmd_hz    ← VFD frequency (Hz)
     ├── sweep_001/
     └── ...
 ```
 
 ---
 
-## API endpoints
+## API Endpoints
 
-| Endpoint | Beskrivelse |
+| Endpoint | Description |
 |---|---|
-| `GET /api/run/status` | Kørselsstatus (elapsed, steps, telemetri) |
-| `POST /api/run/start` | Start test med profil |
-| `POST /api/run/stop` | Stop kørende test |
-| `GET /api/telemetry` | Live telemetri (RPM, temp, last) |
-| `GET /api/hdf5/status` | HDF5 filstatus (størrelse, sweeps, diskplads) |
-| `GET /api/shelly/status` | Shelly kanal status |
-| `POST /api/shelly/switch/{id}` | Tænd/sluk Shelly kanal |
+| `GET /api/run/status` | Run status (elapsed, steps, telemetry) |
+| `POST /api/run/start` | Start test with profile |
+| `POST /api/run/stop` | Stop running test |
+| `GET /api/telemetry` | Live telemetry (RPM, temp, load) |
+| `GET /api/hdf5/status` | HDF5 file status (size, sweeps, disk space) |
+| `GET /api/shelly/status` | Shelly channel status |
+| `POST /api/shelly/switch/{id}` | Turn Shelly channel on/off |
 | `GET /api/scope/waveform` | Live waveform preview |
-| `GET /docs` | Interaktiv API dokumentation |
+| `GET /docs` | Interactive API documentation |

@@ -1,0 +1,37 @@
+{
+  "scope": {
+    "preferred_port": null
+  },
+  "store": {
+    "output_file": "/home/aau/projects/ForeverBearing/sw/TestRigInstrumentation/py/runs/20260212_143224_Standard_Test_Profile/scope.h5",
+    "timestamped": true
+  },
+  "acquisition": {
+    "samples": 10,
+    "interval_sec": 3.0,
+    "points": 2000,
+    "waveform_format": "WORD"
+  },
+  "channels": [
+    {
+      "name": "CH1",
+      "source": "CHAN1",
+      "enabled": true
+    },
+    {
+      "name": "CH2",
+      "source": "CHAN2",
+      "enabled": true
+    },
+    {
+      "name": "CH3",
+      "source": "CHAN3",
+      "enabled": true
+    },
+    {
+      "name": "CH4",
+      "source": "CHAN4",
+      "enabled": true
+    }
+  ]
+}

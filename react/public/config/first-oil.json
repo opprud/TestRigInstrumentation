@@ -150,5 +150,19 @@
     "interval_sec": 3,
     "waveform_format": "WORD",
     "acq_type": "HRES"
+  },
+  "scope_channels": {
+    "AE": {
+      "timebase_range": 0.02,
+      "volt_range": 1.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "UL": {
+      "timebase_range": 0.02,
+      "volt_range": 0.8,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    }
   }
 }

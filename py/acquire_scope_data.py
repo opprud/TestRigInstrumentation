@@ -533,6 +533,56 @@ def _query_scope_settings(ip: str, port: int, channels: list) -> dict:
     return settings
 
 
+def _scope_write(ip: str, port: int, cmd: str, timeout_sec: float = 3.0):
+    """Send a write-only SCPI command (no response expected)."""
+    import socket as _socket
+    s = _socket.create_connection((ip, port), timeout=timeout_sec)
+    s.settimeout(timeout_sec)
+    try:
+        if not cmd.endswith("\n"):
+            cmd += "\n"
+        s.sendall(cmd.encode("ascii", errors="ignore"))
+        time.sleep(0.05)  # brief pause for scope to process
+    finally:
+        try:
+            s.close()
+        except Exception:
+            pass
+
+
+def _apply_scope_channel_settings(ip: str, port: int, channels: list, profile_cfg: dict):
+    """
+    Apply scope channel settings from test profile scope_channels section.
+    Only channels listed in scope_channels are adjusted.
+    """
+    scope_ch_cfg = (profile_cfg or {}).get("scope_channels", {})
+    if not scope_ch_cfg:
+        return
+
+    name_to_source = {ch["name"]: ch["source"] for ch in channels}
+
+    for alias, settings in scope_ch_cfg.items():
+        src = name_to_source.get(alias)
+        if not src:
+            if DEBUG:
+                print(f"[scope_channels] Unknown alias '{alias}', skipping")
+            continue
+        try:
+            if "timebase_range" in settings:
+                _scope_write(ip, port, f":TIM:RANG {settings['timebase_range']}")
+            if "volt_range" in settings:
+                _scope_write(ip, port, f":{src}:RANG {settings['volt_range']}")
+            if "volt_offset" in settings:
+                _scope_write(ip, port, f":{src}:OFFS {settings['volt_offset']}")
+            if "coupling" in settings:
+                _scope_write(ip, port, f":{src}:COUP {settings['coupling']}")
+            if DEBUG:
+                print(f"[scope_channels] Applied {alias} ({src}): {settings}")
+        except Exception as e:
+            if DEBUG:
+                print(f"[scope_channels] Error applying {alias}: {e}")
+
+
 def _write_metadata(h5f, config: dict, scope_idn: str, ts_local: str, ts_utc: str,
                     scope_settings: dict):
     """
@@ -631,6 +681,19 @@ def acquire_loop(config):
         scope_idn = socket_query_line(ip, port, "*IDN?", timeout_sec=3.0)
     except Exception:
         pass
+
+    # Small delay to let scope finish IDN response before sending channel settings
+    time.sleep(0.5)
+
+    # Apply profile scope_channels FIRST, then query so HDF5 reflects actual settings
+    try:
+        _apply_scope_channel_settings(ip, port, channels, config.get("_profile_cfg"))
+    except Exception as e:
+        if DEBUG:
+            print(f"[acquire_loop] Could not apply scope channel settings: {e}")
+    
+    # Wait for scope to process settings before querying
+    time.sleep(0.5)
 
     scope_settings = {}
     try:
@@ -745,6 +808,7 @@ def main():
     scope_cfg.setdefault("acquisition", {})
     scope_cfg["acquisition"]["stop_event"] = scope_stop_event
     scope_cfg["acquisition"]["_telemetry_store"] = telemetry_store
+    scope_cfg["_profile_cfg"] = profile_cfg  # for scope_channels settings
     scope_cfg.setdefault("store", {})
     scope_cfg["store"]["timestamped"] = False
     scope_cfg["store"]["output_file"] = str(run_dir / f"scope_{run_id}.h5")

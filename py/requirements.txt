@@ -8,3 +8,4 @@ scipy
 fastapi
 uvicorn[standard]
 pymodbus
+paho-mqtt

@@ -44,6 +44,151 @@ from pathlib import Path
 from shared_modbus_manager import reset_shared_modbus_manager
 
 
+
+# --- Shelly MQTT Manager ---
+
+class ShellyMQTTManager:
+    """Manages persistent MQTT connection to Shelly Pro 4PM."""
+
+    def __init__(self, config_path: str):
+        self.config_path = config_path
+        self._config = None
+        self._client = None
+        self._connected = False
+        self._channel_state: Dict[int, Dict] = {}
+        self._lock = threading.Lock()
+        self._msg_id = 100
+        self._load_config()
+        self._start()
+
+    def _load_config(self):
+        try:
+            with open(self.config_path) as f:
+                self._config = json.load(f)
+        except Exception as e:
+            print(f"[Shelly] Config load failed: {e}")
+            self._config = None
+
+    def _start(self):
+        if not self._config:
+            return
+        try:
+            import paho.mqtt.client as mqtt
+        except ImportError:
+            print("[Shelly] paho-mqtt not installed — run: pip install paho-mqtt")
+            return
+
+        mqtt_cfg = self._config.get("mqtt", {})
+        device_id = self._config.get("device_id", "")
+        client = mqtt.Client(client_id=mqtt_cfg.get("client_id", "testrig_shelly"))
+        if mqtt_cfg.get("username"):
+            client.username_pw_set(mqtt_cfg["username"], mqtt_cfg.get("password", ""))
+
+        def on_connect(c, userdata, flags, rc):
+            if rc == 0:
+                self._connected = True
+                c.subscribe(f"{device_id}/#")
+                print("[Shelly] Connected and subscribed")
+                # Request current status for all 4 channels
+                import threading as _threading, time as _time
+                def _fetch_initial():
+                    _time.sleep(0.5)
+                    for ch in range(4):
+                        self._msg_id += 1
+                        p = json.dumps({"id": self._msg_id, "src": "testrig",
+                                        "method": "Switch.GetStatus", "params": {"id": ch}})
+                        c.publish(f"{device_id}/rpc", p)
+                        _time.sleep(0.2)
+                _threading.Thread(target=_fetch_initial, daemon=True).start()
+            else:
+                print(f"[Shelly] Connect failed rc={rc}")
+
+        def on_disconnect(c, userdata, rc):
+            self._connected = False
+            print(f"[Shelly] Disconnected rc={rc}")
+
+        def on_message(c, userdata, msg):
+            try:
+                payload = json.loads(msg.payload.decode())
+                topic = msg.topic
+                if "/status/switch:" in topic:
+                    ch_id = int(topic.split("switch:")[-1])
+                    with self._lock:
+                        existing = self._channel_state.get(ch_id, {})
+                        existing.update(payload)
+                        self._channel_state[ch_id] = existing
+                elif "/events/rpc" in topic:
+                    params = payload.get("params", {})
+                    for key, val in params.items():
+                        if key.startswith("switch:"):
+                            ch_id = int(key.split("switch:")[-1])
+                            with self._lock:
+                                existing = self._channel_state.get(ch_id, {})
+                                if isinstance(val, dict):
+                                    existing.update(val)
+                                self._channel_state[ch_id] = existing
+
+                # rpc/response — reply to Switch.GetStatus
+                elif "/rpc/response" in topic:
+                    result = payload.get("result", {})
+                    if isinstance(result, dict) and "id" in result and "output" in result:
+                        ch_id = result["id"]
+                        with self._lock:
+                            existing = self._channel_state.get(ch_id, {})
+                            existing.update(result)
+                            self._channel_state[ch_id] = existing
+            except Exception:
+                pass
+
+        client.on_connect = on_connect
+        client.on_disconnect = on_disconnect
+        client.on_message = on_message
+
+        try:
+            client.connect(mqtt_cfg.get("host", "localhost"), mqtt_cfg.get("port", 1883), keepalive=60)
+            client.loop_start()
+            self._client = client
+        except Exception as e:
+            print(f"[Shelly] Connection error: {e}")
+
+    def get_status(self) -> Dict:
+        with self._lock:
+            return {"connected": self._connected, "channels": dict(self._channel_state)}
+
+    def set_switch(self, channel_id: int, on: bool) -> bool:
+        if not self._client or not self._connected:
+            return False
+        device_id = self._config.get("device_id", "")
+        self._msg_id += 1
+        payload = json.dumps({
+            "id": self._msg_id, "src": "testrig",
+            "method": "Switch.Set", "params": {"id": channel_id, "on": on}
+        })
+        result = self._client.publish(f"{device_id}/rpc", payload)
+        return result.rc == 0
+
+    def get_channel_config(self) -> list:
+        if not self._config:
+            return []
+        return self._config.get("channels", [])
+
+    def reload_config(self):
+        self._load_config()
+
+
+_shelly_manager: Optional[Any] = None
+_shelly_manager_lock = threading.Lock()
+
+
+def _get_shelly_manager():
+    global _shelly_manager
+    with _shelly_manager_lock:
+        if _shelly_manager is None:
+            cfg = Path(__file__).parent / "shelly_config.json"
+            if cfg.exists():
+                _shelly_manager = ShellyMQTTManager(str(cfg))
+        return _shelly_manager
+
 # --- Global locks ---
 _rs485_lock = asyncio.Lock()
 
@@ -536,8 +681,6 @@ async def get_hdf5_status():
         import shutil
         disk = shutil.disk_usage(os.path.dirname(h5_path))
 
-        total_samples = total_sweeps * active_channels
-
         return {
             "filename": filename,
             "created": created,
@@ -546,7 +689,6 @@ async def get_hdf5_status():
             "diskFreeBytes": disk.free,
             "diskTotalBytes": disk.total,
             "totalSweeps": total_sweeps,
-            "totalSamples": total_samples,
             "activeChannels": active_channels,
             "recordingDuration": recording_duration,
         }
@@ -1707,6 +1849,78 @@ async def get_scope_waveform(channel: str = "CHAN1", points: int = None):
         finally:
             if 'scope' in locals():
                 scope.close()
+
+@app.get("/api/shelly/status")
+async def shelly_status():
+    """
+    Get current status of all Shelly channels.
+    Returns channel state (on/off, power, current, voltage) plus config names.
+    """
+    mgr = _get_shelly_manager()
+    if not mgr:
+        return {"connected": False, "channels": [], "error": "shelly_config.json not found"}
+
+    status = mgr.get_status()
+    ch_cfg = {ch["id"]: ch for ch in mgr.get_channel_config()}
+    channels = []
+
+    for i in range(4):
+        hw = status["channels"].get(i, {})
+        cfg = ch_cfg.get(i, {"id": i, "name": f"Channel {i+1}", "description": "", "enabled": True})
+        channels.append({
+            "id": i,
+            "name": cfg.get("name", f"Channel {i+1}"),
+            "description": cfg.get("description", ""),
+            "enabled": cfg.get("enabled", True),
+            "output": hw.get("output", None),
+            "apower": hw.get("apower"),
+            "current": hw.get("current"),
+            "voltage": hw.get("voltage"),
+            "temperature_c": hw.get("temperature", {}).get("tC") if isinstance(hw.get("temperature"), dict) else None,
+            "aenergy_total": hw.get("aenergy", {}).get("total") if isinstance(hw.get("aenergy"), dict) else None,
+        })
+
+    return {
+        "connected": status["connected"],
+        "channels": channels,
+        "ts": _now_iso(),
+    }
+
+
+@app.post("/api/shelly/switch/{channel_id}")
+async def shelly_set_switch(channel_id: int, payload: Dict):
+    """
+    Turn a Shelly channel on or off.
+    Body: {"on": true/false}
+    """
+    mgr = _get_shelly_manager()
+    if not mgr:
+        raise HTTPException(status_code=503, detail="Shelly not configured")
+
+    on = payload.get("on")
+    if on is None:
+        raise HTTPException(status_code=400, detail="Missing 'on' field in body")
+
+    success = mgr.set_switch(channel_id, bool(on))
+    if not success:
+        raise HTTPException(status_code=503, detail="MQTT not connected or publish failed")
+
+    # Brief wait for device to respond
+    await asyncio.sleep(2.0)
+
+    # Return updated status
+    return await shelly_status()
+
+
+@app.post("/api/shelly/reload")
+async def shelly_reload():
+    """Reload shelly_config.json without restarting."""
+    global _shelly_manager
+    with _shelly_manager_lock:
+        if _shelly_manager:
+            _shelly_manager.reload_config()
+    return {"status": "ok"}
+
 
 if __name__ == "__main__":
     import uvicorn
