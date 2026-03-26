@@ -141,7 +141,7 @@ Commands are sent as plain text followed by **Enter** (LF/CRLF).
 | `LOAD?` | Read current weight | `OK LOAD mass_g=123.456 raw=61728 ts=1234567890` |
 | `TARE` | Zero the tare (saved to EEPROM) | `OK TARE` |
 | `SETCAL <slope> <tare>` | Set calibration and save | `OK SETCAL` |
-| `CAL?` | Show current calibration | `OK CAL slope=0.004000000 tare=0 gain=64` |
+| `CAL?` | Show current calibration | `OK CAL slope=0.008047000 tare=339992 gain=64` |
 | `RESETCAL` | Reset to factory defaults | `OK RESETCAL` |
 
 ### HX711 Gain
@@ -187,82 +187,100 @@ Commands are sent as plain text followed by **Enter** (LF/CRLF).
 
 ## Load Cell Calibration
 
-Calibration requires a **known reference weight** (e.g. 1000 g).
+Calibration requires a **known reference weight**. A 10 kg reference is strongly recommended as it is easier to place stably on the load cell than lighter weights, giving more consistent raw readings.
 
-### Step 1 – Check gain
+> **Note:** The load cell exhibits some mechanical noise (~150 g spread between consecutive readings). This is normal and related to the physical mounting of the load cell. Always use an average of multiple readings when calculating the slope.
 
-Select gain based on your measurement range:
+### Current Calibration Values
+
+These are the validated calibration values for this testrig:
+
+| Parameter | Value |
+|-----------|-------|
+| slope | 0.008047 |
+| tare | 339992 |
+| gain | 64 |
+
+To restore these values at any time:
+```
+SETCAL 0.008047 339992
+```
+
+---
+
+### Full Calibration Procedure (from scratch)
+
+#### Step 1 – Reset to factory defaults
 
 ```
-GAIN?
+RESETCAL
 ```
 
-Change if necessary (example: gain 64 for heavier loads):
-```
-SETGAIN 64
-```
+#### Step 2 – Tare with no load
 
-### Step 2 – Tare (zero calibration)
-
-Make sure the load cell is **unloaded** (no weight on it), then send:
+Make sure the load cell is **completely unloaded**, then:
 
 ```
 TARE
 ```
 
-The board saves the zero point to EEPROM.
-
-### Step 3 – Read raw value with reference weight
-
-Place your **known reference weight** on the load cell and read the raw value:
-
-```
-LOAD?
-```
-
-Example response:
-```
-OK LOAD mass_g=1234.567 raw=312500 ts=1234567890
-```
-
-Note the `raw` value (here `312500`) and your tare offset from:
+Confirm the tare was saved:
 ```
 CAL?
 ```
-Example: `tare=0`
 
-### Step 4 – Calculate slope
+Note the `tare` value from the response.
 
-```
-slope = reference_weight_in_grams / (raw - tare)
-```
+#### Step 3 – Apply reference weight and collect raw readings
 
-Example with 1000 g reference weight:
-```
-slope = 1000 / (312500 - 0) = 0.003200
-```
-
-### Step 5 – Save calibration
-
-```
-SETCAL 0.003200 0
-```
-
-Format: `SETCAL <slope> <tare_offset>`
-
-### Step 6 – Verify
-
-Place the reference weight again and check:
+Place your **10 kg reference weight** stably and centered on the load cell. Take **5 or more readings**:
 
 ```
 LOAD?
+LOAD?
+LOAD?
+LOAD?
+LOAD?
 ```
 
-The response should now show `mass_g` close to your reference weight.
+Calculate the **average of the raw values**.
 
-### Repeat after gain change
+#### Step 4 – Calculate slope
 
-If you change gain with `SETGAIN`, the entire calibration procedure must be repeated, as gain directly affects the raw values from the HX711.
+```
+slope = reference_weight_in_grams / (average_raw - tare)
+```
+
+Example:
+```
+slope = 10000 / (1485860 - 339992) = 10000 / 1145868 = 0.008727
+```
+
+#### Step 5 – Save calibration
+
+```
+SETCAL <slope> <tare>
+```
+
+Example:
+```
+SETCAL 0.008727 339992
+```
+
+#### Step 6 – Verify
+
+With the 10 kg reference weight still on, take several readings:
+```
+LOAD?
+LOAD?
+LOAD?
+```
+
+If the readings are consistently close to 10000 g, calibration is complete. If not, repeat from Step 3 using the new readings to refine the slope:
+
+```
+slope_new = slope_old × (10000 / measured_average)
+```
 
 ---
 
@@ -281,6 +299,16 @@ The calibration is valid as long as the `CAL2` magic number and CRC32 checksum m
 | slope | 0.004000 |
 | tare | 0 |
 | gain | 64 |
+
+---
+
+## Tips for Stable Measurements
+
+- Always place the reference weight **centered** on the load cell
+- Ensure the load cell is **rigidly mounted** at both ends to avoid side loading
+- Avoid vibrations in the environment during calibration
+- Take **multiple readings and average** the raw values rather than relying on a single reading
+- Calibrate at the **load level you will actually be measuring** – the 10 kg reference is best if measuring loads in that range
 
 ---
 
