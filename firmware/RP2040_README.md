@@ -1,41 +1,41 @@
 # RP2040 Firmware – Seeed XIAO RP2040
-### ForeverBearing TestRig – Setup, Kompilering, Upload & Kalibrering
+### ForeverBearing TestRig – Setup, Compilation, Flashing & Calibration
 
 ---
 
-## Indhold
+## Table of Contents
 
 1. [Hardware](#hardware)
-2. [Opsætning på Raspberry Pi](#opsætning-på-raspberry-pi)
-3. [Kompilering](#kompilering)
-4. [Upload til board](#upload-til-board)
+2. [Setup on Raspberry Pi](#setup-on-raspberry-pi)
+3. [Compilation](#compilation)
+4. [Uploading to the Board](#uploading-to-the-board)
 5. [Serial Monitor](#serial-monitor)
-6. [Kommandoreference](#kommandoreference)
-7. [Kalibrering af load cell](#kalibrering-af-load-cell)
+6. [Command Reference](#command-reference)
+7. [Load Cell Calibration](#load-cell-calibration)
 
 ---
 
 ## Hardware
 
-| Komponent | Pin (RP2040) |
+| Component | Pin (RP2040) |
 |-----------|-------------|
 | HX711 DOUT | GPIO 4 |
 | HX711 SCK | GPIO 2 |
 | Tachometer | GPIO 0 |
 
-Boardet forbindes til Raspberry Pi via USB.
+The board connects to the Raspberry Pi via USB.
 
 ---
 
-## Opsætning på Raspberry Pi
+## Setup on Raspberry Pi
 
-### 1. Installer PlatformIO
+### 1. Install PlatformIO
 
 ```bash
 pip3 install platformio --break-system-packages
 ```
 
-### 2. Tilføj PlatformIO til PATH
+### 2. Add PlatformIO to PATH
 
 ```bash
 export PATH=$PATH:~/.local/bin
@@ -43,16 +43,16 @@ echo 'export PATH=$PATH:~/.local/bin' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### 3. Hent projektet
+### 3. Clone the repository
 
 ```bash
 git clone <repo-url>
 cd TestRigInstrumentation/firmware
 ```
 
-### 4. Ret `platformio.ini`
+### 4. Fix `platformio.ini`
 
-Sørg for at filen ser sådan ud:
+Make sure the file looks like this:
 
 ```ini
 [env:seeed-xiao-rp2040]
@@ -62,21 +62,21 @@ framework = arduino
 monitor_speed = 115200
 ```
 
-> **Vigtigt:** `board` skal være `seeed_xiao_rp2040` med **underscore**, ikke bindestreg.
-> `platform` skal pege på Earle F. Philhower's kerne – ikke `Seeed Studio`.
+> **Important:** `board` must be `seeed_xiao_rp2040` with an **underscore**, not a hyphen.  
+> `platform` must point to Earle F. Philhower's core – not `Seeed Studio`.
 
 ---
 
-## Kompilering
+## Compilation
 
 ```bash
 cd firmware
 pio run
 ```
 
-Første gang henter PlatformIO automatisk den rigtige kerne og biblioteker – det tager et par minutter.
+The first time, PlatformIO will automatically download the correct core and libraries – this may take a few minutes.
 
-Forventet output ved succes:
+Expected output on success:
 ```
 RAM:   [          ]   3.6% (used 9516 bytes from 262144 bytes)
 Flash: [          ]   3.6% (used 74508 bytes from 2093056 bytes)
@@ -85,17 +85,17 @@ Flash: [          ]   3.6% (used 74508 bytes from 2093056 bytes)
 
 ---
 
-## Upload til board
+## Uploading to the Board
 
-Sørg for at boardet er forbundet via USB, og kør:
+Make sure the board is connected via USB, then run:
 
 ```bash
 pio run --target upload
 ```
 
-PlatformIO finder automatisk porten (`/dev/ttyACM0`), genstarter boardet i BOOTSEL-mode og flasher firmware.
+PlatformIO will automatically detect the port (`/dev/ttyACM0`), reboot the board into BOOTSEL mode, and flash the firmware.
 
-Forventet output ved succes:
+Expected output on success:
 ```
 Verifying Flash: [==============================] 100%
   OK
@@ -107,142 +107,142 @@ The device was rebooted to start the application.
 
 ## Serial Monitor
 
-Åbn serial monitor til at kommunikere med boardet:
+Open the serial monitor to communicate with the board:
 
 ```bash
 pio device monitor
 ```
 
-- Baudrate: `115200`
-- Afslut: `Ctrl+C`
+- Baud rate: `115200`
+- Quit: `Ctrl+C`
 
-Når forbindelsen er oprettet, sender boardet et banner:
+Once connected, the board sends a banner:
 ```
 OK READY vendor=ForeverBearing device=RP2040 fw=1.1.0
 ```
 
-Kommandoer sendes som tekst efterfulgt af **Enter** (LF/CRLF).
+Commands are sent as plain text followed by **Enter** (LF/CRLF).
 
 ---
 
-## Kommandoreference
+## Command Reference
 
-### Generelle kommandoer
+### General
 
-| Kommando | Beskrivelse | Eksempel svar |
-|----------|-------------|---------------|
-| `PING` | Test forbindelsen | `OK PONG` |
-| `INFO` | Vis firmware info | `OK INFO vendor=ForeverBearing device=RP2040 fw=1.1.0` |
+| Command | Description | Example response |
+|---------|-------------|-----------------|
+| `PING` | Test the connection | `OK PONG` |
+| `INFO` | Show firmware info | `OK INFO vendor=ForeverBearing device=RP2040 fw=1.1.0` |
 
 ### Load Cell
 
-| Kommando | Beskrivelse | Eksempel svar |
-|----------|-------------|---------------|
-| `LOAD?` | Læs aktuel vægt | `OK LOAD mass_g=123.456 raw=61728 ts=1234567890` |
-| `TARE` | Nulstil tare (gem i EEPROM) | `OK TARE` |
-| `SETCAL <slope> <tare>` | Sæt kalibrering og gem | `OK SETCAL` |
-| `CAL?` | Vis aktuel kalibrering | `OK CAL slope=0.004000000 tare=0 gain=64` |
-| `RESETCAL` | Nulstil til fabriksindstillinger | `OK RESETCAL` |
+| Command | Description | Example response |
+|---------|-------------|-----------------|
+| `LOAD?` | Read current weight | `OK LOAD mass_g=123.456 raw=61728 ts=1234567890` |
+| `TARE` | Zero the tare (saved to EEPROM) | `OK TARE` |
+| `SETCAL <slope> <tare>` | Set calibration and save | `OK SETCAL` |
+| `CAL?` | Show current calibration | `OK CAL slope=0.004000000 tare=0 gain=64` |
+| `RESETCAL` | Reset to factory defaults | `OK RESETCAL` |
 
 ### HX711 Gain
 
-| Kommando | Beskrivelse | Eksempel svar |
-|----------|-------------|---------------|
-| `GAIN?` | Vis aktuel gain | `OK GAIN gain=64` |
-| `SETGAIN <64\|128>` | Sæt gain (gem i EEPROM) | `OK SETGAIN` |
+| Command | Description | Example response |
+|---------|-------------|-----------------|
+| `GAIN?` | Show current gain | `OK GAIN gain=64` |
+| `SETGAIN <64\|128>` | Set gain (saved to EEPROM) | `OK SETGAIN` |
 
-> **Gain 64** = større måleområde (anbefalet til >30 kg)  
-> **Gain 128** = højere opløsning (anbefalet til præcisionsvejning <10 kg)  
-> Efter ændring af gain **skal** SETCAL køres igen med ny slope-værdi.
+> **Gain 64** = larger measurement range (recommended for >30 kg loads)  
+> **Gain 128** = higher resolution (recommended for precision weighing <10 kg)  
+> After changing gain, **SETCAL must be run again** with a new slope value.
 
 ### Tachometer
 
-| Kommando | Beskrivelse | Eksempel svar |
-|----------|-------------|---------------|
-| `SPEED?` | Læs hastighed | `OK SPEED rpm=1500.00 period_ms=40.000 pulses=3000 ts=1234567890` |
-| `PPR?` | Vis pulser per omdrejning | `OK PPR ppr=1` |
-| `SETPPR <n>` | Sæt pulser per omdrejning | `OK SETPPR` |
+| Command | Description | Example response |
+|---------|-------------|-----------------|
+| `SPEED?` | Read current speed | `OK SPEED rpm=1500.00 period_ms=40.000 pulses=3000 ts=1234567890` |
+| `PPR?` | Show pulses per revolution | `OK PPR ppr=1` |
+| `SETPPR <n>` | Set pulses per revolution | `OK SETPPR` |
 
-### Tid
+### Time Synchronisation
 
-| Kommando | Beskrivelse | Eksempel svar |
-|----------|-------------|---------------|
-| `SETTIME <unix_ms>` | Synkroniser ur med host | `OK SETTIME` |
+| Command | Description | Example response |
+|---------|-------------|-----------------|
+| `SETTIME <unix_ms>` | Sync clock with host | `OK SETTIME` |
 
-### Fejlkoder
+### Error Codes
 
-| Kode | Betydning |
-|------|-----------|
-| `ERR 10` | Ukendt kommando |
-| `ERR 11` | Linje for lang |
+| Code | Meaning |
+|------|---------|
+| `ERR 10` | Unknown command |
+| `ERR 11` | Line too long |
 | `ERR 20` | HX711 timeout |
-| `ERR 30` | Mangler unix_ms argument |
-| `ERR 31` | Mangler slope/tare argument |
-| `ERR 32` | Mangler PPR argument |
-| `ERR 33` | Ugyldig PPR (må ikke være 0) |
-| `ERR 34` | Mangler gain argument |
-| `ERR 35` | Ugyldig gain (brug 64 eller 128) |
+| `ERR 30` | Missing unix_ms argument |
+| `ERR 31` | Missing slope/tare argument |
+| `ERR 32` | Missing PPR argument |
+| `ERR 33` | Invalid PPR (must not be 0) |
+| `ERR 34` | Missing gain argument |
+| `ERR 35` | Invalid gain (use 64 or 128) |
 
 ---
 
-## Kalibrering af load cell
+## Load Cell Calibration
 
-Kalibrering kræver en **kendt referencevægt** (f.eks. 1000 g).
+Calibration requires a **known reference weight** (e.g. 1000 g).
 
-### Trin 1 – Tjek gain
+### Step 1 – Check gain
 
-Vælg gain ud fra dit måleområde:
+Select gain based on your measurement range:
 
 ```
 GAIN?
 ```
 
-Skift om nødvendigt (her eksempel med gain 64 til større laster):
+Change if necessary (example: gain 64 for heavier loads):
 ```
 SETGAIN 64
 ```
 
-### Trin 2 – Tare (nulpunktskalibrering)
+### Step 2 – Tare (zero calibration)
 
-Sørg for at load cellen er **aflastet** (ingen vægt på), og send:
+Make sure the load cell is **unloaded** (no weight on it), then send:
 
 ```
 TARE
 ```
 
-Boardet gemmer nulpunktet i EEPROM.
+The board saves the zero point to EEPROM.
 
-### Trin 3 – Aflæs råværdi med referencevægt
+### Step 3 – Read raw value with reference weight
 
-Placer din **kendte referencevægt** på load cellen og aflæs raw-værdien:
+Place your **known reference weight** on the load cell and read the raw value:
 
 ```
 LOAD?
 ```
 
-Eksempel svar:
+Example response:
 ```
 OK LOAD mass_g=1234.567 raw=312500 ts=1234567890
 ```
 
-Notér `raw`-værdien (her `312500`) og din tare (fra `CAL?`):
+Note the `raw` value (here `312500`) and your tare offset from:
 ```
 CAL?
 ```
-Eksempel: `tare=0`
+Example: `tare=0`
 
-### Trin 4 – Beregn slope
+### Step 4 – Calculate slope
 
 ```
-slope = referencevægt_i_gram / (raw - tare)
+slope = reference_weight_in_grams / (raw - tare)
 ```
 
-Eksempel med 1000 g referencevægt:
+Example with 1000 g reference weight:
 ```
 slope = 1000 / (312500 - 0) = 0.003200
 ```
 
-### Trin 5 – Gem kalibrering
+### Step 5 – Save calibration
 
 ```
 SETCAL 0.003200 0
@@ -250,34 +250,34 @@ SETCAL 0.003200 0
 
 Format: `SETCAL <slope> <tare_offset>`
 
-### Trin 6 – Verificér
+### Step 6 – Verify
 
-Placer referencevægten igen og tjek:
+Place the reference weight again and check:
 
 ```
 LOAD?
 ```
 
-Svar bør nu vise `mass_g` tæt på din referencevægt.
+The response should now show `mass_g` close to your reference weight.
 
-### Gentag ved gain-ændring
+### Repeat after gain change
 
-Hvis du skifter gain med `SETGAIN` skal hele kalibreringsproceduren gentages, da gain direkte påvirker råværdierne fra HX711.
+If you change gain with `SETGAIN`, the entire calibration procedure must be repeated, as gain directly affects the raw values from the HX711.
 
 ---
 
-## EEPROM-persistence
+## EEPROM Persistence
 
-Følgende indstillinger gemmes automatisk i EEPROM (flash-emulering) og overlever genstart:
+The following settings are automatically saved to EEPROM (flash emulation) and survive a reboot:
 
-- `slope` (kalibreringsfaktor)
-- `tare` (nulpunkt)
+- `slope` (calibration factor)
+- `tare` (zero offset)
 - `gain` (HX711 gain)
 
-Kalibreringen er gyldig så længe `CAL2`-magic og CRC32-checksum matcher. Ved korruption eller første opstart bruges fabriksindstillingerne:
+The calibration is valid as long as the `CAL2` magic number and CRC32 checksum match. On corruption or first boot, factory defaults are used:
 
-| Parameter | Fabriksværdi |
-|-----------|-------------|
+| Parameter | Factory default |
+|-----------|----------------|
 | slope | 0.004000 |
 | tare | 0 |
 | gain | 64 |
