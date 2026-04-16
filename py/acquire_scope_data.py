@@ -228,7 +228,7 @@ def socket_query_line(ip: str, port: int, cmd: str, timeout_sec: float = 3.0) ->
             s.close()
         except Exception:
             pass
-            
+
 def socket_capture_waveform(ip: str, port: int, src: str, points: int, fmt: str, timeout_sec: float = 15.0):
     import socket
     import numpy as np
@@ -318,22 +318,21 @@ def socket_capture_waveform(ip: str, port: int, src: str, points: int, fmt: str,
         send(s, "*CLS")
         query_opc(s)
 
-        # Source select
-        send(s, f":WAV:SOUR {src}")
+        # Digitize first — acquire into full memory
+        send(s, ":DIGITIZE")
+        query_opc(s)
 
-        # Use socket-known commands (original CLI style)
-        send(s, f":WAV:FORM {fmt}")
+        # Configure waveform readout AFTER acquisition
+        send(s, f":WAV:SOUR {src}")
+        send(s, ":WAV:POIN:MODE RAW")
         send(s, f":WAV:POIN {points}")
+        send(s, f":WAV:FORM {fmt}")
 
         if fmt == "WORD":
             send(s, ":WAV:UNS 0")
             send(s, ":WAV:BYT MSBFirst")
         else:
             send(s, ":WAV:UNS 1")
-
-        # Digitize + wait
-        send(s, ":DIGITIZE")
-        query_opc(s)
 
         # Preamble (robust read, no newline assumption)
         pre_line = query_text(s, ":WAV:PRE?")
@@ -364,7 +363,8 @@ def socket_capture_waveform(ip: str, port: int, src: str, points: int, fmt: str,
             s.close()
         except Exception:
             pass
-            
+
+
 def read_waveform(scope, channel_cfg, acq_cfg):
     src = channel_cfg["source"]
     points = int(acq_cfg["points"])
