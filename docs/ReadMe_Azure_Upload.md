@@ -1,61 +1,61 @@
-# Azure Upload & HDF5 Komprimering
+# Azure Upload & HDF5 Compression
 
 ## Azure Upload
 
-Upload testdata (HDF5-filer) direkte fra Dashboard til Azure Blob Storage.
+Upload test data (HDF5 files) directly from the Dashboard to Azure Blob Storage.
 
-### Opsætning
+### Setup
 
-Tilføj en `azure` sektion i `config.json`:
+Add an `azure` section to `config.json`:
 
 ```json
 "azure": {
-    "connection_string": "DIN_CONNECTION_STRING_HER",
+    "connection_string": "YOUR_CONNECTION_STRING_HERE",
     "default_container": "data"
 }
 ```
 
-Connection string kan enten være en AccountKey- eller SAS-baseret string. Du finder den i Azure Portal under **Storage account → Access keys** eller **Shared access signature**.
+The connection string can be either an AccountKey or SAS-based string. You can find it in the Azure Portal under **Storage account → Access keys** or **Shared access signature**.
 
-Installer Python-afhængigheden (er inkluderet i `requirements.txt`):
+Install the Python dependency (already included in `requirements.txt`):
 
 ```bash
 pip install azure-storage-blob azure-core
 ```
 
-### Brug
+### Usage
 
-1. Kør en test som normalt fra Dashboard
-2. Når testen er færdig, klik **Upload Azure** knappen i Controls-sektionen
-3. Dialogen åbner og viser en liste over alle tilgængelige HDF5-filer — vælg den du vil uploade
-4. Vælg target **container** (eller skriv et nyt containernavn)
-5. Rediger eventuelt **blob-navnet** (filnavnet i Azure)
-6. Klik **Upload**
-7. Progress bar viser fremskridt i realtid
-8. Klik **Annuller** hvis du vil stoppe upload undervejs
+1. Run a test as usual from the Dashboard
+2. When the test is complete, click the **Upload Azure** button in the Controls section
+3. The dialog opens and displays a list of all available HDF5 files — select the one you want to upload
+4. Choose the target **container** (or type a new container name)
+5. Optionally edit the **blob name** (the filename in Azure)
+6. Click **Upload**
+7. The progress bar shows real-time upload progress
+8. Click **Cancel** to abort the upload at any time
 
-### Filbrowser
+### File Browser
 
-Dialogen scanner automatisk `data/` mappen og eventuelle run-folders for `.h5` og `.hdf5` filer. Filerne vises sorteret med nyeste først og inkluderer filstørrelse, dato og mappe.
+The dialog automatically scans the `data/` directory and any run folders for `.h5` and `.hdf5` files. Files are listed newest first and include file size, date, and parent folder.
 
-### Fejlfinding
+### Troubleshooting
 
-| Problem | Løsning |
+| Problem | Solution |
 |---|---|
-| "No module named 'azure'" | Kør `pip install azure-storage-blob azure-core` |
-| "Could not resolve host" | Tjek at storage account-navnet i connection string er korrekt |
-| Upload hænger ved 0% | Tjek internetforbindelse fra Pi med `curl -I https://DITACCOUNT.blob.core.windows.net` |
-| "Upload already in progress" | En upload kører allerede — vent eller annuller den først |
+| "No module named 'azure'" | Run `pip install azure-storage-blob azure-core` |
+| "Could not resolve host" | Verify the storage account name in your connection string is correct |
+| Upload stuck at 0% | Check internet connectivity from the Pi with `curl -I https://YOURACCOUNT.blob.core.windows.net` |
+| "Upload already in progress" | An upload is already running — wait for it to finish or cancel it first |
 
 ---
 
-## HDF5 Komprimering
+## HDF5 Compression
 
-Reducer filstørrelsen på HDF5-testdata ved at slå komprimering til.
+Reduce HDF5 test data file size by enabling compression.
 
-### Opsætning
+### Setup
 
-I `config.json` under `store`-sektionen:
+In `config.json` under the `store` section:
 
 ```json
 "store": {
@@ -72,51 +72,51 @@ I `config.json` under `store`-sektionen:
 }
 ```
 
-### Komprimeringsindstillinger
+### Compression Settings
 
-**`compress`** — vælg komprimeringsalgoritme:
+**`compress`** — choose the compression algorithm:
 
-| Værdi | Beskrivelse |
+| Value | Description |
 |---|---|
-| `"none"` | Ingen komprimering (default). Hurtigst at skrive. |
-| `"gzip"` | God komprimering. Bedst til arkivering og upload. |
-| `"lzf"` | Hurtig komprimering, mindre reduktion. Godt til realtid. |
+| `"none"` | No compression (default). Fastest write speed. |
+| `"gzip"` | Good compression ratio. Best for archiving and upload. |
+| `"lzf"` | Fast compression, lower ratio. Good for real-time acquisition. |
 
-**`compression_level`** — kun relevant for gzip (1-9):
+**`compression_level`** — only applies to gzip (1–9):
 
-| Level | Hastighed | Filstørrelse |
+| Level | Speed | File Size |
 |---|---|---|
-| 1 | Hurtigst | Størst |
-| 4 | Balanceret (default) | God reduktion |
-| 9 | Langsomst | Mindst |
+| 1 | Fastest | Largest |
+| 4 | Balanced (default) | Good reduction |
+| 9 | Slowest | Smallest |
 
-### Slå komprimering til
+### Enabling Compression
 
-Sæt `compress` til `"gzip"`:
+Set `compress` to `"gzip"`:
 
 ```json
 "compress": "gzip",
 "compression_level": 4
 ```
 
-### Slå komprimering fra
+### Disabling Compression
 
-Sæt `compress` til `"none"`:
+Set `compress` to `"none"`:
 
 ```json
 "compress": "none"
 ```
 
-### Verificering
+### Verification
 
-Komprimeringen kan verificeres på to måder.
+Compression can be verified in two ways.
 
-**Via Python på Pi'en:**
+**Via Python on the Pi:**
 
 ```bash
 python3 -c "
 import h5py
-f = h5py.File('STIEN_TIL_DIN_FIL.h5', 'r')
+f = h5py.File('PATH_TO_YOUR_FILE.h5', 'r')
 ds = f['sweeps/sweep_000/AE/voltage']
 print(f'compression: {ds.compression}')
 print(f'compression_opts: {ds.compression_opts}')
@@ -125,7 +125,7 @@ f.close()
 "
 ```
 
-Forventet output med gzip:
+Expected output with gzip enabled:
 ```
 compression: gzip
 compression_opts: 4
@@ -134,20 +134,20 @@ chunks: (1954,)
 
 **Via myHDF5 viewer:**
 
-1. Gå til https://myhdf5.hdfgroup.org
-2. Upload din HDF5-fil
-3. Naviger til et voltage-dataset og klik **Inspect**
-4. Under `filters` skal der stå `"name": "deflate"` med `"cd_values": [4]`
+1. Go to https://myhdf5.hdfgroup.org
+2. Upload your HDF5 file
+3. Navigate to a voltage dataset and click **Inspect**
+4. Under `filters` you should see `"name": "deflate"` with `"cd_values": [4]`
 
-Bemærk: "deflate" er det interne HDF5-navn for gzip.
+Note: "deflate" is the internal HDF5 name for the gzip algorithm.
 
-### Komprimering i test-profiler
+### Compression in Test Profiles
 
-Komprimeringsindstillinger kan også sættes per test-profil. Tilføj en `store`-sektion i din profil-JSON, og den vil overskrive config.json:
+Compression settings can also be set per test profile. Add a `store` section to your profile JSON, and it will override the values in `config.json`:
 
 ```json
 {
-    "name": "Langtidstest med komprimering",
+    "name": "Long duration test with compression",
     "duration_minutes": 480,
     "store": {
         "compress": "gzip",
@@ -156,8 +156,8 @@ Komprimeringsindstillinger kan også sættes per test-profil. Tilføj en `store`
 }
 ```
 
-### Anbefalinger
+### Recommendations
 
-- **Korte tests (< 30 min):** `"none"` — filerne er små nok til at komprimering ikke gør den store forskel
-- **Lange tests (> 1 time):** `"gzip"` level 4 — god balance mellem hastighed og størrelse
-- **Upload til Azure:** `"gzip"` anbefales — reducerer upload-tid markant for store filer
+- **Short tests (< 30 min):** `"none"` — files are small enough that compression adds little benefit
+- **Long tests (> 1 hour):** `"gzip"` level 4 — good balance between speed and file size
+- **Upload to Azure:** `"gzip"` recommended — significantly reduces upload time for large files
