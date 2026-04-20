@@ -7,6 +7,7 @@ import { useWaveform } from "./hooks/useWaveform";
 import { ConfigSelector } from "./components/ConfigSelector";
 import { HDF5Status } from "./components/HDF5Status";
 import { HardwareStatus } from "./components/HardwareStatus";
+import { AzureUploadDialog } from "./components/AzureUploadDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-import { Play, Square, Radio, ThermometerSun, Gauge, HardDriveDownload, Cpu, Link as LinkIcon, FileText, Activity, RefreshCw } from "lucide-react";
+import { Play, Square, Radio, ThermometerSun, Gauge, HardDriveDownload, Cpu, Link as LinkIcon, FileText, Activity, RefreshCw, Cloud } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip as RTooltip, CartesianGrid, ResponsiveContainer, ReferenceLine, AreaChart, Area } from "recharts";
 import { motion } from "framer-motion";
 
@@ -165,6 +166,9 @@ export default function Dashboard() {
   const [manualRpm, setManualRpm] = useState(1500);
   const [manualTemp, setManualTemp] = useState(60);
   const [previewChannel, setPreviewChannel] = useState("CHAN1");
+
+  // Azure upload dialog
+  const [azureDialogOpen, setAzureDialogOpen] = useState(false);
   
   // Load test configuration from JSON file
   const { config, loading: configLoading, error: configError, getChartData, getTestDuration, loadConfig } = useTestConfig();
@@ -541,9 +545,18 @@ export default function Dashboard() {
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-2 justify-end">
+                <div className="flex items-center gap-2 justify-end flex-wrap">
                   <Button variant="outline" size="sm" onClick={resetFile} className="gap-1">
                     <HardDriveDownload className="h-3 w-3"/> New File
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAzureDialogOpen(true)}
+                    className="gap-1"
+                    disabled={!fileInfo?.filename}
+                  >
+                    <Cloud className="h-3 w-3"/> Upload Azure
                   </Button>
                   <Button variant="secondary" className="gap-2"><HardDriveDownload className="h-4 w-4"/> Save Config</Button>
                   <Button className="gap-2"><Play className="h-4 w-4"/> Apply</Button>
@@ -656,6 +669,11 @@ export default function Dashboard() {
           </div>
         </main>
       </div>
+      <AzureUploadDialog
+        open={azureDialogOpen}
+        onClose={() => setAzureDialogOpen(false)}
+        fileInfo={fileInfo}
+      />
     </TooltipProvider>
   );
 }

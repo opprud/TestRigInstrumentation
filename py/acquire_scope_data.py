@@ -664,6 +664,25 @@ def acquire_loop(config):
     if store_cfg.get("timestamped", True):
         out_path = timestamped_path(out_path, ts_local)
 
+    # --- HDF5 compression settings from store config ---
+    # Supported: "none", "gzip", "lzf"
+    # gzip accepts compression_opts 1-9 (default 4)
+    compress_mode = str(store_cfg.get("compress", "none")).strip().lower()
+    ds_kwargs = {}  # extra kwargs for create_dataset()
+
+    if compress_mode in ("gzip", "lzf"):
+        ds_kwargs["compression"] = compress_mode
+        ds_kwargs["chunks"] = True  # required for compression
+        if compress_mode == "gzip":
+            ds_kwargs["compression_opts"] = int(store_cfg.get("compression_level", 4))
+        if DEBUG:
+            print(f"[acquire_loop] HDF5 compression: {compress_mode} (opts={ds_kwargs.get('compression_opts', 'N/A')})")
+    elif store_cfg.get("chunk", False):
+        # Chunking without compression (allows resizing etc.)
+        ds_kwargs["chunks"] = True
+    if DEBUG and not ds_kwargs:
+        print("[acquire_loop] HDF5 compression: none")
+
     # Inject scope connection info (used by read_waveform/socket_capture_waveform)
     scope_cfg_inner = {
         "ip": config.get("scope_ip"),
@@ -712,6 +731,11 @@ def acquire_loop(config):
     with h5py.File(out_path, "w") as h5f:
         _write_metadata(h5f, config, scope_idn, ts_local, ts_utc, scope_settings)
 
+        # Record compression settings in file metadata
+        h5f.attrs["compression"] = compress_mode
+        if compress_mode == "gzip":
+            h5f.attrs["compression_level"] = ds_kwargs.get("compression_opts", 4)
+
         sweeps_grp = h5f.create_group("sweeps")
 
         samples  = int(acq_cfg["samples"])
@@ -751,8 +775,8 @@ def acquire_loop(config):
                 t, v, meta = read_waveform(None, ch, acq_cfg)
 
                 grp = sweep.create_group(alias)
-                grp.create_dataset("time",    data=t)
-                grp.create_dataset("voltage", data=v)
+                grp.create_dataset("time",    data=t, **ds_kwargs)
+                grp.create_dataset("voltage", data=v, **ds_kwargs)
                 for k, val in meta.items():
                     grp.attrs[k] = val
 

@@ -16,6 +16,7 @@ import asyncio
 import subprocess
 import sys
 import re
+import base64
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, List, Any
@@ -1849,6 +1850,303 @@ async def get_scope_waveform(channel: str = "CHAN1", points: int = None):
         finally:
             if 'scope' in locals():
                 scope.close()
+
+
+# ── Azure Blob Storage Upload ────────────────────────────────────────────────
+
+_azure_upload_state = {
+    "status": "idle",          # idle | uploading | done | error | cancelled
+    "filename": None,
+    "container": None,
+    "bytes_sent": 0,
+    "bytes_total": 0,
+    "percent": 0,
+    "error": None,
+    "started_at": None,
+    "finished_at": None,
+    "blob_url": None,
+}
+_azure_upload_lock = threading.Lock()
+_azure_upload_cancel = threading.Event()
+
+
+def _get_azure_blob_service():
+    """Create BlobServiceClient from config.json azure section."""
+    config_path = Path(__file__).parent / "config.json"
+    if not config_path.exists():
+        raise RuntimeError("config.json not found")
+
+    with open(config_path) as f:
+        cfg = json.load(f)
+
+    azure_cfg = cfg.get("azure", {})
+    conn_str = azure_cfg.get("connection_string")
+    if not conn_str:
+        raise RuntimeError("No azure.connection_string in config.json")
+
+    from azure.storage.blob import BlobServiceClient
+    return BlobServiceClient.from_connection_string(conn_str)
+
+
+def _upload_to_azure_thread(file_path: str, container_name: str, blob_name: str):
+    """Background thread: chunked upload with progress tracking and cancel support."""
+    global _azure_upload_state
+    import os as _os
+
+    try:
+        file_size = _os.path.getsize(file_path)
+        with _azure_upload_lock:
+            _azure_upload_state.update({
+                "status": "uploading",
+                "filename": _os.path.basename(file_path),
+                "container": container_name,
+                "bytes_sent": 0,
+                "bytes_total": file_size,
+                "percent": 0,
+                "error": None,
+                "started_at": datetime.now().isoformat(),
+                "finished_at": None,
+                "blob_url": None,
+            })
+
+        blob_service = _get_azure_blob_service()
+
+        # Ensure container exists (ignore if already exists)
+        try:
+            blob_service.create_container(container_name)
+        except Exception:
+            pass  # container already exists
+
+        container_client = blob_service.get_container_client(container_name)
+        blob_client = container_client.get_blob_client(blob_name)
+
+        CHUNK_SIZE = 8 * 1024 * 1024  # 8 MB chunks (faster for large files)
+        bytes_uploaded = 0
+
+        with open(file_path, "rb") as f:
+            if file_size > CHUNK_SIZE:
+                # Staged block upload for large files (progress per chunk)
+                from azure.storage.blob import BlobBlock
+                block_list = []
+                block_id = 0
+
+                while True:
+                    # Check cancel flag before each chunk
+                    if _azure_upload_cancel.is_set():
+                        # Clean up partial blob
+                        try:
+                            blob_client.delete_blob()
+                        except Exception:
+                            pass
+                        with _azure_upload_lock:
+                            _azure_upload_state.update({
+                                "status": "cancelled",
+                                "finished_at": datetime.now().isoformat(),
+                            })
+                        return
+
+                    chunk = f.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+
+                    block_id_str = f"{block_id:06d}"
+                    b64_block_id = base64.b64encode(block_id_str.encode()).decode()
+
+                    blob_client.stage_block(b64_block_id, chunk, length=len(chunk))
+                    block_list.append(b64_block_id)
+                    block_id += 1
+
+                    bytes_uploaded += len(chunk)
+                    pct = int((bytes_uploaded / file_size) * 100) if file_size > 0 else 100
+
+                    with _azure_upload_lock:
+                        _azure_upload_state["bytes_sent"] = bytes_uploaded
+                        _azure_upload_state["percent"] = pct
+
+                # Final cancel check before commit
+                if _azure_upload_cancel.is_set():
+                    with _azure_upload_lock:
+                        _azure_upload_state.update({
+                            "status": "cancelled",
+                            "finished_at": datetime.now().isoformat(),
+                        })
+                    return
+
+                blob_client.commit_block_list(
+                    [BlobBlock(block_id=bid) for bid in block_list]
+                )
+            else:
+                # Small file: single upload
+                data = f.read()
+                blob_client.upload_blob(data, overwrite=True)
+                bytes_uploaded = file_size
+                with _azure_upload_lock:
+                    _azure_upload_state["bytes_sent"] = bytes_uploaded
+                    _azure_upload_state["percent"] = 100
+
+        with _azure_upload_lock:
+            _azure_upload_state.update({
+                "status": "done",
+                "bytes_sent": file_size,
+                "percent": 100,
+                "finished_at": datetime.now().isoformat(),
+                "blob_url": blob_client.url,
+            })
+
+    except Exception as e:
+        with _azure_upload_lock:
+            _azure_upload_state.update({
+                "status": "error",
+                "error": str(e),
+                "finished_at": datetime.now().isoformat(),
+            })
+
+
+@app.get("/api/azure/files")
+async def azure_list_files():
+    """List available HDF5 files that can be uploaded."""
+    import os as _os
+
+    files = []
+    seen = set()
+
+    # 1) Current run folder
+    run_folder = _run_state.get("run_folder")
+    if run_folder and Path(run_folder).exists():
+        for p in Path(run_folder).glob("*.h5"):
+            if str(p) not in seen:
+                seen.add(str(p))
+                files.append(_file_info(p))
+        for p in Path(run_folder).glob("*.hdf5"):
+            if str(p) not in seen:
+                seen.add(str(p))
+                files.append(_file_info(p))
+
+    # 2) data/ directory (recursive)
+    data_dir = Path(__file__).parent / "data"
+    if data_dir.exists():
+        for pattern in ("**/*.h5", "**/*.hdf5"):
+            for p in data_dir.glob(pattern):
+                if str(p) not in seen:
+                    seen.add(str(p))
+                    files.append(_file_info(p))
+
+    # Sort by modified time, newest first
+    files.sort(key=lambda f: f["modified_ts"], reverse=True)
+
+    return {"files": files}
+
+
+def _file_info(p: Path) -> dict:
+    import os as _os
+    stat = p.stat()
+    return {
+        "path": str(p),
+        "name": p.name,
+        "size_bytes": stat.st_size,
+        "modified": datetime.fromtimestamp(stat.st_mtime).strftime("%d/%m/%Y, %H:%M:%S"),
+        "modified_ts": stat.st_mtime,
+        "parent": p.parent.name,
+    }
+
+
+@app.post("/api/azure/upload")
+async def azure_upload(payload: Dict):
+    """
+    Start uploading an HDF5 file to Azure Blob Storage.
+
+    Body:
+        {
+            "container": "data",
+            "blob_name": "my_test.h5",    (optional: defaults to filename)
+            "file_path": "path/to/file"   (optional: defaults to latest HDF5)
+        }
+    """
+    with _azure_upload_lock:
+        if _azure_upload_state["status"] == "uploading":
+            raise HTTPException(status_code=409, detail="Upload already in progress")
+
+    container = payload.get("container", "data")
+    file_path = payload.get("file_path")
+
+    # Find the HDF5 file if not explicitly provided
+    if not file_path:
+        run_folder = _run_state.get("run_folder")
+        if run_folder:
+            candidates = list(Path(run_folder).glob("scope_*.h5"))
+            if candidates:
+                file_path = str(sorted(candidates)[-1])
+
+        if not file_path:
+            data_dir = Path(__file__).parent / "data"
+            candidates = list(data_dir.rglob("scope_*.h5")) + list(data_dir.glob("*.h5")) + list(data_dir.rglob("*.hdf5"))
+            if candidates:
+                file_path = str(max(candidates, key=lambda p: p.stat().st_mtime))
+
+    if not file_path or not Path(file_path).exists():
+        raise HTTPException(status_code=404, detail="No HDF5 file found to upload")
+
+    blob_name = payload.get("blob_name") or Path(file_path).name
+
+    # Verify Azure config before starting thread
+    try:
+        _get_azure_blob_service()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Azure configuration error: {str(e)}")
+
+    # Clear any previous cancel flag
+    _azure_upload_cancel.clear()
+
+    t = threading.Thread(
+        target=_upload_to_azure_thread,
+        args=(file_path, container, blob_name),
+        daemon=True,
+    )
+    t.start()
+
+    return {
+        "status": "started",
+        "file": Path(file_path).name,
+        "container": container,
+        "blob_name": blob_name,
+    }
+
+
+@app.get("/api/azure/upload/status")
+async def azure_upload_status():
+    """Poll upload progress."""
+    with _azure_upload_lock:
+        return dict(_azure_upload_state)
+
+
+@app.post("/api/azure/upload/cancel")
+async def azure_upload_cancel():
+    """Cancel an in-progress upload."""
+    _azure_upload_cancel.set()
+    # Wait briefly for thread to notice
+    await asyncio.sleep(0.5)
+    with _azure_upload_lock:
+        if _azure_upload_state["status"] == "uploading":
+            _azure_upload_state["status"] = "cancelled"
+        return dict(_azure_upload_state)
+
+
+@app.get("/api/azure/containers")
+async def azure_list_containers():
+    """List available Azure Blob containers."""
+    try:
+        blob_service = _get_azure_blob_service()
+        containers = []
+        try:
+            for c in blob_service.list_containers():
+                containers.append(c.name)
+        except Exception:
+            # SAS tokens may not allow listing — return known defaults
+            containers = ["data"]
+        return {"containers": containers}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/shelly/status")
 async def shelly_status():

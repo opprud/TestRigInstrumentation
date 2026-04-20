@@ -9,3 +9,5 @@ fastapi
 uvicorn[standard]
 pymodbus
 paho-mqtt
+azure-storage-blob
+azure-core

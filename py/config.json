@@ -1,10 +1,10 @@
 {
-  "scope_ip": "169.254.172.2",
+  "scope_ip": "169.254.227.43",
 
   "bearing": {
     "manufacturer": "SKF",
     "model": "SYJ25",
-    "material": "Chrome steel",
+    "material": "Chrome steel2",
     "bore_mm": 25,
     "Rolling elements": 9,
     "cage_type": "Steel",
@@ -28,7 +28,7 @@
   },
 
   "acquisition": {
-    "points": 125000,
+    "points": 50000,
     "samples": 500,
     "interval_sec": 10,
     "waveform_format": "WORD",
@@ -81,7 +81,7 @@
   },
 
   "test_parameters": {
-    "test_name": "Oil & sensor test",
+    "test_name": "Full Oil test",
     "target_rpm": 500,
     "target_temperature_c": 60,
     "expected_load_g": 200,
@@ -90,9 +90,10 @@
   },
 
   "store": {
-    "output_file": "data/firstoil_4.h5",
+    "output_file": "data/keratech22.hdf5",
     "timestamped": true,
-    "compress": "none",
+    "compress": "gzip",
+	"compression_level": 4,
     "chunk": false,
     "attrs": {
       "project": "ForeverBearing",
@@ -103,6 +104,11 @@
   
   "scope": {
     "preferred_port": 5025
+  },
+
+  "azure": {
+    "connection_string": "BlobEndpoint=https://csfbst001.blob.core.windows.net/;QueueEndpoint=https://csfbst001.queue.core.windows.net/;FileEndpoint=https://csfbst001.file.core.windows.net/;TableEndpoint=https://csfbst001.table.core.windows.net/;SharedAccessSignature=sv=2025-11-05&ss=b&srt=co&sp=rwdlactf&se=2126-04-10T06:33:12Z&st=2026-04-10T06:33:12Z&spr=https&sig=mLYdG%2F%2F%2BBvdWkmjCUZmI7gww4pfMynDByS%2BbJgTeOC0%3D",
+	"default_container": "data"
   }
 
 }
