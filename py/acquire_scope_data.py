@@ -1,4 +1,30 @@
 #!/usr/bin/env python3
+
+# ── Startup log ─────────────────────────────────────────────────────────────
+import sys as _sys, os as _os
+_LOGFILE = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "debug_startup.log")
+
+def _dlog(msg: str):
+    """Skriv til debug_startup.log OG stdout."""
+    try:
+        import time as _t2
+        line = f"[{_t2.strftime('%H:%M:%S')}] {msg}"
+        with open(_LOGFILE, "a") as _lf:
+            _lf.write(line + "\n")
+        print(line, flush=True)
+    except Exception:
+        pass
+
+try:
+    import time as _t
+    _dlog(f"=== START args={_sys.argv} ===")
+    del _t
+except Exception as _e:
+    pass
+del _sys, _os
+# ────────────────────────────────────────────────────────────────────────────
+
+_dlog("import stdlib...")
 import argparse
 import json
 import os
@@ -10,11 +36,14 @@ import threading
 from datetime import datetime, UTC
 from zoneinfo import ZoneInfo
 from pathlib import Path
+_dlog("import numpy/h5py...")
 
 import numpy as np
 import h5py
+_dlog("import scope_utils...")
 
 from scope_utils import ScopeManager
+_dlog("alle imports OK")
 
 
 TZ = ZoneInfo("Europe/Copenhagen")
@@ -228,7 +257,7 @@ def socket_query_line(ip: str, port: int, cmd: str, timeout_sec: float = 3.0) ->
             s.close()
         except Exception:
             pass
-
+            
 def socket_capture_waveform(ip: str, port: int, src: str, points: int, fmt: str, timeout_sec: float = 15.0):
     import socket
     import numpy as np
@@ -318,21 +347,22 @@ def socket_capture_waveform(ip: str, port: int, src: str, points: int, fmt: str,
         send(s, "*CLS")
         query_opc(s)
 
-        # Digitize first — acquire into full memory
-        send(s, ":DIGITIZE")
-        query_opc(s)
-
-        # Configure waveform readout AFTER acquisition
+        # Source select
         send(s, f":WAV:SOUR {src}")
-        send(s, ":WAV:POIN:MODE RAW")
-        send(s, f":WAV:POIN {points}")
+
+        # Use socket-known commands (original CLI style)
         send(s, f":WAV:FORM {fmt}")
+        send(s, f":WAV:POIN {points}")
 
         if fmt == "WORD":
             send(s, ":WAV:UNS 0")
             send(s, ":WAV:BYT MSBFirst")
         else:
             send(s, ":WAV:UNS 1")
+
+        # Digitize + wait
+        send(s, ":DIGITIZE")
+        query_opc(s)
 
         # Preamble (robust read, no newline assumption)
         pre_line = query_text(s, ":WAV:PRE?")
@@ -363,7 +393,7 @@ def socket_capture_waveform(ip: str, port: int, src: str, points: int, fmt: str,
             s.close()
         except Exception:
             pass
-
+            
 
 def read_waveform(scope, channel_cfg, acq_cfg):
     src = channel_cfg["source"]
@@ -533,54 +563,75 @@ def _query_scope_settings(ip: str, port: int, channels: list) -> dict:
     return settings
 
 
-def _scope_write(ip: str, port: int, cmd: str, timeout_sec: float = 3.0):
-    """Send a write-only SCPI command (no response expected)."""
-    import socket as _socket
-    s = _socket.create_connection((ip, port), timeout=timeout_sec)
-    s.settimeout(timeout_sec)
-    try:
-        if not cmd.endswith("\n"):
-            cmd += "\n"
-        s.sendall(cmd.encode("ascii", errors="ignore"))
-        time.sleep(0.05)  # brief pause for scope to process
-    finally:
-        try:
-            s.close()
-        except Exception:
-            pass
-
-
 def _apply_scope_channel_settings(ip: str, port: int, channels: list, profile_cfg: dict):
     """
     Apply scope channel settings from test profile scope_channels section.
-    Only channels listed in scope_channels are adjusted.
+    Uses a single persistent TCP connection for all SCPI commands so the scope
+    can process them reliably in sequence.
+
+    Note: timebase_range is a global scope setting (not per-channel) — it is only
+    sent once, taken from the first channel that specifies it.
     """
+    import socket as _socket
+
     scope_ch_cfg = (profile_cfg or {}).get("scope_channels", {})
     if not scope_ch_cfg:
         return
 
     name_to_source = {ch["name"]: ch["source"] for ch in channels}
 
+    # Build ordered command list; timebase is global — emit it only once
+    cmds = []
+    timebase_done = False
+
     for alias, settings in scope_ch_cfg.items():
         src = name_to_source.get(alias)
         if not src:
-            if DEBUG:
-                print(f"[scope_channels] Unknown alias '{alias}', skipping")
+            print(f"[scope_channels] Unknown channel alias '{alias}', skipping", flush=True)
             continue
+
+        if "timebase_range" in settings and not timebase_done:
+            cmds.append((f":TIM:RANG {settings['timebase_range']}", alias))
+            timebase_done = True
+
+        if "volt_range" in settings:
+            cmds.append((f":{src}:RANG {settings['volt_range']}", alias))
+        if "volt_offset" in settings:
+            cmds.append((f":{src}:OFFS {settings['volt_offset']}", alias))
+        if "coupling" in settings:
+            cmds.append((f":{src}:COUP {settings['coupling']}", alias))
+
+    if not cmds:
+        return
+
+    # Send all commands over ONE TCP session, followed by *OPC? to confirm completion
+    try:
+        s = _socket.create_connection((ip, port), timeout=5.0)
+        s.settimeout(5.0)
         try:
-            if "timebase_range" in settings:
-                _scope_write(ip, port, f":TIM:RANG {settings['timebase_range']}")
-            if "volt_range" in settings:
-                _scope_write(ip, port, f":{src}:RANG {settings['volt_range']}")
-            if "volt_offset" in settings:
-                _scope_write(ip, port, f":{src}:OFFS {settings['volt_offset']}")
-            if "coupling" in settings:
-                _scope_write(ip, port, f":{src}:COUP {settings['coupling']}")
-            if DEBUG:
-                print(f"[scope_channels] Applied {alias} ({src}): {settings}")
-        except Exception as e:
-            if DEBUG:
-                print(f"[scope_channels] Error applying {alias}: {e}")
+            for cmd, alias in cmds:
+                print(f"[scope_channels] {alias}: {cmd}", flush=True)
+                s.sendall((cmd + "\n").encode("ascii", errors="ignore"))
+                time.sleep(0.05)   # brief inter-command pause
+
+            # *OPC? confirms all pending commands have been processed
+            s.sendall(b"*OPC?\n")
+            try:
+                s.settimeout(3.0)
+                resp = s.recv(64).decode(errors="ignore").strip()
+                print(f"[scope_channels] *OPC? => {resp!r}  ({len(cmds)} cmds applied)", flush=True)
+            except Exception as opc_e:
+                print(f"[scope_channels] *OPC? timed out (settings still sent): {opc_e}", flush=True)
+        finally:
+            try:
+                s.close()
+            except Exception:
+                pass
+
+    except Exception as e:
+        import traceback
+        print(f"[scope_channels] ERROR applying settings: {e}", flush=True)
+        traceback.print_exc()
 
 
 def _write_metadata(h5f, config: dict, scope_idn: str, ts_local: str, ts_utc: str,
@@ -664,25 +715,6 @@ def acquire_loop(config):
     if store_cfg.get("timestamped", True):
         out_path = timestamped_path(out_path, ts_local)
 
-    # --- HDF5 compression settings from store config ---
-    # Supported: "none", "gzip", "lzf"
-    # gzip accepts compression_opts 1-9 (default 4)
-    compress_mode = str(store_cfg.get("compress", "none")).strip().lower()
-    ds_kwargs = {}  # extra kwargs for create_dataset()
-
-    if compress_mode in ("gzip", "lzf"):
-        ds_kwargs["compression"] = compress_mode
-        ds_kwargs["chunks"] = True  # required for compression
-        if compress_mode == "gzip":
-            ds_kwargs["compression_opts"] = int(store_cfg.get("compression_level", 4))
-        if DEBUG:
-            print(f"[acquire_loop] HDF5 compression: {compress_mode} (opts={ds_kwargs.get('compression_opts', 'N/A')})")
-    elif store_cfg.get("chunk", False):
-        # Chunking without compression (allows resizing etc.)
-        ds_kwargs["chunks"] = True
-    if DEBUG and not ds_kwargs:
-        print("[acquire_loop] HDF5 compression: none")
-
     # Inject scope connection info (used by read_waveform/socket_capture_waveform)
     scope_cfg_inner = {
         "ip": config.get("scope_ip"),
@@ -731,11 +763,6 @@ def acquire_loop(config):
     with h5py.File(out_path, "w") as h5f:
         _write_metadata(h5f, config, scope_idn, ts_local, ts_utc, scope_settings)
 
-        # Record compression settings in file metadata
-        h5f.attrs["compression"] = compress_mode
-        if compress_mode == "gzip":
-            h5f.attrs["compression_level"] = ds_kwargs.get("compression_opts", 4)
-
         sweeps_grp = h5f.create_group("sweeps")
 
         samples  = int(acq_cfg["samples"])
@@ -772,11 +799,17 @@ def acquire_loop(config):
                     break
 
                 alias = ch["name"]
-                t, v, meta = read_waveform(None, ch, acq_cfg)
+                try:
+                    t, v, meta = read_waveform(None, ch, acq_cfg)
+                except Exception as e:
+                    import traceback
+                    print(f"[WARN] Kanal {alias} ({ch['source']}) fejlede – springer over:", flush=True)
+                    traceback.print_exc()
+                    continue
 
                 grp = sweep.create_group(alias)
-                grp.create_dataset("time",    data=t, **ds_kwargs)
-                grp.create_dataset("voltage", data=v, **ds_kwargs)
+                grp.create_dataset("time",    data=t)
+                grp.create_dataset("voltage", data=v)
                 for k, val in meta.items():
                     grp.attrs[k] = val
 
@@ -792,6 +825,7 @@ def acquire_loop(config):
     
 def main():
     global DEBUG
+    _dlog("main() started")
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="config.json")
     parser.add_argument("profile", nargs="?", default=None, help="Optional test-profile.json (auto RPM+Temp)")
@@ -799,9 +833,17 @@ def main():
     args = parser.parse_args()
 
     DEBUG = args.debug
+    _dlog(f"args parsed: config={args.config} profile={args.profile}")
 
-    with open(args.config, "r") as f:
-        scope_cfg = json.load(f)
+    try:
+        with open(args.config, "r") as f:
+            scope_cfg = json.load(f)
+        _dlog("config.json loaded OK")
+    except Exception as _cfg_err:
+        import traceback as _tb
+        _dlog(f"FATAL: config.json fejl: {_cfg_err}")
+        _dlog(_tb.format_exc())
+        raise
 
     # --- Manual mode (unchanged) ---
     if not args.profile:
@@ -809,8 +851,15 @@ def main():
         return
 
     # --- Auto mode: runner + scope acquisition paired by run_id ---
-    with open(args.profile, "r") as f:
-        profile_cfg = json.load(f)
+    try:
+        with open(args.profile, "r") as f:
+            profile_cfg = json.load(f)
+        _dlog("profile loaded OK")
+    except Exception as _prof_err:
+        import traceback as _tb
+        _dlog(f"FATAL: profile fejl: {_prof_err}")
+        _dlog(_tb.format_exc())
+        raise
 
     run_id = make_run_id()
 
@@ -819,6 +868,8 @@ def main():
     base_dir = Path(out_base).resolve().parent
     run_dir = base_dir / "runs" / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
+    _dlog(f"run_dir created: {run_dir}")
+    print(f"[main] Run folder: {run_dir}", flush=True)
 
     stop_event = asyncio.Event()
     scope_stop_event = threading.Event()
@@ -854,9 +905,14 @@ def main():
     scope_err = {"exc": None}
 
     def scope_thread():
+        print("[scope] scope_thread started", flush=True)
         try:
             acquire_loop(scope_cfg)
+            print("[scope] acquire_loop færdig", flush=True)
         except Exception as e:
+            import traceback
+            print(f"\n[scope] FATAL fejl i acquire_loop:", flush=True)
+            traceback.print_exc()
             scope_err["exc"] = e
             # stop runner NOW if scope fails
             try:
@@ -880,13 +936,16 @@ def main():
     t = threading.Thread(target=scope_thread, daemon=False)
     
     t.start()
+    print("[main] scope_thread started, launching test runner...", flush=True)
 
     async def run_profile():
         # Local imports so manual mode doesn't require these modules
+        print("[runner] Importing hardware modules...", flush=True)
         from test_runner import TestRunner
         from hardware_discovery import discover_serial_ports
         from omron_temp_poll import E5CCTool
         from rs510_vfd_control import RS510VFDController
+        print("[runner] Imports OK", flush=True)
 
         rs485_lock = asyncio.Lock()
 
@@ -917,9 +976,11 @@ def main():
             except Exception:
                 print("[runner]", msg, flush=True)
 
+        print("[runner] Starting runner.run()...", flush=True)
         try:
             await runner.run(profile_cfg, update_cb=update_cb, stop_event=stop_event)
         finally:
+            print("[runner] runner.run() finished, stopping scope...", flush=True)
             stop_event.set()
             scope_stop_event.set()  # Stop scope acquisition when runner finishes
 
@@ -929,6 +990,11 @@ def main():
         scope_done.wait()
     except KeyboardInterrupt:
         stop_event.set()
+    except Exception as e:
+        import traceback
+        print(f"\n[main] FATAL exception in run_profile():", flush=True)
+        traceback.print_exc()
+        scope_stop_event.set()
     finally:
         t.join(timeout=10.0)
 

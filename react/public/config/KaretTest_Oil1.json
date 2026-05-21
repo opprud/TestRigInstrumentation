@@ -6370,22 +6370,28 @@
     ]
   },
   "acquisition": {
-    "scope_points": 250000,
+    "scope_points": 50000,
     "samples_per_step": 3,
     "interval_sec": 3,
     "waveform_format": "WORD",
     "acq_type": "HRES"
   },
   "scope_channels": {
-    "AE": {
-      "timebase_range": 0.02,
-      "volt_range": 0.2,
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 0.5,
       "volt_offset": 0.0,
       "coupling": "DC"
     },
-    "UL": {
-      "timebase_range": 0.02,
-      "volt_range": 2.0,
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 4.0,
+      "volt_offset": 0.1,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 4.0,
       "volt_offset": 0.1,
       "coupling": "DC"
     }

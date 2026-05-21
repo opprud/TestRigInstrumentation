@@ -417,8 +417,9 @@ class TestRunner:
             if rpm_meas is not None:
                 last_good_rpm_t = now_t
             elif rpm_target is not None and rpm_target > 0:
-                # If we expect motion but can't read RPM for too long -> stop
-                if (now_t - last_good_rpm_t) > max_missing_rpm_sec:
+                # Only trigger tachometer-missing stop if RP2040 was present at startup.
+                # If rp_ser is None (never connected), we never had RPM data — don't stop.
+                if rp_ser is not None and (now_t - last_good_rpm_t) > max_missing_rpm_sec:
                     stop_reason = f"tachometer_missing>{max_missing_rpm_sec}s"
                     break
 
@@ -530,38 +531,42 @@ class TestRunner:
             if rs485_port:
                 async with self._rs485_lock:
                     # Omron read PV/SV
-                    try:
-                        if omron_tool is None:
-                            raise RuntimeError("Omron tool not initialized")
-                        rec["omron_pv_c"] = omron_tool.read_pv_c()
-                        rec["omron_sv_c"] = omron_tool.read_sv_c()
-                        consecutive_modbus_errors = 0
-                    except Exception as e:
-                        rec["omron_error"] = str(e)
-                        consecutive_modbus_errors += 1
+                    if omron_tool is None:
+                        # Hardware port was found but Omron never initialised — not a comm error
+                        rec["omron_error"] = "not_initialized"
+                    else:
+                        try:
+                            rec["omron_pv_c"] = omron_tool.read_pv_c()
+                            rec["omron_sv_c"] = omron_tool.read_sv_c()
+                            consecutive_modbus_errors = 0
+                        except Exception as e:
+                            rec["omron_error"] = str(e)
+                            consecutive_modbus_errors += 1
 
                     # VFD status
-                    try:
-                        if vfd is None:
-                            raise RuntimeError("VFD controller not initialized")
-                        st = vfd.get_status()
-                        rec["vfd_frequency_cmd_hz"] = getattr(
-                            st, "frequency_cmd_hz", getattr(st, "frequency_command_hz", None)
-                        )
-                        rc = getattr(st, "run_command", None)
-                        rec["vfd_run_command"] = rc.name if rc else None
-                        rec["vfd_fault_code"] = getattr(st, "fault_code", None)
-                        rec["vfd_is_running"] = getattr(st, "is_running", None)
+                    if vfd is None:
+                        # Hardware port was found but VFD never initialised — not a comm error
+                        rec["vfd_error"] = "not_initialized"
+                    else:
+                        try:
+                            st = vfd.get_status()
+                            rec["vfd_frequency_cmd_hz"] = getattr(
+                                st, "frequency_cmd_hz", getattr(st, "frequency_command_hz", None)
+                            )
+                            rc = getattr(st, "run_command", None)
+                            rec["vfd_run_command"] = rc.name if rc else None
+                            rec["vfd_fault_code"] = getattr(st, "fault_code", None)
+                            rec["vfd_is_running"] = getattr(st, "is_running", None)
 
-                        # Safety: VFD fault
-                        fault = rec.get("vfd_fault_code")
-                        if fault not in (None, 0, "0"):
-                            stop_reason = f"vfd_fault:{fault}"
-                    except Exception as e:
-                        rec["vfd_error"] = str(e)
-                        consecutive_modbus_errors += 1
+                            # Safety: VFD fault
+                            fault = rec.get("vfd_fault_code")
+                            if fault not in (None, 0, "0"):
+                                stop_reason = f"vfd_fault:{fault}"
+                        except Exception as e:
+                            rec["vfd_error"] = str(e)
+                            consecutive_modbus_errors += 1
 
-            # Safety: too many comm errors
+            # Safety: too many REAL comm errors (not counting "not_initialized")
             if consecutive_modbus_errors >= max_consecutive_modbus_errors:
                 stop_reason = stop_reason or f"modbus_errors>={max_consecutive_modbus_errors}"
 

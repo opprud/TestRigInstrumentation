@@ -4,7 +4,7 @@
   "bearing": {
     "manufacturer": "SKF",
     "model": "SYJ25",
-    "material": "Chrome steel2",
+    "material": "Chrome steel",
     "bore_mm": 25,
     "Rolling elements": 9,
     "cage_type": "Steel",
@@ -28,13 +28,13 @@
   },
 
   "acquisition": {
-    "points": 50000,
+    "points": 20000,
     "samples": 500,
-    "interval_sec": 10,
+    "interval_sec": 20,
     "waveform_format": "WORD",
     "points_mode": "RAW",    
     "trigger_sweep": "AUTO",  
-    "acq_type": "HRES"        
+    "acq_type": "NORM"        
   },
 
   "dashboard_preview": {
@@ -48,22 +48,22 @@
 
   "channels": [
     {
-      "name": "AE",
+      "name": "UL",
       "source": "CHAN1",
       "enabled": true,
       "notes": "Kistler acoustic emission probe"
     },
     {
-      "name": "UL",
+      "name": "AE",
       "source": "CHAN2",
       "enabled": true,
       "notes": "Piezo accelerometer"
     },
     {
-      "name": "UL",
+      "name": "SP",
       "source": "CHAN3",
-      "enabled": false,
-      "notes": "Ultrasound"
+      "enabled": true,
+      "notes": "Slæbering"
     },
     {
       "name": "Temp",
@@ -81,7 +81,7 @@
   },
 
   "test_parameters": {
-    "test_name": "Full Oil test",
+    "test_name": "Oil & sensor test",
     "target_rpm": 500,
     "target_temperature_c": 60,
     "expected_load_g": 200,
@@ -90,16 +90,16 @@
   },
 
   "store": {
-    "output_file": "data/keratech22.hdf5",
-    "timestamped": true,
-    "compress": "gzip",
+	"output_file": "data/keratech22.hdf5",
+	"timestamped": true,
+	"compress": "gzip",
 	"compression_level": 4,
-    "chunk": false,
-    "attrs": {
-      "project": "ForeverBearing",
-      "operator": "morten",
-      "scope_model": "MSO-X 2024A"
-    }
+	"chunk": false,
+	"attrs": {
+	  "project": "ForeverBearing",
+	  "operator": "morten",
+	  "scope_model": "MSO-X 2024A"
+	}
   },
   
   "scope": {
@@ -108,7 +108,7 @@
 
   "azure": {
     "connection_string": "BlobEndpoint=https://csfbst001.blob.core.windows.net/;QueueEndpoint=https://csfbst001.queue.core.windows.net/;FileEndpoint=https://csfbst001.file.core.windows.net/;TableEndpoint=https://csfbst001.table.core.windows.net/;SharedAccessSignature=sv=2025-11-05&ss=b&srt=co&sp=rwdlactf&se=2126-04-10T06:33:12Z&st=2026-04-10T06:33:12Z&spr=https&sig=mLYdG%2F%2F%2BBvdWkmjCUZmI7gww4pfMynDByS%2BbJgTeOC0%3D",
-	"default_container": "data"
+	"default_container": "auherning3bearingtester"
   }
 
 }

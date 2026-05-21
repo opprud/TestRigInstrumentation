@@ -1119,13 +1119,15 @@ async def run_start(payload: Dict):
         if not config_json.exists():
             raise HTTPException(status_code=500, detail=f"Missing {config_json}")
 
-        cmd = [sys.executable, str(script), str(config_json), str(resolved_profile)]
+        cmd = [sys.executable, "-u", str(script), str(config_json), str(resolved_profile)]
         if payload.get("debug", True):
             cmd.append("--debug")
 
         _run_proc_stop = threading.Event()
 
         # Start subprocess
+        env = os.environ.copy()
+        env["PYTHONUNBUFFERED"] = "1"
         _run_proc = subprocess.Popen(
             cmd,
             cwd=str(py_dir),
@@ -1135,6 +1137,7 @@ async def run_start(payload: Dict):
             bufsize=1,
             universal_newlines=True,
             start_new_session=True,  # new process group for clean stop (SIGINT)
+            env=env,
         )
         _run_state["pid"] = _run_proc.pid
 
