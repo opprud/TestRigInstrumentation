@@ -259,6 +259,81 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 ---
 
+## Load cell & firmware — auto gain scaling
+
+`firmware/src/main.cpp` **is now v1.2.0 (auto gain scaling)** — this is the chosen firmware going
+forward. `auto_scale(raw)` auto-switches the HX711 gain **128 ↔ 64 ↔ 32** (high gain/resolution for
+light loads, drops for heavy) with hysteresis, a 3-read stability gate, **per-gain calibration**, an
+ADC-saturation guard (`ERR 21`), and it emits `OK AUTOGAIN gain=N` when it switches.
+
+The previous **v1.1.0 (manual gain)** was overwritten in place; it is preserved **in git history**,
+not as a second file — `main.cpp` is the only source in `firmware/src/`. To read or roll back:
+
+```bash
+git show 07cf7907:firmware/src/main.cpp            # view v1.1.0
+git show 07cf7907:firmware/src/main.cpp > firmware/src/main.cpp   # roll back
+```
+
+> **Do not keep a second `.cpp` in `firmware/src/`.** `platformio.ini` sets no `build_src_filter`,
+> so PlatformIO compiles *every* source in that directory. A copy of the old firmware there brings a
+> second `setup()`/`loop()` and the build fails at link time with duplicate symbols.
+
+v1.1.0 has manual `SETGAIN 64|128`, `SETPPR`/`PPR?`, and a 100 µs glitch filter in the tach ISR
+(`if (dt > 100) …`) that v1.2.0 does **not**.
+
+**Tradeoffs v1.2.0 carries** (fine for the current single-mark rig, but know them before you flash):
+- No `SETPPR`/`PPR?` — `PULSES_PER_REV` is hardcoded to 1 (OK: one reflective mark). `util_tool.py
+  setppr` will error against it.
+- No 100 µs ISR debounce.
+- Still **no tach timeout** — a lost tacho signal freezes at the last value (see the tacho known-issue).
+
+**Renaming the source does NOT reflash the board.** The RP2040 keeps running whatever was last
+flashed (still v1.1.0's behaviour) until you build + upload v1.2.0 (`pio run --target upload`).
+Confirm what is actually *running* with the `INFO` command (reports `fw=`), not by looking at the
+source. And **only flash when the rig is idle** — the same board serves the tacho *and* the load
+cell during a run, so flashing mid-test breaks both.
+
+**After flashing, on the Python side:** with auto-scale live, `LOAD?` produces unsolicited
+`OK AUTOGAIN gain=N` lines — verify `util_tool.py` / `test_runner.py`'s response parser **skips**
+non-matching lines, or a gain switch mid-read will desync it. Then **re-TARE and re-run SETCAL per
+gain** — calibration is gain-dependent.
+
+---
+
+## BLE bearing sensor (OE) — integration (in progress)
+
+Goal: sample the **BearingBrain "OE" BLE bearing sensor** (ultrasound mic + accelerometers, etc.)
+as part of each TestRig run and store it alongside the scope data.
+
+- **Code:** the sensor + a working standalone sampler live at
+  `software/BearingBrain/BearingBrainGWEmulator 1/`; a trimmed, Pi-ready copy with its own
+  CLAUDE.md is at `BearingBrain/PiSensorTest/`. Core modules: `oe_device.py` → `oe_protocol.py`
+  → `utils.py` (bleak, UART-over-BLE). Ultrasound-mic sensor mask = `(1<<3)|(1<<4)` = `0x18`.
+- **Design decisions (agreed):**
+  - **Cadence — every N minutes** (config `oe.interval_min`, default 5). BLE mic sampling is slow
+    (~2–3 MB, ~16–120 s per sample), so it **cannot** run per scope sweep.
+  - **Channels — ultrasound mic only** (mic_amb + mic_mch, IDs 3–4).
+  - **Storage — into the run's HDF5** (`/oe_samples`), each sample tagged with the operating point
+    (RPM/temp) + nearest sweep index. gzip is already on.
+  - **Threading — asyncio task alongside the runner**, handing samples via a thread-safe queue to
+    the scope thread, which does ALL HDF5 writes (single-writer = safe).
+  - **Resilience — reconnect on drop, never crash the run** (like the scope resilience).
+- **Verify the BLE path on this Pi first.** `OeDevice.connect()` is experimental: `start_notify`
+  is **commented out**, there is a double-connect, and there are macOS/"Windows BLE stack" waits;
+  the existing samples are from macOS/April. On Linux/BlueZ you will likely need to **un-comment
+  `start_notify(UART_CHAR_UUID, …)`**. Prove it standalone before integrating:
+  ```bash
+  # in PiSensorTest, venv with bleak, BlueZ running:
+  python run_sampler.py --address <MAC> --sensors 3 4
+  ```
+  Once that returns mic data, replicate that exact (fixed) `sample_device` flow in the integration.
+- **Integration shape (to build):** `py/ble/` (the 3 modules, relative imports), `py/oe_sampler.py`
+  (the N-minute async task), a small hook in `acquire_scope_data.py` (`main()` starts the task;
+  `acquire_loop` drains the queue into `/oe_samples`), `bleak` added to `requirements.txt`, and an
+  `oe` config block `{enabled, device_address, interval_min: 5, sensors: [3, 4]}`.
+
+---
+
 ## Next steps
 
 1. **Make the tachometer robust** — reflective-tape mark + re-teach the OGT500, then validate
@@ -273,6 +348,12 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 5. **Move the Azure SAS out of `config.json`.**
 6. **Confirm rpm/Hz empirically** with the now-working sensor and refine the 59.5 factor if a
    temperature-dependent value is warranted for the analysis.
+7. **Load-cell auto gain scaling** — `main.cpp` is now v1.2.0 (see "Load cell & firmware").
+   Remaining: flash it when the rig is idle (`pio run --target upload`), make the `LOAD?` parser
+   tolerant of `OK AUTOGAIN` lines, and re-TARE + SETCAL per gain. Optional: fold
+   `SETPPR`/debounce/tach-timeout back in from the preserved v1.1.0.
+8. **BLE OE sensor integration** — verify the BLE path on BlueZ (un-comment `start_notify`), then
+   build the N-minute ultrasound-mic sampler into the run (see "BLE bearing sensor (OE)").
 
 ---
 
