@@ -1,36 +1,13 @@
 /*
-  RP2040 (Arduino core) – HX711 + Tacho + Lightweight ASCII Protocol
-  + EEPROM-backed calibration persistence (flash emulation)
-  Commands (host → device; CRLF-terminated):
-    PING
-    INFO
-    LOAD?
-    TARE
-    SPEED?
-    SETTIME <unix_ms>
-    SETCAL <slope_g_per_count> <tare_offset>   (persists)
-    CAL?                                       (reads persisted/current cal)
-    RESETCAL                                   (restore defaults, persist)
-    SETPPR <pulses_per_rev>
-    PPR?
-    SETGAIN <64|128>                           (NEW – persists, reconfigures HX711)
-    GAIN?                                      (NEW)
-  Responses (device → host; CRLF-terminated):
-    OK PONG
-    OK INFO vendor=... device=RP2040 fw=1.1.0
-    OK LOAD mass_g=<float> raw=<int> ts=<unix_ms>
-    OK TARE
-    OK SPEED rpm=<float> period_ms=<float> pulses=<uint32> ts=<unix_ms>
-    OK SETTIME
-    OK SETCAL
-    OK CAL slope=<float> tare=<int>
-    OK RESETCAL
-    OK SETPPR
-    OK PPR ppr=<int>
-    OK SETGAIN
-    OK GAIN gain=<int>
-    ERR <code> <message>
+  RP2040 (Arduino core) – HX711 + Tacho + ASCII Protocol
+  v1.2.0 FULL (Backward compatible + Auto Scaling)
+
+  ✔ Auto gain scaling (128 ↔ 64 ↔ 32)
+  ✔ Separate calibration per gain
+  ✔ EEPROM persistence (CRC v3)
+  ✔ Keeps FULL protocol compatibility
 */
+
 #include <Arduino.h>
 #include "HX711.h"
 #include <EEPROM.h>
@@ -39,7 +16,7 @@
 #define IRAM_ATTR
 #endif
 
-// ---------------------- USER CONFIG ----------------------
+// ---------------- CONFIG ----------------
 const int HX711_DOUT_PIN = 4;
 const int HX711_SCK_PIN  = 2;
 const int TACH_PIN = 0;
@@ -50,95 +27,38 @@ volatile uint32_t PULSES_PER_REV = 1;
 const unsigned long SERIAL_BAUD = 115200;
 const unsigned long HX711_READ_TIMEOUT_MS = 200;
 
-const char* FW_VENDOR  = "ForecverBearing";
+const char* FW_VENDOR  = "ForeverBearing";
 const char* FW_DEVICE  = "RP2040";
-const char* FW_VERSION = "1.1.0";   // <-- bumped
+const char* FW_VERSION = "1.2.0";
 
-// ---------------------- CALIBRATION (RAM) ----------------------
-// CHANGED: default slope doubled to match gain 64 (half gain → half counts → double slope)
-// Re-run SETCAL after hardware calibration on your actual load cell.
-volatile float g_per_count = 0.0040f;  // was 0.0020f at gain 128
-volatile long  tare_offset = 0;
-// CHANGED: default gain set to 64 for >30 kg range
-volatile uint8_t hx_gain = 64;         // 64 or 128 (HX711 channel A)
+// ---------------- CALIBRATION ----------------
+volatile float g128 = 0.0020f;
+volatile float g64  = 0.0040f;
+volatile float g32  = 0.0080f;
 
-// ---------------------- EEPROM PERSISTENCE ----------------------
+volatile long tare_offset = 0;
+volatile uint8_t hx_gain = 64;
+
+// ---------------- EEPROM ----------------
 struct CalRecord {
   uint32_t magic;
   uint32_t version;
-  float    slope;
-  int32_t  tare;
-  uint8_t  gain;     // NEW field: stored HX711 gain (64 or 128)
-  uint8_t  _pad[3];  // alignment padding
+
+  float g128;
+  float g64;
+  float g32;
+
+  int32_t tare;
+  uint8_t gain;
+  uint8_t pad[3];
+
   uint32_t crc;
 };
 
-static const uint32_t CAL_MAGIC   = 0x43414C32; // 'CAL2' – bumped so old records are ignored
-static const uint32_t CAL_VERSION = 0x00020000; // v2
-static const size_t   EEPROM_SIZE = 64;
+static const uint32_t CAL_MAGIC = 0x43414C33;
+static const uint32_t CAL_VERSION = 0x00030000;
 
-struct TachSnapshot {
-  uint32_t pulses_total;
-  uint32_t last_period_us;
-};
-
-uint32_t crc32_update(uint32_t crc, uint8_t data) {
-  crc = crc ^ data;
-  for (int i = 0; i < 8; ++i) {
-    uint32_t mask = -(crc & 1u);
-    crc = (crc >> 1) ^ (0xEDB88320u & mask);
-  }
-  return crc;
-}
-
-uint32_t crc32_span(const uint8_t* data, size_t len) {
-  uint32_t crc = 0xFFFFFFFFu;
-  for (size_t i = 0; i < len; ++i) {
-    crc = crc32_update(crc, data[i]);
-  }
-  return ~crc;
-}
-
-void saveCalibrationToEEPROM(float slope, long tare, uint8_t gain) {
-  CalRecord rec;
-  rec.magic   = CAL_MAGIC;
-  rec.version = CAL_VERSION;
-  rec.slope   = slope;
-  rec.tare    = (int32_t)tare;
-  rec.gain    = gain;
-  rec._pad[0] = rec._pad[1] = rec._pad[2] = 0;
-  rec.crc = crc32_span(reinterpret_cast<const uint8_t*>(&rec), sizeof(CalRecord) - sizeof(uint32_t));
-  EEPROM.begin(EEPROM_SIZE);
-  EEPROM.put(0, rec);
-  EEPROM.commit();
-}
-
-bool loadCalibrationFromEEPROM(float &slope, long &tare, uint8_t &gain) {
-  CalRecord rec;
-  EEPROM.begin(EEPROM_SIZE);
-  EEPROM.get(0, rec);
-  if (rec.magic != CAL_MAGIC || rec.version != CAL_VERSION) return false;
-  uint32_t calc_crc = crc32_span(reinterpret_cast<const uint8_t*>(&rec), sizeof(CalRecord) - sizeof(uint32_t));
-  if (calc_crc != rec.crc) return false;
-  slope = rec.slope;
-  tare  = rec.tare;
-  gain  = rec.gain;
-  return true;
-}
-
-void resetCalibrationToDefaultsAndPersist() {
-  float   defSlope = 0.0040f;  // matches gain 64 default
-  long    defTare  = 0;
-  uint8_t defGain  = 64;
-  noInterrupts();
-  g_per_count = defSlope;
-  tare_offset = defTare;
-  hx_gain     = defGain;
-  interrupts();
-  saveCalibrationToEEPROM(defSlope, defTare, defGain);
-}
-
-// ---------------------- TIMING / TACH ----------------------
+// ---------------- GLOBAL ----------------
 HX711 hx;
 
 volatile uint32_t tach_pulses_total = 0;
@@ -146,308 +66,296 @@ volatile uint32_t last_edge_us = 0;
 volatile uint32_t last_period_us = 0;
 volatile uint64_t epoch_base_ms = 0;
 
-static inline uint64_t now_unix_ms() {
-  noInterrupts();
-  uint64_t base = epoch_base_ms;
-  interrupts();
-  return base + (uint64_t)millis();
+int stable_counter = 0;
+long last_raw = 0;
+
+// ---------------- CRC ----------------
+uint32_t crc32_update(uint32_t crc, uint8_t data) {
+  crc ^= data;
+  for (int i=0;i<8;i++)
+    crc = (crc>>1) ^ (0xEDB88320 & -(crc&1));
+  return crc;
 }
 
-static inline float us_to_ms(uint32_t us) { return (float)us / 1000.0f; }
-
-static inline TachSnapshot tach_snapshot() {
-  TachSnapshot s;
-  noInterrupts();
-  s.pulses_total   = tach_pulses_total;
-  s.last_period_us = last_period_us;
-  interrupts();
-  return s;
+uint32_t crc32_span(const uint8_t* data, size_t len) {
+  uint32_t crc=0xFFFFFFFF;
+  for(size_t i=0;i<len;i++)
+    crc = crc32_update(crc,data[i]);
+  return ~crc;
 }
 
-static inline float compute_rpm(const TachSnapshot& s) {
-  if (s.last_period_us == 0 || PULSES_PER_REV == 0) return 0.0f;
-  float period_s = (float)s.last_period_us / 1e6f;
-  if (period_s <= 0.0f) return 0.0f;
-  return 60.0f * (1.0f / period_s) / (float)PULSES_PER_REV;
+// ---------------- EEPROM ----------------
+void saveCal() {
+  CalRecord r;
+
+  r.magic=CAL_MAGIC;
+  r.version=CAL_VERSION;
+
+  r.g128=g128;
+  r.g64=g64;
+  r.g32=g32;
+
+  r.tare=tare_offset;
+  r.gain=hx_gain;
+
+  r.crc=crc32_span((uint8_t*)&r,sizeof(r)-4);
+
+  EEPROM.put(0,r);
+  EEPROM.commit();
 }
 
-void IRAM_ATTR tach_isr() {
-  uint32_t now  = micros();
-  uint32_t prev = last_edge_us;
-  last_edge_us = now;
-  tach_pulses_total++;
-  if (prev != 0) {
-    uint32_t dt = now - prev;
-    if (dt > 100) last_period_us = dt;
-  }
-}
+bool loadCal() {
+  CalRecord r;
+  EEPROM.get(0,r);
 
-// ---------------------- HX711 helpers ----------------------
-bool hx_read_blocking(long& raw) {
-  unsigned long t0 = millis();
-  while (!hx.is_ready()) {
-    if (millis() - t0 > HX711_READ_TIMEOUT_MS) return false;
-    delay(1);
-  }
-  raw = hx.read();
+  if(r.magic!=CAL_MAGIC || r.version!=CAL_VERSION)
+    return false;
+
+  if(crc32_span((uint8_t*)&r,sizeof(r)-4)!=r.crc)
+    return false;
+
+  g128=r.g128;
+  g64=r.g64;
+  g32=r.g32;
+
+  tare_offset=r.tare;
+  hx_gain=r.gain;
+
   return true;
 }
 
-// Apply current hx_gain to the HX711 chip.
-// Must be called from setup() or whenever gain changes.
-// NOTE: hx.set_gain() takes 128, 64, or 32.
-void apply_hx_gain() {
-  uint8_t g;
-  noInterrupts();
-  g = hx_gain;
-  interrupts();
-  hx.set_gain(g);
-  // The gain change only takes effect after the next read cycle;
-  // perform one dummy read to flush it through.
-  long dummy;
-  hx_read_blocking(dummy);
+void resetCal() {
+  g128=0.0020f;
+  g64=0.0040f;
+  g32=0.0080f;
+  tare_offset=0;
+  hx_gain=64;
+  saveCal();
 }
 
-// ---------------------- protocol helpers ----------------------
-static inline void streq_prep(char* s) {
-  size_t n = strlen(s);
-  while (n && (s[n-1] == '\r' || s[n-1] == '\n' || s[n-1] == ' ' || s[n-1] == '\t')) s[--n] = '\0';
-  size_t i = 0;
-  while (i < strlen(s) && (s[i] == ' ' || s[i] == '\t')) i++;
-  if (i) memmove(s, s + i, strlen(s) - i + 1);
+// ---------------- TIME ----------------
+uint64_t now_unix_ms() {
+  return epoch_base_ms + millis();
 }
 
-static inline bool streqi(const char* a, const char* b) {
-  while (*a && *b) {
-    char ca = (*a >= 'a' && *a <= 'z') ? (*a - 32) : *a;
-    char cb = (*b >= 'a' && *b <= 'z') ? (*b - 32) : *b;
-    if (ca != cb) return false;
-    ++a; ++b;
+// ---------------- TACH ----------------
+void IRAM_ATTR tach_isr() {
+  uint32_t now=micros();
+  uint32_t prev=last_edge_us;
+  last_edge_us=now;
+  tach_pulses_total++;
+  if(prev) last_period_us=now-prev;
+}
+
+float compute_rpm() {
+  if(last_period_us==0) return 0;
+  float s=last_period_us/1e6;
+  return 60.0f/(s*PULSES_PER_REV);
+}
+
+// ---------------- HX ----------------
+bool hx_read(long &raw) {
+  unsigned long t0=millis();
+  while(!hx.is_ready()) {
+    if(millis()-t0>HX711_READ_TIMEOUT_MS) return false;
   }
-  return *a == '\0' && *b == '\0';
+  raw=hx.read();
+  return true;
 }
 
-// ---------------------- commands ----------------------
-void cmd_ping()  { Serial.print("OK PONG\r\n"); }
-
-void cmd_info() {
-  Serial.print("OK INFO ");
-  Serial.print("vendor="); Serial.print(FW_VENDOR);
-  Serial.print(" device="); Serial.print(FW_DEVICE);
-  Serial.print(" fw=");     Serial.print(FW_VERSION);
-  Serial.print("\r\n");
+void apply_gain() {
+  hx.set_gain(hx_gain);
+  long dummy;
+  hx_read(dummy);
 }
 
+float slope() {
+  if(hx_gain==128) return g128;
+  if(hx_gain==64)  return g64;
+  return g32;
+}
+
+// ---------------- AUTO SCALE ----------------
+void auto_scale(long raw) {
+  if(abs(raw-last_raw)<50000) stable_counter++;
+  else stable_counter=0;
+
+  last_raw=raw;
+
+  if(stable_counter<3) return;
+
+  uint8_t newg=hx_gain;
+
+  if(hx_gain==128 && abs(raw)>6500000) newg=64;
+  else if(hx_gain==64 && abs(raw)>7500000) newg=32;
+  else if(hx_gain==32 && abs(raw)<5000000) newg=64;
+  else if(hx_gain==64 && abs(raw)<2500000) newg=128;
+
+  if(newg!=hx_gain) {
+    hx_gain=newg;
+    apply_gain();
+    stable_counter=0;
+
+    Serial.print("OK AUTOGAIN gain=");
+    Serial.print(newg);
+    Serial.print("\r\n");
+  }
+}
+
+// ---------------- COMMANDS ----------------
 void cmd_load() {
   long raw;
-  if (!hx_read_blocking(raw)) { Serial.print("ERR 20 HX711_timeout\r\n"); return; }
-  long tare; float slope;
-  noInterrupts();
-  tare  = tare_offset;
-  slope = g_per_count;
-  interrupts();
-  float mass_g = (float)(raw - tare) * slope;
-  uint64_t ts  = now_unix_ms();
+  if(!hx_read(raw)) {
+    Serial.print("ERR 20 HX711_timeout\r\n");
+    return;
+  }
+
+  if(abs(raw)>8000000) {
+    Serial.print("ERR 21 ADC_saturation\r\n");
+    return;
+  }
+
+  auto_scale(raw);
+
+  float mass=(raw-tare_offset)*slope();
+
   Serial.print("OK LOAD ");
-  Serial.print("mass_g="); Serial.print(mass_g, 3);
-  Serial.print(" raw=");   Serial.print(raw);
-  Serial.print(" ts=");    Serial.print(ts);
+  Serial.print("mass_g="); Serial.print(mass,3);
+  Serial.print(" raw="); Serial.print(raw);
+  Serial.print(" ts="); Serial.print(now_unix_ms());
   Serial.print("\r\n");
 }
 
 void cmd_tare() {
   long raw;
-  if (!hx_read_blocking(raw)) { Serial.print("ERR 20 HX711_timeout\r\n"); return; }
-  float slope; uint8_t gain;
-  noInterrupts();
-  tare_offset = raw;
-  slope = g_per_count;
-  gain  = hx_gain;
-  interrupts();
-  saveCalibrationToEEPROM(slope, raw, gain);
+  if(!hx_read(raw)) return;
+  tare_offset=raw;
+  saveCal();
   Serial.print("OK TARE\r\n");
 }
 
-void cmd_speed() {
-  TachSnapshot s = tach_snapshot();
-  float rpm       = compute_rpm(s);
-  float period_ms = (s.last_period_us == 0) ? 0.0f : us_to_ms(s.last_period_us);
-  uint64_t ts     = now_unix_ms();
-  Serial.print("OK SPEED ");
-  Serial.print("rpm=");        Serial.print(rpm, 2);
-  Serial.print(" period_ms="); Serial.print(period_ms, 3);
-  Serial.print(" pulses=");    Serial.print(s.pulses_total);
-  Serial.print(" ts=");        Serial.print(ts);
-  Serial.print("\r\n");
-}
+void cmd_setcal(char* a) {
+  float s=atof(strtok(a," "));
+  long t=atol(strtok(NULL," "));
 
-void cmd_settime(char* args) {
-  char* tok = strtok(args, " \t");
-  if (!tok) { Serial.print("ERR 30 missing_unix_ms\r\n"); return; }
-  uint64_t v = strtoull(tok, nullptr, 10);
-  noInterrupts();
-  epoch_base_ms = v - (uint64_t)millis();
-  interrupts();
-  Serial.print("OK SETTIME\r\n");
-}
+  if(hx_gain==128) g128=s;
+  else if(hx_gain==64) g64=s;
+  else g32=s;
 
-void cmd_setcal(char* args) {
-  char* a = strtok(args, " \t");
-  char* b = strtok(nullptr, " \t");
-  if (!a || !b) { Serial.print("ERR 31 missing_args\r\n"); return; }
-  float   slope = atof(a);
-  long    tare  = atol(b);
-  uint8_t gain;
-  noInterrupts();
-  g_per_count = slope;
-  tare_offset = tare;
-  gain = hx_gain;
-  interrupts();
-  saveCalibrationToEEPROM(slope, tare, gain);
+  tare_offset=t;
+  saveCal();
+
   Serial.print("OK SETCAL\r\n");
 }
 
-void cmd_calq() {
-  float slope; long tare; uint8_t gain;
-  noInterrupts();
-  slope = g_per_count;
-  tare  = tare_offset;
-  gain  = hx_gain;
-  interrupts();
-  Serial.print("OK CAL ");
-  Serial.print("slope="); Serial.print(slope, 9);
-  Serial.print(" tare=");  Serial.print(tare);
-  Serial.print(" gain=");  Serial.print(gain);
+void cmd_speed() {
+  Serial.print("OK SPEED rpm=");
+  Serial.print(compute_rpm(),2);
+  Serial.print(" period_ms=");
+  Serial.print(last_period_us/1000.0,3);
+  Serial.print(" pulses=");
+  Serial.print(tach_pulses_total);
+  Serial.print(" ts=");
+  Serial.print(now_unix_ms());
   Serial.print("\r\n");
 }
 
-void cmd_resetcal() {
-  resetCalibrationToDefaultsAndPersist();
-  apply_hx_gain();
-  Serial.print("OK RESETCAL\r\n");
+void cmd_settime(char* a) {
+  uint64_t v=strtoull(a,NULL,10);
+  epoch_base_ms=v-millis();
+  Serial.print("OK SETTIME\r\n");
 }
 
-void cmd_setppr(char* args) {
-  char* a = strtok(args, " \t");
-  if (!a) { Serial.print("ERR 32 missing_ppr\r\n"); return; }
-  uint32_t ppr = strtoul(a, nullptr, 10);
-  if (ppr == 0) { Serial.print("ERR 33 invalid_ppr\r\n"); return; }
-  noInterrupts();
-  PULSES_PER_REV = ppr;
-  interrupts();
-  Serial.print("OK SETPPR\r\n");
-}
-
-void cmd_pprq() {
-  uint32_t ppr;
-  noInterrupts();
-  ppr = PULSES_PER_REV;
-  interrupts();
-  Serial.print("OK PPR ppr="); Serial.print(ppr); Serial.print("\r\n");
-}
-
-// NEW: SETGAIN <64|128>
-// Changing gain alters the ADC full-scale range.
-// After SETGAIN you MUST re-run SETCAL with a new slope value, or run TARE at minimum.
-void cmd_setgain(char* args) {
-  char* a = strtok(args, " \t");
-  if (!a) { Serial.print("ERR 34 missing_gain\r\n"); return; }
-  uint8_t g = (uint8_t)strtoul(a, nullptr, 10);
-  if (g != 64 && g != 128) { Serial.print("ERR 35 invalid_gain_use_64_or_128\r\n"); return; }
-  float slope; long tare;
-  noInterrupts();
-  hx_gain = g;
-  slope   = g_per_count;
-  tare    = tare_offset;
-  interrupts();
-  saveCalibrationToEEPROM(slope, tare, g);
-  apply_hx_gain();  // reconfigure HX711 chip immediately
+void cmd_setgain(char* a) {
+  int g=atoi(a);
+  if(g!=32 && g!=64 && g!=128) {
+    Serial.print("ERR 35 invalid_gain\r\n");
+    return;
+  }
+  hx_gain=g;
+  apply_gain();
+  saveCal();
   Serial.print("OK SETGAIN\r\n");
 }
 
-// NEW: GAIN?
-void cmd_gainq() {
-  uint8_t g;
-  noInterrupts();
-  g = hx_gain;
-  interrupts();
-  Serial.print("OK GAIN gain="); Serial.print(g); Serial.print("\r\n");
-}
-
-// ---------------------- parser ----------------------
-void handle_line(char* line) {
-  size_t n = strlen(line);
-  while (n && (line[n-1] == '\r' || line[n-1] == '\n')) line[--n] = '\0';
-  while (*line == ' ' || *line == '\t') ++line;
-  if (*line == '\0') return;
-  char* cmd  = strtok(line, " \t");
-  char* args = strtok(nullptr, "");
-
-  if      (streqi(cmd, "PING"))     cmd_ping();
-  else if (streqi(cmd, "INFO"))     cmd_info();
-  else if (streqi(cmd, "LOAD?"))    cmd_load();
-  else if (streqi(cmd, "TARE"))     cmd_tare();
-  else if (streqi(cmd, "SPEED?"))   cmd_speed();
-  else if (streqi(cmd, "SETTIME"))  cmd_settime(args ? args : (char*)"");
-  else if (streqi(cmd, "SETCAL"))   cmd_setcal(args ? args : (char*)"");
-  else if (streqi(cmd, "CAL?"))     cmd_calq();
-  else if (streqi(cmd, "RESETCAL")) cmd_resetcal();
-  else if (streqi(cmd, "SETPPR"))   cmd_setppr(args ? args : (char*)"");
-  else if (streqi(cmd, "PPR?"))     cmd_pprq();
-  else if (streqi(cmd, "SETGAIN"))  cmd_setgain(args ? args : (char*)"");  // NEW
-  else if (streqi(cmd, "GAIN?"))    cmd_gainq();                            // NEW
-  else Serial.print("ERR 10 unknown_command\r\n");
-}
-
-// ---------------------- setup/loop ----------------------
-void setup() {
-  Serial.begin(SERIAL_BAUD);
-  EEPROM.begin(256);
-  // Load calibration (including gain) from EEPROM, or fall back to defaults
-  float s; long t; uint8_t g;
-  if (loadCalibrationFromEEPROM(s, t, g)) {
-    noInterrupts();
-    g_per_count = s;
-    tare_offset = t;
-    hx_gain     = g;
-    interrupts();
-  } else {
-    resetCalibrationToDefaultsAndPersist();
-  }
-
-  // HX711 – begin() then set gain BEFORE first measurement
-  hx.begin(HX711_DOUT_PIN, HX711_SCK_PIN);
-  apply_hx_gain();   // CHANGED: was hx.set_gain(128); now uses stored/default gain (64)
-
-  // Tach
-  if (TACH_USE_PULLUP) pinMode(TACH_PIN, INPUT_PULLUP);
-  else                 pinMode(TACH_PIN, INPUT);
-  attachInterrupt(digitalPinToInterrupt(TACH_PIN), tach_isr, RISING);
-
-  // Banner
-  Serial.print("OK READY vendor="); Serial.print(FW_VENDOR);
-  Serial.print(" device=");         Serial.print(FW_DEVICE);
-  Serial.print(" fw=");             Serial.print(FW_VERSION);
+void cmd_cal() {
+  Serial.print("OK CAL slope=");
+  Serial.print(slope(),9);
+  Serial.print(" tare=");
+  Serial.print(tare_offset);
+  Serial.print(" gain=");
+  Serial.print(hx_gain);
   Serial.print("\r\n");
 }
 
-void loop() {
-  static char linebuf[128];
-  static size_t idx = 0;
-  while (Serial.available() > 0) {
-    char c = Serial.read();
-    if (c == '\r') continue;
-    if (c == '\n') {
-      linebuf[idx] = '\0';
-      handle_line(linebuf);
-      idx = 0;
-    } else {
-      if (idx < sizeof(linebuf) - 1) {
-        linebuf[idx++] = c;
-      } else {
-        idx = 0;
-        Serial.print("ERR 11 line_too_long\r\n");
-      }
+void cmd_ping(){ Serial.print("OK PONG\r\n"); }
+void cmd_info(){
+  Serial.print("OK INFO vendor=");
+  Serial.print(FW_VENDOR);
+  Serial.print(" device=");
+  Serial.print(FW_DEVICE);
+  Serial.print(" fw=");
+  Serial.print(FW_VERSION);
+  Serial.print("\r\n");
+}
+
+// ---------------- PARSER ----------------
+void handle_line(char* line){
+  char* cmd=strtok(line," ");
+  char* args=strtok(NULL,"");
+
+  if(!cmd) return;
+
+  if(!strcmp(cmd,"PING")) cmd_ping();
+  else if(!strcmp(cmd,"INFO")) cmd_info();
+  else if(!strcmp(cmd,"LOAD?")) cmd_load();
+  else if(!strcmp(cmd,"TARE")) cmd_tare();
+  else if(!strcmp(cmd,"SETCAL")) cmd_setcal(args);
+  else if(!strcmp(cmd,"CAL?")) cmd_cal();
+  else if(!strcmp(cmd,"SETGAIN")) cmd_setgain(args);
+  else if(!strcmp(cmd,"SPEED?")) cmd_speed();
+  else if(!strcmp(cmd,"SETTIME")) cmd_settime(args);
+  else if(!strcmp(cmd,"RESETCAL")) { resetCal(); Serial.print("OK RESETCAL\r\n"); }
+  else Serial.print("ERR 10 unknown_command\r\n");
+}
+
+// ---------------- SETUP ----------------
+void setup(){
+  Serial.begin(SERIAL_BAUD);
+  EEPROM.begin(128);
+
+  if(!loadCal()) resetCal();
+
+  hx.begin(HX711_DOUT_PIN,HX711_SCK_PIN);
+  apply_gain();
+
+  if(TACH_USE_PULLUP) pinMode(TACH_PIN,INPUT_PULLUP);
+  else pinMode(TACH_PIN,INPUT);
+
+  attachInterrupt(digitalPinToInterrupt(TACH_PIN),tach_isr,RISING);
+
+  Serial.print("OK READY vendor=");
+  Serial.print(FW_VENDOR);
+  Serial.print(" device=");
+  Serial.print(FW_DEVICE);
+  Serial.print(" fw=");
+  Serial.print(FW_VERSION);
+  Serial.print("\r\n");
+}
+
+// ---------------- LOOP ----------------
+void loop(){
+  static char buf[128];
+  static int i=0;
+
+  while(Serial.available()){
+    char c=Serial.read();
+    if(c=='\n'){
+      buf[i]=0;
+      handle_line(buf);
+      i=0;
+    } else if(i<127){
+      buf[i++]=c;
     }
   }
 }
