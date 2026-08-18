@@ -752,7 +752,8 @@ def _scope_write(ip: str, port: int, cmd: str, timeout_sec: float = 3.0):
             pass
 
 
-def _apply_scope_channel_settings(ip: str, port: int, channels: list, profile_cfg: dict):
+def _apply_scope_channel_settings(ip: str, port: int, channels: list, profile_cfg: dict,
+                                  strict: bool = False):
     """
     Apply scope channel settings from test profile scope_channels section.
     Only channels listed in scope_channels are adjusted.
@@ -781,11 +782,18 @@ def _apply_scope_channel_settings(ip: str, port: int, channels: list, profile_cf
             if DEBUG:
                 print(f"[scope_channels] Applied {alias} ({src}): {settings}")
         except Exception as e:
-            if DEBUG:
-                print(f"[scope_channels] Error applying {alias}: {e}")
+            # Never DEBUG-gated and never silent: an unapplied channel setting means
+            # the waveform is digitised at the wrong volts/div, and the resulting file
+            # still looks perfectly valid afterwards.
+            msg = f"[scope_channels] Error applying {alias}: {e!r}"
+            print(msg, flush=True)
+            _event_log(msg)
+            if strict:
+                raise RuntimeError(f"scope channel setup failed for {alias}: {e}") from e
 
 
-def _apply_scope_acquisition_settings(ip: str, port: int, acq_cfg: dict):
+def _apply_scope_acquisition_settings(ip: str, port: int, acq_cfg: dict,
+                                      strict: bool = False):
     """
     Apply global acquisition settings to the scope from the resolved config.
 
@@ -825,8 +833,13 @@ def _apply_scope_acquisition_settings(ip: str, port: int, acq_cfg: dict):
         if DEBUG:
             print(f"[scope_acq] Applied acq_type={acq_type}, trigger_sweep={trigger_sweep}, acq_points={acq_points}")
     except Exception as e:
-        if DEBUG:
-            print(f"[scope_acq] Error applying acquisition settings: {e}")
+        # Same reasoning, and worse: if :ACQ:POIN never lands, the run silently
+        # captures at whatever memory depth the scope happened to be left in.
+        msg = f"[scope_acq] Error applying acquisition settings: {e!r}"
+        print(msg, flush=True)
+        _event_log(msg)
+        if strict:
+            raise RuntimeError(f"scope acquisition setup failed: {e}") from e
 
 
 def _write_metadata(h5f, config: dict, scope_idn: str, ts_local: str, ts_utc: str,
@@ -952,7 +965,8 @@ def acquire_loop(config):
 
     # Apply profile scope_channels FIRST, then query so HDF5 reflects actual settings
     try:
-        _apply_scope_channel_settings(ip, port, channels, config.get("_profile_cfg"))
+        _apply_scope_channel_settings(ip, port, channels, config.get("_profile_cfg"),
+                                      strict=True)
     except Exception as e:
         if DEBUG:
             print(f"[acquire_loop] Could not apply scope channel settings: {e}")
@@ -961,7 +975,7 @@ def acquire_loop(config):
     # resolved config so they take effect on the scope AND so the settings
     # queried below for HDF5 metadata reflect the configured values.
     try:
-        _apply_scope_acquisition_settings(ip, port, acq_cfg)
+        _apply_scope_acquisition_settings(ip, port, acq_cfg, strict=True)
     except Exception as e:
         if DEBUG:
             print(f"[acquire_loop] Could not apply scope acquisition settings: {e}")
