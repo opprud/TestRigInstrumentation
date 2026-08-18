@@ -3,8 +3,8 @@ id: 0001
 title: Integrate BearingBrain OE ultrasound-mic sampling into test runs
 area: ble
 role: dev
-status: backlog
-assignee: unassigned
+status: in-progress
+assignee: pi-claude
 branch:
 pr:
 ---
@@ -36,3 +36,9 @@ Sample the BearingBrain "OE" sensor's ultrasound mic periodically **during rig t
 
 ## Owner / test
 - **Dev:** BLE. **Tester (Pi):** verify with a real OE sensor + rig run; confirm `/oe_samples` populated and sweep skips not increased.
+
+## Recon (2026-08-18, architect-verified)
+- **Env ready:** BlueZ active, BLE adapter `88:A2:9E:37:39:46` powered. Only `.venv` + `bleak` missing (~5 min). Physical build + verify deferred to a session **at the rig** (sensor not mounted yet).
+- **⚠️ Receive path is broken — platform-independent, NOT just a Linux caveat.** `oe_protocol.take_samples()` writes the command (`write_gatt_char`) then `await`s `self.tcs` (a future). That future is resolved **only** inside `push()`; `push()` is called **only** by `oe_device.notification_handler`, which fires **only** if `start_notify` is registered — and it is commented out in `oe_device.connect()` (~line 110). So sampling sends the command, receives nothing, and times out with empty `sampleData` on **every** platform. `connect_ota()` *does* register notify (on the firmware char), confirming the pattern is intentional and the UART path was disabled at some point.
+- **Fix:** enable `start_notify(UART_CHAR_UUID, self.notification_handler)` in `connect()` — essential everywhere, not "probably on Linux" as the harness guide implied. Also sanity-check that `take_samples` writes to the correct **characteristic** UUID (it currently targets `UART_SERVICE_UUID`). HW-verify with a real OE sensor tomorrow.
+- **Also:** reconcile `BearingBrain/PiSensorTest/CLAUDE.md` (harness doc) with this finding so the "un-comment on Linux" wording doesn't mislead.
