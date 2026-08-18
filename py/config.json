@@ -1,6 +1,5 @@
 {
   "scope_ip": "169.254.227.43",
-
   "bearing": {
     "manufacturer": "SKF",
     "model": "SYJ25",
@@ -12,7 +11,6 @@
     "Max speed_rpm": 7000,
     "notes": "Test bearing for ForeverBearing endurance testing"
   },
-
   "lubricant": {
     "product_name": "Keratech 22",
     "manufacturer": "Kerax",
@@ -26,17 +24,15 @@
     "batch_number": "N/A",
     "notes": "Initial test, new bearing"
   },
-
   "acquisition": {
     "points": 40000,
     "samples": 500,
     "interval_sec": 20,
     "waveform_format": "WORD",
-    "points_mode": "RAW",    
-    "trigger_sweep": "AUTO",  
-    "acq_type": "NORM"        
+    "points_mode": "RAW",
+    "trigger_sweep": "AUTO",
+    "acq_type": "NORM"
   },
-
   "dashboard_preview": {
     "points": 1000,
     "samples": 1,
@@ -45,7 +41,6 @@
     "throttle_ms": 2000,
     "notes": "Lightweight acquisition for dashboard preview - adjustable decimation rate and throttling"
   },
-
   "channels": [
     {
       "name": "UL",
@@ -63,7 +58,7 @@
       "name": "SP",
       "source": "CHAN3",
       "enabled": true,
-      "notes": "Slæbering"
+      "notes": "Sl\u00e6bering"
     },
     {
       "name": "Temp",
@@ -72,14 +67,12 @@
       "notes": "Temperature"
     }
   ],
-
   "telemetry": {
     "enabled": false,
     "rp2040_port": "/dev/tty.usbmodemXXXX",
     "modbus_config": "modbus_config.json",
     "notes": "Using RS VFD, no filter"
   },
-
   "test_parameters": {
     "test_name": "Oil & sensor test",
     "target_rpm": 500,
@@ -88,27 +81,33 @@
     "duration_minutes": 60,
     "notes": "Standard t"
   },
-
   "store": {
-	"output_file": "data/keratech22.hdf5",
-	"timestamped": true,
-	"compress": "gzip",
-	"compression_level": 4,
-	"chunk": false,
-	"attrs": {
-	  "project": "ForeverBearing",
-	  "operator": "morten",
-	  "scope_model": "MSO-X 2024A"
-	}
+    "output_file": "data/keratech22.hdf5",
+    "timestamped": true,
+    "compress": "gzip",
+    "compression_level": 4,
+    "chunk": false,
+    "attrs": {
+      "project": "ForeverBearing",
+      "operator": "morten",
+      "scope_model": "MSO-X 2024A"
+    }
   },
-  
   "scope": {
     "preferred_port": 5025
   },
-
   "azure": {
     "connection_string": "BlobEndpoint=https://csfbst001.blob.core.windows.net/;QueueEndpoint=https://csfbst001.queue.core.windows.net/;FileEndpoint=https://csfbst001.file.core.windows.net/;TableEndpoint=https://csfbst001.table.core.windows.net/;SharedAccessSignature=sv=2025-11-05&ss=b&srt=co&sp=rwdlactf&se=2126-04-10T06:33:12Z&st=2026-04-10T06:33:12Z&spr=https&sig=mLYdG%2F%2F%2BBvdWkmjCUZmI7gww4pfMynDByS%2BbJgTeOC0%3D",
-	"default_container": "auherning3bearingtester"
+    "default_container": "auherning3bearingtester"
+  },
+  "oe": {
+    "enabled": false,
+    "device_address": "",
+    "interval_min": 5,
+    "sensors": [
+      3,
+      4
+    ],
+    "notes": "BearingBrain OE BLE sensor. sensors 3+4 = mic_amb + mic_mch (mask 0x18). device_address must be the MAC as seen by BlueZ (ble_debug_scan.py), not a macOS UUID. Disabled by default; enabling adds an /oe_samples group to the run HDF5."
   }
-
 }

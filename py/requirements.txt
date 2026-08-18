@@ -11,3 +11,5 @@ pymodbus
 paho-mqtt
 azure-storage-blob
 azure-core
+# BearingBrain OE BLE sensor sampling (optional, config.oe.enabled)
+bleak==3.0.2
