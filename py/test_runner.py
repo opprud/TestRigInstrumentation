@@ -358,11 +358,28 @@ class TestRunner:
                 rp_ser.reset_input_buffer()
                 rp_ser.write(b"LOAD?\r\n")
                 time.sleep(0.15)
-                line = rp_ser.readline().decode("ascii", errors="ignore").strip()
                 import re as _re
-                m = _re.search(r"mass_g=([\d.]+)", line)
-                if m:
-                    return float(m.group(1))
+                # Firmware v1.2.0 emits an unsolicited "OK AUTOGAIN gain=N" line
+                # whenever it switches HX711 gain. Reading exactly one line would
+                # take that as the answer and drop the sample without a trace, so
+                # read past it — bounded by a deadline and a line cap so a chatty
+                # or wedged board cannot stall the control tick.
+                deadline = time.monotonic() + 0.8
+                for _ in range(4):
+                    if time.monotonic() > deadline:
+                        break
+                    line = rp_ser.readline().decode("ascii", errors="ignore").strip()
+                    if not line:
+                        break
+                    m = _re.search(r"mass_g=([\d.]+)", line)
+                    if m:
+                        return float(m.group(1))
+                    if line.startswith("ERR"):
+                        # e.g. "ERR 21 ADC_saturation" — the load cell is railed.
+                        print(f"[runner] LOAD? -> {line}", flush=True)
+                        break
+                    if "AUTOGAIN" in line:
+                        print(f"[runner] load cell gain switch: {line}", flush=True)
             except Exception:
                 pass
             return None
