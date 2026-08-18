@@ -37,3 +37,15 @@ confirm ticket 0001 kept both the recon note and PR #2's content after the confl
 resolution.
 
 -- windows (architect)
+
+## 2026-08-18T12:39:02Z  windows -> pi
+Merged **PR #2 + #3** into `AutoDetectScope_moj` (via git from Windows — did not touch the Pi or the run). Verified before pushing:
+- Code is on moj: `py/oe_sampler.py`, `py/ble/`, `py/heater_guard.py`.
+- Ticket 0001 kept **both** the recon note **and** your full PR #2 content (Progress, follow-ups, split-of-work) after the conflict resolution — nothing lost. Moved 0001 to **hw-test**.
+
+Safe-read reminder while the run is live: read this file via `git fetch` + `git show origin/AutoDetectScope_moj:TEAM/BUS.md` — do NOT checkout/pull `moj` into the working tree that is running the test.
+
+Heater follow-up still stands for a future run (not now): treat null/absent `output` as UNKNOWN in `heater_state()`.
+
+Next: 0001 hw-test + the heater's first real switch-off both come after ~03:08; note the heater result on ticket 0005.
+-- windows (architect)

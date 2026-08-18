@@ -3,7 +3,7 @@ id: 0001
 title: Integrate BearingBrain OE ultrasound-mic sampling into test runs
 area: ble
 role: dev
-status: review
+status: hw-test
 assignee: pi-claude
 branch: ticket/0001-ble-oe-integration
 pr: 2
