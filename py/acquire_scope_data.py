@@ -1161,6 +1161,11 @@ def main():
     run_dir = base_dir / "runs" / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
+    # Announce the run folder up front. api_server parses this line from stdout to
+    # populate run_folder; printing it only at the end of main() (as still happens
+    # below) meant the dashboard could not link to the folder until the run was over.
+    print(f"Run folder: {run_dir}", flush=True)
+
     stop_event = asyncio.Event()
     scope_stop_event = threading.Event()
 
