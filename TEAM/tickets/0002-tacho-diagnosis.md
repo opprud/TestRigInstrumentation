@@ -3,8 +3,8 @@ id: 0002
 title: Diagnose tacho measured-vs-commanded speed gap (slip vs artifact)
 area: control
 role: dev
-status: backlog
-assignee: unassigned
+status: diagnosed
+assignee: pi-claude
 branch:
 pr:
 ---
@@ -18,18 +18,18 @@ Decide whether the persistent gap between **measured** and **commanded/target** 
 
 ## Method (from the latest run's telemetry on the Pi)
 1. Per speed step, compute `measured_rpm / commanded_rpm` (with `commanded_rpm = commanded_Hz × 59.5`).
-2. Characterise the gap:
-   - **direction** — is measured *above* or *below* commanded?
-   - **magnitude** — a few %, or a large factor?
-   - **load-dependence** — does the gap grow with load (torque/force channel)?
-   - **stability** — does measured hold a value or jump while commanded changes?
-3. Read what firmware is actually **flashed** on the RP2040 (`INFO` → `fw=`) and its `PULSES_PER_REV` / `SETPPR`. **Prime suspect** for a constant-ratio gap is a PPR mismatch: the source was renamed to v1.2.0 (hardcodes PPR=1), but the board may still run older firmware with a different PPR.
+2. Characterise the gap: **direction**, **magnitude**, **load-dependence**, **stability**.
+3. Read what firmware is actually **flashed** on the RP2040 (`INFO` → `fw=`) and its `PULSES_PER_REV` / `SETPPR`.
 
-## Verdict → action
-- measured **modestly below** commanded, load-dependent (≤ ~5 %) → **slip**; sensor OK, use as-is.
-- **constant ratio** ≈2× / ≈½× → **PPR mismatch**; set the correct pulses-per-rev (or reflash the intended firmware).
-- measured **above** commanded → over-counting (noise / multiple pulses per rev).
-- measured **frozen/erratic** vs changing commanded → dropped tacho pulses + firmware holds last value (no timeout) → needs a tach timeout + signal check.
+## VERDICT (2026-08-18, Pi-Claude) — tacho artifact, NOT slip
 
-## Deliverable
-Per-step ratio table + verdict (slip vs artifact) + recommended fix, reported to the architect. This is the definitive answer to Frederik's "is the sensor working well?".
+**The tacho is not measuring shaft speed.**
+
+- **Decisive evidence:** in a run this morning the drive never started (STOP / 0.0 Hz, shaft stationary — confirmed in drive telemetry + audibly), yet the tacho reported **234.41 rpm for all 41 samples**. A stationary shaft can't produce a real reading → the sensor is picking up something that isn't rotation.
+- **Systematic error (13 h run):** `measured = 1.0011 × true + 582 rpm`, max deviation ~5 rpm over 100–2300 rpm, then **hard saturation at 2963 rpm** (`true` = commanded reconstructed from drive Hz × 59.5).
+- **Interpretation:** slope ≈ 1 → **scale / pulses-per-rev is correct** (not extra reflections per rev, not miscalibration). The fault is a **constant additive offset of 582 rpm ≈ +9.7 Hz of extra pulses**, independent of shaft speed → a **second pulse source** (electrical pickup / stationary reflection / ambient light).
+- **Shaft speed is fine:** open-loop drive freq = target, recorded freq matches target/59.5 at every step; true speed = 59.5 × Hz, ±2–3 % slip. The tacho mismatch does **not** mean the shaft runs at the wrong speed → use commanded-derived speed for analysis.
+- **Caveat:** shaft speed can't be independently confirmed right now (the only independent sensor is the faulty one). A hand tachometer or phone strobe at a couple of set points would settle it in minutes.
+
+## Fix (follow-up → ticket 0003 when ready)
+Eliminate the spurious ~9.7 Hz pulse source: check electrical pickup (shielding/grounding of the OGT500 signal line), a stationary reflection in the sensor's field, or stray ambient light; and/or add debounce + validation in the RP2040 tach ISR plus a tach timeout (it currently holds the last value). Re-verify against an independent hand-tach / phone-strobe reading. Also investigate the saturation ceiling at 2963 rpm.
