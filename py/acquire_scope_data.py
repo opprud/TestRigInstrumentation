@@ -1046,6 +1046,7 @@ def acquire_loop(config):
                 _logr("Stopping acquisition early (stop_event set)")
                 break
 
+            sweep_t0 = time.monotonic()
             ts_local, ts_utc = now_pair()
 
             # --- Capture ALL channels in ONE acquisition (retry; skip on fail) ---
@@ -1120,7 +1121,11 @@ def acquire_loop(config):
                 if _stop_requested():
                     _logr("Stopping acquisition early (stop_event set)")
                     break
-                time.sleep(interval)
+                # interval_sec is the sweep *period*, not an extra gap after the work.
+                # Sleeping the full interval made the real cadence (work + interval),
+                # so `samples` (= duration/interval) was never reachable and the
+                # reported sweep_total always overstated what the run could do.
+                time.sleep(max(0.0, interval - (time.monotonic() - sweep_t0)))
 
         _logr(f"acquire loop ended — {skipped} sweep(s) skipped")
 
