@@ -1,0 +1,6 @@
+{
+    "sampling_masks": [[14]],
+    "sensor_infos": [
+        {"sensor_name": "ISM330 GYRO Z", "id_for_device": 14, "sampling_rate": 6660}
+    ]
+}

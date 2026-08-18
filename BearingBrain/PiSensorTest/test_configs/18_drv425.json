@@ -1,0 +1,6 @@
+{
+    "sampling_masks": [[18]],
+    "sensor_infos": [
+        {"sensor_name": "DRV425 MAG", "id_for_device": 18, "sampling_rate": 25600}
+    ]
+}

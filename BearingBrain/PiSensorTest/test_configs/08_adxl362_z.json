@@ -1,0 +1,6 @@
+{
+    "sampling_masks": [[8]],
+    "sensor_infos": [
+        {"sensor_name": "ADXL362 ACC Z", "id_for_device": 8, "sampling_rate": 400}
+    ]
+}

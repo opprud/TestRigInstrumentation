@@ -1,0 +1,6 @@
+{
+    "sampling_masks": [[3]],
+    "sensor_infos": [
+        {"sensor_name": "MIC AMB", "id_for_device": 3, "sampling_rate": 100000}
+    ]
+}

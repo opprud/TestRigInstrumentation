@@ -1,0 +1,6 @@
+{
+    "sampling_masks": [[15]],
+    "sensor_infos": [
+        {"sensor_name": "MMC5603NJ MAG X", "id_for_device": 15, "sampling_rate": 250}
+    ]
+}

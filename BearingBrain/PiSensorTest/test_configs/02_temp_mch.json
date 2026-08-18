@@ -1,0 +1,6 @@
+{
+    "sampling_masks": [[2]],
+    "sensor_infos": [
+        {"sensor_name": "TEMP MCH", "id_for_device": 2, "sampling_rate": 250}
+    ]
+}

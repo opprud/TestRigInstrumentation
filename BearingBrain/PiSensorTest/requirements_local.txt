@@ -1,0 +1,18 @@
+# Pinned 2026-08-18 on the Raspberry Pi (Python 3.13.5, aarch64), verified to
+# import and start. The previous "bleak>=0.22.3" resolved to bleak 3.0.2 — two
+# major versions past what this code was written against on macOS — so pin it
+# rather than let a fresh setup land somewhere else again.
+#
+# Every bleak API this code calls (BleakClient, BleakScanner, BleakError,
+# BleakDBusError, connect, disconnect, start_notify, write_gatt_char) exists in
+# 3.0.2, but runtime behaviour was not verified against hardware. If the BLE
+# connection misbehaves, `pip install 'bleak==0.22.3'` is the A/B test — the
+# double connect() in oe_device.connect() is the likeliest casualty.
+bleak==3.0.2
+numpy==2.5.2
+plotly==6.9.0
+
+# Transitive, recorded for reference (installed automatically):
+#   dbus-fast==5.0.22   (bleak's BlueZ/D-Bus backend on Linux)
+#   narwhals==2.24.0    (plotly)
+#   packaging==26.3

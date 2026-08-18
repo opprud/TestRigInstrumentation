@@ -1,0 +1,6 @@
+{
+    "sampling_masks": [[9]],
+    "sensor_infos": [
+        {"sensor_name": "ISM330 ACC X", "id_for_device": 9, "sampling_rate": 6660}
+    ]
+}

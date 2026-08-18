@@ -56,3 +56,9 @@ temp/
 
 # Auto-generated inline test profiles written by the dashboard at run time
 react/public/config/inline_*.json
+
+# BearingBrain OE BLE sensor test — sampler output is data, not source.
+# Keep the directory itself so run_sampler.py has somewhere to write.
+BearingBrain/PiSensorTest/samples/*
+!BearingBrain/PiSensorTest/samples/.gitkeep
+BearingBrain/PiSensorTest/*.html

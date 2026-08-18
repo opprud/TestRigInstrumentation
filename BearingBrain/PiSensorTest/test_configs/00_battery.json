@@ -1,0 +1,6 @@
+{
+    "sampling_masks": [[0]],
+    "sensor_infos": [
+        {"sensor_name": "BATT", "id_for_device": 0, "sampling_rate": 1}
+    ]
+}
