@@ -172,6 +172,7 @@ class TestRunner:
         vfd_min_hz = float(control.get("vfd_min_hz", 0.0))
         vfd_max_hz = float(control.get("vfd_max_hz", 60.0))
         rpm_per_hz_guess = float(control.get("rpm_per_hz_guess", 30.0))  # feedforward initial guess
+        open_loop = bool(control.get("open_loop", False))  # True: command Hz from target, ignore tacho
         kp = float(control.get("kp_hz_per_rpm", 0.002))
         ki = float(control.get("ki_hz_per_rpm_s", 0.0004))
         integrator_limit_hz = float(control.get("integrator_limit_hz", 20.0))
@@ -208,6 +209,7 @@ class TestRunner:
                 "vfd_min_hz": vfd_min_hz,
                 "vfd_max_hz": vfd_max_hz,
                 "rpm_per_hz_guess": rpm_per_hz_guess,
+                "open_loop": open_loop,
                 "kp_hz_per_rpm": kp,
                 "ki_hz_per_rpm_s": ki,
                 "integrator_limit_hz": integrator_limit_hz,
@@ -419,7 +421,8 @@ class TestRunner:
             elif rpm_target is not None and rpm_target > 0:
                 # Only trigger tachometer-missing stop if RP2040 was present at startup.
                 # If rp_ser is None (never connected), we never had RPM data — don't stop.
-                if rp_ser is not None and (now_t - last_good_rpm_t) > max_missing_rpm_sec:
+                # In open-loop mode we ignore the tacho entirely, so never stop on it.
+                if (not open_loop) and rp_ser is not None and (now_t - last_good_rpm_t) > max_missing_rpm_sec:
                     stop_reason = f"tachometer_missing>{max_missing_rpm_sec}s"
                     break
 
@@ -445,7 +448,17 @@ class TestRunner:
                         except Exception:
                             pass
 
-                if rpm_meas is not None:
+                if open_loop:
+                    # Open-loop: command Hz straight from the target via the rpm/Hz
+                    # calibration; ignore the tacho entirely (robust when the optical
+                    # sensor is unreliable). True speed is reconstructed offline from Hz.
+                    hz_cmd = _clamp(float(rpm_target) / rpm_per_hz_guess, vfd_min_hz, vfd_max_hz)
+                    if last_hz_cmd is not None:
+                        max_d = hz_rate_limit * float(tick_sec)
+                        hz_cmd = _clamp(hz_cmd, last_hz_cmd - max_d, last_hz_cmd + max_d)
+                    last_hz_cmd = hz_cmd
+
+                elif rpm_meas is not None:
                     err = float(rpm_target) - float(rpm_meas)
                     if abs(err) < rpm_deadband:
                         err = 0.0
