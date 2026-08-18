@@ -84,8 +84,16 @@ def heater_state(channel_id: int, channel_name: str):
         with urllib.request.urlopen("http://localhost:8000/api/shelly/status", timeout=10) as r:
             data = json.loads(r.read().decode())
         for c in data.get("channels", []):
-            if int(c.get("id", -1)) == channel_id:
-                return not bool(c.get("output"))
+            if int(c.get("id", -1)) != channel_id:
+                continue
+            out = c.get("output")
+            if not isinstance(out, bool):
+                # Absent or null means the API has no fresh state for the channel —
+                # that is UNKNOWN. bool(None) would silently read as "off" and let
+                # the guard claim VERIFIED without the heater ever being switched.
+                log(f"channel {channel_id}: API returned output={out!r} — treating as UNKNOWN")
+                return None
+            return not out
     except Exception as e:
         log(f"API status unavailable ({e!r}); falling back to MQTT CLI")
 
