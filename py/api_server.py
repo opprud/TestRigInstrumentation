@@ -1200,18 +1200,22 @@ async def run_start(payload: Dict):
                     if m2:
                         _run_state["run_folder"] = m2.group(1).strip()
 
-                # process ended
+                # Process ended. stdout EOF only means the child closed its pipe;
+                # it may not be reaped yet, so poll() can still return None and a
+                # cleanly finished run gets reported as an error. Wait for the real
+                # exit code instead of racing the reaper.
+                rc = None
                 if _run_proc:
-                    rc = _run_proc.poll()
-                else:
-                    rc = None
+                    try:
+                        rc = _run_proc.wait(timeout=30)
+                    except subprocess.TimeoutExpired:
+                        rc = _run_proc.poll()
 
-                if rc is None:
-                    # reader ended unexpectedly; mark error
-                    _run_state["state"] = "error"
-                    _run_state["error"] = _run_state.get("error") or "runner output stream ended unexpectedly"
-                elif rc == 0:
+                if rc == 0:
                     _run_state["state"] = "stopped"
+                elif rc is None:
+                    _run_state["state"] = "error"
+                    _run_state["error"] = _run_state.get("error") or "runner did not exit after its output stream closed"
                 else:
                     _run_state["state"] = "error"
                     _run_state["error"] = _run_state.get("error") or f"acquire_scope_data exited with code {rc}"
