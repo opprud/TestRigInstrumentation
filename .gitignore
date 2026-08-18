@@ -53,3 +53,6 @@ react/build/
 *.temp
 tmp/
 temp/
+
+# Auto-generated inline test profiles written by the dashboard at run time
+react/public/config/inline_*.json
