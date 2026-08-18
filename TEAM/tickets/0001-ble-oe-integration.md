@@ -6,7 +6,7 @@ role: dev
 status: review
 assignee: dev-ble (Pi session)
 branch: ticket/0001-ble-oe-integration
-pr:
+pr: 2
 ---
 
 ## Goal
