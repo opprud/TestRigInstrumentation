@@ -6377,7 +6377,7 @@
     "scope_points": "MAX",
     "acq_points": 1000000,
     "samples_per_step": 3,
-    "interval_sec": 7,
+    "interval_sec": 12,
     "waveform_format": "WORD",
     "acq_type": "NORM"
   },
