@@ -233,6 +233,10 @@ class TestRunner:
         # State for PI + setpoint sending
         last_temp_sent: Optional[float] = None
         vfd_started = False
+        vfd_start_failures = 0
+        # Refusing to start the drive is fatal: without it the rig sits still while
+        # the schedule runs on, and the recorded data looks like a normal test.
+        vfd_start_max_failures = int(control.get("vfd_start_max_failures", 5))
         integ_hz = 0.0
         last_hz_cmd: Optional[float] = None
         last_hz_sent: Optional[float] = None
@@ -442,11 +446,22 @@ class TestRunner:
                             vfd.set_frequency(hz_guess)
                             vfd.start_forward(hz_guess)
                             vfd_started = True
+                            vfd_start_failures = 0
                             last_hz_cmd = hz_guess
                             last_hz_sent = hz_guess
                             hz_cmd = hz_guess
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            # Never swallow this. If the drive cannot be started the
+                            # bearing does not turn, yet the schedule keeps advancing
+                            # and telemetry still reports the *commanded* Hz, so the
+                            # run looks healthy while recording a stationary rig.
+                            vfd_start_failures += 1
+                            print(f"[runner] vfd start failed "
+                                  f"({vfd_start_failures}/{vfd_start_max_failures}): {e!r}",
+                                  flush=True)
+                            if vfd_start_failures >= vfd_start_max_failures:
+                                stop_reason = (f"vfd_start_failed after "
+                                               f"{vfd_start_failures} attempts: {e}")
 
                 if open_loop:
                     # Open-loop: command Hz straight from the target via the rpm/Hz
