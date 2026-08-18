@@ -6,7 +6,7 @@ role: dev
 status: done
 assignee: pi-claude
 branch: ticket/0004-heater-guard
-pr:
+pr: 3
 ---
 
 ## Goal
