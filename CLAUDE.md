@@ -71,8 +71,18 @@ Key Python modules:
 
 The VFD and the Omron share one RS485 bus (different Modbus slave IDs), so bus access is
 serialized with a lock. Sensor channels wired to the scope are configured in
-`config.json → channels` (currently CHAN1 = acoustic emission, CHAN2 = accelerometer,
-CHAN3 = slip ring; CHAN4 disabled).
+`config.json → channels`. **The aliases do not read as you would expect** — the alias `UL`
+is the acoustic-emission probe and the alias `AE` is the accelerometer:
+
+| Scope source | Alias (`name`) | Sensor |
+|---|---|---|
+| CHAN1 | `UL` | Kistler acoustic-emission probe |
+| CHAN2 | `AE` | Piezo accelerometer |
+| CHAN3 | `SP` | Slip ring (slæbering) |
+| CHAN4 | `Temp` | Temperature — **disabled** |
+
+The aliases are what the profile's `scope_channels` block, `plot_waveform.py --channels` and
+the dashboard's preview picker refer to, so keep those three in sync with this table.
 
 ---
 
