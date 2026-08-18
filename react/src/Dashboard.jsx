@@ -596,9 +596,9 @@ export default function Dashboard() {
                       onChange={(e) => setPreviewChannel(e.target.value)}
                       className="text-xs border rounded px-2 py-1 bg-background"
                     >
-                      <option value="CHAN1">CH1 - AE</option>
-                      <option value="CHAN2">CH2 - Accel</option>
-                      <option value="CHAN3">CH3 - UL</option>
+                      <option value="CHAN1">CH1 - UL</option>
+                      <option value="CHAN2">CH2 - AE</option>
+                      <option value="CHAN3">CH3 - SP</option>
                       <option value="CHAN4">CH4 - Temp</option>
                     </select>
                   </div>

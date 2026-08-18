@@ -28,7 +28,7 @@
   },
 
   "acquisition": {
-    "points": 20000,
+    "points": 40000,
     "samples": 500,
     "interval_sec": 20,
     "waveform_format": "WORD",
