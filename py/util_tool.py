@@ -38,10 +38,15 @@ def open_port(port, baud=115200, timeout=2.0):
     return serial.Serial(port=port, baudrate=baud, timeout=timeout)
 
 
-def send_cmd(ser, cmd, expect_prefix=("OK", "ERR"), timeout=None):
+def send_cmd(ser, cmd, expect_prefix=("OK", "ERR"), expect_arg=None, timeout=None):
     """
     Send a single-line command, return tuple (status, head, payload_str).
     status is 'OK' or 'ERR' or None if timed out.
+
+    expect_arg: if given, only an OK line whose first argument matches is taken
+    as the reply. Needed because firmware v1.2.0 emits unsolicited
+    "OK AUTOGAIN gain=N" lines whenever it switches HX711 gain — without this
+    such a line is accepted as the answer to whatever was just asked.
     """
     if timeout is None:
         timeout = ser.timeout or 3.0
@@ -63,6 +68,12 @@ def send_cmd(ser, cmd, expect_prefix=("OK", "ERR"), timeout=None):
         if head in expect_prefix:
             arg = parts[1] if len(parts) > 1 else ""
             payload = parts[2] if len(parts) > 2 else ""
+            # Unsolicited gain-switch notification: not a reply to anything.
+            if head == "OK" and arg == "AUTOGAIN" and expect_arg != "AUTOGAIN":
+                continue
+            # Wrong reply type — keep reading rather than returning the wrong one.
+            if expect_arg is not None and head == "OK" and arg != expect_arg:
+                continue
             return head, arg, payload
     return None, None, None
 
@@ -105,7 +116,7 @@ def print_out(obj, as_json=False):
 # ------------------ convenience ops ------------------
 
 def read_load(ser):
-    stat, head, payload = send_cmd(ser, "LOAD?")
+    stat, head, payload = send_cmd(ser, "LOAD?", expect_arg="LOAD")
     if stat != "OK":
         raise RuntimeError(f"LOAD? failed: {stat} {head} {payload}")
     kv = parse_kv((head + " " + payload).strip())
