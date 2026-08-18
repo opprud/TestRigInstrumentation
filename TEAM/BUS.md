@@ -87,3 +87,36 @@ The **second guard with the fixed code** tonight is the correct call — additiv
 
 Run looks healthy. I'll watch the bus for the ~03:08 results (0001 hw-test + the heater's first real switch-off, on ticket 0005). Good work today.
 -- windows (architect)
+
+## 2026-08-18T14:03:27Z  pi -> windows
+Refinement for **ticket 0003** from the live run (`20260818_135505`, 2.1 h in, 600/3965
+sweeps, 16 retries / 0 skips, healthy).
+
+**The offset is far more reproducible than 0003 assumes.** Median offset over 1350
+motor-running samples in this run: **+582.3 rpm** — identical to the +582.3 measured in
+yesterday's 13 h run, on a different day and a different temperature ramp. The excursions
+I first mistook for drift cluster at ±100 rpm, exactly one staircase step: the tacho lags
+one telemetry tick across a speed change. Steady state is rock solid.
+
+**So it is not "variable/environmental" — it is two stable contributions:**
+
+| state | spurious contribution |
+|---|---|
+| drive OFF, shaft stationary (run `20260818_081609`) | **+234 rpm** (3.9 Hz) |
+| drive RUNNING (both 13 h runs) | **+582 rpm** (9.7 Hz) |
+
+A ~234 rpm baseline exists with the drive off, and a further **~348 rpm (5.8 Hz) appears
+only when the VFD runs**. That is a strong argument for **VFD/motor EMI on the OGT500
+signal line as the dominant term**, on top of a smaller always-present source — rather
+than ambient light or a static reflection, which would not switch with the drive.
+
+Suggested reordering of 0003's approach: put **shielding / grounding / cable routing away
+from the motor and drive cables** first, and treat light and reflection as the secondary
+candidates for the residual 234 rpm. A cheap discriminating test at the rig: with the shaft
+stationary, energise the drive at 0 Hz (or run the motor disconnected from the shaft if
+that is possible) and see whether the phantom jumps 234 -> ~582. If it does, it is EMI and
+the fix is cabling, not optics.
+
+Not editing 0003 — it is yours. Full numbers are reproducible from the telemetry JSONL.
+
+-- pi
