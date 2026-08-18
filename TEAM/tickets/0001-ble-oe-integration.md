@@ -3,10 +3,10 @@ id: 0001
 title: Integrate BearingBrain OE ultrasound-mic sampling into test runs
 area: ble
 role: dev
-status: in-progress
+status: review
 assignee: pi-claude
-branch:
-pr:
+branch: ticket/0001-ble-oe-integration
+pr: 2
 ---
 
 ## Goal
@@ -17,11 +17,11 @@ Sample the BearingBrain "OE" sensor's ultrasound mic periodically **during rig t
 - The OE UART-over-BLE protocol (bleak) works. Mic mask `0x18` = IDs 3+4 (`mic_amb` + `mic_mch`) — the primary signal of interest.
 
 ## Scope
-- [ ] `py/ble/` package that reuses `oe_device`/`oe_protocol`/`utils` (relative imports; keep the harness copy as the source, don't fork the protocol).
-- [ ] `py/oe_sampler.py`: async task, sample every N minutes (default 5), mic mask `0x18`; push each capture to a thread-safe queue.
-- [ ] Hook into `acquire_scope_data.py`: start the OE task in `main()`; the acquire loop drains the queue into HDF5 `/oe_samples`.
-- [ ] Config block: `{ "oe": { "enabled": false, "device_address": "<MAC>", "interval_min": 5, "sensors": [3,4] } }`.
-- [ ] Add `bleak` to `py/requirements.txt`.
+- [x] `py/ble/` package that reuses `oe_device`/`oe_protocol`/`utils` (relative imports; keep the harness copy as the source, don't fork the protocol).
+- [x] `py/oe_sampler.py`: async task, sample every N minutes (default 5), mic mask `0x18`; push each capture to a thread-safe queue.
+- [x] Hook into `acquire_scope_data.py`: start the OE task in `main()`; the acquire loop drains the queue into HDF5 `/oe_samples`.
+- [x] Config block: `{ "oe": { "enabled": false, "device_address": "<MAC>", "interval_min": 5, "sensors": [3,4] } }`.
+- [x] Add `bleak` to `py/requirements.txt`.
 
 ## Prerequisites / risks
 - **Verify BLE on BlueZ first**: un-comment `start_notify` in `oe_device.connect()` (~line 110) and confirm a real connect on the Pi before wiring into runs.
@@ -42,3 +42,57 @@ Sample the BearingBrain "OE" sensor's ultrasound mic periodically **during rig t
 - **⚠️ Receive path is broken — platform-independent, NOT just a Linux caveat.** `oe_protocol.take_samples()` writes the command (`write_gatt_char`) then `await`s `self.tcs` (a future). That future is resolved **only** inside `push()`; `push()` is called **only** by `oe_device.notification_handler`, which fires **only** if `start_notify` is registered — and it is commented out in `oe_device.connect()` (~line 110). So sampling sends the command, receives nothing, and times out with empty `sampleData` on **every** platform. `connect_ota()` *does* register notify (on the firmware char), confirming the pattern is intentional and the UART path was disabled at some point.
 - **Fix:** enable `start_notify(UART_CHAR_UUID, self.notification_handler)` in `connect()` — essential everywhere, not "probably on Linux" as the harness guide implied. Also sanity-check that `take_samples` writes to the correct **characteristic** UUID (it currently targets `UART_SERVICE_UUID`). HW-verify with a real OE sensor tomorrow.
 - **Also:** reconcile `BearingBrain/PiSensorTest/CLAUDE.md` (harness doc) with this finding so the "un-comment on Linux" wording doesn't mislead.
+
+## Progress (Pi dev session, 2026-08-18)
+
+Implemented on `ticket/0001-ble-oe-integration`. All scope items done; **acceptance is only
+partly verified** because no OE sensor was present on the bench.
+
+**Verified**
+- BlueZ + bleak 3.0.2 work on the Pi: `ble_debug_scan.py` saw 25 devices. No OE among them.
+- `/oe_samples` write path unit-tested against a real HDF5 file: captures stored as
+  `oe_000…`, one dataset per channel, with `near_sweep`, `mask`, `sensors` and `telem_*`
+  attributes; a malformed record is logged and skipped rather than raising.
+- `enabled: false` leaves the file layout untouched — a motor-free manual-mode run produced
+  only `metadata` + `sweeps`, 3/3 sweeps, 0 skipped.
+- `py/ble` degrades to `OeUnavailable` when `bleak` is missing instead of breaking the run.
+
+**Not verified — needs the sensor (hw-test)**
+- A real connect, `start_notify` actually delivering data, and a populated `/oe_samples`.
+- Sweep skip count against a no-OE reference run (reference: `20260818_083247`, 71 sweeps,
+  2 retries, 0 skips, 12.00 s cadence).
+
+**Note for the reviewer:** `oe_device.connect()` needed more than un-commenting. The protocol
+only ever writes — there is no `read_gatt_char` anywhere — so with `start_notify` disabled no
+device reply could reach `OeProtocol.push()` on *any* platform, not just Linux. It is now
+enabled after service discovery (the code's own comment requires that order), and the
+duplicate `connect()` and 3 s "Windows BLE stack" sleep are removed.
+
+
+## Recon follow-ups — resolved (Pi, 2026-08-18)
+
+Answers to the two open points in the recon above, so review is not blocked on them:
+
+- **`take_samples` writes to the right UUID.** `oe_protocol.UART_SERVICE_UUID` and
+  `oe_device.UART_CHAR_UUID` are the *same string* (`00002760-…-0254`); only the name is
+  misleading. Same for the firmware pair. Nothing to fix — worth renaming one day, but it
+  is not a bug and not in this PR.
+- **The harness doc needs no correction.** `BearingBrain/PiSensorTest/CLAUDE.md` never
+  mentions `start_notify`; the misleading "un-comment on Linux" wording was in the **root**
+  `CLAUDE.md`, and PR #2 already replaces it with the platform-independent explanation.
+
+## Split of work (agreed 2026-08-18)
+
+The implementation is **already done** — PR #2, authored from the Pi. There is no second
+implementation to reconcile: the architect's commits on `AutoDetectScope_moj` are ticket
+documents only (`git log --author` confirms no code). So the split from here is:
+
+- **Architect / PM** — review and merge PR #2. No re-implementation needed.
+- **Pi (tester)** — the hardware verification, which is the only part still outstanding:
+  mount the sensor → `ble_debug_scan.py` for the MAC → set `device_address` +
+  `enabled: true` → confirm a real connect and a populated `/oe_samples` → compare the
+  sweep skip count against the no-OE reference run `20260818_083247`.
+
+**The rig is not free until ~03:08** (13 h run `20260818_135505`, ticket 0005), and the
+sensor is not mounted, so hw-test happens at the rig after that. Ticket moves to
+`hw-test` on merge, and to `done` only when the sensor has actually been sampled.

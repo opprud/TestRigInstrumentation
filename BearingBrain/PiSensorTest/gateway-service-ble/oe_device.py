@@ -105,26 +105,24 @@ class OeDevice:
         
     async def connect(self):
         try:
-            await self.client.connect()
-            await asyncio.sleep(0.2)  # wait a bit to let the connection stabilize
-            #await self.client.start_notify(UART_CHAR_UUID, self.notification_handler)
             await self.client.connect(timeout=20.0)
-
-            # Give Windows BLE stack time to stabilize
-            await asyncio.sleep(3.0)
+            await asyncio.sleep(0.2)  # wait a bit to let the connection stabilize
 
             # Force service discovery BEFORE notify/write
             services = self.client.services
 
-            print("\n=== BLE SERVICES ===")
-
+            self.logger.debug(f"[{self.name}] - services:")
             for service in services:
-                print(service.uuid)
-
+                self.logger.debug(f"  {service.uuid}")
                 for char in service.characteristics:
-                    print("   ", char.uuid, char.properties)
+                    self.logger.debug(f"    {char.uuid} {char.properties}")
 
-            print("====================\n")
+            # Subscribe to the UART characteristic. Without this nothing ever reaches
+            # notification_handler -> OeProtocol.push(), and since the protocol only
+            # ever writes (there is no read_gatt_char anywhere), no reply from the
+            # device can be parsed at all. It must come after service discovery.
+            await self.client.start_notify(UART_CHAR_UUID, self.notification_handler)
+
             self.protocol = OeProtocol(self.client)
             self.connected = True
             self.logger.info(f"[{self.name}] - Connected!")

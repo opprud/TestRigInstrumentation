@@ -912,6 +912,61 @@ def _write_metadata(h5f, config: dict, scope_idn: str, ts_local: str, ts_utc: st
     return meta_grp
 
 
+def _drain_oe_queue(h5f, oe_queue, state, telemetry_store, sweep_idx, ds_kwargs, logr):
+    """
+    Move any finished OE captures from the sampler thread into /oe_samples.
+
+    Called from the scope thread only, so the HDF5 file keeps a single writer.
+    Non-blocking: it takes whatever is ready and returns — a slow BLE capture
+    must never hold up a sweep.
+    """
+    if oe_queue is None:
+        return
+    while True:
+        try:
+            rec = oe_queue.get_nowait()
+        except Exception:
+            return  # queue.Empty (and anything else) => nothing more to do
+        try:
+            grp_root = state.get("grp")
+            if grp_root is None:
+                # Created lazily so a run with OE disabled keeps its old layout.
+                grp_root = h5f.create_group("oe_samples")
+                state["grp"] = grp_root
+
+            n = state.get("n", 0)
+            g = grp_root.create_group(f"oe_{n:03d}")
+            state["n"] = n + 1
+
+            g.attrs["t_start"] = rec.get("t_start", "")
+            g.attrs["t_stop"] = rec.get("t_stop", "")
+            g.attrs["device_name"] = str(rec.get("device_name", ""))
+            g.attrs["device_address"] = str(rec.get("device_address", ""))
+            g.attrs["mask"] = int(rec.get("mask", 0))
+            g.attrs["sensors"] = [int(x) for x in (rec.get("sensors") or [])]
+            # Tie the capture to the operating point it was taken at.
+            g.attrs["near_sweep"] = int(sweep_idx)
+            for k, v in dict(telemetry_store).items():
+                if v is None:
+                    continue
+                try:
+                    g.attrs[f"telem_{k}"] = v
+                except Exception:
+                    g.attrs[f"telem_{k}"] = str(v)
+
+            for ch in rec.get("samples") or []:
+                name = str(ch.get("sensor_name") or "unknown")
+                data = ch.get("data") or []
+                try:
+                    g.create_dataset(name, data=data, **ds_kwargs)
+                except Exception:
+                    g.create_dataset(name, data=[float(x) for x in data], **ds_kwargs)
+            logr(f"[oe] stored capture oe_{n:03d} near sweep {sweep_idx}")
+        except Exception as e:
+            # Losing one OE capture must never take the run with it.
+            logr(f"[oe] FAILED to store capture: {e!r}")
+
+
 def acquire_loop(config):
     store_cfg = config["store"]
     acq_cfg   = config["acquisition"]
@@ -993,6 +1048,9 @@ def acquire_loop(config):
     # Shared telemetry dict — updated by test_runner via acq_cfg["_telemetry_store"]
     # acquire_loop reads latest value per sweep
     telemetry_store: dict = acq_cfg.get("_telemetry_store") or {}
+    # OE BLE captures arrive on this queue from the sampler task (ticket 0001).
+    oe_queue = acq_cfg.get("_oe_queue")
+    oe_state: dict = {"grp": None, "n": 0}
 
     def _stop_requested():
         return "stop_event" in acq_cfg and acq_cfg["stop_event"].is_set()
@@ -1131,6 +1189,9 @@ def acquire_loop(config):
             else:
                 print(f"[{ts_local}] {_msg}", flush=True)
 
+            # Fold in any OE captures that finished while this sweep ran.
+            _drain_oe_queue(h5f, oe_queue, oe_state, telemetry_store, i, ds_kwargs, _logr)
+
             if i < samples - 1:
                 if _stop_requested():
                     _logr("Stopping acquisition early (stop_event set)")
@@ -1140,6 +1201,12 @@ def acquire_loop(config):
                 # so `samples` (= duration/interval) was never reachable and the
                 # reported sweep_total always overstated what the run could do.
                 time.sleep(max(0.0, interval - (time.monotonic() - sweep_t0)))
+
+        # Last chance to store anything the sampler produced near the end.
+        _drain_oe_queue(h5f, oe_queue, oe_state, telemetry_store,
+                        max(0, samples - 1), ds_kwargs, _logr)
+        if oe_state["n"]:
+            _logr(f"acquire loop: stored {oe_state['n']} OE capture(s) in /oe_samples")
 
         _logr(f"acquire loop ended — {skipped} sweep(s) skipped")
 
@@ -1192,6 +1259,12 @@ def main():
     scope_cfg.setdefault("acquisition", {})
     scope_cfg["acquisition"]["stop_event"] = scope_stop_event
     scope_cfg["acquisition"]["_telemetry_store"] = telemetry_store
+    # OE BLE sampler -> scope thread. Plain queue.Queue: the sampler is an asyncio
+    # task in this thread, the scope loop is another thread, and the scope thread
+    # stays the only HDF5 writer.
+    import queue as _queue
+    oe_queue = _queue.Queue()
+    scope_cfg["acquisition"]["_oe_queue"] = oe_queue
     scope_cfg["_profile_cfg"] = profile_cfg  # for scope_channels settings
     scope_cfg.setdefault("store", {})
     scope_cfg["store"]["timestamped"] = False
@@ -1300,11 +1373,29 @@ def main():
             except Exception:
                 print("[runner]", msg, flush=True)
 
+        # Optional OE BLE ultrasound-mic sampling (ticket 0001). Disabled unless the
+        # config says otherwise, and never allowed to break the run.
+        oe_task = None
+        try:
+            oe_cfg = (scope_cfg.get("oe") or {}) if isinstance(scope_cfg, dict) else {}
+            if oe_cfg.get("enabled"):
+                from oe_sampler import OeSampler
+                sampler = OeSampler(oe_cfg, oe_queue, log=lambda m: print(m, flush=True))
+                oe_task = asyncio.create_task(sampler.run(stop_event))
+        except Exception as e:
+            _event_log(f"[oe] sampler failed to start (continuing without it): {e!r}")
+            print(f"[oe] sampler failed to start (continuing without it): {e!r}", flush=True)
+
         try:
             await runner.run(profile_cfg, update_cb=update_cb, stop_event=stop_event)
         finally:
             stop_event.set()
             scope_stop_event.set()  # Stop scope acquisition when runner finishes
+            if oe_task is not None:
+                try:
+                    await asyncio.wait_for(oe_task, timeout=30)
+                except Exception:
+                    oe_task.cancel()
 
     try:
         asyncio.run(run_profile())

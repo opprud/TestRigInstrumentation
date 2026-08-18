@@ -300,37 +300,55 @@ gain** — calibration is gain-dependent.
 
 ---
 
-## BLE bearing sensor (OE) — integration (in progress)
+## BLE bearing sensor (OE) — integration (built, awaiting hardware test)
 
-Goal: sample the **BearingBrain "OE" BLE bearing sensor** (ultrasound mic + accelerometers, etc.)
-as part of each TestRig run and store it alongside the scope data.
+The **BearingBrain "OE"** sensor's ultrasound mic is sampled periodically *during* a rig run
+and stored in the run's HDF5. Implemented under ticket `TEAM/tickets/0001-ble-oe-integration.md`.
+**Off by default** — nothing changes until `oe.enabled` is set.
 
-- **Code:** the sensor + a working standalone sampler live at
-  `software/BearingBrain/BearingBrainGWEmulator 1/`; a trimmed, Pi-ready copy with its own
-  CLAUDE.md is at `BearingBrain/PiSensorTest/`. Core modules: `oe_device.py` → `oe_protocol.py`
-  → `utils.py` (bleak, UART-over-BLE). Ultrasound-mic sensor mask = `(1<<3)|(1<<4)` = `0x18`.
-- **Design decisions (agreed):**
-  - **Cadence — every N minutes** (config `oe.interval_min`, default 5). BLE mic sampling is slow
-    (~2–3 MB, ~16–120 s per sample), so it **cannot** run per scope sweep.
-  - **Channels — ultrasound mic only** (mic_amb + mic_mch, IDs 3–4).
-  - **Storage — into the run's HDF5** (`/oe_samples`), each sample tagged with the operating point
-    (RPM/temp) + nearest sweep index. gzip is already on.
-  - **Threading — asyncio task alongside the runner**, handing samples via a thread-safe queue to
-    the scope thread, which does ALL HDF5 writes (single-writer = safe).
-  - **Resilience — reconnect on drop, never crash the run** (like the scope resilience).
-- **Verify the BLE path on this Pi first.** `OeDevice.connect()` is experimental: `start_notify`
-  is **commented out**, there is a double-connect, and there are macOS/"Windows BLE stack" waits;
-  the existing samples are from macOS/April. On Linux/BlueZ you will likely need to **un-comment
-  `start_notify(UART_CHAR_UUID, …)`**. Prove it standalone before integrating:
-  ```bash
-  # in PiSensorTest, venv with bleak, BlueZ running:
-  python run_sampler.py --address <MAC> --sensors 3 4
-  ```
-  Once that returns mic data, replicate that exact (fixed) `sample_device` flow in the integration.
-- **Integration shape (to build):** `py/ble/` (the 3 modules, relative imports), `py/oe_sampler.py`
-  (the N-minute async task), a small hook in `acquire_scope_data.py` (`main()` starts the task;
-  `acquire_loop` drains the queue into `/oe_samples`), `bleak` added to `requirements.txt`, and an
-  `oe` config block `{enabled, device_address, interval_min: 5, sensors: [3, 4]}`.
+**Config** (`py/config.json`):
+```json
+"oe": { "enabled": false, "device_address": "", "interval_min": 5, "sensors": [3, 4] }
+```
+`device_address` is the **MAC as BlueZ sees it** (from `BearingBrain/PiSensorTest/ble_debug_scan.py`),
+not the macOS UUID. Sensors 3+4 are `mic_amb` + `mic_mch` (mask `0x18`).
+
+**Pieces:**
+
+| File | Role |
+|------|------|
+| `py/ble/__init__.py` | Adapter onto the harness. Puts `BearingBrain/PiSensorTest/gateway-service-ble/` on `sys.path` and re-exports `OeDevice`; adds `find_device_by_address()` and `build_mask()`. **The harness stays the single source of the protocol — do not fork it.** |
+| `py/oe_sampler.py` | `OeSampler.run()`: async task, one connect→sample→disconnect cycle every `interval_min`, bounded by scan 20 s / connect 45 s / sample 120 s. |
+| `py/acquire_scope_data.py` | `main()` starts the task next to the runner; `_drain_oe_queue()` writes captures into `/oe_samples` from the sweep loop. |
+
+**Why the cadence is minutes, not sweeps:** one mic capture is ~2–3 MB and takes 16–120 s over
+BLE, against a ~12 s sweep period. A capture can never delay a sweep: the sampler is an asyncio
+task in the runner's loop and hands finished captures to the scope thread over a `queue.Queue`,
+which the sweep loop drains *non-blocking*. The scope thread stays the only HDF5 writer.
+
+**Failure policy — loud, never fatal.** A failed cycle (sensor not advertising, connect refused,
+no data) is logged with its reason, counted, and skipped; the run continues. Counts are reported
+when the task stops. If `bleak` or the harness is missing, `py/ble` degrades to `OeUnavailable`
+and OE sampling simply does not start — a rig run must never die because an optional BLE sensor
+is absent.
+
+**Data layout:** `/oe_samples/oe_000, oe_001, …`, one dataset per channel named by sensor
+(`Ambient Microphone`, `Machine Microphone`), plus attributes `t_start`, `t_stop`,
+`device_name`, `device_address`, `mask`, `sensors`, `near_sweep` (the sweep index it sits
+between) and the same `telem_*` stamps the sweeps carry. With `enabled: false` the group is
+never created, so existing files keep their exact layout.
+
+**Fixed in `oe_device.connect()` on the way in:** `start_notify(UART_CHAR_UUID, …)` was
+commented out. Since `oe_protocol` only ever *writes* (there is no `read_gatt_char` anywhere),
+nothing could reach `notification_handler` → `OeProtocol.push()`, so no device reply could be
+parsed **on any platform** — not just Linux. It is now enabled, placed *after* service discovery
+as the code's own comment requires, and the redundant second `connect()` and the 3 s
+"Windows BLE stack" wait are gone.
+
+> **Not yet verified against the sensor.** BlueZ, bleak 3.0.2 and scanning are confirmed working
+> on the Pi (25 devices seen), and the HDF5 path is unit-tested, but no OE device has been
+> connected. Get the MAC from `ble_debug_scan.py`, set `device_address`, `enabled: true`, and
+> confirm `/oe_samples` fills and the sweep skip count is unchanged against a no-OE reference run.
 
 ---
 
@@ -352,8 +370,9 @@ as part of each TestRig run and store it alongside the scope data.
    Remaining: flash it when the rig is idle (`pio run --target upload`), make the `LOAD?` parser
    tolerant of `OK AUTOGAIN` lines, and re-TARE + SETCAL per gain. Optional: fold
    `SETPPR`/debounce/tach-timeout back in from the preserved v1.1.0.
-8. **BLE OE sensor integration** — verify the BLE path on BlueZ (un-comment `start_notify`), then
-   build the N-minute ultrasound-mic sampler into the run (see "BLE bearing sensor (OE)").
+8. **BLE OE sensor integration** — built (ticket 0001, `enabled: false`). Remaining: connect a
+   real OE sensor, take its MAC from `ble_debug_scan.py`, enable it, and confirm `/oe_samples`
+   fills without changing the sweep skip count (see "BLE bearing sensor (OE)").
 
 ---
 
