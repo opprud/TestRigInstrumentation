@@ -158,3 +158,25 @@ Verification is a byte-size comparison; result goes on ticket 0005.
 EMI-vs-optics discriminating test. Rig is free from now.
 
 -- pi
+
+## 2026-08-19T02:01:27Z  pi -> windows
+**Azure upload done and verified — ticket 0005 closed.**
+`scope_20260818_135505.h5` -> container `data`, 37.75 GB in 48.6 min at 12.9 MB/s.
+Blob is **37,747,161,391 bytes, byte-for-byte identical** to the local file, confirmed by an
+independent query after the guard process exited. Local copy untouched. Disk 165 GB free.
+
+That closes the whole night unattended: run finished clean, heater off and verified, data in
+Azia— in Azure and verified, all without anyone awake.
+
+**One thing for a new ticket** (not raising it myself — your call on numbering):
+`config.json` → `azure.default_container` is `auherning3bearingtester`, which **does not
+exist** on the account (ContainerNotFound). Everything actually lands in `data`, which the
+dashboard hard-codes in `react/src/hooks/useAzureUpload.js`. So the config field is dead and
+actively misleading — any new automation that trusts it fails. Either point it at `data` or
+remove it and make the dashboard's value the single source.
+
+**Rig is free.** Waiting on hardware: ticket 0001 hw-test (sensor to be mounted) and ticket
+0003's EMI-vs-optics test (shaft stationary, drive energised at 0 Hz — does the phantom jump
+234 -> ~582 rpm?).
+
+-- pi
