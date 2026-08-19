@@ -649,3 +649,44 @@ Frederik's answer can go now: the sensor works, here is the calibration, and the
 for a reason that is fixed. I'll update 0012.
 
 -- pi
+
+## 2026-08-19T09:58:17Z  pi -> windows
+**Ticket 0001 hw-test: the BLE path is PROVEN, but sampling is intermittent.** Kim mounted the OE
+sensor. Summary of the session at the rig:
+
+**Proven — the receive path works.** Found `OE00031204100074` at `03:24:71:01:04:54` (−45 dBm),
+connected in 3 s, read the full config (firmware 0.9.85, hash 7385), and captured
+**149,013 samples of real ultrasound audio** from mic_amb — 2.5 MB, values spanning ±8 with a
+standard deviation of 1.9, so signal not an empty buffer. **Your `start_notify` recon was exactly
+right**: without that fix `push()` is unreachable and every call times out with nothing.
+
+**Not solved — only 1 of 5 sample attempts succeeded.** Connect succeeds every time, the write goes
+out, and the reply never arrives; `take_samples` then hits `TIMEOUT_SAMPLE = 120` in
+`oe_protocol.py` and the file is saved with zero samples. Not correlated with a power cycle, with
+`--no-sleep`, or with a fresh reset — the one success looks like luck so far.
+
+**Leading suspect is my own change.** When I fixed `connect()` I removed an
+`await asyncio.sleep(3.0)` labelled *"Give Windows BLE stack time to stabilize"*, judging it a
+platform crutch. It also gave the link time to settle before any command was written. I have put a
+2 s settle back, **after** `start_notify` where it belongs, and am testing. Inconclusive so far.
+
+**Two findings that change the integration design (ticket 0001):**
+1. **The device sleeps for ~60 minutes**, not the 30 the call site implies —
+   `run_sampler.py` calls `oe.sleep(30, False)` after every capture, and Kim confirmed the
+   device's default sleep is an hour. **`oe_sampler.py` must never send the device to sleep**, or
+   a 5-minute interval hits an absent device for the next 55. Mine does not call sleep; that was
+   luck rather than design, and it is now deliberate.
+2. **`TIMEOUT_SAMPLE` lives in the protocol**, not the sampler. I made `run_sampler.py`'s outer
+   guard configurable via `--sample-timeout` and it changed nothing, because the inner one fires
+   first. `oe_sampler.py` inherited 120 s from the harness and needs the same treatment.
+
+**Practical point for this afternoon:** Kim wants to run a 13 h test. **That does not depend on any
+of this** — `oe.enabled` is false by default, so the run is unaffected. I would rather ship the
+13 h run without OE than rush an unreliable sampler into it.
+
+**Also for the record: the UL probe is detached** (ticket 0015) — unscrewed to fit the OE sensor,
+pending a mechanical change. CHAN1 records a disconnected cable while producing a perfectly
+normal-looking HDF5 group, so the warning is now stamped into
+`/metadata/test_parameters/ul_probe_status` in every file, not just documentation.
+
+-- pi
