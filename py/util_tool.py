@@ -127,6 +127,19 @@ def read_load(ser):
     return {"status": "OK", "type": "LOAD", **kv}
 
 
+def read_tachdiag(ser):
+    """Raw tach edge statistics (firmware >= 1.1.1). Lets the spurious pulse rate be
+    measured at the rig without a scope: sample twice and divide by the interval."""
+    stat, head, payload = send_cmd(ser, "TACHDIAG?", expect_arg="TACHDIAG")
+    if stat != "OK":
+        raise RuntimeError(f"TACHDIAG? failed: {stat} {head} {payload}")
+    kv = parse_kv((head + " " + payload).strip())
+    for k in ("pulses", "glitches", "accepted", "last_period_ms", "ts"):
+        if k in kv:
+            kv[k] = as_number(kv[k])
+    return {"status": "OK", "type": "TACHDIAG", **kv}
+
+
 def do_tare(ser):
     stat, head, payload = send_cmd(ser, "TARE")
     if stat != "OK":
@@ -228,6 +241,7 @@ def main():
     p_setcal.add_argument("--slope", type=float, required=True, help="grams per count")
     p_setcal.add_argument("--tare",  type=int,   required=True, help="raw tare offset")
 
+    sub.add_parser("tachdiag", help="Tach edge statistics (pulses/glitches/accepted)")
     p_cal = sub.add_parser("calibrate", help="Guided calibration with known weight")
     p_cal.add_argument("--weight-g", type=float, required=True, help="known calibration weight in grams")
     p_cal.add_argument("--settle-sec", type=float, default=5.0, help="settling time after putting/removing weight")
@@ -266,6 +280,8 @@ def main():
         elif args.cmd == "setcal":
             out = set_cal(ser, args.slope, args.tare)
 
+        elif args.cmd == "tachdiag":
+            out = read_tachdiag(ser)
         elif args.cmd == "calibrate":
             # Tare with no load
             _ = do_tare(ser)

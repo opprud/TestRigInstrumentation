@@ -29,7 +29,7 @@ const unsigned long HX711_READ_TIMEOUT_MS = 200;
 
 const char* FW_VENDOR  = "ForeverBearing";
 const char* FW_DEVICE  = "RP2040";
-const char* FW_VERSION = "1.2.0";
+const char* FW_VERSION = "1.2.1";
 
 // ---------------- CALIBRATION ----------------
 volatile float g128 = 0.0020f;
@@ -61,9 +61,23 @@ static const uint32_t CAL_VERSION = 0x00030000;
 // ---------------- GLOBAL ----------------
 HX711 hx;
 
-volatile uint32_t tach_pulses_total = 0;
-volatile uint32_t last_edge_us = 0;
-volatile uint32_t last_period_us = 0;
+// --- tach robustness (ticket 0007) ---
+// Timeout: the slowest real speed we run is 100 rpm = 600 ms/rev, so 1.5 s without an
+// accepted edge means the signal is gone, not that the shaft is merely slow. Without
+// this the old code held last_period_us forever and rpm froze at its last value.
+const uint32_t TACH_TIMEOUT_US    = 1500000;
+// Glitch floor: 8 ms => >7500 rpm, physically impossible here (max real 3000 rpm = 20 ms).
+// Rejects double-edges and fast electrical spikes. Assumes PULSES_PER_REV = 1.
+const uint32_t TACH_MIN_PERIOD_US = 8000;
+const int      TACH_MEDIAN_N      = 5;
+
+volatile uint32_t tach_pulses_total = 0;   // every raw rising edge, including rejected
+volatile uint32_t tach_glitch_total = 0;   // edges rejected as too close together
+volatile uint32_t last_edge_us = 0;        // timestamp of the last ACCEPTED edge
+volatile uint32_t last_period_us = 0;      // last accepted period
+volatile uint32_t tach_periods[TACH_MEDIAN_N] = {0};
+volatile int      tach_period_idx = 0;
+volatile int      tach_period_count = 0;
 volatile uint64_t epoch_base_ms = 0;
 
 int stable_counter = 0;
@@ -142,15 +156,41 @@ uint64_t now_unix_ms() {
 void IRAM_ATTR tach_isr() {
   uint32_t now=micros();
   uint32_t prev=last_edge_us;
-  last_edge_us=now;
   tach_pulses_total++;
-  if(prev) last_period_us=now-prev;
+  if(prev){
+    uint32_t dt=now-prev;                  // unsigned subtraction: rollover-safe
+    if(dt<TACH_MIN_PERIOD_US){             // glitch / double-edge
+      tach_glitch_total++;
+      return;                              // keep last_edge_us at the last REAL edge
+    }
+    last_period_us=dt;
+    tach_periods[tach_period_idx]=dt;
+    tach_period_idx=(tach_period_idx+1)%TACH_MEDIAN_N;
+    if(tach_period_count<TACH_MEDIAN_N) tach_period_count++;
+  }
+  last_edge_us=now;
 }
 
+// Median of the last N accepted periods, so a single odd interval cannot swing the
+// reading the way "period between the last two edges" did.
 float compute_rpm() {
-  if(last_period_us==0) return 0;
-  float s=last_period_us/1e6;
-  return 60.0f/(s*PULSES_PER_REV);
+  noInterrupts();
+  uint32_t le=last_edge_us;
+  int n=tach_period_count;
+  uint32_t pbuf[TACH_MEDIAN_N];
+  for(int i=0;i<n;i++) pbuf[i]=tach_periods[i];
+  interrupts();
+
+  if(n==0) return 0.0f;
+  if((uint32_t)(micros()-le)>TACH_TIMEOUT_US) return 0.0f;   // signal lost / shaft stopped
+  for(int i=1;i<n;i++){                                      // insertion sort, n<=5
+    uint32_t k=pbuf[i]; int j=i-1;
+    while(j>=0 && pbuf[j]>k){ pbuf[j+1]=pbuf[j]; j--; }
+    pbuf[j+1]=k;
+  }
+  uint32_t med=pbuf[n/2];
+  if(med==0 || PULSES_PER_REV==0) return 0.0f;
+  return 60.0f/((med/1e6f)*PULSES_PER_REV);
 }
 
 // ---------------- HX ----------------
@@ -248,6 +288,21 @@ void cmd_setcal(char* a) {
   Serial.print("OK SETCAL\r\n");
 }
 
+// Exposes the raw edge statistics so the spurious pulse source can be measured at the
+// rig without a scope: with the shaft stationary the accepted count still rises, at the
+// spurious rate. That is the ticket 0003 EMI-vs-optics discriminator.
+void cmd_tachdiag() {
+  noInterrupts();
+  uint32_t pl=tach_pulses_total, gl=tach_glitch_total, lp=last_period_us;
+  interrupts();
+  Serial.print("OK TACHDIAG pulses="); Serial.print(pl);
+  Serial.print(" glitches=");          Serial.print(gl);
+  Serial.print(" accepted=");          Serial.print(pl-gl);
+  Serial.print(" last_period_ms=");    Serial.print(lp/1000.0,3);
+  Serial.print(" ts=");                Serial.print(now_unix_ms());
+  Serial.print("\r\n");
+}
+
 void cmd_speed() {
   Serial.print("OK SPEED rpm=");
   Serial.print(compute_rpm(),2);
@@ -314,6 +369,7 @@ void handle_line(char* line){
   else if(!strcmp(cmd,"CAL?")) cmd_cal();
   else if(!strcmp(cmd,"SETGAIN")) cmd_setgain(args);
   else if(!strcmp(cmd,"SPEED?")) cmd_speed();
+  else if(!strcmp(cmd,"TACHDIAG?")) cmd_tachdiag();
   else if(!strcmp(cmd,"SETTIME")) cmd_settime(args);
   else if(!strcmp(cmd,"RESETCAL")) { resetCal(); Serial.print("OK RESETCAL\r\n"); }
   else Serial.print("ERR 10 unknown_command\r\n");
