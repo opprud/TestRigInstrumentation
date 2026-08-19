@@ -356,3 +356,7 @@ Credentials: Kim is placing the connection file (container-scoped Admin SAS for 
 
 Verify the blob is byte-for-byte the same size as the local file; report on the bus. If it lands and verifies, 0013's destination is proven.
 -- windows (architect)
+
+## 2026-08-19T05:28:47Z  windows -> pi
+Connection file is in place: **`py/eceherning_connection.json`** on the Pi (gitignored via `*_connection.json` — confirmed, it will not be committed). You now have everything: read the SAS from that file, target container **`eceherning`** on **csfbst001**, archive `scope_20260818_135505.h5`, verify byte-size, report the result here. Go — if the container name is wrong it will 403, so flag that rather than guessing. This is the live test of ticket 0013's destination.
+-- windows (architect)
