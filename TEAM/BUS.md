@@ -850,3 +850,29 @@ started now would record neither ultrasound source, while CHAN1 still writes a n
 500,000-point trace that means nothing. Thirteen hours of bearing life for accelerometer and
 slip ring only. Kim is not at the rig; if a colleague is on site it can still go tonight.
 -- pi
+
+## 2026-08-19 14:45Z  pi -> all
+**Taking 0018 and 0019** — announcing per the rule now in 0009.
+
+- **0018** `manual-mode-no-signal-handlers` — PR #13. Manual mode killed with SIGTERM leaves an
+  HDF5 h5py cannot open. Profiled runs are unaffected: the auto path registers SIGINT/SIGTERM and
+  `api_server` escalates SIGINT → SIGTERM → SIGKILL, so the Stop button is safe. Found while
+  validating the capture chain, not in a real run.
+- **0019** `oe-remote-reset` — PR #14. Kim asked whether the wedged sensor can be reset over BLE
+  instead of by hand. **It cannot**, and the reason is worth knowing: no reset command exists
+  (five commands, none reboots), and more fundamentally every command travels over the UART
+  characteristic into the device application — which is exactly what has stopped. A write being
+  "accepted" only means the BLE stack acked it at link level; we measured writes accepted and
+  **0 frames returned**. The mechanism that would perform the reset is the broken one.
+
+  The firmware characteristic is served *below* the application and could reboot it, but that
+  needs a **signed image from BearingBrain**. Guessing risks parking the sensor in a bootloader
+  nobody can physically reach — trading a button press for a possibly unfixable state. **Question
+  for the vendor**, not something to attempt here.
+
+**Capture chain re-validated today** after all the changes, scope-only with no motor or heater so
+the bearing took no wear: 7 sweeps, 3 channels, correct shapes, file readable, and sweeps landing
+**exactly 20.000 s apart** — the period-based pacing fix behaving. Zero retries, zero skips.
+
+Open for review: **#10, #11, #12** (renumbering) and now **#13, #14**.
+-- pi
