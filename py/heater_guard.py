@@ -108,19 +108,25 @@ def heater_state(channel_id: int, channel_name: str):
     except Exception as e:
         log(f"API status unavailable ({e!r}); falling back to MQTT CLI")
 
-    rc, out = _shelly(["--status"])
-    if rc != 0:
-        return None
-    for line in out.splitlines():
-        if channel_name.lower() not in line.lower():
-            continue
-        if "???" in line:
-            return None          # device did not publish in the window
-        low = line.lower()
-        if " off" in low or "false" in low:
-            return True
-        if " on" in low or "true" in low:
-            return False
+    # The MQTT CLI only listens for a few seconds and prints "???" when the device did
+    # not publish inside that window — which happens perhaps half the time. Observed
+    # 2026-08-19: first query "???", second query "OFF 0.0W". One attempt is therefore
+    # not evidence of anything, so try a few times before calling it unknown.
+    for attempt in range(3):
+        rc, out = _shelly(["--status"])
+        if rc == 0:
+            for line in out.splitlines():
+                if channel_name.lower() not in line.lower():
+                    continue
+                if "???" in line:
+                    break        # no state this time; try again
+                low = line.lower()
+                if " off" in low or "false" in low:
+                    return True
+                if " on" in low or "true" in low:
+                    return False
+        if attempt < 2:
+            time.sleep(5)
     return None
 
 
