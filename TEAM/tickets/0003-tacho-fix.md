@@ -59,3 +59,12 @@ With the robust firmware (0007) flashed, `TACHDIAG?` at the rig:
 - **Shaft not turning + drive energised + 579 pulses/min → can only be electrical pickup. It IS VFD EMI.** 9.65 Hz × 60 = 579 ≈ the historical +582. Edges arrive at a strikingly regular 103.4 ms; **zero glitches rejected** → clean, well-spaced pulses the ISR cannot tell from real. Firmware cannot remove it — the fix is the **ferrite + cable routing**.
 - **CORRECTION — strike the earlier "+234 baseline / always-present source":** the 234 rpm at standstill was a **frozen value** (old firmware had no timeout), not live pulses. With the timeout, drive-off reads **ZERO**. No background source. **One source: the drive, contributing the whole +582.**
 - **Ferrite before/after is now trivial:** any non-zero `TACHDIAG?` accepted-rate, shaft stationary + drive energised, is what to drive to zero. **Before = 9.65 Hz.**
+
+## RETRACTION (2026-08-19) — the EMI conclusion above is WRONG
+Kim at the rig: with the drive energised at commanded **0 Hz** he can **see and hear the motor turning** ("motoren lyder normal, det er langsom rpm den kører ved"). So the ~9.65 Hz of pulses were **real rotation**, not electrical pickup. The "shaft stationary at 0 Hz" premise — inferred from the drive *reporting* `hz_out=0.0` / `current=0.0A`, never independently observed — was false, and it was load-bearing for the whole EMI conclusion.
+
+- **Strike:** the "EMI CONFIRMED" section and the 9.65 Hz "before" number (it measured rotation, not pickup).
+- **New leading hypothesis (UNPROVEN):** the drive over-runs the commanded frequency by a fixed ~580 rpm — at "0 Hz" the shaft really turns ~580 rpm. Fits the constant additive offset (`measured = 1.0011·true + 582`) cleanly, and would mean **the tacho was correct all along**; last night's run was ~580–3580 rpm, not 0–3000. Needs an independent shaft-speed measurement.
+- **Distinguishing test (with Kim now):** command 10 Hz (commanded ≈ 595 rpm) and measure the shaft **independently** (strobe / counting a mark). Independent ≈ 595 → shaft follows command, tacho reads high (offset real, ferrites relevant). Independent ≈ 1175 → drive over-runs, tacho correct.
+- **Ferrites ON HOLD** — do not shield against pickup that may not exist.
+- `py/tach_emi_test.py` (PR #8) labels every edge "spurious" → misleading while the shaft turns; Pi-Claude is correcting it. Do not rely on it until then.
