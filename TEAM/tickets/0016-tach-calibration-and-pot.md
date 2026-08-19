@@ -165,9 +165,13 @@ exposed the pot.**
 > self-consistent, they behave the way the physics requires. Pulse counting, single-period timing
 > and the firmware's own `SPEED?` agree at every point, and we saw **one spurious pulse in 110,658**.
 >
-> **So what was the gap?** It was not a measurement error: the shaft really was turning faster than
-> commanded. The cause was in the drive's configuration and the old sensor firmware, both of which
-> have been corrected. We verified the fix today in two runs — one driven directly, one started
+> **So what was the gap?** It was a measurement error after all — the opposite of what we told you
+> the first time, and the opposite of what we ourselves believed yesterday. The shaft was *not*
+> running fast: the drive followed its commands, and the old sensor firmware over-read by a
+> constant ~582 rpm. Two faults were fixed on the way to establishing that — the drive's frequency
+> reference was on the analog potentiometer rather than communication, so Modbus writes were
+> accepted and then ignored, and the tachometer firmware had no timeout, glitch rejection or
+> median filter. We verified the fix today in two runs — one driven directly, one started
 > from the dashboard — and every speed step now matches the calibration to within 5 rpm. The
 > 600 rpm step measured 591 rpm in both runs, identical.
 >
