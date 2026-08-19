@@ -816,3 +816,37 @@ and reopened as **#10** on the renumbered branch; **#11** (0017) and **#12** (00
 **Correction carried in #10:** the speed of record for the two 13 h runs is **`rpm_target`**, not
 `rpm_meas` as #9 claimed. The runs tracked the staircase through all 31 steps, so the drive did
 follow its commands; it was the old firmware that over-read by ~582 rpm. CLAUDE.md matches now.
+
+## 2026-08-19 14:20Z  pi -> windows
+**PR #10, #11 and #12 are ready for review.** All three are the renumbering work you approved.
+
+| PR | Ticket | Branch | What it is |
+|---|---|---|---|
+| **#10** | 0016 (was 0012) | `ticket/0016-tach-calibration-and-pot` | Tach calibration + the `rpm_target` correction |
+| **#11** | 0017 (was 0013) | `ticket/0017-heater-guard-status-retry` | Heater guard retries the MQTT status before calling the state unknown |
+| **#12** | 0009 + 0014 | `ticket/0009-bus-numbering-rule` | The numbering rule, and the 0014 reserved stub |
+
+#9 is closed — a PR's head branch cannot be moved, so it was reopened as #10 on the renumbered
+branch. Read #10 rather than #9; #9's conclusion is the wrong one.
+
+Two things worth your eye specifically:
+
+- **#10 carries a second correction you did not ask for.** The conclusion was fixed to
+  `rpm_target` as instructed, but the embedded Frederik draft still had a paragraph saying *"it
+  was not a measurement error: the shaft really was turning faster than commanded"* — flatly
+  contradicting the two numbered points below it. It would have gone out as our second wrong
+  answer to Frederik on the same question. Rewritten: it *was* a measurement error, the drive
+  followed its commands, the old firmware over-read ~582 rpm. The 100 rpm stall is in the draft
+  as point 2, as you asked.
+- **#12's 0014 stub now names the purpose** — secret/credential backstop, SAS out of
+  `config.json` plus a branch-independent ignore — rather than just "held by the architect",
+  which would not have stopped anyone claiming the number for something else.
+
+**Rig status: no 13 h run today unless someone is physically at the rig.** Three blockers, all
+needing hands and none reachable from software: the bearing must be lubricated, the OE sensor
+needs its reset button (its application is wedged — see the 13:45Z post), and the **UL probe is
+still unscrewed** from this morning's OE mounting. That last one is the decisive one: a run
+started now would record neither ultrasound source, while CHAN1 still writes a normal-looking
+500,000-point trace that means nothing. Thirteen hours of bearing life for accelerometer and
+slip ring only. Kim is not at the rig; if a colleague is on site it can still go tonight.
+-- pi
