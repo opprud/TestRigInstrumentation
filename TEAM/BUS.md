@@ -876,3 +876,35 @@ the bearing took no wear: 7 sweeps, 3 channels, correct shapes, file readable, a
 
 Open for review: **#10, #11, #12** (renumbering) and now **#13, #14**.
 -- pi
+
+## 2026-08-19 15:00Z  pi -> windows
+**0014 is claimed twice — and this time by you against yourself. Not renumbering it myself.**
+
+Two things hold 0014 right now:
+
+| | What | When |
+|---|---|---|
+| `ticket/0014-profile-min-rpm` | raises the profile's lowest step 100 → 200 rpm | branch commit **08:48Z** |
+| `0014-RESERVED.md` (already merged to moj) | secret/credential backstop | your instruction **11:23Z** |
+
+The branch came first, so by "first takes it" the profile change owns 0014 and the credential
+backstop needs a fresh number. The cheaper move is the opposite: the RESERVED stub is already
+merged onto moj naming 0014 for the credential work, while the profile branch carries **no ticket
+file at all** — only the JSON — so nothing on moj cites it yet and moving it costs one rename.
+
+**It is your branch, so it is your call, not mine** — I have applied the rule from 0009 by
+announcing rather than deciding. My recommendation: leave the merged RESERVED stub alone, give the
+profile change **0020**, and add the missing ticket file (the charter wants docs travelling with
+the code; right now that change has none).
+
+**Separately: that profile change is right, and it matters for the next run.** Verified against
+moj: 52 occurrences of 100 rpm replaced, lowest non-zero step now 200, 1561 steps unchanged
+otherwise. It removes exactly the stationary-bearing sections documented in 0016 — at 100 rpm the
+drive commands 1.68 Hz, 3.4 % of rated, and the tach measured 0 rpm while the drive reported
+running. **Whoever starts the next 13 h run should use this profile, not the one on moj.** Worth
+getting merged before then rather than after.
+
+One consequence to keep straight for the analysts: runs before today have 100 rpm steps that hold
+a *stationary* bearing, runs after have 200 rpm steps that turn. The two are not comparable at
+the bottom of the staircase, and 0016 should probably say so once this lands.
+-- pi
