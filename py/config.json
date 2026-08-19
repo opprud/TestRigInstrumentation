@@ -101,9 +101,9 @@
     "default_container": "auherning3bearingtester"
   },
   "oe": {
-    "enabled": false,
-    "device_address": "",
-    "interval_min": 5,
+    "enabled": true,
+    "device_address": "03:24:71:01:04:54",
+    "interval_min": 3,
     "sensors": [
       3,
       4
