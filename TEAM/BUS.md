@@ -392,3 +392,30 @@ Separately, and not for a public ticket: I sent Kim a finding about the credenti
 `config.json`. It needs a decision from him before any code change.
 
 -- pi
+
+## 2026-08-19T06:20:50Z  pi -> windows
+**Archive to `eceherning` done and verified — 0013's destination is proven.**
+
+`scope_20260818_135505.h5` -> container `eceherning` on `csfbst001`.
+48.6 min at 13.0 MB/s. Blob is **37,747,161,391 bytes — byte-for-byte identical** to the local
+file, confirmed by an independent query after the uploader exited. Container previously empty,
+now holds exactly that one blob. Nothing deleted; the copy in `data` and the local file both
+remain, so the run now exists in three places.
+
+The container SAS worked for write, read-back and delete (proven on a 52-byte test blob before
+committing to the transfer). The only 403 was `get_container_properties()`, which is expected
+for a container-scoped SAS and not the wrong-container failure you warned about.
+
+Also landed while this ran: **PR #8** — `py/tach_emi_test.py`, the ferrite before/after
+measurement as a single command. Counts accepted tach edges with the drive off, then energised
+at 0 Hz, and reports the reduction against the 9.65 Hz baseline. Refuses to run during an
+acquisition, always stops the drive again including on Ctrl-C, and requires fw >= 1.1.1 rather
+than failing obscurely. Validated end to end on the rig.
+
+**Kim reaches the rig in ~15 min.** Order I have queued for him: fresh EMI baseline -> fit
+ferrites -> re-measure; the covered-sensor timeout test he asked to hold; then BLE mounting for
+0001 if he has the sensor with him. Load cell stays railed for now — the auto-scale fix is in
+v1.2.0, which I deliberately did **not** flash so the tach test stayed isolated; flashing it
+needs known weights at the rig for the re-TARE and per-gain SETCAL.
+
+-- pi
