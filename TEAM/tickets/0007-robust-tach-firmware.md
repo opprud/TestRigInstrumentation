@@ -3,10 +3,10 @@ id: 0007
 title: Robust tach firmware — timeout, glitch rejection, median filter, diagnostics
 area: firmware
 role: dev
-status: backlog
-assignee: unassigned
+status: review
+assignee: pi-claude
 depends_on: 0002, 0003
-branch:
+branch: ticket/0007-robust-tach-firmware
 pr:
 ---
 
@@ -114,3 +114,51 @@ This tach change touches **only** the tach code — orthogonal to auto-scale. Tw
 ## Owner / test
 - **Dev:** integrate + compile + flash. **Tester (Pi, rig free now):** flash, confirm SPEED?/TACHDIAG?,
   timeout, and run the stationary-shaft + drive-at-0-Hz discriminating test. Re-cal only if flashed via v1.2.0.
+
+## Implementation (Pi, 2026-08-19) — built and compiling, NOT yet flashed
+
+Done **both** ways the ticket offered, because they serve different purposes:
+
+| Build env | Source | Version | Purpose |
+|---|---|---|---|
+| `seeed-xiao-rp2040` | `firmware/src/main.cpp` | **1.2.1** | forward path: auto-scale + robust tach |
+| `seeed-xiao-rp2040-tach-v111` | `firmware/src_tach_v111/main.cpp` | **1.1.1** | isolated tach-only fix to flash now |
+
+The isolated build is v1.1.0 — the version actually on the board — plus the tach changes and
+nothing else, selected with `build_src_filter` so PlatformIO compiles only that source (two
+`setup()`/`loop()` definitions in one build would fail at link).
+
+**Verified by inspecting the built binaries**, not by assumption:
+
+| env | version string | `TACHDIAG` | `AUTOGAIN` |
+|---|---|---|---|
+| `seeed-xiao-rp2040` | 1.2.1 | present | present |
+| `seeed-xiao-rp2040-tach-v111` | 1.1.1 | present | **absent** |
+
+That absence is the point: flashing the isolated build cannot disturb the load cell, so no
+re-TARE and no per-gain SETCAL are needed.
+
+Both compile clean. Cost on the v1.2.x build: +32 bytes RAM, +464 bytes flash.
+
+### Notes on the reference implementation
+- `IRAM_ATTR` is an ESP32 idiom, but both sources already carry
+  `#ifndef IRAM_ATTR / #define IRAM_ATTR`, so it is a harmless no-op here. Checked before use.
+- v1.1.0 has a different tach architecture from v1.2.0 — a `TachSnapshot` struct with an
+  atomic read — which is cleaner than v1.2.0's direct volatile access. The backport keeps that
+  pattern rather than forcing v1.2.0's shape onto it, so the snapshot now also carries
+  `glitch_total`, `last_edge_us` and the period ring.
+- `TachSnapshot` is declared above the constants and must size its array with a literal, so a
+  `static_assert` guards it against drifting from `TACH_MEDIAN_N`.
+- The old v1.1.0 filter was `dt > 100` (100 µs — contact bounce only). Replaced by the 8 ms
+  floor, which also rejects fast electrical spikes.
+
+### Acceptance status
+- [x] Compiles for the RP2040 target (both envs).
+- [x] `SPEED?` unchanged on the wire — same fields, same order; only the value is now median-
+      filtered and timeout-aware.
+- [x] `TACHDIAG?` implemented, returning `pulses`, `glitches`, `accepted`, `last_period_ms`, `ts`.
+- [ ] **Timeout verified on hardware** — needs a flash.
+- [ ] **The diagnostic itself** (stationary-shaft accepted-rate, then drive at 0 Hz) — needs a flash.
+
+**Not flashing without a go-ahead.** The board is the rig's only tacho and load-cell interface;
+the architect asked to be pinged first, and Kim should know the rig is being touched.
