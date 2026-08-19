@@ -1,11 +1,11 @@
 ---
-id: 0013
+id: 0017
 title: Heater guard — retry the MQTT status query before calling the state unknown
 area: control
 role: dev
 status: review
 assignee: pi-claude
-branch: ticket/0013-heater-guard-status-retry
+branch: ticket/0017-heater-guard-status-retry
 depends_on: 0004, 0006, 0008
 pr:
 ---
