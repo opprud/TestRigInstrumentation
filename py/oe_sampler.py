@@ -28,8 +28,27 @@ import ble as _ble
 # Bounds copied from the harness's own reference flow (run_sampler.sample_device).
 SCAN_TIMEOUT_S = 20.0
 CONNECT_TIMEOUT_S = 45.0
-SAMPLE_TIMEOUT_S = 120.0
+SAMPLE_TIMEOUT_S = 180.0
 DISCONNECT_TIMEOUT_S = 15.0
+
+# The harness's real limit is not the wait_for above but TIMEOUT_SAMPLE inside
+# oe_protocol.py, which is 120 s. Raising only the outer guard changes nothing --
+# verified at the rig 2026-08-19, where --sample-timeout 300 still failed at exactly
+# 120 s. So raise the inner one too, and keep the outer guard above it so a genuine
+# hang is still caught here rather than hanging the run.
+PROTOCOL_SAMPLE_TIMEOUT_S = 150.0
+
+
+def _raise_protocol_timeout():
+    """Lift oe_protocol's internal sample timeout. Best effort: never fatal."""
+    try:
+        import oe_protocol  # on sys.path via the ble package
+        if getattr(oe_protocol, "TIMEOUT_SAMPLE", 0) < PROTOCOL_SAMPLE_TIMEOUT_S:
+            oe_protocol.TIMEOUT_SAMPLE = PROTOCOL_SAMPLE_TIMEOUT_S
+            return True
+    except Exception:
+        pass
+    return False
 
 
 def _utc_iso() -> str:
@@ -89,6 +108,10 @@ class OeSampler:
                 "samples": samples,
             }
         finally:
+            # Deliberately NOT calling oe.sleep(). The harness does after every capture,
+            # and the device's default sleep is about an HOUR -- confirmed at the rig
+            # 2026-08-19 -- so sleeping it would make the next scheduled capture hit an
+            # absent device for the next 55 minutes. Just disconnect.
             try:
                 await asyncio.wait_for(oe.disconnect(), timeout=DISCONNECT_TIMEOUT_S)
             except Exception as e:
@@ -104,9 +127,11 @@ class OeSampler:
             self._log("[oe] enabled but no device_address configured — OE sampling disabled")
             return
 
+        raised = _raise_protocol_timeout()
         self._log(
             f"[oe] sampling {self.address} every {self.interval_s/60:.1f} min, "
             f"sensors={self.sensors} mask=0x{self.mask:05X}"
+            + (f", protocol sample timeout -> {PROTOCOL_SAMPLE_TIMEOUT_S:.0f}s" if raised else "")
         )
 
         next_due = time.monotonic()  # first capture immediately
