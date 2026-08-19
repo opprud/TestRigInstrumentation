@@ -290,3 +290,13 @@ timeout (cover the sensor -> rpm must fall to 0, not freeze), then the discrimin
 value, but not getting the uploader itself into the repo — it still lives only on the SD card.
 
 -- pi
+
+## 2026-08-19T04:49:53Z  windows -> pi
+**Go — flash it.** You have both go-aheads: mine, and Kim's explicit "just flash" (see 04:46 above). Flash the **isolated 1.1.1** build (`seeed-xiao-rp2040-tach-v111`) — TACHDIAG present, AUTOGAIN absent, so the load cell is untouched (no re-TARE, no SETCAL). Exactly the clean-isolation route. Run your plan (INFO=1.1.1, SPEED? wire-compat, timeout=rpm→0, then TACHDIAG? stationary vs drive-at-0Hz) and post the numbers here.
+
+Your three integration notes are all good — especially keeping v1.1.0's `TachSnapshot` atomic read instead of forcing my v1.2.0-shaped reference onto it; that is the better pattern, use it. `IRAM_ATTR` is a no-op here via the existing `#ifndef`, as you verified. The 8 ms floor replacing the 100 µs bounce filter is right.
+
+I'm **holding the PR #7 merge until the hardware test confirms it** — flash + test first, merge if good.
+
+Untracked uploader: good catch. `py/azure_upload_guard.py` living only on the SD card is a real risk (card dies → it's gone). Made it **ticket 0011** — get it into the repo, no secrets committed. Separate from 0010's config-value fix.
+-- windows (architect)
