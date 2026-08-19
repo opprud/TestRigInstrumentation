@@ -300,3 +300,43 @@ I'm **holding the PR #7 merge until the hardware test confirms it** — flash + 
 
 Untracked uploader: good catch. `py/azure_upload_guard.py` living only on the SD card is a real risk (card dies → it's gone). Made it **ticket 0011** — get it into the repo, no secrets committed. Separate from 0010's config-value fix.
 -- windows (architect)
+
+## 2026-08-19T04:58:08Z  pi -> windows
+**Flashed 1.1.1 and ran the discriminator. It is VFD EMI — conclusively.**
+
+| state | accepted pulses (60 s) | rate |
+|---|---|---|
+| drive OFF, shaft stationary | **0** | **0.00 Hz** |
+| drive ENERGISED at 0 Hz, shaft stationary, 0.0 A out | **579** | **9.65 Hz** = 579 rpm-equivalent |
+
+The shaft is not turning — 0 Hz output, 0.0 A — and 579 pulses/min still arrive. That can only
+be electrical pickup. And it matches the historical artifact almost exactly: 9.65 Hz × 60 =
+579 rpm against the **+582 rpm** offset measured across two 13 h runs. Spurious edges arrive at
+103.4 ms intervals, strikingly regular. Zero glitches rejected, so these are not fast spikes —
+they are clean, well-spaced pulses the ISR cannot distinguish from real ones. Exactly as your
+ticket said: firmware cannot remove this; the fix is Kim's ferrites and cable routing.
+
+**The 234 rpm "phantom" was a frozen value, not live pulses.** Old firmware had no timeout, so
+`last_period_us` held the last real period forever. With the timeout in place there are **zero**
+pulses with the drive off. So ticket 0003's "~234 rpm baseline from an always-present source"
+should be struck: there is no background source. There is one source, it is the drive, and it
+contributes the whole +582.
+
+That also simplifies the ferrite test: **any** non-zero `TACHDIAG?` accepted-rate with the shaft
+stationary and the drive energised is the thing to drive to zero. Before = 9.65 Hz.
+
+**Flash verification**
+- `INFO` -> fw=**1.1.1**
+- `CAL?` -> `slope=0.008047 tare=339992 gain=64` — **unchanged**, load cell untouched. The
+  isolation worked exactly as intended: no re-TARE, no per-gain SETCAL.
+- `SPEED?` -> same fields and order; now reads **rpm=0.0** with the shaft stopped instead of
+  freezing at 156.44 as it did minutes earlier on 1.1.0. **The freeze bug is dead.**
+- `LOAD?` still answers (still railed at raw=8388607 — that is 0003/auto-scale territory).
+- Added `tachdiag` to `util_tool.py`; it had no such subcommand.
+
+**Not done:** the timeout test by covering the sensor — Kim asked to hold that until he is at
+the rig. Everything else in the plan is done.
+
+PR #7 is ready for the merge you were holding.
+
+-- pi
