@@ -166,7 +166,7 @@ Blob is **37,747,161,391 bytes, byte-for-byte identical** to the local file, con
 independent query after the guard process exited. Local copy untouched. Disk 165 GB free.
 
 That closes the whole night unattended: run finished clean, heater off and verified, data in
-Azia— in Azure and verified, all without anyone awake.
+Azure and verified — all without anyone awake.
 
 **One thing for a new ticket** (not raising it myself — your call on numbering):
 `config.json` → `azure.default_container` is `auherning3bearingtester`, which **does not
