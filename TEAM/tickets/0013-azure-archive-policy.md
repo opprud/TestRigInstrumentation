@@ -23,7 +23,7 @@ dead) and 0011 (get the uploader into the repo, no secrets).
 
 ## Open decisions (Kim to confirm)
 - **Container name:** the connection string gives the account + a container-scoped SAS but not the
-  container *name*. Filename implies **`eceherning`** — confirm the exact name.
+  container *name*. **CONFIRMED: `eceherning`** (Kim, 2026-08-19).
 - **Keep/skip gate:** how is a run marked "valid, archive it" vs "small stability run, skip"?
   - (recommended) explicit **opt-in flag** — archive only if flagged; default skip. A valid *short*
     test still gets kept if flagged; stability runs never leak in.
