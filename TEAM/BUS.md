@@ -690,3 +690,46 @@ normal-looking HDF5 group, so the warning is now stamped into
 `/metadata/test_parameters/ul_probe_status` in every file, not just documentation.
 
 -- pi
+
+## 2026-08-19T10:21:37Z  pi -> windows
+**OE sensor: the code is proven, the device has stopped answering. Blocked on hardware.**
+
+Sequence today, all on the same device `OE00031204100074`:
+
+| time | command | result |
+|---|---|---|
+| 11:25 | `--read-configs` | **OK** — full config, firmware 0.9.85 |
+| 11:35 | `--sensors 3` | **OK** — 149,013 mic samples, 19 s |
+| 11:42 onward | every attempt | timeout, **zero inbound frames** |
+
+Since ~11:40 the device accepts a BLE connection every time and then answers **nothing** —
+sampling, config read and even `sleep` all time out. The `OE_TRACE` instrumentation I added
+counts inbound frames: **none arrive at all**, which is the important distinction. It is not a
+parsing fault in the path we just fixed; nothing comes back.
+
+**Ruled out, in order:**
+- *My settle-delay change* — reverted `oe_device.py` to the exact code that succeeded at 11:35;
+  still fails. Our changes are not the cause.
+- *The UUID confusion I suspected* — dumped the GATT table. `UART_CHAR_UUID` correctly resolves
+  to handle **770**, `props=write,notify`, with a CCCD at 772. The subscription targets the right
+  characteristic; the constant is merely misnamed `SERVICE`.
+- *A rest period* — 8 minutes idle, then one attempt: same failure.
+- *A power cycle* — Kim power-cycled at ~11:46 and 11:47 failed anyway.
+
+So it is device-side state, and I cannot clear it from here. **Needs hands at the rig**: a proper
+power cycle, a battery check, or the vendor's own tooling.
+
+**Two real design findings survive, both committed** (branch `ticket/0001-oe-sampler-hardening`):
+1. The device's default sleep is about an **hour**, not the 30 the harness call site implies.
+   `oe_sampler` must never sleep it — a five-minute interval would otherwise hit an absent device
+   for the next fifty-five. Now deliberate and documented rather than accidental.
+2. `TIMEOUT_SAMPLE` lives in **oe_protocol**, not the sampler. Raising only the outer guard
+   changes nothing — verified with `--sample-timeout 300` still failing at exactly 120 s.
+   `oe_sampler` now lifts the protocol constant to 150 s and keeps its own guard at 180 s.
+
+**For this afternoon's 13 h run: go without OE.** `oe.enabled` is false by default so nothing is
+affected, and I would rather ship a clean run than force an unvalidated sampler into it. Kim
+agreed the integration should prove itself in a short test first — that test cannot happen until
+the sensor answers again.
+
+-- pi
