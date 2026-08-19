@@ -226,16 +226,40 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   `ConnectionRefused`. The resilience machinery absorbs it (sub-1 % loss), but it is not
   eliminated. Lower the point count or increase `sweep_retries` if zero loss is required.
 
-- **The optical tachometer (ifm OGT500) is the weak link.** Historically it over-read
-  (multiple reflections → extra pulses/rev), reported spurious values at standstill, and
-  saturated near the top of the range. The firmware computes rpm from the interval between
-  the last two pulses and has **no timeout**, so when the sensor stops producing edges the
-  reading **freezes at the last value** — this looks like a stuck reading, not a zero. Teach
-  the OGT500 as: reflective mark in front → **OUT ON**, dark shaft in front → **OUT OFF**;
-  verify the yellow LED blinks exactly once per revolution. Check it live with
-  `python3 util_tool.py --port <PORT> speed` (watch `pulses` increment by one per turn) and
-  set pulses-per-rev with `setppr` if the shaft has more than one mark. Prefer open-loop
-  control until the mark is robust.
+- **The tachometer is accurate — verified 2026-08-19.** It was long suspected of over-reading;
+  it was not. Measured against commanded drive frequency across the full range:
+
+  | drive Hz | shaft rpm | rpm/Hz | slip vs 60 |
+  |---|---|---|---|
+  | 5 | 288 | 57.6 | 4.0 % |
+  | 10 | 588 | 58.8 | 2.0 % |
+  | 20 | 1190 | 59.5 | 0.8 % |
+  | 30 | 1788 | 59.6 | 0.7 % |
+  | 40 | 2382 | 59.5 | 0.8 % |
+  | 50 | 2979 | 59.6 | 0.7 % |
+
+  **`rpm = 59.83 x Hz - 11.7`, maximum deviation 5 rpm.** The intercept is zero within error, and
+  slip falls with speed as an induction motor under light load should. Pulse-count, single-period
+  and `SPEED?` agree at every point; one glitch in 110,658 pulses. Use `rpm_meas` from the tach as
+  the speed of record — it is better than reconstructing from drive frequency.
+
+- **The +582 rpm "tach offset" was an analog potentiometer, not the sensor.** The RS510's frequency
+  reference is the **sum of the Modbus command and an analog pot input**. With the pot wound up it
+  added a constant ~9.8 Hz to every commanded speed — 9.8 x 59.5 = 583 rpm, which is exactly the
+  constant offset seen across 31 speed steps of the 2026-08-17 and 2026-08-18 13 h runs. An analog
+  offset is additive, which is why it looked identical at every speed and was mistaken first for a
+  sensor scale error and then for VFD EMI. **Check the pot is at minimum before a run**, and treat
+  a constant offset between `rpm_target` and `rpm_meas` as a pot symptom, not a sensor fault.
+
+  > **The 13 h runs of 2026-08-17 and 2026-08-18 ran ~582 rpm faster than their profiles asked
+  > for.** The data is usable but analysis must use the logged `rpm_meas`, not `rpm_target`.
+
+- **The drive's Modbus registers do not always reflect reality.** Observed 2026-08-19: the drive
+  reported `cmd=0.0 ud=0.0` while the shaft turned at 2985 rpm, and accepted and echoed a written
+  frequency that had no effect on the output. Writes also intermittently fail outright when
+  processes open `/dev/ttyUSB0` in quick succession (`Could not exclusively lock port`), and a
+  `stop()` can be reported as successful without stopping the motor. **Verify actuation against
+  the tach, never against a readback.**
 
 - **Closed loop hides sensor scale errors.** In closed loop `rpm_meas` always converges to
   the target regardless of sensor accuracy. Only comparing `rpm_meas` against `59.5 × Hz`
