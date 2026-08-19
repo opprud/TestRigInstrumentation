@@ -1,6 +1,6 @@
 ---
 id: 0019
-title: Can the OE sensor be reset over BLE instead of by hand? — investigated, answer is no
+title: Remote reset of the OE sensor over BLE — no reset command, but OTA is a real recovery path
 area: ble
 role: dev
 status: review
@@ -49,16 +49,49 @@ about anyone reading it. The mechanism that would execute a reset is the mechani
 so no command sent that way can work — a reset command would land in the same dead parser as
 everything else.
 
-## The one avenue that could work, and why it is not ours to take
+## Correction after reading the whole OTA implementation
+Kim pointed at the OTA code, and it changes the answer materially. The first version of this
+ticket treated the firmware path as a theoretical curiosity. It is not — it is a working remote
+recovery path that we are one artefact short of being able to use.
+
+**The OTA path never touches the application's UART parser.** Firmware blocks are written
+straight to the firmware characteristic with a leading opcode byte 1; the signature goes as
+opcode 2. `UPDATE_FIRMWARE_CMD` (0x01) appears in the code *only as a reply code*, never as
+something we send — so nothing about starting or driving an update requires the application to
+be alive. That is the same layer we measured still answering: GATT reads instant, CCCD writes
+accepted on the firmware characteristic too.
+
+So the honest statement is not "the sensor cannot be reset remotely". It is:
+
+> **No reset *command* exists — but a successful signed firmware install reboots the device, and
+> that path runs below the wedged application. With a signed image from BearingBrain we could
+> recover this sensor over the air without anyone driving to the rig.**
+
+There are exactly two opcodes on that characteristic, 1 (data) and 2 (install + signature).
+Neither is a reset primitive; the reboot is a side effect of signature verification succeeding.
+
+**Untested:** whether the bootloader-side handler is actually still running. We subscribed to the
+firmware characteristic and saw no traffic, but we never wrote to it, so its silence proves
+nothing either way.
+
+## Why it is still not ours to take unilaterally
 The firmware characteristic (`…0255`, handle 774) is served **below** the application, which is
 why it still accepts writes and subscriptions. A genuine signed firmware install would reboot the
 device without the application's cooperation.
 
-That needs a real firmware image **and its valid signature from BearingBrain**. Attempting it
-without one risks leaving the sensor in a bootloader state — still unreachable, but now also not
-running its application, and still with nobody able to touch it. That trades a problem we can fix
-with a button press for one we might not be able to fix at all. **Ask BearingBrain** whether they
-expose a supported remote reset (or a signed no-op image) before anyone tries this.
+It needs a real firmware image **and its valid signature**. Only BearingBrain can produce that
+pair; a wrong signature is rejected by design, which is the point of signing.
+
+The risk of experimenting instead is asymmetric. Writing unsigned blocks to a device **nobody can
+physically reach today** could park it in a state where it is not running its application *and*
+not recoverable by the button — trading a problem a finger solves for one that may have no
+solution. The sensor is already useless until someone visits it, so there is nothing to buy by
+rushing.
+
+**The ask for BearingBrain is now concrete:** a signed image (the current firmware re-signed is
+enough — we want the reboot, not new features), or confirmation that a supported remote-reset
+opcode exists on the firmware characteristic that we have not found. If they supply either, the
+OE sensor stops being able to block an unattended run by hanging.
 
 ## What to do instead, for now
 Press the button. The recovery watcher polls every 10 minutes and reports the moment a config
