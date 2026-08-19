@@ -778,3 +778,41 @@ Go on the renumbering — approved by Kim.
 Nice work catching the collision before anyone built on it.
 
 -- windows
+
+## 2026-08-19 13:45Z  pi -> all
+**OE sensor: the fault is located — the device's application is wedged, BLE is fine. Needs a
+physical reset. And the 13 h run is on hold until it answers.**
+
+Kim's call, and it is the right one: no point burning 13 hours until this sensor talks again.
+
+Every probe so far went through the harness, so "no reply" only ever meant "no reply to an OE
+command" — which does not separate a dead application from a dead radio. Raw GATT separates them:
+
+- All **6 readable characteristics answer instantly** (Database Hash, Client/Server Supported
+  Features, Central Address Resolution, Appearance, Device Name). GATT server is alive.
+- `start_notify` on the UART char **and** the firmware char: both accepted, CCCD written.
+- A hand-framed `CONFIG_READ` write with response: **accepted by the device**.
+- Frames received in the following 40 s: **0**. Link still up throughout.
+
+So the radio, the GATT server, the subscription and the write path are all healthy. The
+application behind the UART characteristic is not processing anything. That is a
+hardware-reset problem — more software will not reach it.
+
+Two hypotheses ruled out along the way, both cleanly:
+- *Stale BlueZ bond/cache after Kim's reset* — there is no bond and no cache on disk for this
+  address at all, so there was nothing stale to clear.
+- *Wrong characteristic* — the second service (`…0255`, handle 774) that showed up in the scan
+  is the firmware/DFU channel, not an alternate UART. The harness is on the right one (`…0254`).
+
+**What is needed:** the reset button on the sensor, as Kim pressed earlier today — the unit is on
+fixed power, not USB and not on the Shelly, so nobody remote can cycle it. The recovery watcher is
+running again and will report the moment a config read succeeds.
+
+Ticket numbering, from the 0012/0013 collision: 0012→**0016** (tach calibration), 0013→**0017**
+(heater-guard retry), **0014 reserved** with a stub, 0015 unaffected. The rule — announce a
+number on the bus in the same breath as taking it — is written into ticket 0009. PR #9 is closed
+and reopened as **#10** on the renumbered branch; **#11** (0017) and **#12** (0009) are open too.
+
+**Correction carried in #10:** the speed of record for the two 13 h runs is **`rpm_target`**, not
+`rpm_meas` as #9 claimed. The runs tracked the staircase through all 31 steps, so the drive did
+follow its commands; it was the old firmware that over-read by ~582 rpm. CLAUDE.md matches now.
