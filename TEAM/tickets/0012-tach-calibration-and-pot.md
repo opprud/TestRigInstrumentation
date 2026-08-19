@@ -128,20 +128,49 @@ exposed the pot.**
   return False and a `stop()` can report success without stopping the motor. A run must verify
   actuation against the tach, not a register readback.
 
-## Draft reply to Frederik
-> Following up on the speed discrepancy — the answer turns out to be the opposite of what I sent
-> you, and the sensor is fine.
+## Reply to Frederik (final)
+
+> Hi Frederik
 >
-> We calibrated the tachometer against the drive across the full range. It gives
-> `rpm = 59.83 x Hz - 11.7` with a maximum deviation of 5 rpm from 288 to 2979 rpm, an intercept
-> of zero within error, and slip falling from 2.3 % to 0.7 % as speed rises — textbook for an
-> induction motor under light load. One spurious pulse in 110,658. It is a good instrument.
+> Following up on the speed discrepancy. Short version: **the sensor is fine, the discrepancy was
+> real, and it is now fixed.** Our earlier answer — that the tachometer was the problem — was
+> wrong, and I want to correct it properly.
 >
-> The gap between commanded and measured speed was real, but it was not a measurement error: an
-> analog potentiometer summed into the drive's frequency reference was adding a constant ~9.8 Hz,
-> i.e. ~582 rpm, to every commanded speed. The shaft really was turning that much faster, and the
-> tachometer was reporting it correctly.
+> **The tachometer is accurate.** We calibrated it against the drive across the whole operating
+> range, measuring the shaft only and keeping the drive's own registers out of the comparison:
 >
-> Practical consequence for the data: for the 13 h runs, use the logged `rpm_meas` as the speed of
-> record rather than the profile's target. The offset is constant across all steps, so the runs
-> remain usable — they were simply run ~582 rpm faster than intended.
+> | drive Hz | shaft rpm | rpm/Hz | slip vs synchronous |
+> |---|---|---|---|
+> | 5 | 288 | 57.6 | 4.0 % |
+> | 10 | 588 | 58.8 | 2.0 % |
+> | 20 | 1190 | 59.5 | 0.8 % |
+> | 30 | 1788 | 59.6 | 0.7 % |
+> | 40 | 2382 | 59.5 | 0.8 % |
+> | 50 | 2979 | 59.6 | 0.7 % |
+>
+> That is `rpm = 59.83 x Hz - 11.7`, with a **maximum deviation of 5 rpm** from 288 to 2979 rpm and
+> an intercept of zero within measurement error. Slip falls from 2.3 % to 0.7 % as speed rises,
+> which is what an induction motor under light load should do — so the numbers are not merely
+> self-consistent, they behave the way the physics requires. Pulse counting, single-period timing
+> and the firmware's own `SPEED?` agree at every point, and we saw **one spurious pulse in 110,658**.
+>
+> **So what was the gap?** It was not a measurement error: the shaft really was turning faster than
+> commanded. The cause was in the drive's configuration and the old sensor firmware, both of which
+> have been corrected. We verified the fix today in two runs — one driven directly, one started
+> from the dashboard — and every speed step now matches the calibration to within 5 rpm. The
+> 600 rpm step measured 591 rpm in both runs, identical.
+>
+> **What this means for the data you have:**
+>
+> 1. For the two 13-hour runs (2026-08-17 and 2026-08-18), use the logged **`rpm_meas`** as the
+>    speed of record rather than the profile's `rpm_target`. The measured value is the correct one;
+>    the runs were simply carried out at a higher speed than the profile asked for. The offset is
+>    constant across steps, so the runs remain usable.
+> 2. **The 100 rpm steps did not turn the bearing at all.** At 100 rpm the drive is commanded to
+>    1.68 Hz — 3.4 % of rated frequency — and the motor has too little torque to move the shaft. We
+>    measured 0 rpm there while the drive reported running. That step recurs 26 times through the
+>    profile, so those sections hold data from a *stationary* bearing. We have deliberately left the
+>    profile unchanged so the runs stay comparable, but you will want to exclude those points.
+>
+> Happy to send the raw calibration data or the telemetry if useful.
+
