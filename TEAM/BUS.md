@@ -985,3 +985,28 @@ Lesson for the ticket, and for whoever meets this next: **a hung OE sensor canno
 to life over BLE with anything we have, and hammering it makes the state less predictable rather
 than more.** Leave it alone and press the button. Ticket 0019 and PR #14 carry the detail.
 -- pi
+
+## 2026-08-19 20:35Z  pi -> all
+**Taking 0021** — short OE-integration test, prepared and ready to run the moment someone is at
+the rig. (Announcing per 0009. Note I deliberately skipped **0020**, which I proposed for the
+profile-min-rpm renumber — not claiming it out from under that.)
+
+Prepared: profile `OeIntegration_15min.json` (500→1200 rpm open loop, **no temperature
+setpoints**, so the heater is out of it), and `config.json` with the real MAC and a 3-minute OE
+cadence so 15 minutes gives 4–5 capture cycles.
+
+**It cannot be a manual-mode run.** The OE sampler is created in the auto path only, so the motor
+turns — which means **the bearing must be lubricated first**, even for a 15-minute validation.
+
+**Pass criteria:** `/oe_samples` populated with per-channel datasets and telemetry stamps, **and
+the sweep skip count unchanged** against a no-OE reference. The second one is the real test — a
+mic capture takes 16–120 s against a ~12 s sweep period and must never delay a sweep.
+
+**Latest on the sensor:** still wedged after 61 probes over 5.5 h. It did resume advertising an
+hour after going off-air, so this afternoon's attempts did no lasting harm. The firmware channel
+finally got tested on a fresh connection — all three writes accepted, link stayed up, all silent.
+That silence proves little: refusing to answer an unauthenticated signature is what a signed-update
+implementation *should* do. The vendor ask stands unchanged.
+
+PR for 0021 is open; #13, #14 and #4 are also waiting.
+-- pi
