@@ -1,5 +1,6 @@
 import logging
 import asyncio
+import os
 from bleak import BleakClient, BLEDevice
 from oe_protocol import OeProtocol
 from utils import get_data_size
@@ -154,6 +155,14 @@ class OeDevice:
             self.connected = False
 
     def notification_handler(self, sender, data):
+        # Diagnostic, off unless OE_TRACE is set. Being able to see whether *any* frame
+        # arrives is what separated "the device is not answering" from "our parsing is
+        # wrong" during the 2026-08-19 hardware test — the answer was zero frames.
+        if os.environ.get("OE_TRACE"):
+            n = getattr(self, "_rx_n", 0) + 1
+            self._rx_n = n
+            if n <= 5 or n % 200 == 0:
+                print(f"    [rx] #{n} {len(data)}B", flush=True)
         if self.protocol:
             self.protocol.push(data)
     

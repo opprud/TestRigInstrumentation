@@ -134,6 +134,11 @@ async def pick_device(devices: list):
         print("Invalid choice, try again.")
 
 
+SAMPLE_TIMEOUT = 120.0   # seconds for one capture. A mic sample is 2-3 MB and the harness docs
+                         # say 16-120 s, so the old hardcoded 120 sat exactly on the ceiling and
+                         # a two-channel capture timed out. Override with --sample-timeout.
+
+
 async def sample_device(device, sensor_ids: list[int], sampling_masks: list[list[int]] | None = None,
                         display_name: str | None = None, sleep: bool = True):
     """Connect to device, sample sensors, return data."""
@@ -171,7 +176,7 @@ async def sample_device(device, sensor_ids: list[int], sampling_masks: list[list
             logger.info(f"Sampling group {i+1}/{len(masks)}: {', '.join(enabled)} (mask=0x{mask:05X})")
 
             start_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%fZ")
-            await asyncio.wait_for(oe.sample(mask=mask), timeout=120)
+            await asyncio.wait_for(oe.sample(mask=mask), timeout=SAMPLE_TIMEOUT)
             stop_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%fZ")
 
             samples = oe.get_sample_data()
@@ -267,8 +272,12 @@ async def main():
     parser.add_argument("--show-all", action="store_true", help="Show all BLE devices during scan, not just OE/Packet")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable debug logging")
     parser.add_argument("--no-save", action="store_true", help="Don't save results to file")
+    parser.add_argument("--sample-timeout", type=float, default=120.0,
+                        help="seconds to wait for one capture (default 120)")
     parser.add_argument("--no-sleep", action="store_true", help="Don't send device to sleep after sampling")
     args = parser.parse_args()
+    global SAMPLE_TIMEOUT
+    SAMPLE_TIMEOUT = args.sample_timeout
 
     setup_logging(args.verbose)
     logger = logging.getLogger("sampler")
