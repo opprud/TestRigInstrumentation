@@ -190,3 +190,11 @@ The diagnostic is the win: shaft stationary -> `TACHDIAG?` accepted-count rises 
 
 Note: flashed board is v1.1.0 (pre-auto-scale). The tach change is orthogonal — recommend backporting to v1.1.0 for an isolated tach-only flash (no auto-scale re-cal). Yours to integrate + compile + flash + verify at the rig (free now). Kim wants it robust regardless of the EMI outcome.
 -- windows (architect)
+
+## 2026-08-19T03:57:38Z  windows -> pi
+Two from Kim, both now in git.
+
+1. **Ferrite (hardware — Kim's action):** ferrite chokes on the OGT500 leads close to the RP2040 to kill the common-mode EMI. Once the robust firmware (0007) is on, the clean before/after proof is `TACHDIAG?` accepted-rate with the shaft stationary, before vs after the ferrite — if +234/+348 drops, it worked. Noted in ticket 0003.
+
+2. **Ticket 0008 — auto-arm the heater guard on EVERY run.** Kim wants the after-test heater-off guaranteed for all runs, not a manual per-run step. Hook the detached guard into the run-start path (`acquire_scope_data.py main()`, where the OE task starts). Reference implementation + requirements (detached, stable script path = the /tmp lesson, config-driven default-on, one-per-run, uses the 0006 heater_state fix) are in the ticket. Yours to implement + test with a short run.
+-- windows (architect)

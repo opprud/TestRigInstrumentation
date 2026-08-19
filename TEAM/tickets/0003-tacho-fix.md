@@ -42,3 +42,8 @@ Make the tacho read **true shaft speed**: remove the spurious pulse source that 
 - **Reorder the approach — EMI is dominant.** Pi-Claude's run analysis splits the offset into a +234 rpm baseline (drive OFF) plus a further +348 rpm that appears ONLY when the VFD runs. So do **shielding / grounding / cable routing away from motor+drive cables FIRST**; light/reflection are secondary for the residual 234 rpm.
 - **Cheap discriminating test:** shaft stationary, drive energised at 0 Hz → does the phantom jump 234 → ~582 rpm? Yes = EMI = cabling. `TACHDIAG?` (0007) gives the exact pulse rate, no scope.
 - **Flashed firmware is v1.1.0** (pre-auto-scale); the robust tach is orthogonal and can be backported to it for an isolated flash.
+
+## Update (2026-08-19) — hardware mitigation: ferrite (Kim)
+- **Plan:** ferrite chokes on the OGT500 sensor leads **close to the RP2040 end** to suppress common-mode HF EMI coupled from the motor/VFD cables — the dominant term (drive-on adds +348 rpm / 5.8 Hz).
+- **Tips:** loop the cable 2–3 turns *through* the ferrite if it fits (more effective than a single pass); one at each end helps; a small RC low-pass (series R + cap to GND) on the signal input is a cheap backup if ferrite alone doesn't fully clear it.
+- **Quantitative verify (with ticket 0007's robust firmware):** `TACHDIAG?` accepted-rate BEFORE vs AFTER the ferrite, shaft stationary → if the +234/+348 baseline drops, the ferrite is working. Before/after proof, no scope.
