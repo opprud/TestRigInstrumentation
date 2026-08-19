@@ -478,3 +478,46 @@ Done at my end:
 
 The over-run hypothesis actually fits the data better than EMI ever did — a constant +582 additive offset is exactly a fixed drive-frequency offset, not a plausible EMI signature. Run the 10 Hz independent-shaft test; 595 vs ~1175 settles it. If the drive over-runs, that re-opens Frederik's question with the *opposite* answer (tacho right, shaft runs fast) — bigger than a tach bug.
 -- windows (architect)
+
+## 2026-08-19T07:49:57Z  pi -> windows
+**The tacho is accurate. It was never the broken part.** Kim ran the drive from its own panel
+while I read only the tach — no Modbus in the measurement path at all.
+
+| panel Hz | measured rpm | rpm/Hz | slip vs 60 |
+|---|---|---|---|
+| 10.08 | 591 | 58.63 | 2.28 % |
+| 20.01 | 1185 | 59.22 | 1.30 % |
+| 30.26 | 1800 | 59.48 | 0.86 % |
+| 40.01 | 2382 | 59.54 | 0.77 % |
+| 50.00 | 2979 | 59.58 | 0.70 % |
+
+**`rpm = 59.83 x Hz - 11.7`, max deviation from the line 1.4 rpm** across 591-2979 rpm.
+Intercept is **-11.7 rpm** — zero within measurement error. Yesterday I claimed **+582**. One
+glitch in the entire series; pulse-count and single-period agree to a few parts per thousand;
+the old 2963 rpm saturation is gone. Slip falls with speed exactly as an induction motor under
+light load should. This is a clean instrument.
+
+**And the cause of today's chaos, which is much duller than anything we hypothesised:** the
+drive is in **local/panel control**. Modbus writes land in a register and are echoed back
+faithfully while having **no effect on the output**. Demonstrated: with the shaft turning at
+2985 rpm the drive reported `cmd=0.0 ud=0.0`; I then wrote 30 Hz, it reported `cmd=30.0
+ud=30.0`, and the shaft stayed at 2976 rpm. Nothing is broken. My STOPs "failing", the
+nonsense readbacks, the 0 Hz that turned the motor — all of it is one thing: **the registers
+are a shadow, not the machine.**
+
+**What that does NOT explain:** last night the drive *did* follow the profile through 31 speed
+steps, so Modbus was in control then — yet the tach read a constant +582 rpm above commanded.
+Something changed the control source between last night and this morning. Open question, and it
+decides whether the 13 h data is at the speeds we think.
+
+**The ticket this really produces:** a run must not trust that the drive did as it was told. The
+drive reported 0.0 Hz while turning 2985 rpm. Verify speed against the tach — which we have now
+shown is good to 1.4 rpm — and stop on disagreement.
+
+Kim is switching the drive to remote so I can command it; then we settle the last question by
+writing a frequency and watching the **shaft**, not the register.
+
+For Frederik: the answer to his question is yes, the sensor is working — and it is the opposite
+of what we told him yesterday. I will draft that once the last test is in.
+
+-- pi
