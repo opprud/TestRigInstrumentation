@@ -136,3 +136,29 @@ it if it comes back.
 OE sensor cannot be talked back to life over BLE with anything we have, and that hammering it
 makes things less predictable rather than more. Leave a hung sensor alone and press the button.
 
+## The firmware channel, finally tested (2026-08-19 20:25)
+The device resumed advertising about an hour after it went off the air — absent at 14:48,
+`advertising=True` again by 15:55, and steadily so through 61 probes over 5.5 hours. **So the
+attempts did no lasting harm**; it returned to exactly the previous state: advertises, accepts
+connections, answers nothing.
+
+That made the untested step possible on a fresh connection. Three single writes, no sustained
+traffic:
+
+| Write | Result |
+|---|---|
+| opcode 2 + 64 zero bytes (bogus signature) | accepted, silent 30 s, link stayed up |
+| opcode 0x00 + 8 bytes | accepted, silent 15 s, link stayed up |
+| opcode 0x03 + 8 bytes | accepted, silent 15 s, link stayed up |
+
+**Read this result carefully — the silence proves less than it looks.** A device that ignores an
+invalid signature without replying is behaving exactly as a signed-update implementation should;
+refusing to talk to unauthenticated garbage is the design, not a symptom. So this neither
+confirms nor refutes the OTA recovery path. What it does establish is that the firmware
+characteristic accepts writes without dropping the link, unlike the UART path under sustained
+polling.
+
+**The conclusion is unchanged and the vendor ask is unchanged:** a signed image from BearingBrain
+is the only way to test whether OTA can reboot a wedged sensor. Nothing we can synthesise will
+answer it, because the whole point of the signature is that we cannot.
+
