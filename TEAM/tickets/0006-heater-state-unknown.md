@@ -3,7 +3,7 @@ id: 0006
 title: heater_state() must treat a missing/null Shelly output as UNKNOWN, not off
 area: control
 role: dev
-status: review
+status: done
 assignee: pi-claude
 branch: ticket/0006-heater-state-unknown
 pr:

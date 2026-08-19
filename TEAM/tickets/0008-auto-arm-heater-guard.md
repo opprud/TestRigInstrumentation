@@ -3,7 +3,7 @@ id: 0008
 title: Auto-arm the heater guard on every run start
 area: control
 role: dev
-status: review
+status: done
 assignee: pi-claude
 depends_on: 0004, 0006
 branch: ticket/0008-auto-arm-heater-guard
