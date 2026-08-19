@@ -7,6 +7,8 @@ import logging
 import math
 import asyncio
 import threading
+import subprocess
+import sys
 from datetime import datetime, UTC
 from zoneinfo import ZoneInfo
 from pathlib import Path
@@ -912,6 +914,68 @@ def _write_metadata(h5f, config: dict, scope_idn: str, ts_local: str, ts_utc: st
     return meta_grp
 
 
+def _arm_heater_guard(run_dir, profile_cfg):
+    """
+    Spawn the detached heater guard for this run (ticket 0008).
+
+    The guarantee that the heater is switched off must not depend on anyone
+    remembering to start a guard by hand — a run started without one leaves the
+    heater energised, which is precisely what ticket 0004 exists to prevent.
+
+    Detached (start_new_session) so it outlives this process being killed, which
+    is the whole point: a crashed run is the case that needs the guard most.
+    The script path is resolved next to this file, never a temporary directory —
+    the guard shells out to shelly_control.py relative to its own location, and a
+    /tmp cleanup overnight once left a guard unable to switch anything.
+    """
+    try:
+        cfg_path = Path(__file__).resolve().parent / "shelly_config.json"
+        shelly_cfg = {}
+        if cfg_path.exists():
+            shelly_cfg = json.loads(cfg_path.read_text()) or {}
+        if not shelly_cfg.get("heater_guard_enabled", True):
+            print("[heater-guard] disabled in shelly_config.json — run is UNGUARDED", flush=True)
+            return None
+
+        dur_s = float((profile_cfg or {}).get("duration_minutes", 0) or 0) * 60.0
+        margin_s = max(45 * 60.0, 0.05 * dur_s)   # cover retries and overruns
+        deadline = time.time() + dur_s + margin_s
+
+        guard = Path(__file__).resolve().parent / "heater_guard.py"
+        if not guard.exists():
+            print(f"[heater-guard] {guard} missing — run is UNGUARDED", flush=True)
+            return None
+
+        ch_id = int(shelly_cfg.get("heater_channel_id", 0))
+        ch = str(shelly_cfg.get("heater_channel_name", "heater"))
+        stale_min = float(shelly_cfg.get("heater_guard_stale_min", 15))
+        log_path = Path(run_dir) / "heater_guard.log"
+
+        with open(log_path, "ab") as lf:
+            proc = subprocess.Popen(
+                [sys.executable, "-u", str(guard),
+                 "--run", str(run_dir),
+                 "--deadline", str(deadline),
+                 "--channel-id", str(ch_id),
+                 "--channel", ch,
+                 "--stale-min", str(stale_min)],
+                stdout=lf, stderr=lf, stdin=subprocess.DEVNULL,
+                start_new_session=True)
+        print(f"[heater-guard] armed pid={proc.pid} channel={ch_id}/{ch} "
+              f"deadline={datetime.fromtimestamp(deadline).isoformat(timespec='seconds')} "
+              f"log={log_path}", flush=True)
+        _event_log(f"[heater-guard] armed pid={proc.pid} deadline={deadline:.0f}")
+        return proc.pid
+    except Exception as e:
+        # Never take the run down over this, but never let it pass unnoticed either.
+        print(f"[heater-guard] FAILED to arm ({e!r}) — run is UNGUARDED", flush=True)
+        try:
+            _event_log(f"[heater-guard] FAILED to arm: {e!r}")
+        except Exception:
+            pass
+        return None
+
+
 def _drain_oe_queue(h5f, oe_queue, state, telemetry_store, sweep_idx, ds_kwargs, logr):
     """
     Move any finished OE captures from the sampler thread into /oe_samples.
@@ -1246,6 +1310,9 @@ def main():
     # populate run_folder; printing it only at the end of main() (as still happens
     # below) meant the dashboard could not link to the folder until the run was over.
     print(f"Run folder: {run_dir}", flush=True)
+
+    # Arm the heater guard for this run before anything else can go wrong (ticket 0008).
+    _arm_heater_guard(run_dir, profile_cfg)
 
     stop_event = asyncio.Event()
     scope_stop_event = threading.Event()

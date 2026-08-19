@@ -3,10 +3,10 @@ id: 0008
 title: Auto-arm the heater guard on every run start
 area: control
 role: dev
-status: backlog
-assignee: unassigned
+status: review
+assignee: pi-claude
 depends_on: 0004, 0006
-branch:
+branch: ticket/0008-auto-arm-heater-guard
 pr:
 ---
 
@@ -65,3 +65,35 @@ Call it once, right after the run folder exists. Record the PID in the run log.
 ## Owner / test
 - **Dev:** wire the auto-arm into the run-start path. **Tester (Pi):** a short run → confirm the guard
   auto-armed, survives a killed run process, and switches off at the end.
+
+## Implementation (Pi, 2026-08-19)
+
+`_arm_heater_guard()` in `acquire_scope_data.py`, called immediately after the run folder is
+created — the same place the run folder is announced. Manual mode (`no profile`) returns before
+that point and drives neither motor nor temperature, so it is deliberately not armed.
+
+Config lives in `shelly_config.json`: `heater_guard_enabled` (default **true**),
+`heater_channel_id`, `heater_channel_name`, plus `heater_guard_stale_min` — added because the
+acceptance test needed a shorter staleness window than 15 min, and it is worth having anyway.
+
+### Verified against the rig
+| Criterion | Result |
+|---|---|
+| Auto-spawns on run start | ✅ pid + log recorded in the run folder |
+| Survives the run being killed | ✅ `kill -9` the run; guard alive with **ppid 1** |
+| Switches off on a dead run | ✅ triggered after 2.6 min, `VERIFIED: channel 0 is OFF` |
+| Disable flag | ✅ logs `run is UNGUARDED` and returns None |
+
+### Two defects found while testing, both fixed here
+1. **`subprocess` and `sys` were not imported** in `acquire_scope_data.py`. The arming would
+   have raised `NameError` on *every* run — caught by its own error handling, so each run would
+   have started unguarded while printing a warning nobody was watching for.
+2. **A run dying in its first seconds never creates a telemetry file**, and the staleness check
+   was predicated on that file existing. The only remaining trigger was the deadline — for a
+   13 h run, nearly 14 hours of energised heater. The guard now also fires on "no telemetry file
+   after `stale_min` and no acquisition process". Verified in 11 s with a 3 s window.
+
+### Limitation
+The heater was already off during testing (last night's run switched it off at 03:08), so the
+switch-off exercised the full command and verification path but not an actual state change. The
+real state change was proven on the 13 h run — see ticket 0005.

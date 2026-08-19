@@ -32,5 +32,10 @@
       "description": "Raspberry pi",
       "enabled": true
     }
-  ]
+  ],
+  "heater_guard_enabled": true,
+  "heater_channel_id": 0,
+  "heater_channel_name": "heater",
+  "_notes": "heater_guard_enabled: every profiled run auto-spawns a detached heater guard (ticket 0008). Default true on purpose \u2014 a run must never start unguarded by accident. Set false only for a deliberate un-guarded run.",
+  "heater_guard_stale_min": 15
 }
