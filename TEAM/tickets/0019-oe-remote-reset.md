@@ -102,3 +102,37 @@ The device ran fine after Kim's power cycle this morning and wedged again around
 wedges again after the next reset, that is a pattern in the sensor's own firmware rather than an
 accident, and it belongs upstream with BearingBrain — a sensor that needs a manual reset at
 unpredictable intervals cannot be part of a 13-hour unattended run.
+
+## Attempted 2026-08-19 14:40–14:51, on Kim's instruction — and the device's state changed
+Kim authorised trying, on the reasoning that someone has to reach the sensor physically anyway.
+One step was deliberately skipped: **opcode 1, the firmware data blocks.** It overwrites the
+staging area and can never by itself cause a reset — the reboot follows only a *valid* signature,
+which we do not have — so it is pure downside.
+
+**Stage 1, zero risk: sustained polling.** Every earlier probe was a single command inside a
+short connection, which cannot distinguish a crash from a device that wakes in a brief window.
+Held one connection and sent `CONFIG_READ` every 5 s for five minutes: **completely silent**, and
+then at ~250 s the writes began timing out and **the link dropped**. So it is not a wake-window
+effect, and sustained traffic is something the device does not survive.
+
+**Stages 2 and 3 never actually ran.** The link was already down, so the firmware-channel writes
+failed inside bleak (`Service Discovery has not been performed yet`) without reaching the device.
+The script's closing line claiming the firmware channel was silent is wrong — it was never
+reached. **The firmware channel remains untested.**
+
+**Then the device stopped advertising altogether.** It had advertised consistently all day. Six
+scans over three minutes from 14:48 to 14:51 found it absent while 13–18 other BLE devices were
+visible each time, so the adapter is fine. This is a state change caused by our attempts, and it
+cuts both ways:
+
+- *Worse:* it has gone further down and no longer advertises, so even connecting is impossible.
+- *Better:* the sustained polling tripped a watchdog reset, and it is now in its normal 60-minute
+  sleep, in which it does not advertise — in which case it returns on its own.
+
+We cannot tell which from here. The recovery watcher is running at a 5-minute interval to catch
+it if it comes back.
+
+**What this does not change:** someone still has to visit the rig. What it adds is that a wedged
+OE sensor cannot be talked back to life over BLE with anything we have, and that hammering it
+makes things less predictable rather than more. Leave a hung sensor alone and press the button.
+
