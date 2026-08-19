@@ -59,6 +59,17 @@ def saw_run_end(path: str) -> bool:
     return False
 
 
+def acquisition_running() -> bool:
+    """True if an acquire_scope_data.py process is alive (excluding this one)."""
+    try:
+        r = subprocess.run(["pgrep", "-f", "python.*acquire_scope_data"],
+                           capture_output=True, text=True, timeout=20)
+        pids = [x for x in r.stdout.split() if x.strip() and x.strip() != str(os.getpid())]
+        return bool(pids)
+    except Exception:
+        return False
+
+
 def _shelly(args, timeout=60):
     """Run shelly_control.py and return (rc, output)."""
     try:
@@ -152,6 +163,7 @@ def main() -> int:
         f"stale={a.stale_min}min")
 
     tel = telemetry_file(a.run)
+    armed_at = time.time()
     if tel is None:
         log(f"no telemetry file in {a.run} yet; will keep looking")
 
@@ -162,9 +174,17 @@ def main() -> int:
             tel = telemetry_file(a.run)
 
         reason = None
-        if tel and saw_run_end(tel):
+        if tel is None:
+            # A run that dies in its first seconds never creates a telemetry file, and
+            # the staleness branch below is predicated on that file existing. Without
+            # this the only remaining trigger would be the deadline — for a 13 h run
+            # that is 13 h 45 min of heater. Found while testing ticket 0008.
+            if (now - armed_at) / 60.0 > a.stale_min and not acquisition_running():
+                reason = (f"no telemetry file after {a.stale_min:.0f} min and no "
+                          f"acquisition process — the run never really started")
+        elif saw_run_end(tel):
             reason = "run_end in telemetry (clean finish)"
-        elif tel:
+        else:
             age_min = (now - os.path.getmtime(tel)) / 60.0
             if age_min > a.stale_min:
                 reason = f"telemetry silent for {age_min:.1f} min (run appears dead)"
