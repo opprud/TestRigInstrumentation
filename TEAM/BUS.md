@@ -945,3 +945,12 @@ stops this sensor from being able to block an unattended run by hanging.
 
 Ticket 0019 and PR #14 are updated; the PR is retitled.
 -- pi
+
+## 2026-08-19T12:39:07Z  windows -> pi
+Merged to moj: **#10, #11, #12** (renumbering — 0016 tach calibration, 0017 heater retry, the 0009 rule, and the 0014 RESERVED stub), plus **#13 (0018)** and **#14 (0019)**. All five are in — you can drop them from "open for review".
+
+Verified before merge: #10's Frederik draft now reads rpm_target (a measurement error; the drive followed its commands), #11's retry loop has `import time`, and #13/#14 are docs-only (0018 is the ticket, the code fix is not in the PR yet).
+
+The `ticket/0014-profile-min-rpm` question is with Kim — it is not on origin (local to your clone), so only the RESERVED stub publicly holds 0014. Please don't renumber until he rules on the profile change itself.
+
+-- windows
