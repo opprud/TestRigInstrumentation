@@ -1,9 +1,9 @@
 ---
 id: 0012
-title: Tach calibrated and vindicated; frequency source was on the pot (02-03) — night offset still open
+title: Tach calibrated and vindicated; the +582 rpm offset is resolved
 area: control
 role: dev
-status: review
+status: done
 assignee: pi-claude
 branch: ticket/0012-tach-calibration-and-pot
 pr:
@@ -65,10 +65,45 @@ So the night offset is **open again**. It has now been attributed to the sensor 
 (0003) and to the pot summing into the command (this ticket's first draft) — **all three wrong.**
 No fourth guess here.
 
-**The decisive test, now cheap:** 02-03 is correct, firmware 1.1.1 is flashed and the tach is
-calibrated to 5 rpm. Run a short profile with a couple of speed steps and compare `rpm_meas`
-against `rpm_target`. Agreement means the offset belonged to the old setup; a persistent 582 means
-a real fault still hiding.
+## RESOLVED (2026-08-19) — the offset is gone, in both run paths
+
+Two runs, deliberately differing only in whether `api_server` was up:
+
+| target | direct run | UI-started run | vs calibration |
+|---|---|---|---|
+| 600 rpm | 591 | **591** | −1 |
+| 1200 rpm | 1192 | — | −3 |
+| 1800 rpm | 1793 | — | −5 |
+| 200 rpm | — | 187 | −2 |
+| 300 rpm | — | 289 | −1 |
+| 400 rpm | — | 390 | **0** |
+| 500 rpm | — | 491 | **0** |
+
+The 600 rpm step measured **591 rpm in both**, identical to the last digit. So:
+
+- **The +582 offset is gone.** Every step now matches the calibration within 5 rpm.
+- **The API-contention theory is wrong too** — it made no difference whether `api_server` was
+  running. That was my fourth hypothesis and it also failed.
+
+**Conclusion:** the offset belonged to the old setup — drive parameter **02-03 on the pot**, the
+**old firmware**, or both. I am not picking between them: the two changed together, and I have
+been wrong three times on this question already. What matters practically is that the rig now
+commands and measures speed correctly end to end, and that both causes are gone.
+
+**For the 13 h run data:** those runs were taken with the old setup, so their true speeds are the
+logged `rpm_meas`, not `rpm_target`. The tach is trustworthy — that part is settled by the
+calibration above.
+
+## Separate finding: the profile's 100 rpm step does not turn the bearing
+At 100 rpm the profile commands 1.68 Hz — 3.4 % of rated frequency. Measured **0 rpm** on the
+tach while the drive reported running and its display showed 1.68 Hz; Kim confirmed by ear that
+nothing turned. At the next step, 3.36 Hz, the shaft turns and matches the calibration to 2 rpm.
+
+The step recurs **26 times** through the 13 h profile, so every earlier run recorded a
+*stationary* bearing at those points rather than a bearing at 100 rpm.
+
+**Kim's decision: leave the profile unchanged** and document it, to keep comparability with
+earlier runs. Anyone analysing a run should treat the 100 rpm steps as stationary-bearing data.
 
 ## Consequences
 1. **The 13 h runs' true speeds are uncertain** until the offset is explained. The tach is

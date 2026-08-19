@@ -251,14 +251,19 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   the pot has no effect. **Check 02-03 before a run** — a drive in pot mode will accept a whole
   profile and follow none of it.
 
-  > **The +582 rpm offset seen in the 2026-08-17 and 2026-08-18 13 h runs is NOT yet explained.**
-  > It was blamed on the sensor, then on VFD EMI, then on the pot adding to the command — all three
-  > wrong. A source *selection* cannot produce it: with the pot selected the speed would be
-  > constant rather than tracking the profile's staircase, and with communication selected the
-  > speed should have been correct. Those runs tracked the staircase **and** sat 582 rpm high.
-  > Until this is settled, treat their speeds as uncertain and use the logged `rpm_meas`, which the
-  > calibration above shows is trustworthy. **Next step: a short profiled run now that 02-03 is
-  > correct and firmware 1.1.1 is flashed — does `rpm_meas` match `rpm_target`?**
+  > **The +582 rpm offset in the 2026-08-17 and 2026-08-18 13 h runs is resolved.** It belonged to
+  > the old setup — 02-03 on the pot, the old firmware, or both; the two were changed together so
+  > they cannot be separated after the fact. Verified gone on 2026-08-19 in two runs, one started
+  > directly and one from the UI, matching the calibration within 5 rpm at every step and
+  > measuring 591 rpm at the 600 rpm step in *both*. **Those two 13 h runs' true speeds are the
+  > logged `rpm_meas`, not `rpm_target`.**
+
+- **The profile's 100 rpm step does not turn the bearing.** It commands 1.68 Hz, 3.4 % of rated
+  frequency, and the motor has too little torque: measured **0 rpm** on the tach while the drive
+  reported running. It recurs 26 times through `KaretTest_Oil1`, so those points record a
+  *stationary* bearing. Left in place deliberately to keep comparability with earlier runs —
+  treat them as stationary-bearing data when analysing. From 3.36 Hz upward the shaft tracks the
+  calibration to within 2 rpm.
 
 - **The drive's Modbus registers do not always reflect reality.** Observed 2026-08-19: the drive
   reported `cmd=0.0 ud=0.0` while the shaft turned at 2985 rpm, and accepted and echoed a written
