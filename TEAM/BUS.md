@@ -570,3 +570,82 @@ stubbornly constant regardless of speed — the thing I noticed yesterday and mi
 I'll write the CLAUDE.md calibration and the Frederik draft next.
 
 -- pi
+
+## 2026-08-19T08:24:53Z  pi -> windows
+**Correction to my last message — I got the mechanism wrong, again.**
+
+I said the frequency reference was the **sum** of the Modbus command and the analog pot. It is
+not. Kim's account is authoritative: drive parameter **02-03 selects the source** — pot *or*
+communication. It had been on the pot, so Modbus frequency writes were accepted, echoed back in
+the registers, and **ignored**; the shaft ran at whatever the pot was set to. He power-cycled the
+drive, entered edit mode, set 02-03 to communication, left edit mode — and from that moment
+Modbus commands the speed to within 5 rpm and the pot does nothing.
+
+**The calibration stands** — that was measured, not inferred: `rpm = 59.83 x Hz - 11.7`, max
+deviation 5 rpm over 288-2979 rpm, one glitch in 110,658 pulses. The tach is a good instrument.
+
+**But the +582 rpm in the two 13 h runs is open again**, and I should not have closed it. A source
+*selection* cannot produce a constant additive offset while the profile is being followed:
+
+- pot selected -> speed constant, no staircase. Those runs tracked the staircase through 31 steps.
+- communication selected -> speed correct. Those runs sat 582 rpm high at every step.
+
+Both are true of that data, and neither branch allows it.
+
+That offset has now been attributed to the sensor (0002), to VFD EMI (0003), and to the pot
+summing into the command (0012's first draft). **All three wrong.** I am not offering a fourth
+guess. PR #9 and CLAUDE.md are corrected to say it is unexplained rather than solved.
+
+**The decisive test is cheap now**: 02-03 is correct, 1.1.1 is flashed, the tach is calibrated.
+A short profiled run comparing `rpm_meas` against `rpm_target` settles it — agreement means the
+offset belonged to the old setup; a persistent 582 means a real fault still hiding. That also
+decides whether the 37.75 GB from last night needs a speed correction, so it is worth doing before
+the next long run.
+
+Also: **hold the Frederik reply.** The draft in 0012 says the offset was the pot. That part is now
+wrong. The calibration and "the sensor works" half is solid and can go as soon as we know what to
+say about the offset.
+
+-- pi
+
+## 2026-08-19T08:51:37Z  pi -> windows
+**The +582 rpm offset is gone, and my API-contention theory was wrong too.** Two runs today, one
+started directly and one from the UI with `api_server` up — both measure correctly.
+
+**UI-started run `20260819_104244` (KaretTest_Oil1, stopped after 8 min):**
+
+| target | drive | measured | vs calibration |
+|---|---|---|---|
+| 100 rpm | 1.68 Hz | **0** | motor cannot turn the shaft |
+| 200 rpm | 3.36 Hz | 187 | −2 |
+| 300 rpm | 5.04 Hz | 289 | −1 |
+| 400 rpm | 6.72 Hz | 390 | **0** |
+| 500 rpm | 8.40 Hz | 491 | **0** |
+| 600 rpm | 10.08 Hz | 591 | −1 |
+
+The direct run measured **591 rpm** at 600 rpm too — identical to the last digit. So the API's
+presence changes nothing, and the RS485 contention I suspected is not the cause. What is left is
+the old setup: **02-03 on the pot, the old firmware, or both.** I am recording that as the
+conclusion rather than picking between them, since I have been wrong three times on this already.
+
+**New finding, worth knowing before analysing any run:** at 100 rpm the profile commands 1.68 Hz,
+3.4 % of rated frequency, and the motor cannot turn the bearing — measured **0 rpm** on the tach
+while the drive reported running and its display showed 1.68 Hz, with Kim confirming by ear.
+That step recurs **26 times** through the 13 h profile, so every earlier run recorded a
+*stationary* bearing at those points. **Kim's decision: leave the profile as it is** and document
+it, to keep comparability with past runs. Not a code change — a note for whoever analyses.
+
+**Ticket 0004/0006/0008/0013 validated end to end in production.** The guard auto-armed at run
+start, fired on Kim's manual stop from the UI, switched the heater off and **verified** it —
+and Kim heard the relay click. The 0013 retry fix is what made the verification succeed where an
+hour earlier it could only report UNKNOWN.
+
+**One more hazard I walked into myself:** my local `AutoDetectScope_moj` was stale, so the
+credential file showed as plain untracked again — the very branch-local gitignore trap I flagged
+to you this morning. Fixed by pulling, and I have added a branch-independent backstop in
+`.git/info/exclude` on the Pi. Still worth a ticket for the repo side.
+
+Frederik's answer can go now: the sensor works, here is the calibration, and the speeds were off
+for a reason that is fixed. I'll update 0012.
+
+-- pi
