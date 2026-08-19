@@ -226,16 +226,55 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   `ConnectionRefused`. The resilience machinery absorbs it (sub-1 % loss), but it is not
   eliminated. Lower the point count or increase `sweep_retries` if zero loss is required.
 
-- **The optical tachometer (ifm OGT500) is the weak link.** Historically it over-read
-  (multiple reflections → extra pulses/rev), reported spurious values at standstill, and
-  saturated near the top of the range. The firmware computes rpm from the interval between
-  the last two pulses and has **no timeout**, so when the sensor stops producing edges the
-  reading **freezes at the last value** — this looks like a stuck reading, not a zero. Teach
-  the OGT500 as: reflective mark in front → **OUT ON**, dark shaft in front → **OUT OFF**;
-  verify the yellow LED blinks exactly once per revolution. Check it live with
-  `python3 util_tool.py --port <PORT> speed` (watch `pulses` increment by one per turn) and
-  set pulses-per-rev with `setppr` if the shaft has more than one mark. Prefer open-loop
-  control until the mark is robust.
+- **The tachometer is accurate — verified 2026-08-19.** It was long suspected of over-reading;
+  it was not. Measured against commanded drive frequency across the full range:
+
+  | drive Hz | shaft rpm | rpm/Hz | slip vs 60 |
+  |---|---|---|---|
+  | 5 | 288 | 57.6 | 4.0 % |
+  | 10 | 588 | 58.8 | 2.0 % |
+  | 20 | 1190 | 59.5 | 0.8 % |
+  | 30 | 1788 | 59.6 | 0.7 % |
+  | 40 | 2382 | 59.5 | 0.8 % |
+  | 50 | 2979 | 59.6 | 0.7 % |
+
+  **`rpm = 59.83 x Hz - 11.7`, maximum deviation 5 rpm.** The intercept is zero within error, and
+  slip falls with speed as an induction motor under light load should. Pulse-count, single-period
+  and `SPEED?` agree at every point; one glitch in 110,658 pulses. Use `rpm_meas` from the tach as
+  the speed of record **for runs from 2026-08-19 onward** (firmware >= 1.1.1). For earlier runs use
+  `rpm_target`: the old firmware derived rpm from the last two edges with no timeout or filtering
+  and over-read by ~582 rpm.
+
+- **The frequency reference source is selected by drive parameter 02-03 — pot *or* communication,
+  not both.** Until 2026-08-19 it was set to the analog pot, so Modbus frequency writes were
+  accepted, echoed back in the registers, and **ignored**: the shaft ran at whatever the pot was
+  set to. Kim fixed it by power-cycling the drive, entering edit mode, setting 02-03 to
+  communication and leaving edit mode; after that Modbus commands the speed to within 5 rpm and
+  the pot has no effect. **Check 02-03 before a run** — a drive in pot mode will accept a whole
+  profile and follow none of it.
+
+  > **The +582 rpm offset in the 2026-08-17 and 2026-08-18 13 h runs is resolved.** It belonged to
+  > the old setup — 02-03 on the pot, the old firmware, or both; the two were changed together so
+  > they cannot be separated after the fact. Verified gone on 2026-08-19 in two runs, one started
+  > directly and one from the UI, matching the calibration within 5 rpm at every step and
+  > measuring 591 rpm at the 600 rpm step in *both*. **For those two 13 h runs use `rpm_target`,
+  > not `rpm_meas`** — the drive followed its commands (the staircase was tracked through all 31
+  > steps), and it was the *old firmware* that over-read by a constant ~582 rpm. The calibration
+  > below was measured after flashing 1.1.1 and does not retroactively validate those readings.
+
+- **The profile's 100 rpm step does not turn the bearing.** It commands 1.68 Hz, 3.4 % of rated
+  frequency, and the motor has too little torque: measured **0 rpm** on the tach while the drive
+  reported running. It recurs 26 times through `KaretTest_Oil1`, so those points record a
+  *stationary* bearing. Left in place deliberately to keep comparability with earlier runs —
+  treat them as stationary-bearing data when analysing. From 3.36 Hz upward the shaft tracks the
+  calibration to within 2 rpm.
+
+- **The drive's Modbus registers do not always reflect reality.** Observed 2026-08-19: the drive
+  reported `cmd=0.0 ud=0.0` while the shaft turned at 2985 rpm, and accepted and echoed a written
+  frequency that had no effect on the output. Writes also intermittently fail outright when
+  processes open `/dev/ttyUSB0` in quick succession (`Could not exclusively lock port`), and a
+  `stop()` can be reported as successful without stopping the motor. **Verify actuation against
+  the tach, never against a readback.**
 
 - **Closed loop hides sensor scale errors.** In closed loop `rpm_meas` always converges to
   the target regardless of sensor accuracy. Only comparing `rpm_meas` against `59.5 × Hz`
