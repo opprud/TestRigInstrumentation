@@ -55,6 +55,10 @@ done in this PR**, for two reasons:
 2. More importantly, removing it from `HEAD` would achieve very little on its own — the value is
    already in the repository's history, so it stays readable regardless.
 
-Details and a recommendation have gone to Kim directly rather than into this ticket, since a
-public ticket is the wrong place to describe a live credential. **This needs a decision from Kim
-before any code change.**
+Details and a recommendation went to Kim directly rather than into this ticket, since a public
+ticket is the wrong place to describe a live credential.
+
+**Decision (Kim, 2026-08-19): leave the current arrangement as it is until he says otherwise.**
+So the credential half of this ticket is closed as *deferred by the owner*, not as outstanding
+work — nobody should pick it up expecting it to be an open task. The tracking half (this PR) is
+done.
