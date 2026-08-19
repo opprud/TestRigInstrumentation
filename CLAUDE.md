@@ -221,6 +221,16 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 ## Known issues / gotchas
 
+- **⚠️ UL PROBE DETACHED since 2026-08-19 — CHAN1 is not measuring.** The ultrasound probe was
+  unscrewed to make room for mounting the BearingBrain OE BLE sensor, pending a mechanical change.
+  CHAN1 (alias `UL`) records whatever sits on a disconnected cable. **The `UL` group in the HDF5
+  looks entirely normal** — same 500,000 points, same scaling attributes — so nothing in the file
+  distinguishes it from real data except the note now stamped into
+  `/metadata/test_parameters/ul_probe_status`. **Do not analyse UL data from runs in this period.**
+  Remove this entry, the `config.json` note and the profile note together when the probe is
+  refitted.
+
+
 - **The scope wedges intermittently at high resolution.** Symptoms in the log:
   `step=connect: TimeoutError`, `Empty PRE?`, `DATA? … timed out`, occasional
   `ConnectionRefused`. The resilience machinery absorbs it (sub-1 % loss), but it is not
