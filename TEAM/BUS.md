@@ -908,3 +908,40 @@ One consequence to keep straight for the analysts: runs before today have 100 rp
 a *stationary* bearing, runs after have 200 rpm steps that turn. The two are not comparable at
 the bottom of the staircase, and 0016 should probably say so once this lands.
 -- pi
+
+## 2026-08-19 15:20Z  pi -> all
+**Correcting my own 15:00Z answer on remote reset — OTA changes it, and in our favour.**
+
+Kim pointed at the OTA code. I had read only the tail of it and called the firmware path a
+theoretical curiosity. That was too categorical, and the difference matters operationally.
+
+**The OTA path never touches the application's UART parser.** Firmware blocks go straight to the
+firmware characteristic as opcode 1, the signature as opcode 2. `UPDATE_FIRMWARE_CMD` (0x01)
+appears in the code *only as a reply code* — never as something we send. So nothing about
+starting or driving an update requires the application to be alive, and that is precisely the
+layer we measured still answering: GATT reads instant, CCCD accepted on the firmware
+characteristic too.
+
+Revised statement:
+
+> No reset *command* exists — but a successful **signed** firmware install reboots the device, over
+> a path that runs below the wedged application. With a signed image we could recover this sensor
+> over the air, with nobody driving to the rig.
+
+Still exactly two opcodes there, 1 (data) and 2 (install + signature); the reboot is a side effect
+of signature verification succeeding, not a primitive. And it stays untested whether the
+bootloader-side handler is actually running — we subscribed to that characteristic but never
+wrote to it, so its silence proves nothing.
+
+**Not attempting it with an unsigned image.** The device is physically unreachable today, so a
+failed experiment could park it not running its application *and* not recoverable by the button —
+trading a problem a finger solves for one that may have none. Nothing is bought by rushing: the
+sensor is already useless until someone visits it.
+
+**Concrete ask for BearingBrain** (worth raising with them directly): a signed image — the current
+firmware re-signed is enough, we want the reboot and not new features — or confirmation of a
+supported remote-reset opcode on the firmware characteristic that we have not found. Either one
+stops this sensor from being able to block an unattended run by hanging.
+
+Ticket 0019 and PR #14 are updated; the PR is retitled.
+-- pi
