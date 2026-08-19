@@ -1,6 +1,6 @@
 ---
 id: 0012
-title: Tach calibrated and vindicated; the +582 rpm offset was an analog potentiometer
+title: Tach calibrated and vindicated; frequency source was on the pot (02-03) — night offset still open
 area: control
 role: dev
 status: review
@@ -40,21 +40,40 @@ error. Slip falls with speed, as an induction motor under light load should. Pul
 single-period and `SPEED?` agree at every point. **One glitch in 110,658 pulses.** Kim confirmed
 5 -> 10 Hz by ear as a clean doubling.
 
-## The evidence for the pot
-Same command, two pot positions:
+## The pot — corrected by Kim, 2026-08-19
 
-| | commanded | measured |
-|---|---|---|
-| pot wound up (morning) | 5 Hz | **885 rpm** |
-| pot at minimum | 5 Hz | **288 rpm** |
+My first write-up said the frequency reference was the **sum** of the Modbus command and the pot.
+**That is wrong.** Kim's account is authoritative: drive parameter **02-03 selects the source** —
+pot *or* communication. It had been set to the pot, so Modbus frequency writes were accepted,
+echoed in the registers, and ignored; the shaft simply ran at the pot's setting. He power-cycled
+the drive, entered edit mode, set 02-03 to communication, and left edit mode. After that Modbus
+commands the speed to within 5 rpm and the pot does nothing.
 
-Difference **597 rpm ~ 10 Hz** — matching the **+582 rpm** constant offset measured across 31
-speed steps in the 13 h runs. An analog offset is additive, which is why it looked identical at
-every speed and was misread twice.
+That explains the whole morning — every "ignored" write, and the speed changes that came from him
+turning the knob while we tested.
+
+## What it does NOT explain: the +582 rpm in the 13 h runs
+
+A source *selection* cannot produce a constant additive offset while the profile is being
+followed:
+
+- **pot selected** -> speed would be constant, not tracking the staircase. Those runs tracked it
+  through 31 steps.
+- **communication selected** -> speed should have been correct. It sat 582 rpm high at every step.
+
+So the night offset is **open again**. It has now been attributed to the sensor (0002), to VFD EMI
+(0003) and to the pot summing into the command (this ticket's first draft) — **all three wrong.**
+No fourth guess here.
+
+**The decisive test, now cheap:** 02-03 is correct, firmware 1.1.1 is flashed and the tach is
+calibrated to 5 rpm. Run a short profile with a couple of speed steps and compare `rpm_meas`
+against `rpm_target`. Agreement means the offset belonged to the old setup; a persistent 582 means
+a real fault still hiding.
 
 ## Consequences
-1. **The 13 h runs of 2026-08-17 and 2026-08-18 ran ~582 rpm above their profiles.** The data is
-   usable; analysis must use the logged `rpm_meas`, not `rpm_target`.
+1. **The 13 h runs' true speeds are uncertain** until the offset is explained. The tach is
+   trustworthy (calibrated to 5 rpm), so `rpm_meas` is the best record available — but we cannot
+   yet say *why* it sat 582 rpm above target.
 2. **Frederik's question is answered, with the opposite conclusion to the one we sent him:** the
    sensor is working. Draft reply below.
 3. **Tickets 0002 and 0003 are superseded.** Ferrites are not needed; there is no EMI problem.

@@ -243,16 +243,22 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   and `SPEED?` agree at every point; one glitch in 110,658 pulses. Use `rpm_meas` from the tach as
   the speed of record — it is better than reconstructing from drive frequency.
 
-- **The +582 rpm "tach offset" was an analog potentiometer, not the sensor.** The RS510's frequency
-  reference is the **sum of the Modbus command and an analog pot input**. With the pot wound up it
-  added a constant ~9.8 Hz to every commanded speed — 9.8 x 59.5 = 583 rpm, which is exactly the
-  constant offset seen across 31 speed steps of the 2026-08-17 and 2026-08-18 13 h runs. An analog
-  offset is additive, which is why it looked identical at every speed and was mistaken first for a
-  sensor scale error and then for VFD EMI. **Check the pot is at minimum before a run**, and treat
-  a constant offset between `rpm_target` and `rpm_meas` as a pot symptom, not a sensor fault.
+- **The frequency reference source is selected by drive parameter 02-03 — pot *or* communication,
+  not both.** Until 2026-08-19 it was set to the analog pot, so Modbus frequency writes were
+  accepted, echoed back in the registers, and **ignored**: the shaft ran at whatever the pot was
+  set to. Kim fixed it by power-cycling the drive, entering edit mode, setting 02-03 to
+  communication and leaving edit mode; after that Modbus commands the speed to within 5 rpm and
+  the pot has no effect. **Check 02-03 before a run** — a drive in pot mode will accept a whole
+  profile and follow none of it.
 
-  > **The 13 h runs of 2026-08-17 and 2026-08-18 ran ~582 rpm faster than their profiles asked
-  > for.** The data is usable but analysis must use the logged `rpm_meas`, not `rpm_target`.
+  > **The +582 rpm offset seen in the 2026-08-17 and 2026-08-18 13 h runs is NOT yet explained.**
+  > It was blamed on the sensor, then on VFD EMI, then on the pot adding to the command — all three
+  > wrong. A source *selection* cannot produce it: with the pot selected the speed would be
+  > constant rather than tracking the profile's staircase, and with communication selected the
+  > speed should have been correct. Those runs tracked the staircase **and** sat 582 rpm high.
+  > Until this is settled, treat their speeds as uncertain and use the logged `rpm_meas`, which the
+  > calibration above shows is trustworthy. **Next step: a short profiled run now that 02-03 is
+  > correct and firmware 1.1.1 is flashed — does `rpm_meas` match `rpm_target`?**
 
 - **The drive's Modbus registers do not always reflect reality.** Observed 2026-08-19: the drive
   reported `cmd=0.0 ud=0.0` while the shaft turned at 2985 rpm, and accepted and echoed a written
