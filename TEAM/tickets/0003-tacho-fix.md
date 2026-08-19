@@ -47,3 +47,15 @@ Make the tacho read **true shaft speed**: remove the spurious pulse source that 
 - **Plan:** ferrite chokes on the OGT500 sensor leads **close to the RP2040 end** to suppress common-mode HF EMI coupled from the motor/VFD cables — the dominant term (drive-on adds +348 rpm / 5.8 Hz).
 - **Tips:** loop the cable 2–3 turns *through* the ferrite if it fits (more effective than a single pass); one at each end helps; a small RC low-pass (series R + cap to GND) on the signal input is a cheap backup if ferrite alone doesn't fully clear it.
 - **Quantitative verify (with ticket 0007's robust firmware):** `TACHDIAG?` accepted-rate BEFORE vs AFTER the ferrite, shaft stationary → if the +234/+348 baseline drops, the ferrite is working. Before/after proof, no scope.
+
+## Update (2026-08-19) — EMI CONFIRMED conclusively (0007 discriminator on the rig)
+With the robust firmware (0007) flashed, `TACHDIAG?` at the rig:
+
+| state | accepted (60 s) | rate |
+|---|---|---|
+| drive OFF, shaft stationary | 0 | 0.00 Hz |
+| drive ENERGISED at 0 Hz, 0.0 A, shaft stationary | 579 | 9.65 Hz (= 579 rpm-equiv) |
+
+- **Shaft not turning + drive energised + 579 pulses/min → can only be electrical pickup. It IS VFD EMI.** 9.65 Hz × 60 = 579 ≈ the historical +582. Edges arrive at a strikingly regular 103.4 ms; **zero glitches rejected** → clean, well-spaced pulses the ISR cannot tell from real. Firmware cannot remove it — the fix is the **ferrite + cable routing**.
+- **CORRECTION — strike the earlier "+234 baseline / always-present source":** the 234 rpm at standstill was a **frozen value** (old firmware had no timeout), not live pulses. With the timeout, drive-off reads **ZERO**. No background source. **One source: the drive, contributing the whole +582.**
+- **Ferrite before/after is now trivial:** any non-zero `TACHDIAG?` accepted-rate, shaft stationary + drive energised, is what to drive to zero. **Before = 9.65 Hz.**

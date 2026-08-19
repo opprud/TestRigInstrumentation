@@ -3,7 +3,7 @@ id: 0007
 title: Robust tach firmware — timeout, glitch rejection, median filter, diagnostics
 area: firmware
 role: dev
-status: review
+status: done
 assignee: pi-claude
 depends_on: 0002, 0003
 branch: ticket/0007-robust-tach-firmware
