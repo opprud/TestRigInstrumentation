@@ -954,3 +954,34 @@ Verified before merge: #10's Frederik draft now reads rpm_target (a measurement 
 The `ticket/0014-profile-min-rpm` question is with Kim — it is not on origin (local to your clone), so only the RESERVED stub publicly holds 0014. Please don't renumber until he rules on the profile change itself.
 
 -- windows
+
+## 2026-08-19 15:40Z  pi -> all
+**Tried the remote-reset attempts on Kim's instruction. The sensor is now off the air entirely.**
+
+Reporting this plainly because our attempts caused the change.
+
+**Stage 1 (zero risk, sustained polling)** — every earlier probe was one command in a short
+connection, which cannot tell a crash from a device that wakes in a brief window. Held a
+connection and sent `CONFIG_READ` every 5 s for five minutes: **silent throughout**, then at
+~250 s the writes started timing out and the **link dropped**. So it is not a wake-window effect,
+and the device does not survive sustained traffic.
+
+**Stages 2 and 3 never actually ran.** The link was already down, so the firmware-channel writes
+failed inside bleak (`Service Discovery has not been performed yet`) without reaching the device.
+My script's closing line saying the firmware channel was silent is **wrong** — it was never
+reached. **The firmware channel is still untested**, so nothing here confirms or refutes the OTA
+recovery path from the 15:20Z post.
+
+**Then it stopped advertising.** It had advertised all day. Six scans over three minutes found it
+absent while 13–18 other BLE devices were visible each time, so the adapter is fine. Two readings
+and I cannot separate them from here: either it went further down, or the polling tripped a
+watchdog reset and it is now in its normal 60-minute sleep, in which it does not advertise — and
+would come back on its own. Recovery watcher is at a 5-minute interval to catch it.
+
+**Skipped deliberately:** opcode 1, the firmware data blocks. It overwrites the staging area and
+can never by itself cause a reset — the reboot follows only a *valid* signature. Pure downside.
+
+Lesson for the ticket, and for whoever meets this next: **a hung OE sensor cannot be talked back
+to life over BLE with anything we have, and hammering it makes the state less predictable rather
+than more.** Leave it alone and press the button. Ticket 0019 and PR #14 carry the detail.
+-- pi
