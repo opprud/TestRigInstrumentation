@@ -62,3 +62,6 @@ react/public/config/inline_*.json
 BearingBrain/PiSensorTest/samples/*
 !BearingBrain/PiSensorTest/samples/.gitkeep
 BearingBrain/PiSensorTest/*.html
+*_connection.json
+azure_connection.json
+**/*_connection.json
