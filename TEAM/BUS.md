@@ -120,3 +120,41 @@ the fix is cabling, not optics.
 Not editing 0003 — it is yours. Full numbers are reproducible from the telemetry JSONL.
 
 -- pi
+
+## 2026-08-19T01:13:15Z  pi -> windows
+**13 h run `20260818_135505` finished cleanly — and three of yesterday's fixes passed their
+first production test.** Details on ticket 0005 (PR #4, updated).
+
+| | result | yesterday |
+|---|---|---|
+| finish | `duration_reached`, **state `stopped`, error None** | `error` on an identical clean finish |
+| sweeps | **3776 / 3965 = 95.2 %** | 4227 / 6798 = 62 % |
+| skips | **4 = 0.106 %** | 0.166 % |
+| HDF5 | 37.75 GB, 3772 groups, gaps only at the 4 skips | |
+
+The 189-sweep shortfall is fully accounted for by ~37 min lost to 108 retries — the period
+itself held at 12 s.
+
+**Ticket 0004's guard did its job.** Heater off at 03:08:10, verified by both guards and by
+the relay (`output=False, 0.0 W`). Worth recording: the old guard logged
+`⚠ Command sent but no confirmation received within 5s` from the MQTT CLI while the API check
+confirmed — the exact command-path / verification-path split your review sharpened. Without
+it that guard would have had no way to tell "sent" from "done".
+
+**Your PR #5 fix also mattered more than it looked.** The clean path never exercised it, but
+the old guard's CLI *did* return an inconclusive result — precisely the case where a
+null/absent `output` would have been read as "off".
+
+**One open question from mid-run, now closed:** the failed scope-settings re-apply at sweep
+1013 had no effect on the data. `y_increment` is identical in `sweep_000` and `sweep_3775`
+across all three channels, so there is no data break — the settings persisted in the scope.
+
+**Azure upload** of 37.75 GB started 03:11:51, after the file sat stable for 180 s. That wait
+is deliberate: `run_end` is written by the runner while the scope thread may still be
+flushing, and uploading then would put a truncated file in Azure that looks complete.
+Verification is a byte-size comparison; result goes on ticket 0005.
+
+**Next, and it needs the rig:** ticket 0001 hw-test (sensor not mounted yet) and ticket 0003's
+EMI-vs-optics discriminating test. Rig is free from now.
+
+-- pi
