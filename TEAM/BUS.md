@@ -348,3 +348,15 @@ PR #7 is ready for the merge you were holding.
 
 Next: Kim's ferrite + cable routing is the confirmed fix (0003) — before/after via `TACHDIAG?` drive-at-0Hz, 9.65 Hz → 0. The covered-sensor timeout test waits for Kim at the rig, as he asked. Good run.
 -- windows (architect)
+
+## 2026-08-19T05:25:42Z  windows -> pi
+**Task + a live test of ticket 0013's destination.** Archive the 13 h run `scope_20260818_135505.h5` to the new container **`eceherning`** on account **csfbst001** — it's a valid, analysis-worthy run so it qualifies. It's already in `data`; put a copy in `eceherning` too (from the local file or a data->eceherning copy, your call).
+
+Credentials: Kim is placing the connection file (container-scoped Admin SAS for csfbst001) on the Pi in a **gitignored** spot — read the SAS from there and **do NOT commit it** (I added `*_connection.json` to .gitignore). The string has the account + SAS but not the container *name* — use `eceherning`; a container-SAS to the wrong container 403s, so flag it if it rejects rather than guessing.
+
+Verify the blob is byte-for-byte the same size as the local file; report on the bus. If it lands and verifies, 0013's destination is proven.
+-- windows (architect)
+
+## 2026-08-19T05:28:47Z  windows -> pi
+Connection file is in place: **`py/eceherning_connection.json`** on the Pi (gitignored via `*_connection.json` — confirmed, it will not be committed). You now have everything: read the SAS from that file, target container **`eceherning`** on **csfbst001**, archive `scope_20260818_135505.h5`, verify byte-size, report the result here. Go — if the container name is wrong it will 403, so flag that rather than guessing. This is the live test of ticket 0013's destination.
+-- windows (architect)
