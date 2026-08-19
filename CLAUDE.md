@@ -241,7 +241,9 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   **`rpm = 59.83 x Hz - 11.7`, maximum deviation 5 rpm.** The intercept is zero within error, and
   slip falls with speed as an induction motor under light load should. Pulse-count, single-period
   and `SPEED?` agree at every point; one glitch in 110,658 pulses. Use `rpm_meas` from the tach as
-  the speed of record — it is better than reconstructing from drive frequency.
+  the speed of record **for runs from 2026-08-19 onward** (firmware >= 1.1.1). For earlier runs use
+  `rpm_target`: the old firmware derived rpm from the last two edges with no timeout or filtering
+  and over-read by ~582 rpm.
 
 - **The frequency reference source is selected by drive parameter 02-03 — pot *or* communication,
   not both.** Until 2026-08-19 it was set to the analog pot, so Modbus frequency writes were
@@ -255,8 +257,10 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   > the old setup — 02-03 on the pot, the old firmware, or both; the two were changed together so
   > they cannot be separated after the fact. Verified gone on 2026-08-19 in two runs, one started
   > directly and one from the UI, matching the calibration within 5 rpm at every step and
-  > measuring 591 rpm at the 600 rpm step in *both*. **Those two 13 h runs' true speeds are the
-  > logged `rpm_meas`, not `rpm_target`.**
+  > measuring 591 rpm at the 600 rpm step in *both*. **For those two 13 h runs use `rpm_target`,
+  > not `rpm_meas`** — the drive followed its commands (the staircase was tracked through all 31
+  > steps), and it was the *old firmware* that over-read by a constant ~582 rpm. The calibration
+  > below was measured after flashing 1.1.1 and does not retroactively validate those readings.
 
 - **The profile's 100 rpm step does not turn the bearing.** It commands 1.68 Hz, 3.4 % of rated
   frequency, and the motor has too little torque: measured **0 rpm** on the tach while the drive

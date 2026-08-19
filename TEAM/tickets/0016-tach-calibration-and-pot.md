@@ -1,11 +1,11 @@
 ---
-id: 0012
+id: 0016
 title: Tach calibrated and vindicated; the +582 rpm offset is resolved
 area: control
 role: dev
 status: done
 assignee: pi-claude
-branch: ticket/0012-tach-calibration-and-pot
+branch: ticket/0016-tach-calibration-and-pot
 pr:
 supersedes: 0002, 0003
 ---
@@ -90,9 +90,19 @@ The 600 rpm step measured **591 rpm in both**, identical to the last digit. So:
 been wrong three times on this question already. What matters practically is that the rig now
 commands and measures speed correctly end to end, and that both causes are gone.
 
-**For the 13 h run data:** those runs were taken with the old setup, so their true speeds are the
-logged `rpm_meas`, not `rpm_target`. The tach is trustworthy — that part is settled by the
-calibration above.
+**For the 13 h run data: use `rpm_target`, not `rpm_meas`.** This is the opposite of what this
+ticket first said, and the reasoning matters.
+
+The runs tracked the profile's staircase through all 31 steps. Had the frequency reference been on
+the pot, the speed would have been stuck at one value instead of following the profile — so 02-03
+was on communication, the drive did follow its commands, and **the shaft really did turn at the
+commanded speed**. What was wrong was the *reading*: the old firmware derived rpm from the last two
+edges only, with no timeout, no glitch rejection and no median, and it over-read by a constant
+~582 rpm.
+
+So the tach is trustworthy **now**, after 1.1.1 — the calibration above is measured with the new
+firmware. It was not trustworthy in those runs. `rpm_target` is the better record of what the
+bearing actually did.
 
 ## Separate finding: the profile's 100 rpm step does not turn the bearing
 At 100 rpm the profile commands 1.68 Hz — 3.4 % of rated frequency. Measured **0 rpm** on the
@@ -106,9 +116,10 @@ The step recurs **26 times** through the 13 h profile, so every earlier run reco
 earlier runs. Anyone analysing a run should treat the 100 rpm steps as stationary-bearing data.
 
 ## Consequences
-1. **The 13 h runs' true speeds are uncertain** until the offset is explained. The tach is
-   trustworthy (calibrated to 5 rpm), so `rpm_meas` is the best record available — but we cannot
-   yet say *why* it sat 582 rpm above target.
+1. **For the two 13 h runs, `rpm_target` is the speed of record.** The drive followed its commands
+   — the profile's staircase was tracked through all 31 steps — and the old firmware over-read by
+   a constant ~582 rpm. The calibration above was measured after flashing 1.1.1 and does not
+   retroactively validate the old readings.
 2. **Frederik's question is answered, with the opposite conclusion to the one we sent him:** the
    sensor is working. Draft reply below.
 3. **Tickets 0002 and 0003 are superseded.** Ferrites are not needed; there is no EMI problem.
@@ -136,7 +147,7 @@ exposed the pot.**
 > real, and it is now fixed.** Our earlier answer — that the tachometer was the problem — was
 > wrong, and I want to correct it properly.
 >
-> **The tachometer is accurate.** We calibrated it against the drive across the whole operating
+> **The tachometer is accurate now**, after a firmware fix. We calibrated it against the drive across the whole operating
 > range, measuring the shaft only and keeping the drive's own registers out of the comparison:
 >
 > | drive Hz | shaft rpm | rpm/Hz | slip vs synchronous |
@@ -162,10 +173,13 @@ exposed the pot.**
 >
 > **What this means for the data you have:**
 >
-> 1. For the two 13-hour runs (2026-08-17 and 2026-08-18), use the logged **`rpm_meas`** as the
->    speed of record rather than the profile's `rpm_target`. The measured value is the correct one;
->    the runs were simply carried out at a higher speed than the profile asked for. The offset is
->    constant across steps, so the runs remain usable.
+> 1. For the two 13-hour runs (2026-08-17 and 2026-08-18), use the profile's **`rpm_target`** as the
+>    speed of record, not the logged `rpm_meas`. The drive did follow its commands — the speed
+>    staircase was tracked through all 31 steps — so the bearing ran at the speeds the profile
+>    asked for. It was the *reading* that was wrong: the old sensor firmware derived rpm from only
+>    the last two pulse intervals, with no timeout or filtering, and over-read by a constant
+>    ~582 rpm. The calibration above was measured after the firmware was replaced and does not
+>    retroactively validate those older readings.
 > 2. **The 100 rpm steps did not turn the bearing at all.** At 100 rpm the drive is commanded to
 >    1.68 Hz — 3.4 % of rated frequency — and the motor has too little torque to move the shaft. We
 >    measured 0 rpm there while the drive reported running. That step recurs 26 times through the
