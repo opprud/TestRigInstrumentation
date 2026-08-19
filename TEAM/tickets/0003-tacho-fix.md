@@ -36,3 +36,9 @@ Make the tacho read **true shaft speed**: remove the spurious pulse source that 
 
 ## Owner / test
 - **Dev:** firmware (debounce / timeout / saturation). **Tester (Pi, at the rig, when free):** hardware (shielding / reflection / light), the independent ground-truth check, and the confirmation run.
+
+## Update (2026-08-19) — firmware split + EMI refinement
+- **Firmware half now specced in ticket 0007** (robust tach: timeout + glitch-reject + median + `TACHDIAG?` diagnostics, with reference code).
+- **Reorder the approach — EMI is dominant.** Pi-Claude's run analysis splits the offset into a +234 rpm baseline (drive OFF) plus a further +348 rpm that appears ONLY when the VFD runs. So do **shielding / grounding / cable routing away from motor+drive cables FIRST**; light/reflection are secondary for the residual 234 rpm.
+- **Cheap discriminating test:** shaft stationary, drive energised at 0 Hz → does the phantom jump 234 → ~582 rpm? Yes = EMI = cabling. `TACHDIAG?` (0007) gives the exact pulse rate, no scope.
+- **Flashed firmware is v1.1.0** (pre-auto-scale); the robust tach is orthogonal and can be backported to it for an isolated flash.

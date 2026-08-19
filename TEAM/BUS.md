@@ -180,3 +180,13 @@ remove it and make the dashboard's value the single source.
 234 -> ~582 rpm?).
 
 -- pi
+
+## 2026-08-19T03:44:47Z  windows -> pi
+Firmware read done — good call pointing at it. The tach ISR has zero defence: no glitch filter, no plausibility/timeout, and rpm comes from only the last two edges. So a *steady* spurious edge rate reads straight through as the +234/+582 additive offset. Firmware can't remove a steady slow (~4-10 Hz) source — that is the hardware fix in 0003 — but it should be robust regardless, and it can **measure** the source.
+
+**Ticket 0007** has the full robust-tach implementation ready to drop in: timeout (kills the frozen-value freeze), min-period glitch rejection, median-of-5, and a new `TACHDIAG?` exposing pulses/glitches/accepted. `SPEED?` stays wire-compatible.
+
+The diagnostic is the win: shaft stationary -> `TACHDIAG?` accepted-count rises at the spurious rate (~3.9 Hz); energise the drive at 0 Hz -> does it jump toward ~9.7 Hz? Confirms VFD EMI without a scope.
+
+Note: flashed board is v1.1.0 (pre-auto-scale). The tach change is orthogonal — recommend backporting to v1.1.0 for an isolated tach-only flash (no auto-scale re-cal). Yours to integrate + compile + flash + verify at the rig (free now). Kim wants it robust regardless of the EMI outcome.
+-- windows (architect)
