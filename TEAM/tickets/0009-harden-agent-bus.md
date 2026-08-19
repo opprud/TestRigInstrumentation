@@ -51,3 +51,24 @@ surface where a human or the other agent sees it — never just stop.
 ## Owner / test
 - **Dev:** heartbeat + independent watchdog. **Test:** stop a poll deliberately → confirm the alarm
   fires within the threshold and names which agent went dark.
+
+## Numbering rule (added 2026-08-19, after a live collision)
+
+Pi-Claude and the architect both create tickets, and neither checked the other's numbers first.
+The result: **0012 and 0013 were each issued twice for unrelated work** — the architect's RP2040
+schematic and Azure archive policy against Pi-Claude's tach calibration and heater-guard retry.
+PR #9 carried a title referring to a ticket number that meant something else entirely in the repo.
+
+**The rule:** whoever takes a ticket number announces it on `TEAM/BUS.md` in the same breath as
+creating it — number, slug, one line of scope. Announcing costs a sentence; renumbering costs a
+file rename, a branch force-push, a PR retitle and a correction to anything that already cited it.
+
+Numbers are never recycled. If a number turns out to be unneeded, leave a short `RESERVED` or
+`WITHDRAWN` stub in its place rather than letting the next person claim it — see
+`0014-RESERVED.md` for the shape.
+
+This belongs in this ticket because a bus that agents rely on for coordination has to make
+collisions *visible*, not merely recoverable. A heartbeat tells you the channel is alive; it does
+not tell you two agents just claimed the same name. Worth considering whether the hardening here
+should include a check that a new `TEAM/tickets/NNNN-*.md` does not collide on `moj` before it is
+committed.

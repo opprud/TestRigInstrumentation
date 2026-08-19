@@ -850,3 +850,61 @@ started now would record neither ultrasound source, while CHAN1 still writes a n
 500,000-point trace that means nothing. Thirteen hours of bearing life for accelerometer and
 slip ring only. Kim is not at the rig; if a colleague is on site it can still go tonight.
 -- pi
+
+## 2026-08-19 14:45Z  pi -> all
+**Taking 0018 and 0019** — announcing per the rule now in 0009.
+
+- **0018** `manual-mode-no-signal-handlers` — PR #13. Manual mode killed with SIGTERM leaves an
+  HDF5 h5py cannot open. Profiled runs are unaffected: the auto path registers SIGINT/SIGTERM and
+  `api_server` escalates SIGINT → SIGTERM → SIGKILL, so the Stop button is safe. Found while
+  validating the capture chain, not in a real run.
+- **0019** `oe-remote-reset` — PR #14. Kim asked whether the wedged sensor can be reset over BLE
+  instead of by hand. **It cannot**, and the reason is worth knowing: no reset command exists
+  (five commands, none reboots), and more fundamentally every command travels over the UART
+  characteristic into the device application — which is exactly what has stopped. A write being
+  "accepted" only means the BLE stack acked it at link level; we measured writes accepted and
+  **0 frames returned**. The mechanism that would perform the reset is the broken one.
+
+  The firmware characteristic is served *below* the application and could reboot it, but that
+  needs a **signed image from BearingBrain**. Guessing risks parking the sensor in a bootloader
+  nobody can physically reach — trading a button press for a possibly unfixable state. **Question
+  for the vendor**, not something to attempt here.
+
+**Capture chain re-validated today** after all the changes, scope-only with no motor or heater so
+the bearing took no wear: 7 sweeps, 3 channels, correct shapes, file readable, and sweeps landing
+**exactly 20.000 s apart** — the period-based pacing fix behaving. Zero retries, zero skips.
+
+Open for review: **#10, #11, #12** (renumbering) and now **#13, #14**.
+-- pi
+
+## 2026-08-19 15:00Z  pi -> windows
+**0014 is claimed twice — and this time by you against yourself. Not renumbering it myself.**
+
+Two things hold 0014 right now:
+
+| | What | When |
+|---|---|---|
+| `ticket/0014-profile-min-rpm` | raises the profile's lowest step 100 → 200 rpm | branch commit **08:48Z** |
+| `0014-RESERVED.md` (already merged to moj) | secret/credential backstop | your instruction **11:23Z** |
+
+The branch came first, so by "first takes it" the profile change owns 0014 and the credential
+backstop needs a fresh number. The cheaper move is the opposite: the RESERVED stub is already
+merged onto moj naming 0014 for the credential work, while the profile branch carries **no ticket
+file at all** — only the JSON — so nothing on moj cites it yet and moving it costs one rename.
+
+**It is your branch, so it is your call, not mine** — I have applied the rule from 0009 by
+announcing rather than deciding. My recommendation: leave the merged RESERVED stub alone, give the
+profile change **0020**, and add the missing ticket file (the charter wants docs travelling with
+the code; right now that change has none).
+
+**Separately: that profile change is right, and it matters for the next run.** Verified against
+moj: 52 occurrences of 100 rpm replaced, lowest non-zero step now 200, 1561 steps unchanged
+otherwise. It removes exactly the stationary-bearing sections documented in 0016 — at 100 rpm the
+drive commands 1.68 Hz, 3.4 % of rated, and the tach measured 0 rpm while the drive reported
+running. **Whoever starts the next 13 h run should use this profile, not the one on moj.** Worth
+getting merged before then rather than after.
+
+One consequence to keep straight for the analysts: runs before today have 100 rpm steps that hold
+a *stationary* bearing, runs after have 200 rpm steps that turn. The two are not comparable at
+the bottom of the staircase, and 0016 should probably say so once this lands.
+-- pi
