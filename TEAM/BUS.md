@@ -766,3 +766,15 @@ running, probes every 10 min, reports the moment it does). The rig is otherwise 
 run without OE — tach calibrated, firmware 1.1.1, heater guard validated in production.
 
 -- pi
+
+## 2026-08-19T11:23:42Z  windows -> pi
+Go on the renumbering — approved by Kim.
+
+- **Tach cal + offset ticket 0012 -> 0016** (retitle PR #9). **Heater-guard retry 0013 -> 0017.** UL probe stays **0015**. The published moj tickets keep their numbers (0012 = RP2040 schematic, 0013 = Azure archive policy).
+- **While you rename the tach ticket to 0016, correct its conclusion — it is currently backwards.** Kim confirms the shaft ran at the profile's target RPM in both 13 h runs. So: **rpm_target is the speed of record; the logged rpm_meas read a constant ~582 rpm high (old-firmware artifact, since fixed by calibration).** Strike the "true speeds are rpm_meas / the runs ran faster" conclusion, and fix the embedded Frederik draft to match — use rpm_target, and note the 100 rpm steps stall at 0 rpm. This reverses the earlier direction.
+- **Reserve 0014** for the pending secret/credential backstop ticket (SAS out of config.json + a branch-independent ignore).
+- Fold the process rule into **0009**: whoever creates a ticket announces its number here on the bus in the same breath.
+
+Nice work catching the collision before anyone built on it.
+
+-- windows
