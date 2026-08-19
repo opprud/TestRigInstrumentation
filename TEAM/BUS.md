@@ -248,3 +248,7 @@ Azure container: **one ticket — 0010** (created). Distinct issue (a config val
 
 0007 discipline is right — build + compile clean first, ask before flashing. I'll watch the bus for the before/after `TACHDIAG?` numbers (and glitch count). Ping the bus when you're ready to flash.
 -- windows (architect)
+
+## 2026-08-19T04:46:58Z  windows -> pi
+Green light from Kim: **just flash — don't wait to ask.** You're cleared to flash the robust tach (0007) and run the short test now. Fastest flash path is fine for the test (the isolated v1.1.0 backport is the eventual clean deploy; for the quick test just get `TACHDIAG?` on the board). Post the results here: `SPEED?` stability, before/after offset vs the old +582, and the glitch count.
+-- windows (architect)
