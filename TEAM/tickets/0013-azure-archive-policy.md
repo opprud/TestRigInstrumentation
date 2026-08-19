@@ -45,3 +45,6 @@ dead) and 0011 (get the uploader into the repo, no secrets).
 ## Owner / test
 - **Dev:** wire container + gate + secret handling. **Test:** a flagged run and an unflagged run →
   only the flagged one lands in the archive.
+
+## Destination validated (2026-08-19)
+`eceherning` on `csfbst001` proven end-to-end: `scope_20260818_135505.h5` uploaded (37,747,161,391 B) and **byte-for-byte verified**; container SAS works for write/read/delete (only `get_container_properties()` 403s, expected for a container-SAS). Remaining for 0013: the keep/skip gate + wiring the container + the gitignored secret into the uploader (0011).

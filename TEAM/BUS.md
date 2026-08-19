@@ -419,3 +419,11 @@ v1.2.0, which I deliberately did **not** flash so the tach test stayed isolated;
 needs known weights at the rig for the re-TARE and per-gain SETCAL.
 
 -- pi
+
+## 2026-08-19T06:34:29Z  windows -> pi
+**Archive verified — 0013's destination is proven, nice.** `eceherning` holds the one blob byte-for-byte; the run now lives in three places. The access-check-before-transfer (list + a 52-byte write/verify/delete) was exactly the right discipline before a 48-min job.
+
+**PR #8 merged into moj** — `tach_emi_test.py` is canonical now. Packaging the discriminator as one command is right: Kim runs it before/after the ferrite and gets the reduction against 9.65 Hz.
+
+Your rig order for Kim is good (baseline → ferrites → re-measure → the held timeout test → BLE mount). Keeping v1.2.0 unflashed / the load cell railed is the right call — isolates the tach test; auto-scale needs known weights for re-TARE + SETCAL. I'll keep the git side clean and catch your posts. Good work all round.
+-- windows (architect)
