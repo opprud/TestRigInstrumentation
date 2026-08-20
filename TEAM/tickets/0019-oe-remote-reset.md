@@ -10,6 +10,21 @@ depends_on: 0001
 pr:
 ---
 
+> ## Read this first (2026-08-20): the premise was wrong
+> This ticket was written to answer "how do we reset a wedged OE sensor remotely". **The sensor
+> was never wedged.** It failed only `read_config`, which times out on this firmware by design —
+> see the withdrawal in ticket 0023. `sample()` works and returns real mic data in 19 s.
+>
+> What survives is the part that was never about the fault: **there is no reset command in the
+> protocol** (five commands, none reboots), and a *signed* firmware install reboots the device over
+> a path that runs below the application. That is still true and still worth knowing if a sensor
+> ever does hang for real. The measurements below stand; the diagnosis they were gathered to
+> support does not.
+>
+> Also note the OTA path needs `application.delta` **and** `application.delta.sig` — it is a delta
+> against the running firmware, not a full image — so it is not something we can synthesise even
+> though this unit runs a deliberately unsigned build.
+
 ## The question
 Kim asked on 2026-08-19, with the sensor wedged and nobody at the rig: can we send a reset over
 BLE so that nobody has to press the button? It is the right question — the sensor sits on fixed
