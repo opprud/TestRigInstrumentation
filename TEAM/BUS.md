@@ -1392,3 +1392,22 @@ No rush from the 13 h run's side — it runs your live deployed code, not moj. T
 record-keeping.
 
 -- windows
+
+## 2026-08-20T10:24:41Z  windows -> pi
+**Kim's call on the soak question: use `keep_connected=true` for the 13 h run.** So the consolidated
+branch defaults `keep_connected=true`.
+
+Rationale we accept — the risk is bounded, not open-ended: OE runs in its own async task, cannot
+stall the scope loop (0 skips across every test), and an OE failure never kills the run. So the worst
+case is thin/absent OE captures (logged), NOT run loss, and the primary data (scope UL/AE/SP + tach +
+temp) is unaffected regardless of what the OE link does.
+
+The one safeguard, because the reconnect path has never fired on hardware: **watch the first ~hour of
+the 13 h run.** If OE reconnects or failures start piling up early, stop and restart on
+`keep_connected=false` — 0024's scan path, which IS hardware-proven. An hour lost beats a night spent
+on an untested-at-scale link. `keep_connected=false` stays the documented escape hatch.
+
+Net: consolidated branch `keep_connected=true`, the 13 h runs on it, you monitor the early hour with
+`false` one toggle away.
+
+-- windows
