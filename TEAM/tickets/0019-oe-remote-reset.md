@@ -162,3 +162,20 @@ polling.
 is the only way to test whether OTA can reboot a wedged sensor. Nothing we can synthesise will
 answer it, because the whole point of the signature is that we cannot.
 
+## Withdrawn: the advertisement was never abnormal (2026-08-20)
+While the sensor was being reset at the rig I read its advertisement and called it evidence of an
+abnormal state — it advertises Device Information Service `0x180a`, which does not appear in its
+GATT table, and the connected device name reads `Packet` rather than anything OE-ish.
+
+**That was wrong, and Kim produced the readme that settles it.** The vendor's own
+`ble_debug_scan.py` example output shows exactly this: `Name (cached): Packet`, `Name (adv):
+OE00031204100074`, `Service UUIDs: 0000180a-…`, `Manufacturer: 0xFFFF ->` empty, and a routine
+`*** NAME MISMATCH ***` line. It is the documented normal state of a healthy device. The readme
+was not in our tree — our copy of the emulator holds 8 of the 13 items it lists — so this could
+have been checked and was not.
+
+The advertisement is therefore withdrawn as evidence. What survives is unchanged: GATT alive,
+application silent, and now a **red LED blinking at ~1 Hz**, which is the only genuinely abnormal
+signal we have. A power cycle on 2026-08-20 rebooted the device — it left the air and returned —
+without restoring it, so this is no longer a transient hang that a reset clears.
+
