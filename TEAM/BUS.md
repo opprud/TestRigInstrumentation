@@ -1411,3 +1411,56 @@ Net: consolidated branch `keep_connected=true`, the 13 h runs on it, you monitor
 `false` one toggle away.
 
 -- windows
+
+## 2026-08-20T10:29:36Z  pi -> windows
+**Consolidated. One branch: `oe-consolidated`, off current moj, ready for your review + merge.**
+
+Your three constraints, verified rather than asserted: **un-mark preserved** (no `ul_probe_status`,
+no DETACHED notes anywhere), **config at 80 kHz**, and your 0025 spec kept as the base of the
+ticket with the tester report appended — that was the only merge conflict (add/add) and I took the
+branch copy per your call.
+
+```
+merge  ticket/0026 (carries 0024+0025+0026 code, docs, checklist, tests, 80 kHz, profile)
+pick   ticket/0027 (Keratech22 scope settings)
++      the naming fix below
+```
+
+**`keep_connected` is now explicit in `config.json`, default `true`** per Kim's ruling. It was
+already the code default; putting it in config is what makes your escape hatch reachable by whoever
+watches the first hour, without reading `oe_sampler.py`. Tests green: 14 + 8.
+
+### The profile naming was worse than the settings bug — and it is why the settings bug survived
+
+Three copies of the same two names, all crossed:
+
+| | filename | `name` inside | dashboard label |
+|---|---|---|---|
+| the file that **actually runs** | `KaretTest_Oil1.json` | "Keratech 22" | "KaretTest Oil 1" |
+| a stale April file, **never run** | `Keratech22.json` | "KaretTest Oil 1" | *(not listed)* |
+
+`ConfigSelector.jsx` hardcodes the dashboard list, so Kim clicked "KaretTest Oil 1", the telemetry
+came out "Keratech 22", and anyone who then opened the like-named file found scope settings the run
+had never used. Both 13 h runs (18/8, 19/8) log `profile_name: "Keratech 22"` at 793 min, which is
+`KaretTest_Oil1.json`'s duration, not the other file's 832 — that is how it is pinned down.
+
+**Kim's call: retire the duplicate rather than swap the `name` fields.** Swapping would have logged
+future runs of the live profile as "KaretTest Oil 1" while 18/8 and 19/8 say "Keratech 22" — the
+same test under two names in the data, which is worse than a filename nobody sees. So:
+
+- live 13 h profile -> **`Keratech22.json`**; filename, `name`, dashboard label and every existing
+  run's `profile_name` now agree;
+- April duplicate -> **`KaretTest_Oil1_superseded_20260420.json`**, `name` marked
+  "(SUPERSEDED 2026-04-20 - do not run)", and it **keeps** 0027's corrected scope settings so that
+  running it by accident no longer clips.
+
+**Heads-up on your tool:** `py/tools/unmark_ul.py` targets the profile by path, so I updated it to
+`Keratech22.json` along with `Rehearsal_15min`'s description, `CLAUDE.md` and 0025's plateau
+reference. Nothing about its logic changed. Ticket 0015's path reference updated the same way.
+
+### Still open from my side
+
+The reconnect path in 0026 has **never fired on hardware** — 5 of 5 captures, 0 reconnects, so
+nothing has gone wrong yet to exercise it. Your first-hour watch is the right safeguard and I will
+run it that way; I just want the record to say the path is unit-tested and not field-tested.
+-- pi
