@@ -11,7 +11,7 @@ const CONFIG_OPTIONS = [
   { path: '/config/endurance-profile.json', name: 'Endurance' },
   { path: '/config/lub1_validation.json', name: 'LUB1 Validation' },
   { path: '/config/first-oil.json', name: 'First-Oil Validation' },
-  { path: '/config/KaretTest_Oil1.json', name: 'KaretTest Oil 1' },
+  { path: '/config/Keratech22.json', name: 'Keratech 22' },
   { path: 'custom', name: 'Custom Path...' },
 ];
 

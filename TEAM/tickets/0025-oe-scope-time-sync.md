@@ -106,7 +106,7 @@ oe_003      548.29          45      568.35      -20.1 s
 **Every capture begins ~21 s before the sweep it is labelled with.** By design — a capture takes
 ~16 s and is drained by the sweep loop afterwards, so it lands on the next sweep to complete — but
 it makes `near_sweep` a coarse label rather than a time. It matters for the 13 h dataset:
-`KaretTest_Oil1` holds each rpm plateau for only **59 s**, so a 21 s lead can put the start of a
+`Keratech22.json` (the 13 h profile) holds each rpm plateau for only **59 s**, so a 21 s lead can put the start of a
 recording in the previous step. `oe_001` here is stamped 1101 rpm and begins before that step did.
 **Analysis must use `tick`/`tick_start`, not `near_sweep`.** Written into `CLAUDE.md`.
 

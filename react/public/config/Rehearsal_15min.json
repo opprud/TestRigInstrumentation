@@ -1,6 +1,6 @@
 {
   "name": "Rehearsal 15 min",
-  "description": "Short dry-run: same scope/acquisition path as KaretTest_Oil1, gentle RPM staircase, NO temperature schedule (Omron left untouched, heater relay off).",
+  "description": "Short dry-run: same scope/acquisition path as Keratech22, gentle RPM staircase, NO temperature schedule (Omron left untouched, heater relay off).",
   "duration_minutes": 15,
   "control": {
     "rpm_per_hz_guess": 59.5,

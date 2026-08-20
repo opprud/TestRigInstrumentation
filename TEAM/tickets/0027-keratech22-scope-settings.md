@@ -57,3 +57,30 @@ not fixed.**
 The settings this file now carries are the ones just verified end to end on hardware in run
 `20260820_112759`: UL tracks the staircase (0.119 rms at 490 rpm -> 0.529 at 1192 -> 0.139 back at
 490), AE tracks in miniature, SP sits flat as a slip ring should.
+
+---
+
+## Resolved: the crossed names, Kim's call 2026-08-20
+
+Not left alone after all — Kim asked for it fixed, and chose to retire the duplicate rather than
+swap the `name` fields, so that **every telemetry file ever written keeps meaning what it says**.
+
+| before | after |
+|---|---|
+| `KaretTest_Oil1.json`, `name: "Keratech 22"`, 793 min, **the file that actually runs** | **`Keratech22.json`** — filename, `name`, and every existing run's `profile_name` now agree |
+| `Keratech22.json`, `name: "KaretTest Oil 1"`, 832 min, untouched since April, never run | **`KaretTest_Oil1_superseded_20260420.json`**, `name: "KaretTest Oil 1 (SUPERSEDED 2026-04-20 - do not run)"` |
+
+Swapping the `name` fields instead would have made future runs of the live profile log as
+"KaretTest Oil 1" while the 13 h runs of 18/8 and 19/8 say "Keratech 22" — the same test under two
+names in the data, which is worse than a filename nobody sees.
+
+**The dashboard was the third crossed copy.** `react/src/components/ConfigSelector.jsx` hardcoded
+`{ path: '/config/KaretTest_Oil1.json', name: 'KaretTest Oil 1' }`, so the operator picked
+"KaretTest Oil 1" and the telemetry came out as "Keratech 22". That entry now reads
+`{ path: '/config/Keratech22.json', name: 'Keratech 22' }` — what you click is what you get.
+
+Also updated to follow the file: `py/tools/unmark_ul.py` (the architect's tool targets it by path),
+`Rehearsal_15min.json`'s description, `CLAUDE.md`, and ticket 0025's plateau reference.
+
+The retired file keeps the corrected scope settings from this ticket. Belt and braces: it is marked
+"do not run", but if someone runs it anyway it will no longer clip.

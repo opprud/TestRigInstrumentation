@@ -292,7 +292,7 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 - **The profile's 100 rpm step does not turn the bearing.** It commands 1.68 Hz, 3.4 % of rated
   frequency, and the motor has too little torque: measured **0 rpm** on the tach while the drive
-  reported running. It recurs 26 times through `KaretTest_Oil1`, so those points record a
+  reported running. It recurs 26 times through `Keratech22.json` (the 13 h profile), so those points record a
   *stationary* bearing. Left in place deliberately to keep comparability with earlier runs —
   treat them as stationary-bearing data when analysing. From 3.36 Hz upward the shaft tracks the
   calibration to within 2 rpm.
@@ -318,6 +318,16 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   the difference between losing 20 minutes and losing the night — a periodic `f.flush()` in the
   sweep loop is the fix. **Kim's call 2026-08-20: not worth doing yet**, since it takes a power cut
   to bite. Know the exposure before starting a long unattended run.
+
+- **The 13 h profile is `react/public/config/Keratech22.json`** (`name: "Keratech 22"`, 793 min,
+  1561 rpm setpoints). Until 2026-08-20 it was called `KaretTest_Oil1.json` while carrying the name
+  "Keratech 22", and a *different*, stale April file called `Keratech22.json` carried the name
+  "KaretTest Oil 1" — and the dashboard's hardcoded list labelled the first one "KaretTest Oil 1"
+  for good measure. Three crossed copies of the same two names. That is how the stale file kept
+  `UL: volt_range 2.0` for four months: a run under the name "Keratech 22" did happen and went
+  fine, from the *other* file. Filename, `name`, dashboard label and every existing run's
+  `profile_name` now agree; the April file is `KaretTest_Oil1_superseded_20260420.json`, marked
+  "do not run". See ticket 0027.
 
 - **Skipped sweeps leave gaps in the HDF5 sweep numbering.** Analysis must iterate the
   existing `sweep_###` groups, not assume contiguous indices.

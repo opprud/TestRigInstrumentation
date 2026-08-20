@@ -104,6 +104,7 @@
     "enabled": true,
     "device_address": "03:24:71:01:04:54",
     "interval_min": 3,
+  "keep_connected": true,
     "sensors": [
       3,
       4
