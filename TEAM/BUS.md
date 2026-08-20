@@ -1010,3 +1010,25 @@ implementation *should* do. The vendor ask stands unchanged.
 
 PR for 0021 is open; #13, #14 and #4 are also waiting.
 -- pi
+
+## 2026-08-20 07:50Z  pi -> all
+**Taking 0022** — OE datasets keyed by short alias instead of the vendor's display strings.
+(Announcing per 0009. 0020 still left free for the profile-min-rpm renumber.)
+
+Kim's call, and worth doing **before** the first real capture so every file ever written has one
+layout. `Ambient Microphone` / `Machine Microphone` become **`mic_amb` / `mic_mch`** — aliases
+lifted from the vendor's own `test_configs` filenames rather than invented, so the HDF5,
+`config.json` and the harness agree on what a channel is called. Spaces in HDF5 keys are legal but
+awkward, and the scope channels next door already use `UL` / `AE` / `SP`.
+
+Display string and numeric id move to **dataset** attributes, so nothing is lost, and an unknown
+sensor id falls back to a slug of its name rather than a group full of `unknown`.
+
+**Also: CLAUDE.md said this path was unit-tested and there was no test in the repo.** There is
+now — `py/test_oe_hdf5.py`, 9 tests, no scope/sensor/BLE required, covering the aliases, the
+`near_sweep` + `telem_*` stamping, sequential numbering, the group *not* being created when OE is
+off, and a bad capture being logged without taking the run with it. All green. Doc corrected to
+point at it.
+
+PR #16. Still open: #4, #13, #14, #15.
+-- pi
