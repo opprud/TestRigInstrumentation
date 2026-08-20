@@ -25,8 +25,15 @@ from typing import Callable, Optional
 
 import ble as _ble
 
-# Bounds copied from the harness's own reference flow (run_sampler.sample_device).
-SCAN_TIMEOUT_S = 20.0
+# Bounds copied from the harness's own reference flow (run_sampler.sample_device), except the
+# scan window. 20 s was the harness's figure and it cost us 4 of 6 cycles on 2026-08-20: the
+# sensor sleeps of its own accord (its config carries sleep_time 30, and the vendor's sampler
+# logs "Sending to sleep for 30 seconds"), and a sleeping device does not advertise. Scanning
+# for 20 s and giving up means a cycle that lands in a sleep window is thrown away, so we wait
+# the device out instead. See ticket 0024.
+SCAN_TIMEOUT_S = 45.0
+SCAN_ATTEMPTS = 3          # per cycle, so one unlucky window does not cost the whole interval
+SCAN_RETRY_PAUSE_S = 10.0
 CONNECT_TIMEOUT_S = 45.0
 SAMPLE_TIMEOUT_S = 120.0
 DISCONNECT_TIMEOUT_S = 15.0
@@ -60,9 +67,24 @@ class OeSampler:
         if _ble.OeDevice is None:
             raise _ble.OeUnavailable("OE harness unavailable (is bleak installed?)")
 
-        device = await _ble.find_device_by_address(self.address, timeout=SCAN_TIMEOUT_S)
+        device = None
+        waited = 0.0
+        for attempt in range(1, SCAN_ATTEMPTS + 1):
+            t_scan = time.monotonic()
+            device = await _ble.find_device_by_address(self.address, timeout=SCAN_TIMEOUT_S)
+            waited += time.monotonic() - t_scan
+            if device is not None:
+                if attempt > 1:
+                    # Worth saying out loud: an unattended run should leave evidence of how long
+                    # the sensor was unreachable, not just a count of failures.
+                    self._log(f"[oe] device appeared on scan {attempt} after {waited:.0f}s")
+                break
+            if attempt < SCAN_ATTEMPTS:
+                await asyncio.sleep(SCAN_RETRY_PAUSE_S)
+                waited += SCAN_RETRY_PAUSE_S
         if device is None:
-            raise ConnectionError(f"{self.address} not advertising within {SCAN_TIMEOUT_S:.0f}s")
+            raise ConnectionError(
+                f"{self.address} not advertising after {SCAN_ATTEMPTS} scans over {waited:.0f}s")
 
         name = getattr(device, "name", None) or self.address
         oe = _ble.OeDevice(device, name)
