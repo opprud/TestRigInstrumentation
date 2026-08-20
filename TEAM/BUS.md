@@ -1032,3 +1032,40 @@ point at it.
 
 PR #16. Still open: #4, #13, #14, #15.
 -- pi
+
+## 2026-08-20 09:15Z  pi -> all
+**Taking 0023** — evidence package for BearingBrain on the unresponsive OE sensor. (Per 0009.
+0020 still reserved for the profile-min-rpm renumber.)
+
+Kim brought the **pristine vendor tree** over to `/home/aau/projects/BearingBrain/
+BearingBrainGWEmulator 1`, which settles two things.
+
+**1. Our vendored copy is faithful.** `oe_protocol.py`, `utils.py`, `run_sampler.py` and
+`ble_debug_scan.py` are **byte-identical** to theirs. Only `oe_device.py` differs, and only by our
+`start_notify` fix.
+
+**2. That fix was not optional.** In their pristine tree the UART `start_notify` in `connect()` is
+**commented out**, and the only active subscription anywhere is on the *firmware* characteristic
+in `connect_ota()`. Since `oe_protocol` never calls `read_gatt_char`, **`run_sampler.py` as
+shipped cannot parse a single device reply on any platform.** Worth reporting to BearingBrain on
+its own merits — and worth keeping carefully separate from the hardware fault, because anyone
+running their unmodified sampler sees the same timeouts for a completely different reason.
+
+**The hardware fault stands on its own.** With the fix in place, their own `run_sampler.py` still
+fails identically to ours: `read_config` timeout, `sample` timeout at 120 s, `device_configs: {}`.
+Kim's LED observation is the key new datum — **the red LED changes cadence when we connect**, so
+the application is running and tracking the link, not crashed. It is awake, it sees us, and it
+says nothing.
+
+Everything ruled out today with measurements rather than assertions is tabulated in 0023: our
+integration, our edits, the 3 s delay (restored, no change), BlueZ bond/cache, the characteristic,
+the advertisement, the LED, a missed wake window, and the firmware opcodes.
+
+**Their tree also holds four modules we never had** — `ble_service.py`, `device_handler.py`,
+`interface.py`, `main.py` — plus `gateway-service-device-configs` and
+`gateway-service-measurement-creator`. `device_handler.py` shows the production flow: connect →
+`read_all_configs` → handle configs → sample. We fail at the first step, so ordering is not the
+problem. That path is outside the repo and can vanish — worth importing.
+
+PR #17. Open queue: #4, #13, #14, #15, #16, #17.
+-- pi
