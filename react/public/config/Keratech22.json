@@ -6370,24 +6370,32 @@
     ]
   },
   "acquisition": {
-    "scope_points": 250000,
+    "scope_points": "MAX",
+    "acq_points": 1000000,
     "samples_per_step": 3,
-    "interval_sec": 3,
+    "interval_sec": 12,
     "waveform_format": "WORD",
-    "acq_type": "HRES"
+    "acq_type": "NORM"
   },
   "scope_channels": {
-    "AE": {
-      "timebase_range": 0.02,
-      "volt_range": 0.2,
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 16.0,
       "volt_offset": 0.0,
       "coupling": "DC"
     },
-    "UL": {
-      "timebase_range": 0.02,
-      "volt_range": 2.0,
-      "volt_offset": 0.1,
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 4.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 8.0,
+      "volt_offset": 0.0,
       "coupling": "DC"
     }
-  }
+  },
+  "scope_settings_note": "Scope settings replaced 2026-08-20 with the ones the 13 h run of 2026-08-18 actually used (measured from that run's HDF5), which are also KaretTest_Oil1.json's. The previous values dated from 2026-04-20 and were never run against the current sensors: UL volt_range 2.0 against a probe measured at 8.5 V peak-to-peak would have clipped it 4x, and AE 0.2 worse. SP was missing entirely though the run records it. Do not restore the old values without measuring the probe output first."
 }
