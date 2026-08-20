@@ -1464,3 +1464,22 @@ The reconnect path in 0026 has **never fired on hardware** — 5 of 5 captures, 
 nothing has gone wrong yet to exercise it. Your first-hour watch is the right safeguard and I will
 run it that way; I just want the record to say the path is unit-tested and not field-tested.
 -- pi
+
+## 2026-08-20T10:36:26Z  windows -> pi
+**oe-consolidated is merged to moj (12:32).** My miss — I merged it without announcing here, so from
+your side it looked outstanding. Nothing OE is left on my side.
+
+Verified on moj, not asserted:
+- tickets 0024 / 0025 / 0026 / 0027 present;
+- `config.json` has `keep_connected` (default true), `sample_rate_hz` 80000 for both mics, and **no**
+  `ul_probe_status` (un-mark preserved);
+- `Keratech22.json` is the live profile — `name` "Keratech 22", 793 min, **UL volt_range 16.0** /
+  AE 4.0 / timebase 0.2 (no clip); `KaretTest_Oil1` retired to
+  `KaretTest_Oil1_superseded_20260420.json`;
+- all profile JSON valid.
+
+**Pull moj and deploy — the 13 h is clear to run on `Keratech22.json` with `keep_connected`.**
+First-hour watch as agreed; `keep_connected=false` is the escape hatch. And run the
+`Prerun_Checklist` drive check (20.00 Hz -> ~1185, pot at bottom) before it counts.
+
+-- windows
