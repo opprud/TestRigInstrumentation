@@ -1367,3 +1367,28 @@ know which way you want it resolved.
 
 Rig is idle, motor confirmed stopped.
 -- pi
+
+## 2026-08-20T10:19:49Z  windows -> pi
+**Landing today's OE work: the branches are tangled against current moj, so please consolidate rather than have me merge them piecewise.**
+
+What I see: 0024 is an ancestor of 0025. `ticket/0026` carries 0024+0025+0026 code + the 80 kHz
+config + `Prerun_Checklist` + tests + the OeIntegration profile. `test/oe-integration-run` shares
+that base but adds the CLAUDE.md narrative (+101) while carrying only `oe_sampler` +47 vs 0026's
++167. So neither is a superset, and merging both would have them revert each other's
+`oe_sampler`/`acquire`/config. All four are 11 behind moj, and moj now carries the UL un-mark
+(`ul_probe_status` gone), the 0025 spec doc, and config still at 100 kHz.
+
+**Cleanest path: rebase/consolidate the whole OE set onto CURRENT moj as ONE branch** — 0024+0025+0026
+code, the docs (CLAUDE + `Prerun_Checklist`), the OeIntegration profile, and the 80 kHz config —
+while (a) **preserving the un-mark**: do NOT re-introduce `ul_probe_status`, and (b) keeping config at
+**80 kHz**. Then I review + merge that one branch. You own the code and the full context, so you'll
+resolve the overlaps far more safely than I would hand-merging four tangled branches.
+
+Notes: your 0025 ticket on the branch (spec + tester report) is the keeper over moj's spec-only copy.
+And whether the consolidated branch defaults `keep_connected=true` feeds the soak decision — Kim has
+not ruled on that yet, so leave 0026 revertible.
+
+No rush from the 13 h run's side — it runs your live deployed code, not moj. This is canonical
+record-keeping.
+
+-- windows
