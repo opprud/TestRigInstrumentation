@@ -31,6 +31,10 @@ tachometer and load cell.
 
 ---
 
+> **Before every run: `docs/Prerun_Checklist.md`.** Lubricate the bearing, and verify the drive
+> against the tach at a known frequency — that one measurement catches parameter 02-03, a summing
+> pot, a wedged tacho and a mis-scaled sensor at once.
+
 ## Repository layout
 
 ```
@@ -302,7 +306,8 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   on a copy did not open it, and `/oe_samples` had never reached disk at all. The telemetry JSONL
   survived to the last tick (it is line-buffered) but ends in NUL padding. On a 13 h run this is
   the difference between losing 20 minutes and losing the night — a periodic `f.flush()` in the
-  sweep loop is the fix, and it is not yet done.
+  sweep loop is the fix. **Kim's call 2026-08-20: not worth doing yet**, since it takes a power cut
+  to bite. Know the exposure before starting a long unattended run.
 
 - **Skipped sweeps leave gaps in the HDF5 sweep numbering.** Analysis must iterate the
   existing `sweep_###` groups, not assume contiguous indices.
@@ -478,8 +483,9 @@ as the code's own comment requires, and the redundant second `connect()` and the
    skips, and both streams share one time axis. Remaining before a 13 h run: set
    `oe.interval_min` back to **5** (it is at 3 from the short tests), and pick a profile whose
    bottom step actually turns the bearing — the 100 rpm step does not.
-9. **Flush the HDF5 periodically** — see the known issue above. This is the one outstanding item
-   that can cost an entire unattended run, so do it before the next 13 h attempt.
+9. **Flush the HDF5 periodically** — see the known issue above. **Deliberately deferred by Kim
+   2026-08-20**: the exposure is a mains failure, which is rare, and he judged it not worth the
+   change before this run. Left recorded so the cost is known if it happens again.
 10. **Re-mount the UL acoustic-emission probe** (ticket 0015). Until then a run is OE +
    accelerometer + slip ring, and `UL` records nothing meaningful.
 
