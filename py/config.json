@@ -101,18 +101,19 @@
     "default_container": "auherning3bearingtester"
   },
   "oe": {
-    "enabled": false,
-    "device_address": "",
-    "interval_min": 5,
+    "enabled": true,
+    "device_address": "03:24:71:01:04:54",
+    "interval_min": 3,
+  "keep_connected": true,
     "sensors": [
       3,
       4
     ],
-    "notes": "BearingBrain OE BLE sensor. sensors 3+4 = mic_amb + mic_mch (mask 0x18). device_address must be the MAC as seen by BlueZ (ble_debug_scan.py), not a macOS UUID. Disabled by default; enabling adds an /oe_samples group to the run HDF5. sample_rate_hz is stamped onto each /oe_samples dataset; the device does not send it with the data. UNCONFIRMED: the vendor config says 100 kHz for both mics, while the emulator readme says the custom PDM firmware runs the PDM mic 'upto 80KHz'. Confirm with BearingBrain before trusting any frequency axis.",
+    "notes": "BearingBrain OE BLE sensor. sensors 3+4 = mic_amb + mic_mch (mask 0x18). device_address must be the MAC as seen by BlueZ (ble_debug_scan.py), not a macOS UUID. Disabled by default; enabling adds an /oe_samples group to the run HDF5. sample_rate_hz is stamped onto each /oe_samples dataset; the device does not send it with the data. Sample rate is 80 kHz for both mics, confirmed by Kim 2026-08-20. The vendor pdm_mic_config.json claims 100 kHz and is wrong for this custom PDM firmware. Runs before 2026-08-20 stamped 100000 and their frequency axes are 25 percent high.",
     "sample_rate_hz": {
-      "3": 100000,
-      "4": 100000,
-      "_source": "BearingBrain/PiSensorTest/pdm_mic_config.json (device_serial OE00031204100074)"
+      "3": 80000,
+      "4": 80000,
+      "_source": "Confirmed 80 kHz by Kim 2026-08-20. The vendor pdm_mic_config.json says 100000, which is WRONG for this custom PDM firmware; do not restore it from that file."
     }
   }
 }

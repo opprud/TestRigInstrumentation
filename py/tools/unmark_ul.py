@@ -7,7 +7,7 @@ import sys, re, json, io, os
 
 root = sys.argv[1]
 cfg = os.path.join(root, "py", "config.json")
-krt = os.path.join(root, "react", "public", "config", "KaretTest_Oil1.json")
+krt = os.path.join(root, "react", "public", "config", "Keratech22.json")
 
 BODY = ("UL PROBE DETACHED from 2026-08-19: the ultrasound probe was unscrewed to make room for "
         "mounting the BearingBrain OE BLE sensor, pending a mechanical change. CHAN1 (alias UL) is "
@@ -42,7 +42,7 @@ if len(found) == 3 and cfg_valid:
 else:
     ok = False; print("config.json: expected 3 markings, found", found, "valid=", cfg_valid)
 
-# --- react/public/config/KaretTest_Oil1.json : description tail ---
+# --- react/public/config/Keratech22.json : description tail ---
 k = rd(krt); app_krt = "  " + BODY; kf = []
 if app_krt in k: k = k.replace(app_krt, ""); kf.append("description")
 try:
@@ -50,7 +50,7 @@ try:
 except Exception as e:
     krt_valid = False; print("KaretTest INVALID after edit:", e)
 if len(kf) == 1 and krt_valid:
-    wr(krt, k); print("KaretTest_Oil1.json: removed", kf)
+    wr(krt, k); print("Keratech22.json: removed", kf)
 else:
     ok = False; print("KaretTest: expected 1 marking, found", kf, "valid=", krt_valid)
 

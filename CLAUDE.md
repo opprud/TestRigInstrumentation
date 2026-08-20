@@ -31,6 +31,10 @@ tachometer and load cell.
 
 ---
 
+> **Before every run: `docs/Prerun_Checklist.md`.** Lubricate the bearing, and verify the drive
+> against the tach at a known frequency — that one measurement catches parameter 02-03, a summing
+> pot, a wedged tacho and a mis-scaled sensor at once.
+
 ## Repository layout
 
 ```
@@ -263,6 +267,20 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   the pot has no effect. **Check 02-03 before a run** — a drive in pot mode will accept a whole
   profile and follow none of it.
 
+- **The pot can be *summed onto* the Modbus reference, not just substituted for it — check it is
+  at zero before every run.** Found 2026-08-20 after a mains power cut and drive power-cycle. The
+  shaft ran a constant **+3.4 Hz / +200 rpm** above every commanded point: 8.40 Hz commanded read
+  700.7 rpm on the tach (11.78 Hz implied) and 15.13 Hz commanded read 1101.2 rpm, with Kim reading
+  18.66 Hz on the drive's own display. The offset is **additive, not a scale error** — +200.7 and
+  +201.2 rpm at two steps while the ratio moved from 1.40 to 1.22.
+
+  This is nastier than plain pot mode, because **the drive still obeys**: the staircase tracked
+  every step change, so a run looks healthy and is simply 200 rpm too fast throughout. Kim turned
+  the pot to its bottom stop and the bias vanished — 10.084 Hz commanded then read 590.8 rpm
+  against the calibration's 591.6, and after a drive restart 20.00 Hz commanded read 1182.87
+  against 1185.0 (−2.1 rpm, 0.2 %). **The tacho was right the whole time**; it was the drive
+  output that was high.
+
   > **The +582 rpm offset in the 2026-08-17 and 2026-08-18 13 h runs is resolved.** It belonged to
   > the old setup — 02-03 on the pot, the old firmware, or both; the two were changed together so
   > they cannot be separated after the fact. Verified gone on 2026-08-19 in two runs, one started
@@ -274,7 +292,7 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 - **The profile's 100 rpm step does not turn the bearing.** It commands 1.68 Hz, 3.4 % of rated
   frequency, and the motor has too little torque: measured **0 rpm** on the tach while the drive
-  reported running. It recurs 26 times through `KaretTest_Oil1`, so those points record a
+  reported running. It recurs 26 times through `Keratech22.json` (the 13 h profile), so those points record a
   *stationary* bearing. Left in place deliberately to keep comparability with earlier runs —
   treat them as stationary-bearing data when analysing. From 3.36 Hz upward the shaft tracks the
   calibration to within 2 rpm.
@@ -290,6 +308,26 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   the target regardless of sensor accuracy. Only comparing `rpm_meas` against `59.5 × Hz`
   reveals a mis-scaled sensor (e.g. 2 pulses/rev reads 2× high). The rpm-per-Hz factor also
   drifts ~57–60 with load/oil temperature (slip), so treat absolute speed as ±2–3 %.
+
+- **The HDF5 is never flushed, so a power cut costs the whole file — not just the last sweep.**
+  Learned the hard way 2026-08-20: mains failed 837 s into a 900 s run and the 634 MB file was
+  unrecoverable. `acquire_scope_data.py` never calls `h5py`'s `flush()`, so the superblock still
+  said **EOF = 2048 bytes** and carried the "file open for write" flag; patching those two fields
+  on a copy did not open it, and `/oe_samples` had never reached disk at all. The telemetry JSONL
+  survived to the last tick (it is line-buffered) but ends in NUL padding. On a 13 h run this is
+  the difference between losing 20 minutes and losing the night — a periodic `f.flush()` in the
+  sweep loop is the fix. **Kim's call 2026-08-20: not worth doing yet**, since it takes a power cut
+  to bite. Know the exposure before starting a long unattended run.
+
+- **The 13 h profile is `react/public/config/Keratech22.json`** (`name: "Keratech 22"`, 793 min,
+  1561 rpm setpoints). Until 2026-08-20 it was called `KaretTest_Oil1.json` while carrying the name
+  "Keratech 22", and a *different*, stale April file called `Keratech22.json` carried the name
+  "KaretTest Oil 1" — and the dashboard's hardcoded list labelled the first one "KaretTest Oil 1"
+  for good measure. Three crossed copies of the same two names. That is how the stale file kept
+  `UL: volt_range 2.0` for four months: a run under the name "Keratech 22" did happen and went
+  fine, from the *other* file. Filename, `name`, dashboard label and every existing run's
+  `profile_name` now agree; the April file is `KaretTest_Oil1_superseded_20260420.json`, marked
+  "do not run". See ticket 0027.
 
 - **Skipped sweeps leave gaps in the HDF5 sweep numbering.** Analysis must iterate the
   existing `sweep_###` groups, not assume contiguous indices.
@@ -349,7 +387,7 @@ gain** — calibration is gain-dependent.
 
 ---
 
-## BLE bearing sensor (OE) — integration (built, awaiting hardware test)
+## BLE bearing sensor (OE) — integration (validated against the sensor 2026-08-20)
 
 The **BearingBrain "OE"** sensor's ultrasound mic is sampled periodically *during* a rig run
 and stored in the run's HDF5. Implemented under ticket `TEAM/tickets/0001-ble-oe-integration.md`.
@@ -391,15 +429,35 @@ device does not send a rate with the data, so without this a mic capture is an a
 axis and no way to recover one. The rate comes from `config.json → oe.sample_rate_hz`; if it is
 absent the attribute is simply left off rather than guessed.
 
-> **Unconfirmed, and it matters:** the vendor's `pdm_mic_config.json` (matching our
-> `device_serial OE00031204100074`) says **100 kHz** for both mics, while the emulator readme says
-> the custom PDM firmware runs the PDM mic *"upto 80KHz"*. A 100 kHz label on 80 kHz data puts
-> every frequency 25 % out. Confirm with BearingBrain before trusting a frequency axis.
+> **The rate is 80 kHz — confirmed by Kim 2026-08-20.** The vendor's `pdm_mic_config.json`
+> (matching our `device_serial OE00031204100074`) says **100 kHz**, and it is **wrong** for this
+> custom PDM firmware; the emulator readme's *"upto 80KHz"* is the accurate one. `config.json`
+> now stamps 80000 — **do not restore 100000 from the vendor file.**
+>
+> **Captures taken before 2026-08-20 carry `sample_rate_hz = 100000` and their frequency axes are
+> 25 % high.** That is the three OE validation runs (`20260820_091646`, `20260820_093823`,
+> `20260820_103317`). Rescale, or rewrite the attribute, before reading a frequency off them.
 
-Group attributes are `t_start`, `t_stop`,
+Group attributes are `t_start`, `t_stop`, **`tick_start`**,
 `device_name`, `device_address`, `mask`, `sensors`, `near_sweep` (the sweep index it sits
 between) and the same `telem_*` stamps the sweeps carry. With `enabled: false` the group is
 never created, so existing files keep their exact layout.
+
+**One time axis for both streams (ticket 0025).** `main()` takes a single `monotonic()` origin and
+hands it to both the scope loop and the sampler, so every sweep carries `tick` and every capture
+carries `tick_start`, in run-relative seconds from the same zero. Sample *i* of a capture sits at
+`tick_start + i / sample_rate_hz`. The caveat is stamped into the file itself as the `/oe_samples`
+attributes `tick_definition` and `tick_accuracy`: `tick_start` is the host's `sample()` call, not
+the device's record-start, so it is good to sub-second and **not** valid for sample-level (10 us)
+overlay against a waveform.
+
+> **`near_sweep` is a coarse label, not a time — use `tick`/`tick_start`.** Measured on run
+> `20260820_103317`: every capture *began* ~21 s **before** the sweep it is labelled with (5.80 vs
+> 28.34, 187.44 vs 208.34, 366.27 vs 388.34, 548.29 vs 568.35). That is by design — a capture takes
+> ~16 s and is drained by the sweep loop afterwards, so it lands on the next sweep to complete —
+> but the shaft accelerates between steps, so the label can name an operating point the first
+> seconds of the recording were not taken at. `oe_001` is stamped 1101 rpm and starts before that
+> step began.
 
 **Fixed in `oe_device.connect()` on the way in:** `start_notify(UART_CHAR_UUID, …)` was
 commented out. Since `oe_protocol` only ever *writes* (there is no `read_gatt_char` anywhere),
@@ -408,10 +466,17 @@ parsed **on any platform** — not just Linux. It is now enabled, placed *after*
 as the code's own comment requires, and the redundant second `connect()` and the 3 s
 "Windows BLE stack" wait are gone.
 
-> **Not yet verified against the sensor.** BlueZ, bleak 3.0.2 and scanning are confirmed working
-> on the Pi (25 devices seen), and the HDF5 path is unit-tested, but no OE device has been
-> connected. Get the MAC from `ble_debug_scan.py`, set `device_address`, `enabled: true`, and
-> confirm `/oe_samples` fills and the sweep skip count is unchanged against a no-OE reference run.
+> **Verified against the real sensor 2026-08-20** (`03:24:71:01:04:54`, `OE00031204100074`), over
+> three 15-minute runs with the motor turning. `/oe_samples` fills, and the design's central claim
+> holds: **the sweep skip count stayed at zero** while ~149 k-point mic captures ran concurrently
+> with scope digitising, so a capture never delayed a sweep.
+>
+> The one thing that did not work first time was cadence. In `20260820_091646` only **2 of 6**
+> cycles produced data — the device sleeps of its own accord (its `pdm_mic_config.json` carries
+> `sleep_time: 30`) and **a sleeping device does not advertise**, so the 20 s scan window gave up
+> almost immediately. Raising the scan timeout to 45 s and retrying inside the cycle (ticket 0024)
+> took the retest to **5 of 5, zero failures**, on the cadence to the second. See tickets 0021,
+> 0024 and 0025.
 
 ---
 
@@ -433,9 +498,16 @@ as the code's own comment requires, and the redundant second `connect()` and the
    Remaining: flash it when the rig is idle (`pio run --target upload`), make the `LOAD?` parser
    tolerant of `OK AUTOGAIN` lines, and re-TARE + SETCAL per gain. Optional: fold
    `SETPPR`/debounce/tach-timeout back in from the preserved v1.1.0.
-8. **BLE OE sensor integration** — built (ticket 0001, `enabled: false`). Remaining: connect a
-   real OE sensor, take its MAC from `ble_debug_scan.py`, enable it, and confirm `/oe_samples`
-   fills without changing the sweep skip count (see "BLE bearing sensor (OE)").
+8. **BLE OE sensor integration** — **validated against the real sensor 2026-08-20** (tickets 0001,
+   0021, 0024, 0025): `/oe_samples` fills, 5 of 5 capture cycles succeed, sweeps stay at zero
+   skips, and both streams share one time axis. Remaining before a 13 h run: set
+   `oe.interval_min` back to **5** (it is at 3 from the short tests), and pick a profile whose
+   bottom step actually turns the bearing — the 100 rpm step does not.
+9. **Flush the HDF5 periodically** — see the known issue above. **Deliberately deferred by Kim
+   2026-08-20**: the exposure is a mains failure, which is rare, and he judged it not worth the
+   change before this run. Left recorded so the cost is known if it happens again.
+10. **Re-mount the UL acoustic-emission probe** (ticket 0015). Until then a run is OE +
+   accelerometer + slip ring, and `UL` records nothing meaningful.
 
 ---
 
@@ -445,7 +517,10 @@ HDF5 per run:
 - `/metadata/` — `scope_settings`, `bearing`, `lubricant`, `test_parameters`, IDN, timestamps.
 - `/sweeps/sweep_000, sweep_001, …` — each has per-channel groups with `time` + `voltage`
   datasets and channel scaling attributes, plus `telem_*` attributes (RPM, drive Hz,
-  temperature, load, elapsed, step) captured at that sweep.
+  temperature, load, elapsed, step) captured at that sweep, and `tick` — run-relative seconds
+  on the same origin as the OE captures (ticket 0025).
+- `/oe_samples/oe_000, …` — BLE mic captures, one dataset per channel, with `tick_start` on that
+  same axis. See "BLE bearing sensor (OE)".
 
 Telemetry JSONL (from the runner): one `run_header`, then per-tick `sample` records
 (`rpm_target`, `rpm_meas`, `vfd_cmd_hz`, temperatures, load…), then a `run_end` with the

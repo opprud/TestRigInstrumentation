@@ -1,6 +1,6 @@
 {
-  "name": "Rehearsal 15 min",
-  "description": "Short dry-run: same scope/acquisition path as Keratech22, gentle RPM staircase, NO temperature schedule (Omron left untouched, heater relay off).",
+  "name": "OeIntegration_15min",
+  "description": "Short OE-integration test, ~15 min. Purpose: confirm the BLE OE sensor's mic captures land in /oe_samples without changing the sweep skip count, before committing to a 13 h run. Motor turns (500-1200 rpm, open loop) so the sensor sees a running bearing; no temperature setpoints, so the heater stays out of it. NOTE: the UL probe is detached (ticket 0015), so CHAN1 records a normal-looking but meaningless trace in this run - it is not a data run.",
   "duration_minutes": 15,
   "control": {
     "rpm_per_hz_guess": 59.5,

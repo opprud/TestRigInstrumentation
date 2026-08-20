@@ -30,7 +30,7 @@ The note travels **with the data**, not only in documentation:
   `/metadata/test_parameters`, so **every HDF5 written in this period carries the warning inside
   it**.
 - `py/config.json` -> the `UL` channel entry gets an inline `[DETACHED …]` note.
-- `react/public/config/KaretTest_Oil1.json` -> the same text appended to the profile description.
+- `react/public/config/Keratech22.json` -> the same text appended to the profile description.
 - `CLAUDE.md` -> first entry under Known issues.
 
 ## Deliberately NOT done
@@ -52,7 +52,7 @@ disconnected CHAN1 still writes a normal-looking trace). Then, from the repo roo
 
 It removes **exactly** the three markings this ticket added — the UL channel note and the
 `test_parameters` note + `ul_probe_status` key in `py/config.json`, and the description tail in
-`react/public/config/KaretTest_Oil1.json` — validates both files as JSON, and **exits non-zero if any
+`react/public/config/Keratech22.json` — validates both files as JSON, and **exits non-zero if any
 expected marking is missing** (fails loudly rather than half-clearing). Then commit + push the result.
 
 **Do NOT run it before the probe is on and verified** — it would mark a still-detached run as OK,
