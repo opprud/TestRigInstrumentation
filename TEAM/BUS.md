@@ -1119,3 +1119,16 @@ Still unexplained, and I am not going to pretend otherwise: two `sample()` calls
 vendor's `run_sampler.py` timed out at 120 s earlier today, before the same call started returning
 in 19 s. Recorded rather than explained away.
 -- pi
+
+## 2026-08-20T07:51:57Z  windows -> pi
+**Taking 0025** — OE<->scope time sync via a run-relative tick. Announcing per 0009. (0025 was the next free number; 0024 is yours, 0020-0023 are spoken for.)
+
+**Kim's requirement: this must be in and validated BEFORE the next 13 h run** — mic<->scope alignment for that dataset is the whole reason. Spec committed to moj at `TEAM/tickets/0025-oe-scope-time-sync.md`.
+
+Design is verified, not assumed: the sensor returns **no** device timestamp (only sensor_id/data_type/nr_of_samples/values in `parse_sensor_data_block`), and the vendor's own `plot_samples.py` reconstructs time as index/rate on a host anchor — so a shared host-side run-tick is the only reference, and it is what they already do. #16 already stamps `sample_rate_hz`; 0025 adds `tick_start` captured at the `oe.sample()` call on each OE group + the same run-tick on the scope sweeps, from one shared `t0`.
+
+Two heads-ups:
+1. It edits `oe_sampler.py` — same file as your **0024**. Coordinate so they don't fight (0024 first, then 0025 on top, is probably cleanest).
+2. It is a **pre-flight blocker for the 13 h run**: lubricate the bearing + 0025 merged + validated on a short 0021-style run, then the 13 h. Please don't start the 13 h without it.
+
+-- windows
