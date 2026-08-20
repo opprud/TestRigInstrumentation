@@ -1,64 +1,100 @@
 ---
 id: 0025
-title: One run tick shared by scope sweeps and OE captures
-area: ble
+title: OE<->scope time sync via a run-relative tick (required for the 13 h run)
+area: control
 role: dev
 status: done
 assignee: pi-claude
+depends_on: 0001, 0022
 branch: ticket/0025-oe-scope-time-sync
-depends_on: 0001, 0022, 0024
 pr:
 ---
 
-## Why
-A sweep and an OE capture could not be placed on a common time axis. Both carried wall-clock
-strings only, and wall-clock is neither monotonic nor comparable between two threads that each
-stamp their own. The sensor is no help: a block carries `sensor_id`, `data_type`,
-`nr_of_samples` and values — **no device-side timestamp** — so a host-side origin is the only
-anchor available. The vendor's own `plot_samples.py` makes the same assumption when it
-reconstructs time as `index / rate`.
+## Goal
+Make every OE mic capture alignable to the scope sweeps on a shared run timeline, so mic data can
+be correlated against the recorded scope data. **Required in place and validated before the next
+13 h run** — that dataset is the reason this exists (Kim, 2026-08-20).
 
-## What was built
-`main()` takes `t0 = time.monotonic()` once and hands the same value to both consumers:
+## Why this design (verified from the code, not assumed)
+The sensor provides **no device-side time reference**. Each channel block the device returns carries
+only `sensor_id`, `data_type`, `nr_of_samples` and raw values (`oe_protocol.parse_sensor_data_block`)
+— no timestamp, no counter, no clock. The vendor's own `plot_samples.py` reconstructs the time axis
+as `sample_index / sample_rate` anchored on a **host** timestamp. So a shared host-side tick is the
+only reference available — and it is exactly what the vendor already does; we just make it monotonic
+and stamp it on both streams.
 
-- every sweep gets `tick` — run-relative seconds, on `/sweeps/sweep_###`;
-- every OE capture gets `tick_start`, taken at the `sample()` call, on `/oe_samples/oe_###`;
-- with `sample_rate_hz` from 0022, sample *i* sits at `tick_start + i / sample_rate_hz`.
+`sample_rate_hz` is already stamped per OE dataset (ticket 0022 / PR #16). The missing piece is the
+run-relative time origin on both OE captures and scope sweeps.
 
-A missing `t0` logs a warning rather than falling back silently — two independently computed
-origins would look fine and quietly fail to align, which is the exact failure this ticket exists
-to prevent. A missing tick is left off rather than written as `0.0`, which would read as a
-capture at run start.
+## Change
+1. **One run origin:** capture `t0 = time.monotonic()` once at run start, shared by the scope loop
+   and the OE sampler (pass it in; do not let each compute its own).
+2. **OE side (`oe_sampler.py`):** record `tick_start = time.monotonic() - t0` **at the moment
+   `oe.sample()` is called** (closest proxy to device record-start) and carry it on the capture
+   record. NOTE: coordinate with ticket 0024, which also edits `oe_sampler.py`.
+3. **HDF5 (`acquire_scope_data._drain_oe_queue`):** stamp `tick_start` (float seconds) as an
+   attribute on each `oe_NNN` group, alongside the existing `t_start`/`t_stop`/`near_sweep`. With
+   `sample_rate_hz`, each sample's time is then `tick_start + i / sample_rate_hz`.
+4. **Scope side:** stamp the same run-relative tick on each sweep (per-sweep `tick` attribute or a
+   sweeps-aligned `tick` dataset), from the **same** `t0`. If sweeps already carry a monotonic time,
+   re-base it to `t0` so the two share one origin.
 
-The accuracy caveat is stamped into the file as `/oe_samples` attributes `tick_definition` and
-`tick_accuracy`, not left in this ticket: `tick_start` marks the host's `sample()` call, not the
-device's record-start, so it is good to sub-second and **not valid for sample-level (10 us)
-waveform overlay**. Whoever opens the file in a year may not have this repo.
+## Acceptance
+- Each `/oe_samples/oe_NNN` has a float `tick_start` (run-relative seconds) + `sample_rate_hz` -> a
+  reconstructable per-sample time axis.
+- Each scope sweep carries a matching run-relative `tick` from the same origin.
+- On a short run: a mic burst's `tick_start` lands within the run and lines up with the nearest
+  sweep's tick to within the capture cadence; `tick` deltas between bursts ~= `interval_min`.
+- **Documented limitation** (in the ticket AND stamped in the HDF5, not silently): `tick_start`
+  marks the `sample()` call, not the device's internal record-start; a residual sub-second offset
+  (BLE round-trip + firmware) cannot be closed without a device timestamp the firmware does not
+  provide. Good to sub-second; NOT sample-level (10 us) waveform overlay.
 
-Code: commit `9fd3f58b` (`acquire_scope_data.py`, `oe_sampler.py`, `test_oe_hdf5.py`, 14 tests).
+## Owner / test
+- **Dev (Pi):** implement in `oe_sampler.py` + `acquire_scope_data.py` + the scope sweep stamping;
+  validate on a short OE-integration run (0021-style) before the 13 h run.
+- **Blocks:** the 13 h run does not start until this is merged and validated.
 
-## Hardware verification
-**First attempt, run `20260820_100348`, lost.** A mains power cut killed the Pi 837 s into the
-900 s run — 93 % of the way. The HDF5 was unrecoverable, not merely truncated: the superblock
-still said EOF = 2048 bytes and carried the "file open for write" flag, because nothing ever
-flushed. Patching the EOF field and clearing the flag on a copy did not open it. Telemetry
-survived to the last tick but carries no `tick` fields, so nothing could be salvaged for this
-ticket. See the separate flush ticket.
+---
 
-**Retest, run `20260820_103317`, passed.**
+## Implemented — commit `9fd3f58b` (pi)
 
-| Criterion | Result |
+Built as specified. `main()` takes `t0 = time.monotonic()` once and hands the same value to both
+consumers, so neither side can compute its own: every sweep carries `tick`, every capture carries
+`tick_start` taken at the `sample()` call. A missing `t0` logs a warning instead of falling back
+silently — two independently derived origins would look fine and quietly fail to align, which is
+the failure this ticket exists to prevent. A missing tick is left off rather than written as `0.0`,
+which would read as a capture at run start.
+
+The documented limitation is stamped **into the file**, as `/oe_samples` attributes
+`tick_definition` and `tick_accuracy`, not only here — whoever opens the HDF5 in a year may not
+have this repo. 14 tests in `test_oe_hdf5.py`.
+
+0024 went in first and 0025 on top, as you suggested; no conflict in `oe_sampler.py`.
+
+## Hardware verification (tester, Pi, 2026-08-20)
+
+**First attempt lost to a mains power cut.** Run `20260820_100348` died 837 s into 900 s — 93 % of
+the way. The HDF5 was not merely truncated but unrecoverable: nothing ever flushes, so the
+superblock still read EOF = 2048 with the "file open for write" flag set, and patching both fields
+on a copy did not open it. Recorded as a known issue in `CLAUDE.md`; Kim has deliberately deferred
+the flush fix.
+
+**Retest passed — run `20260820_103317`.**
+
+| Acceptance criterion | Result |
 |---|---|
-| Sweeps | 70, contiguous `sweep_000`…`sweep_069`, **0 skipped** |
-| Sweeps carrying `tick` | **70 / 70**, spanning 28.34 → 898.24 s |
-| OE captures carrying `tick_start` | **4 / 4**, no failed cycles |
-| `tick_definition` + `tick_accuracy` | present on `/oe_samples` |
-| `sample_rate_hz` on datasets | stamped on all 8 |
+| Every `oe_NNN` has float `tick_start` + `sample_rate_hz` | **4 / 4** |
+| Every sweep carries a matching `tick` from the same origin | **70 / 70**, 28.34 → 898.24 s |
+| `tick` deltas between bursts ~= `interval_min` | 181.6 / 178.8 / 182.0 s against a 180 s cadence |
+| Documented limitation stamped in the HDF5 | `tick_definition` + `tick_accuracy` present |
+| Sweeps skipped | **0**, contiguous `sweep_000`…`sweep_069` |
 
-The scope wedged once at sweep 49 and the retry path recovered it, so the zero-skip result was
-earned under the failure mode this rig actually has, not on a quiet run.
+The scope wedged once at sweep 49 and the retry path recovered it, so zero-skip was earned under
+this rig's real failure mode rather than on a quiet run.
 
-## What the shared axis immediately revealed
+## What the shared axis immediately revealed — read this before using `near_sweep`
+
 ```
 capture  tick_start  near_sweep  sweep_tick   difference
 oe_000        5.80           0       28.34      -22.5 s
@@ -67,15 +103,16 @@ oe_002      366.27          30      388.34      -22.1 s
 oe_003      548.29          45      568.35      -20.1 s
 ```
 
-**Every capture begins ~21 s before the sweep it is labelled with.** That is not a defect: a
-capture takes ~16 s and is drained by the sweep loop afterwards, so it lands on the next sweep to
-complete. But it means **`near_sweep` is a coarse label, not a time** — analysis must use `tick`
-and `tick_start`. The consequence is real, because the shaft accelerates between steps:
-`oe_001` is stamped 1101 rpm, yet its first seconds were recorded before that step began. Before
-this ticket the discrepancy was invisible.
+**Every capture begins ~21 s before the sweep it is labelled with.** By design — a capture takes
+~16 s and is drained by the sweep loop afterwards, so it lands on the next sweep to complete — but
+it makes `near_sweep` a coarse label rather than a time. It matters for the 13 h dataset:
+`KaretTest_Oil1` holds each rpm plateau for only **59 s**, so a 21 s lead can put the start of a
+recording in the previous step. `oe_001` here is stamped 1101 rpm and begins before that step did.
+**Analysis must use `tick`/`tick_start`, not `near_sweep`.** Written into `CLAUDE.md`.
 
 ## Caveat on this run's operating points
-The captures are stamped 700, 1101, 1404 and 902 rpm rather than the intended 500/900/1200/900.
-The drive was carrying a ~+3.4 Hz bias from the analog pot at the time (see the pot ticket). It
-does not affect this ticket — the timeline is what was under test — but do not read this file as
-a speed protocol.
+
+Captures are stamped 700, 1101, 1404 and 902 rpm rather than the intended 500/900/1200/900: the
+drive carried a ~+3.4 Hz bias from the analog pot at the time (see the bus message and the
+`CLAUDE.md` known issue). It does not affect this ticket — the timeline was what was under test —
+but do not read this file as a speed protocol.
