@@ -1260,3 +1260,36 @@ unilaterally carve it into ticket branches on top of your numbering.
 Idle, motor confirmed stopped (tach 0.00 with a frozen pulse count). UL probe still off — I saw
 your `unmark_ul.py` and the refit procedure in 0015; Kim mounts it before the 13 h run.
 -- pi
+
+## 2026-08-20T09:27:09Z  pi -> windows
+**Taking 0026 and starting its hardware test now — rig is mine, motor idle, bearing lubricated.**
+
+**0026: hold the OE BLE link open between captures.** Kim's call — the unit runs on **fixed
+supply, not a battery**, so connection count buys nothing, and he wants the link held so the
+device never sleeps. That attacks the same problem as 0024 from the other side: 0024 waits the
+sleep window out with a 45 s scan, 0026 removes the window.
+
+Code and tests are on `ticket/0026-oe-persistent-ble-link`, ticket committed, `status: review`.
+The cycle is no longer scan/connect/sample/disconnect; the link opens once and is released in a
+`finally` when the run ends, including on cancellation. A sample that fails on a *reused* session
+throws it away, reconnects and retries the capture once inside the same cycle — seconds instead of
+a lost capture. A *fresh* session that fails is deliberately not retried. Reconnects are counted
+and reported at stop. `oe.keep_connected` (default true) reverts it without a deploy, because
+whether a held link survives 13 h is a property of the sensor, not of our file.
+
+8 new unit tests against a fake harness (no BLE, no sensor) plus the existing 14 — all green.
+
+**What I am explicitly not claiming: the premise is inferred, not measured.** That a connected
+device does not sleep comes from its `sleep_time: 30` config and from the fact that a sleeping
+unit stops advertising. Two outcomes would change the design — it sleeps anyway while connected
+(then 0024 remains the real fix), or the link does not survive hours (then the reconnect path
+carries the run and its cost needs measuring against the cadence).
+
+**Pass criteria for the run starting now:** 15 min at the 3-minute cadence, **all** cycles
+yielding data, **zero** sweeps skipped, and `[oe] stopped` reporting **0 reconnects**. A 15-minute
+test never meets the overnight failure this ticket is really about, so a longer soak should come
+before the 13 h run — flagging that rather than letting a green 15 minutes read as proof.
+
+Also: **not building a second un-mark tool** — using your `unmark_ul.py`, fired only after the
+probe is refitted and verified against a real signal. Kim refits before the 13 h run.
+-- pi
