@@ -1081,6 +1081,20 @@ def _drain_oe_queue(h5f, oe_queue, state, telemetry_store, sweep_idx, ds_kwargs,
                         ds.attrs["sensor_id"] = int(sensor_id)
                     except (TypeError, ValueError):
                         pass
+                # Without a sample rate a mic capture is an array with no time axis, and no
+                # way to recover one later. The device does not send the rate with the data,
+                # so it comes from config; the source is recorded alongside it so a wrong
+                # number is traceable rather than silently authoritative.
+                rate = (state.get("rates") or {}).get(str(sensor_id))
+                if rate is None:
+                    rate = (state.get("rates") or {}).get(sensor_id)
+                if rate is not None:
+                    try:
+                        ds.attrs["sample_rate_hz"] = float(rate)
+                        ds.attrs["sample_rate_source"] = str(
+                            (state.get("rates") or {}).get("_source", "config.json oe.sample_rate_hz"))
+                    except (TypeError, ValueError):
+                        pass
             logr(f"[oe] stored capture oe_{n:03d} near sweep {sweep_idx}")
         except Exception as e:
             # Losing one OE capture must never take the run with it.
@@ -1170,7 +1184,8 @@ def acquire_loop(config):
     telemetry_store: dict = acq_cfg.get("_telemetry_store") or {}
     # OE BLE captures arrive on this queue from the sampler task (ticket 0001).
     oe_queue = acq_cfg.get("_oe_queue")
-    oe_state: dict = {"grp": None, "n": 0}
+    oe_state: dict = {"grp": None, "n": 0,
+                      "rates": acq_cfg.get("_oe_sample_rates") or {}}
 
     def _stop_requested():
         return "stop_event" in acq_cfg and acq_cfg["stop_event"].is_set()
@@ -1388,6 +1403,8 @@ def main():
     import queue as _queue
     oe_queue = _queue.Queue()
     scope_cfg["acquisition"]["_oe_queue"] = oe_queue
+    scope_cfg["acquisition"]["_oe_sample_rates"] = (scope_cfg.get("oe") or {}).get(
+        "sample_rate_hz") or {}
     scope_cfg["_profile_cfg"] = profile_cfg  # for scope_channels settings
     scope_cfg.setdefault("store", {})
     scope_cfg["store"]["timestamped"] = False

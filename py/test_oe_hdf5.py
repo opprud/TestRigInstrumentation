@@ -89,6 +89,27 @@ class TestDrainOeQueue(unittest.TestCase):
             self.assertEqual(int(g["mic_amb"].attrs["sensor_id"]), 3)
             np.testing.assert_allclose(g["mic_mch"][:], np.arange(8, dtype=float))
 
+    def test_sample_rate_is_stamped_with_its_source(self):
+        # A mic capture with no sample rate is an array with no time axis, and the device does
+        # not send the rate with the data -- so it has to come from config and be traceable.
+        q = queue.Queue()
+        q.put(capture())
+        state = {"grp": None, "n": 0,
+                 "rates": {"3": 100000, "4": 100000, "_source": "pdm_mic_config.json"}}
+        with h5py.File(self.path, "w") as f:
+            _drain_oe_queue(f, q, state, {}, 0, {}, lambda m: None)
+        with h5py.File(self.path, "r") as f:
+            g = f["oe_samples/oe_000"]
+            self.assertAlmostEqual(float(g["mic_amb"].attrs["sample_rate_hz"]), 100000.0)
+            self.assertAlmostEqual(float(g["mic_mch"].attrs["sample_rate_hz"]), 100000.0)
+            self.assertEqual(g["mic_amb"].attrs["sample_rate_source"], "pdm_mic_config.json")
+
+    def test_missing_rate_is_left_off_rather_than_guessed(self):
+        # Better a dataset with no rate than one carrying an invented number.
+        self.drain([capture()])
+        with h5py.File(self.path, "r") as f:
+            self.assertNotIn("sample_rate_hz", f["oe_samples/oe_000/mic_amb"].attrs)
+
     def test_capture_carries_its_operating_point(self):
         telem = {"rpm_meas": 1188.0, "vfd_cmd_hz": 20.0, "omron_pv_c": 61.5, "step": 4}
         self.drain([capture()], telemetry=telem, sweep_idx=42)
