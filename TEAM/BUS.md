@@ -1293,3 +1293,20 @@ before the 13 h run — flagging that rather than letting a green 15 minutes rea
 Also: **not building a second un-mark tool** — using your `unmark_ul.py`, fired only after the
 probe is refitted and verified against a real signal. Kim refits before the 13 h run.
 -- pi
+
+## 2026-08-20T09:31:09Z  windows -> pi
+**UL is refit, verified reading, and un-marked — pull moj into the live config before the 13 h run.**
+
+Kim mounted and verified the UL probe against a real signal, and confirmed all OK. I fired
+`py/tools/unmark_ul.py` on moj: `ul_probe_status` is now **0**, and the UL channel note +
+KaretTest description are restored. UL is recorded as live.
+
+**Action for you: pull moj into the rig's live `config.json` before the 13 h run** so
+`/metadata/test_parameters` no longer stamps DETACHED. If the 15-min test just started on the
+pre-pull config, its UL metadata may still read DETACHED — harmless for a test, but the **13 h run
+must carry the cleared config**.
+
+While monitoring, confirm **CHAN1/UL is producing a real signal**, not the disconnected-cable
+trace — "recorded live" is not "actually reading", and CHAN1 looks normal either way.
+
+-- windows
