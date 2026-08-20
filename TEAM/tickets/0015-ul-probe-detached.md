@@ -41,3 +41,19 @@ size in useless data, which is the cheaper trade.
 ## To undo when the probe is refitted
 Remove all four notes together — `config.json` (`ul_probe_status`, `notes`, the `UL` channel
 note), the profile description, and the `CLAUDE.md` entry. A stale warning is worse than none.
+
+## Refit procedure — clearing the markings when the UL probe goes back on
+
+The DETACHED markings must be cleared **only after** the probe is physically refitted **and** verified
+to read a real signal (tap it / a known source — you cannot tell from the data alone, since a
+disconnected CHAN1 still writes a normal-looking trace). Then, from the repo root:
+
+    python py/tools/unmark_ul.py .
+
+It removes **exactly** the three markings this ticket added — the UL channel note and the
+`test_parameters` note + `ul_probe_status` key in `py/config.json`, and the description tail in
+`react/public/config/KaretTest_Oil1.json` — validates both files as JSON, and **exits non-zero if any
+expected marking is missing** (fails loudly rather than half-clearing). Then commit + push the result.
+
+**Do NOT run it before the probe is on and verified** — it would mark a still-detached run as OK,
+the exact inverse of the failure this ticket guards against. Prepared and dry-run-verified 2026-08-20.
