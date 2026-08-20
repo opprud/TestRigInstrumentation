@@ -3,7 +3,7 @@ id: 0021
 title: Short OE-integration test — validate /oe_samples before committing to a 13 h run
 area: ble
 role: tester
-status: open
+status: done
 assignee: pi-claude
 branch: ticket/0021-oe-integration-short-test
 depends_on: 0001, 0019
@@ -49,3 +49,30 @@ which means **the bearing must be lubricated first**. Not optional, even for 15 
 ## Then, and only then
 Re-run with `interval_min: 5` for the 13 h run — and use the 100→200 rpm profile so the bottom of
 the staircase actually turns the bearing.
+
+## Result: passed on the second run (2026-08-20)
+Two runs, both with the motor turning 500→1200 rpm and no temperature setpoints.
+
+| | `20260820_091646` | `20260820_093823` |
+|---|---|---|
+| Sweeps | 71, contiguous, **0 skipped** | 70, contiguous, **0 skipped** |
+| OE cycles with data | 2 of 6 | **5 of 5, zero failures** |
+
+The first run passed the criterion that mattered and failed on capture reliability, which is
+exactly what a 15-minute rehearsal is for. Cause and fix are in ticket 0024 — the sensor sleeps
+of its own accord and stops advertising, and our 20 s scan window gave up too soon.
+
+**The design's central promise held in both runs:** mic captures of ~149,000 points ran
+concurrently with scope digitising and the motor under control, and **never delayed a sweep**.
+Each capture is stamped with the operating point it was taken at — 489, 890, 1192, 691 and
+490 rpm across the staircase.
+
+**Cadence stays at 3 minutes** (Kim's call, 2026-08-20): ~260 captures over a 13 h run instead of
+~156 at the old 5-minute default. The rehearsal showed the tighter cadence costs nothing in sweeps,
+and denser mic coverage through the temperature staircase is precisely what the OE sensor is
+there to contribute. The 5-minute figure was a cautious guess from before we knew that.
+
+**A 13 h run is cleared to start**, with one caveat that is not ours to resolve: the UL probe is
+still detached (ticket 0015), so such a run yields OE + accelerometer + slip ring, and CHAN1 will
+record a normal-looking trace that means nothing.
+
