@@ -46,7 +46,7 @@
       "name": "UL",
       "source": "CHAN1",
       "enabled": true,
-      "notes": "Kistler acoustic emission probe"
+      "notes": "Kistler acoustic emission probe  [DETACHED 2026-08-19 - not measuring, see test_parameters.ul_probe_status]"
     },
     {
       "name": "AE",
@@ -79,7 +79,8 @@
     "target_temperature_c": 60,
     "expected_load_g": 200,
     "duration_minutes": 60,
-    "notes": "Standard t"
+    "notes": "Standard t. UL PROBE DETACHED from 2026-08-19: the ultrasound probe was unscrewed to make room for mounting the BearingBrain OE BLE sensor, pending a mechanical change. CHAN1 (alias UL) is therefore NOT measuring acoustic emission - it records whatever sits on a disconnected cable. The UL group in the HDF5 looks entirely normal, so this note is the only way to tell. Do not analyse UL data from runs in this period. Remove this note when the probe is refitted.",
+    "ul_probe_status": "DETACHED since 2026-08-19"
   },
   "store": {
     "output_file": "data/keratech22.hdf5",
@@ -108,6 +109,11 @@
       3,
       4
     ],
-    "notes": "BearingBrain OE BLE sensor. sensors 3+4 = mic_amb + mic_mch (mask 0x18). device_address must be the MAC as seen by BlueZ (ble_debug_scan.py), not a macOS UUID. Disabled by default; enabling adds an /oe_samples group to the run HDF5."
+    "notes": "BearingBrain OE BLE sensor. sensors 3+4 = mic_amb + mic_mch (mask 0x18). device_address must be the MAC as seen by BlueZ (ble_debug_scan.py), not a macOS UUID. Disabled by default; enabling adds an /oe_samples group to the run HDF5. sample_rate_hz is stamped onto each /oe_samples dataset; the device does not send it with the data. UNCONFIRMED: the vendor config says 100 kHz for both mics, while the emulator readme says the custom PDM firmware runs the PDM mic 'upto 80KHz'. Confirm with BearingBrain before trusting any frequency axis.",
+    "sample_rate_hz": {
+      "3": 100000,
+      "4": 100000,
+      "_source": "BearingBrain/PiSensorTest/pdm_mic_config.json (device_serial OE00031204100074)"
+    }
   }
 }
