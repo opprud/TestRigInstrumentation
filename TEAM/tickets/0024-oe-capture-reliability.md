@@ -3,7 +3,7 @@ id: 0024
 title: OE captures succeed only 2 of 6 cycles — the sensor sleeps and we stop looking too soon
 area: ble
 role: dev
-status: open
+status: review
 assignee: pi-claude
 branch: ticket/0024-oe-capture-reliability
 depends_on: 0001, 0021
@@ -61,3 +61,23 @@ Whatever sleep the device is doing here is its own.
 ## Pass criteria for the retest
 Another 15-minute run at the same cadence with **at least 5 of 6 cycles** producing data, and
 sweeps still at zero skips. Only then is a 13 h run worth starting.
+
+## Retested and passed (run `20260820_093823`, 2026-08-20)
+Same profile, same 3-minute cadence, motor turning 500→1200 rpm.
+
+| Criterion | Required | Before | After |
+|---|---|---|---|
+| Sweeps skipped | 0 | 0 | **0** (70 sweeps, contiguous) |
+| OE cycles yielding data | ≥5 of 6 | 2 of 6 | **5 of 5, zero failures** |
+
+Captures landed on the cadence to the second — 09:38:55, 09:41:54, 09:44:55, 09:47:55, 09:50:5x —
+each at its own operating point: 489, 890, 1192, 691 and 490 rpm. So the run carries mic data
+from across the speed staircase, each capture tied to the sweep it sits beside.
+
+Notably the retry path never had to report a late appearance, so the longer 45 s window alone was
+enough; the two extra scans are headroom rather than something the sensor needed here. Worth
+keeping: a 13 h run will meet sleep windows this 15-minute test never saw.
+
+**A 13 h run is now worth starting**, with the caveat that the UL probe is still detached
+(0015), so it would be OE + accelerometer + slip ring, not a full data run.
+
