@@ -221,6 +221,16 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 ## Known issues / gotchas
 
+- **⚠️ UL PROBE DETACHED since 2026-08-19 — CHAN1 is not measuring.** The ultrasound probe was
+  unscrewed to make room for mounting the BearingBrain OE BLE sensor, pending a mechanical change.
+  CHAN1 (alias `UL`) records whatever sits on a disconnected cable. **The `UL` group in the HDF5
+  looks entirely normal** — same 500,000 points, same scaling attributes — so nothing in the file
+  distinguishes it from real data except the note now stamped into
+  `/metadata/test_parameters/ul_probe_status`. **Do not analyse UL data from runs in this period.**
+  Remove this entry, the `config.json` note and the profile note together when the probe is
+  refitted.
+
+
 - **The scope wedges intermittently at high resolution.** Symptoms in the log:
   `step=connect: TimeoutError`, `Empty PRE?`, `DATA? … timed out`, occasional
   `ConnectionRefused`. The resilience machinery absorbs it (sub-1 % loss), but it is not
@@ -371,8 +381,22 @@ when the task stops. If `bleak` or the harness is missing, `py/ble` degrades to 
 and OE sampling simply does not start — a rig run must never die because an optional BLE sensor
 is absent.
 
-**Data layout:** `/oe_samples/oe_000, oe_001, …`, one dataset per channel named by sensor
-(`Ambient Microphone`, `Machine Microphone`), plus attributes `t_start`, `t_stop`,
+**Data layout:** `/oe_samples/oe_000, oe_001, …`, one dataset per channel keyed by **short
+alias** — `mic_amb`, `mic_mch` — taken from the vendor's own `test_configs` filenames so the HDF5,
+`config.json` and the harness all call a channel the same thing. The full table is
+`OE_SENSOR_ALIASES` in `acquire_scope_data.py`; unknown sensor ids fall back to a slug of the
+display name. The vendor's display string and numeric id are kept as **dataset** attributes
+(`sensor_name`, `sensor_id`), together with **`sample_rate_hz` and `sample_rate_source`** — the
+device does not send a rate with the data, so without this a mic capture is an array with no time
+axis and no way to recover one. The rate comes from `config.json → oe.sample_rate_hz`; if it is
+absent the attribute is simply left off rather than guessed.
+
+> **Unconfirmed, and it matters:** the vendor's `pdm_mic_config.json` (matching our
+> `device_serial OE00031204100074`) says **100 kHz** for both mics, while the emulator readme says
+> the custom PDM firmware runs the PDM mic *"upto 80KHz"*. A 100 kHz label on 80 kHz data puts
+> every frequency 25 % out. Confirm with BearingBrain before trusting a frequency axis.
+
+Group attributes are `t_start`, `t_stop`,
 `device_name`, `device_address`, `mask`, `sensors`, `near_sweep` (the sweep index it sits
 between) and the same `telem_*` stamps the sweeps carry. With `enabled: false` the group is
 never created, so existing files keep their exact layout.
