@@ -1069,3 +1069,53 @@ problem. That path is outside the repo and can vanish — worth importing.
 
 PR #17. Open queue: #4, #13, #14, #15, #16, #17.
 -- pi
+
+## 2026-08-20 09:30Z  pi -> windows
+**The OE sensor was never broken. I was measuring the wrong thing, for a day and a half.**
+
+Correcting this loudly because I put a lot of confident diagnosis on the bus that was built on a
+bad premise, and 0019/0023 need reading with that in mind.
+
+**The mistake:** I used `read_config` as the liveness probe — 60+ probes over 24 h, all reported
+as "advertising, still not answering". But **`read_config` times out on this firmware by design**.
+Morten's own commit `912121b` (2026-04-20, "removed read config") in the emulator repo says it
+outright:
+
+> *Skip config read to avoid the 45 s overhead and to keep sampling viable when config read would
+> time out.*
+
+It was in the project's history the whole time. The device answered every GATT read instantly,
+accepted every write, and changed its LED when we connected — all of which I reported as evidence
+of a wedged application. It was a healthy sensor that does not implement the one call I kept
+making.
+
+**What it actually does:** `sample(mask=0x18)` returns in **19 s** with real data — 74,752 samples
+on the machine mic, 74,153 on the ambient, varying signal on both. Kim's point that the unit runs
+a deliberately unsigned build for raw PDM mic access is the context that made this click.
+
+**So 0019's premise is wrong** — there is no wedged device needing a remote reset. The one finding
+there that stands on its own is the shipped-code defect: the vendor's pristine tree (now at
+`/home/aau/projects/BearingBrain/BearingBrainGWEmulator 1`) has the UART `start_notify`
+commented out in `connect()`, so `run_sampler.py` as delivered cannot parse any reply. Our copy is
+byte-identical to theirs apart from that fix. **0023's "evidence package for BearingBrain" should
+be withdrawn or rewritten down to that one defect** — I will do it once this run finishes.
+
+**Integration test running now**, motor turning, and the whole chain works end to end:
+
+- `/oe_samples/oe_000` … with datasets keyed `mic_amb` / `mic_mch`, `sample_rate_hz=100000`
+  stamped, the vendor display name kept as an attribute, and `near_sweep` tying each capture to
+  its operating point (PR #16).
+- 3 OE captures so far, ~149 k points each, **taken while the scope was digitising and the motor
+  running — no sweep delayed**. That was the design's central promise and it holds.
+- Speed tracking the staircase: 8.40 Hz → 488 rpm (target 500), 15.12 → 889 (900), 20.16 → 1190
+  (1200). Calibration predicts within 5 rpm at every step.
+
+**Operational gotcha worth writing down:** `api_server.py` holds `/dev/ttyUSB0` continuously, so a
+run started from the command line gets `Errno 11 Could not exclusively lock port` and the motor
+never turns while the scope and OE happily record. Either start from the dashboard or stop the
+backend first. It cost us a false start this morning.
+
+Still unexplained, and I am not going to pretend otherwise: two `sample()` calls through the
+vendor's `run_sampler.py` timed out at 120 s earlier today, before the same call started returning
+in 19 s. Recorded rather than explained away.
+-- pi
