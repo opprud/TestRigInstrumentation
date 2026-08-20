@@ -1042,6 +1042,16 @@ def _drain_oe_queue(h5f, oe_queue, state, telemetry_store, sweep_idx, ds_kwargs,
             if grp_root is None:
                 # Created lazily so a run with OE disabled keeps its old layout.
                 grp_root = h5f.create_group("oe_samples")
+                # State the accuracy in the file rather than only in a ticket: whoever opens
+                # this in a year has the caveat in front of them, not in a repo they may not have.
+                grp_root.attrs["tick_definition"] = (
+                    "tick_start = run-relative seconds from the same origin as /sweeps tick. "
+                    "Sample i is at tick_start + i / sample_rate_hz.")
+                grp_root.attrs["tick_accuracy"] = (
+                    "tick_start marks the host's sample() call, not the device's internal "
+                    "record-start. A residual sub-second offset (BLE round-trip + firmware) "
+                    "cannot be closed: the sensor returns no timestamp. Good to sub-second; "
+                    "NOT valid for sample-level (10 us) waveform overlay.")
                 state["grp"] = grp_root
 
             n = state.get("n", 0)
@@ -1050,6 +1060,11 @@ def _drain_oe_queue(h5f, oe_queue, state, telemetry_store, sweep_idx, ds_kwargs,
 
             g.attrs["t_start"] = rec.get("t_start", "")
             g.attrs["t_stop"] = rec.get("t_stop", "")
+            if rec.get("tick_start") is not None:
+                try:
+                    g.attrs["tick_start"] = float(rec["tick_start"])
+                except (TypeError, ValueError):
+                    pass
             g.attrs["device_name"] = str(rec.get("device_name", ""))
             g.attrs["device_address"] = str(rec.get("device_address", ""))
             g.attrs["mask"] = int(rec.get("mask", 0))
@@ -1184,6 +1199,11 @@ def acquire_loop(config):
     telemetry_store: dict = acq_cfg.get("_telemetry_store") or {}
     # OE BLE captures arrive on this queue from the sampler task (ticket 0001).
     oe_queue = acq_cfg.get("_oe_queue")
+    # One origin for both streams (ticket 0025). Manual mode has no runner, so it simply starts
+    # its own here; what matters is that scope and OE never compute separate ones.
+    tick_t0 = acq_cfg.get("_run_tick_t0")
+    if tick_t0 is None:
+        tick_t0 = time.monotonic()
     oe_state: dict = {"grp": None, "n": 0,
                       "rates": acq_cfg.get("_oe_sample_rates") or {}}
 
@@ -1291,6 +1311,10 @@ def acquire_loop(config):
             sweep = sweeps_grp.create_group(f"sweep_{i:03d}")
             sweep.attrs["timestamp_local"] = ts_local
             sweep.attrs["timestamp_utc"]   = ts_utc
+            # Run-relative seconds from the shared origin, so a sweep and an OE capture can be
+            # placed on the same timeline. Wall-clock strings cannot do this: they are not
+            # monotonic and drift against each other.
+            sweep.attrs["tick"] = float(sweep_t0 - tick_t0)
 
             # Write latest telemetry snapshot as sweep attributes
             try:
@@ -1402,6 +1426,8 @@ def main():
     # stays the only HDF5 writer.
     import queue as _queue
     oe_queue = _queue.Queue()
+    run_tick_t0 = time.monotonic()          # ticket 0025: one origin for scope + OE
+    scope_cfg["acquisition"]["_run_tick_t0"] = run_tick_t0
     scope_cfg["acquisition"]["_oe_queue"] = oe_queue
     scope_cfg["acquisition"]["_oe_sample_rates"] = (scope_cfg.get("oe") or {}).get(
         "sample_rate_hz") or {}
@@ -1520,7 +1546,8 @@ def main():
             oe_cfg = (scope_cfg.get("oe") or {}) if isinstance(scope_cfg, dict) else {}
             if oe_cfg.get("enabled"):
                 from oe_sampler import OeSampler
-                sampler = OeSampler(oe_cfg, oe_queue, log=lambda m: print(m, flush=True))
+                sampler = OeSampler(oe_cfg, oe_queue, log=lambda m: print(m, flush=True),
+                                    tick_t0=run_tick_t0)
                 oe_task = asyncio.create_task(sampler.run(stop_event))
         except Exception as e:
             _event_log(f"[oe] sampler failed to start (continuing without it): {e!r}")

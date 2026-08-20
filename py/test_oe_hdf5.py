@@ -62,6 +62,45 @@ class TestAliasMapping(unittest.TestCase):
             self.assertEqual(alias, alias.lower())
 
 
+class TestRunTick(unittest.TestCase):
+    """Ticket 0025: OE captures and scope sweeps must share one run timeline."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.path = Path(self.tmp.name) / "tick.h5"
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_tick_start_is_stamped_on_the_group(self):
+        rec = capture()
+        rec["tick_start"] = 123.456
+        q = queue.Queue(); q.put(rec)
+        with h5py.File(self.path, "w") as f:
+            _drain_oe_queue(f, q, {}, {}, 0, {}, lambda m: None)
+        with h5py.File(self.path, "r") as f:
+            self.assertAlmostEqual(float(f["oe_samples/oe_000"].attrs["tick_start"]), 123.456)
+
+    def test_accuracy_caveat_is_in_the_file_not_just_the_ticket(self):
+        # Whoever opens this in a year may not have the repo; the limitation travels with the data.
+        self.drain_one(capture())
+        with h5py.File(self.path, "r") as f:
+            a = f["oe_samples"].attrs
+            self.assertIn("sample_rate_hz", a["tick_definition"])
+            self.assertIn("NOT valid for sample-level", a["tick_accuracy"])
+
+    def test_missing_tick_is_left_off_rather_than_zeroed(self):
+        # A silent 0.0 would look like a capture at run start -- worse than an absent attribute.
+        self.drain_one(capture())
+        with h5py.File(self.path, "r") as f:
+            self.assertNotIn("tick_start", f["oe_samples/oe_000"].attrs)
+
+    def drain_one(self, rec):
+        q = queue.Queue(); q.put(rec)
+        with h5py.File(self.path, "w") as f:
+            _drain_oe_queue(f, q, {}, {}, 0, {}, lambda m: None)
+
+
 class TestDrainOeQueue(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

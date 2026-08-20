@@ -46,8 +46,18 @@ def _utc_iso() -> str:
 class OeSampler:
     """One OE sensor, sampled every `interval_min` minutes into `out_queue`."""
 
-    def __init__(self, oe_cfg: dict, out_queue: "queue.Queue", log: Optional[Callable[[str], None]] = None):
+    def __init__(self, oe_cfg: dict, out_queue: "queue.Queue", log: Optional[Callable[[str], None]] = None,
+                 tick_t0: Optional[float] = None):
         cfg = oe_cfg or {}
+        # Shared run origin, handed in by the caller so the OE captures and the scope sweeps
+        # sit on ONE timeline. Falling back to our own monotonic() would give a second origin
+        # and silently make the two streams un-alignable -- the exact failure 0025 exists to
+        # prevent -- so a missing t0 is a caller bug worth being loud about in the log.
+        if tick_t0 is None:
+            tick_t0 = time.monotonic()
+            (log or print)("[oe] WARNING: no shared run tick origin passed; OE ticks will not "
+                           "align with scope sweeps")
+        self.tick_t0 = float(tick_t0)
         self.enabled = bool(cfg.get("enabled", False))
         self.address = cfg.get("device_address") or ""
         self.interval_s = float(cfg.get("interval_min", 5)) * 60.0
@@ -96,6 +106,10 @@ class OeSampler:
 
         try:
             t0 = _utc_iso()
+            # Run-relative origin for this capture, taken as close to the device's record-start
+            # as we can get: the sensor returns no timestamp of its own (see 0025), so this is
+            # the anchor the whole time axis hangs from.
+            tick_start = time.monotonic() - self.tick_t0
             await asyncio.wait_for(oe.sample(mask=self.mask), timeout=SAMPLE_TIMEOUT_S)
             t1 = _utc_iso()
             samples = oe.get_sample_data() or []
@@ -104,6 +118,7 @@ class OeSampler:
             return {
                 "t_start": t0,
                 "t_stop": t1,
+                "tick_start": tick_start,
                 "device_name": name,
                 "device_address": self.address,
                 "mask": self.mask,
