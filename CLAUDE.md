@@ -371,8 +371,12 @@ when the task stops. If `bleak` or the harness is missing, `py/ble` degrades to 
 and OE sampling simply does not start — a rig run must never die because an optional BLE sensor
 is absent.
 
-**Data layout:** `/oe_samples/oe_000, oe_001, …`, one dataset per channel named by sensor
-(`Ambient Microphone`, `Machine Microphone`), plus attributes `t_start`, `t_stop`,
+**Data layout:** `/oe_samples/oe_000, oe_001, …`, one dataset per channel keyed by **short
+alias** — `mic_amb`, `mic_mch` — taken from the vendor's own `test_configs` filenames so the HDF5,
+`config.json` and the harness all call a channel the same thing. The full table is
+`OE_SENSOR_ALIASES` in `acquire_scope_data.py`; unknown sensor ids fall back to a slug of the
+display name. The vendor's display string and numeric id are kept as **dataset** attributes
+(`sensor_name`, `sensor_id`), so nothing is lost. Group attributes are `t_start`, `t_stop`,
 `device_name`, `device_address`, `mask`, `sensors`, `near_sweep` (the sweep index it sits
 between) and the same `telem_*` stamps the sweeps carry. With `enabled: false` the group is
 never created, so existing files keep their exact layout.

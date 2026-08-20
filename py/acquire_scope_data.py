@@ -976,6 +976,52 @@ def _arm_heater_guard(run_dir, profile_cfg):
         return None
 
 
+# OE sensor id -> short dataset alias, taken from the vendor's own test_configs filenames
+# (03_mic_amb.json, 04_mic_mch.json, ...) rather than invented here, so the HDF5, config.json
+# and the harness all call a channel the same thing. get_sensor_name() returns display strings
+# like "Ambient Microphone" -- fine for a UI, awkward as an HDF5 key because of the spaces, and
+# inconsistent with the scope channels next door, which use UL / AE / SP.
+OE_SENSOR_ALIASES = {
+    0: "battery",
+    1: "temp_amb",
+    2: "temp_mch",
+    3: "mic_amb",
+    4: "mic_mch",
+    5: "adxl1002",
+    6: "adxl362_x",
+    7: "adxl362_y",
+    8: "adxl362_z",
+    9: "ism330_acc_x",
+    10: "ism330_acc_y",
+    11: "ism330_acc_z",
+    12: "ism330_gyro_x",
+    13: "ism330_gyro_y",
+    14: "ism330_gyro_z",
+    15: "mmc5603_x",
+    16: "mmc5603_y",
+    17: "mmc5603_z",
+    18: "drv425",
+}
+
+
+def _oe_dataset_name(sensor_id, sensor_name):
+    """Short, stable HDF5 key for an OE channel.
+
+    Falls back to a slug of the display name for a sensor id we do not know, so a firmware that
+    adds channels still produces something usable rather than a group full of "unknown".
+    """
+    try:
+        alias = OE_SENSOR_ALIASES.get(int(sensor_id))
+    except (TypeError, ValueError):
+        alias = None
+    if alias:
+        return alias
+    slug = "".join(c.lower() if c.isalnum() else "_" for c in str(sensor_name or "unknown"))
+    while "__" in slug:
+        slug = slug.replace("__", "_")
+    return slug.strip("_") or "unknown"
+
+
 def _drain_oe_queue(h5f, oe_queue, state, telemetry_store, sweep_idx, ds_kwargs, logr):
     """
     Move any finished OE captures from the sampler thread into /oe_samples.
@@ -1019,12 +1065,22 @@ def _drain_oe_queue(h5f, oe_queue, state, telemetry_store, sweep_idx, ds_kwargs,
                     g.attrs[f"telem_{k}"] = str(v)
 
             for ch in rec.get("samples") or []:
-                name = str(ch.get("sensor_name") or "unknown")
+                full_name = str(ch.get("sensor_name") or "unknown")
+                sensor_id = ch.get("sensor_id")
+                name = _oe_dataset_name(sensor_id, full_name)
                 data = ch.get("data") or []
                 try:
-                    g.create_dataset(name, data=data, **ds_kwargs)
+                    ds = g.create_dataset(name, data=data, **ds_kwargs)
                 except Exception:
-                    g.create_dataset(name, data=[float(x) for x in data], **ds_kwargs)
+                    ds = g.create_dataset(name, data=[float(x) for x in data], **ds_kwargs)
+                # Keep the vendor's display name and id on the dataset: the alias is for
+                # analysis code, these are what tie a channel back to the harness.
+                ds.attrs["sensor_name"] = full_name
+                if sensor_id is not None:
+                    try:
+                        ds.attrs["sensor_id"] = int(sensor_id)
+                    except (TypeError, ValueError):
+                        pass
             logr(f"[oe] stored capture oe_{n:03d} near sweep {sweep_idx}")
         except Exception as e:
             # Losing one OE capture must never take the run with it.
