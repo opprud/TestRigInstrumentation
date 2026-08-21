@@ -97,3 +97,27 @@ Validated on the 15-min test and the 13 h run `20260820_125647` (249 captures):
   **run-in/degradation** one. Step-by-step temp correlation + the physics point to thermal. **To
   separate them, a future run should decouple temp and time** — hold temp constant over hours, or
   cycle it up/down and watch whether the mic energy reverses (viscosity) or persists (degradation).
+
+## Refinements from the 13 h run analysis (2026-08-21)
+
+Three corrections/additions to the "First results" above, from analysing the full 13 h run
+(`20260820_125647`, 249 records) and from Kim:
+
+- **The temperature axis is bearing temperature, not oil-bath.** `omron_pv_c` comes from the Omron
+  E5CC's probe, which sits **inside the bearing, against the ball track** (the E5CC is only the
+  controller — the measurement is that probe). So the 40 -> 101 C axis is contact-adjacent bearing
+  temperature, the physically relevant one, which **strengthens** the lubrication-regime result
+  rather than weakening it.
+- **The OE gaps are absent above 85 C.** The six self-healing dropouts all fell at <=84 C; after the
+  last (22:56) the sensor ran 3.2 h unbroken 84 -> 101 C, and the 2.4 h spent at >=90 C contain no
+  gaps. So the hottest third -- the part the lubrication result leans on -- is fully covered.
+  (6 events + temp/time confounding = correlation, not cause; do not over-read it.)
+- **The 100 C endpoint rests on less data.** The run held >=100 C for only ~0.7 h (first crossing at
+  12.2 h in) versus ~1 h per step lower down, because the profile ends mid-step. The top of the
+  1.9-3.5x energy rise is therefore supported by fewer records -- weight it, and a future run should
+  end *after* the top step completes.
+
+**On the OE's own temperature channels:** the OE unit also exposes `temp_amb` (id 1) and `temp_mch`
+(id 2), which could be sampled by widening the mask `0x18 -> 0x1E`. **Decided 2026-08-21 not to** --
+the Omron probe already gives bearing temperature and that is sufficient. Recorded here so it is not
+re-proposed.
