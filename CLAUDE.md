@@ -329,6 +329,18 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   `profile_name` now agree; the April file is `KaretTest_Oil1_superseded_20260420.json`, marked
   "do not run". See ticket 0027.
 
+- **The OE sensor drops off the air for 10-14 minutes at a time, and comes back on its own.**
+  Measured across the 13 h run of 2026-08-20/21: **six gaps**, at 13:03, 14:54, 18:27, 21:37, 21:55
+  and 22:46, lasting 14, 13, 13, 11, 10 and 10 minutes. Every one of them recovered **without
+  intervention** — the sampler simply kept retrying every 3 minutes. Net yield **249 captures of
+  ~264 possible, 94 %**.
+
+  Do not reach for the reset button on the first failure. It was needed once, on 2026-08-20 at
+  midday, when `sample()` timed out at the full 120 s three cycles running and the device stayed
+  silent — that is a different signature from these gaps, which show as
+  `not advertising after 3 scans over 155s` and clear themselves. **Wait one or two cycles before
+  touching the hardware**; a run in progress recovers by itself.
+
 - **Skipped sweeps leave gaps in the HDF5 sweep numbering.** Analysis must iterate the
   existing `sweep_###` groups, not assume contiguous indices.
 
@@ -466,6 +478,13 @@ parsed **on any platform** — not just Linux. It is now enabled, placed *after*
 as the code's own comment requires, and the redundant second `connect()` and the 3 s
 "Windows BLE stack" wait are gone.
 
+> **A held BLE link survived a full 13 h run (ticket 0026).** `keep_connected: true` opened one
+> session and carried 249 captures through 2026-08-20/21. The reconnect path fired **once**, at
+> 18:30, on `device returned no sample data` after five and a half hours on one link: it dropped the
+> session, re-established it and retried inside the same cycle, exactly as designed. That path had
+> been unit-tested and never exercised on hardware until then. `keep_connected: false` remains the
+> documented escape hatch and restores the per-capture session.
+
 > **Verified against the real sensor 2026-08-20** (`03:24:71:01:04:54`, `OE00031204100074`), over
 > three 15-minute runs with the motor turning. `/oe_samples` fills, and the design's central claim
 > holds: **the sweep skip count stayed at zero** while ~149 k-point mic captures ran concurrently
@@ -503,11 +522,17 @@ as the code's own comment requires, and the redundant second `connect()` and the
    skips, and both streams share one time axis. Remaining before a 13 h run: set
    `oe.interval_min` back to **5** (it is at 3 from the short tests), and pick a profile whose
    bottom step actually turns the bearing — the 100 rpm step does not.
-9. **Flush the HDF5 periodically** — see the known issue above. **Deliberately deferred by Kim
+9. **A 13 h run with all three scope channels live is in the archive** — `20260820_125647`,
+   uploaded to `eceherning` and size-verified, 34.75 GB. 3778 sweeps with exactly one lost
+   (`sweep_247`, 0.026 %), 249 OE captures on the shared tick axis, all thirteen temperature steps
+   from 40 to 100 C, and the **first full run since 2026-08-19 with the UL probe fitted**, so UL,
+   AE and SP all carry real data. Use `py/tools/upload_to_azure.py` for the next one.
+10. **Flush the HDF5 periodically** — see the known issue above. **Deliberately deferred by Kim
    2026-08-20**: the exposure is a mains failure, which is rare, and he judged it not worth the
    change before this run. Left recorded so the cost is known if it happens again.
-10. **Re-mount the UL acoustic-emission probe** (ticket 0015). Until then a run is OE +
-   accelerometer + slip ring, and `UL` records nothing meaningful.
+11. **Fix the dashboard's polling before the next long run** (ticket 0028) — it pulls 62 KB
+   twice a second, 58 KB of it log lines no component renders, and the browser tab's renderer is
+   eventually killed. Reloading recovers it and the run is unaffected, but it blinds the operator.
 
 ---
 
