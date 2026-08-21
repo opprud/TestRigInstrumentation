@@ -235,10 +235,7 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   refitted.
 
 
-- **The scope wedges intermittently at high resolution.** Symptoms in the log:
-  `step=connect: TimeoutError`, `Empty PRE?`, `DATA? … timed out`, occasional
-  `ConnectionRefused`. The resilience machinery absorbs it (sub-1 % loss), but it is not
-  eliminated. Lower the point count or increase `sweep_retries` if zero loss is required.
+- **The scope wedges intermittently at high resolution — frequently, not occasionally.** Quantified on the 13 h run `20260820_125647` (`acquire_scope.log`): **114 reset/recovery cycles (~one every 7 minutes), 468 error lines, dominated by `ConnectionRefused` (280) and `TimeoutError` (149)**. The resilience machinery absorbs nearly all of it — **1 sweep lost of 3778 (0.026 %)** — but it is masked, not eliminated: the run is one un-recovered retry from a real gap. `ConnectionRefused` dominating points at the scope's own LXI socket server dropping/capping connections, not just network latency. Lower the point count or raise `sweep_retries` for zero-loss runs; root cause tracked in **ticket 0029**.
 
 - **The tachometer is accurate — verified 2026-08-19.** It was long suspected of over-reading;
   it was not. Measured against commanded drive frequency across the full range:
