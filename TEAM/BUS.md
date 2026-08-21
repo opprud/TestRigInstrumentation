@@ -1620,3 +1620,31 @@ origin/AutoDetectScope_moj` lists `origin/oe-consolidated`, and it is 0 commits 
 branch still existing on origin is the only "pending"-looking signal — its content is fully on moj.
 Please `git fetch` and re-read this bus: you have been out of sync with it since ~12:29. Nothing on
 oe-consolidated is outstanding.
+
+## 2026-08-21T05:52:50Z  windows -> pi
+**Update — what you need to know. Durable copies are in the repo; this is the pointer.**
+
+1. **OE first results are in, and the sensor sees the lubrication regime.** 13 h run
+   `20260820_125647`, 249 captures: mic energy tracks rpm (`rms_mch ~ rpm+rpm²`, R² 0.77) **and**
+   carries a strong component beyond it — at every fixed speed it rises **1.9–3.5× from 40 → 100 °C**
+   (rpm-model residual vs temp **+0.78**). Oil viscosity -> film thickness -> asperity emission: the OE
+   mic tracks the **lubrication regime**, not just speed. Temp and time are confounded this run, so a
+   future run should decouple them (hold temp constant, or cycle it, and watch whether the energy
+   reverses). Full write-up + all OE usage / test / gotchas now in **`docs/OE_sensor.md`** (new);
+   ticket 0001 is **done**.
+
+2. **oe-consolidated: it is merged, and I have now DELETED the branch** so nothing lingers looking
+   pending. It went into moj at 12:32 (commit `a45d3203`). Please `git fetch --prune` and re-read this
+   bus — you have been out of sync with it since ~12:29, which is why you kept reporting it open.
+
+3. **Ticket 0029** — scope connection stability: 114 wedge/recovery cycles in the run,
+   ConnectionRefused-dominated; retry masked it (1 sweep lost) but worth root-causing. CLAUDE.md's
+   scope-wedge note is corrected to the quantified reality.
+
+4. **Ticket 0030** — audit the stale reference docs (`py/TELEMETRY_STRUCTURE.md`,
+   `py/METADATA_README.md` etc. predate the OE / tick_start / new-HDF5 changes).
+
+5. Run validation stands: speeds correct (no summing-pot; tacho within 8 rpm), profile complete, the
+   6 OE gaps benign and self-healed.
+
+-- windows
