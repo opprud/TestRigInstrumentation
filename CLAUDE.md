@@ -68,7 +68,7 @@ Key Python modules:
 | Oscilloscope | Keysight/Agilent **MSO-X 2024A** (InfiniiVision 2000 X-Series, 200 MHz, 4 analog channels) | LAN, raw SCPI socket (port 5025) |
 | Motor | **KLEE T712-2**, 3-phase induction, **2-pole**, 0.55 kW (2840 rpm @ 50 Hz, 3470 @ 60 Hz) | via VFD |
 | VFD | RS510-type drive | Modbus RTU / RS485 |
-| Temp controller | Omron **E5CC** | Modbus RTU / RS485 |
+| Temp controller | Omron **E5CC** — its probe sits **inside the bearing**, against the ball track | Modbus RTU / RS485 |
 | Tachometer | **ifm OGT500** diffuse reflection sensor (reflective mark on shaft) | digital pulse → RP2040 GPIO0 |
 | Load cell | HX711 | → RP2040 |
 | Microcontroller | Seeed XIAO **RP2040** | USB serial (ASCII protocol, 115200 baud) |
@@ -325,6 +325,23 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   fine, from the *other* file. Filename, `name`, dashboard label and every existing run's
   `profile_name` now agree; the April file is `KaretTest_Oil1_superseded_20260420.json`, marked
   "do not run". See ticket 0027.
+
+- **`omron_pv_c` is bearing temperature, not oil-bath temperature.** The probe feeding the E5CC is
+  mounted **inside the bearing, hard against where the balls run** (Kim, 2026-08-21). The controller
+  is only the controller; the measurement comes from that probe. This matters for analysis: the
+  40 -> 101 C axis of a run is the temperature at the contact, not of a bath somewhere nearby, so it
+  is the physically relevant axis for anything about lubrication regime or film thickness. Nothing
+  in this repo recorded that until now, and inferring it from the controller's name gets it wrong —
+  which is exactly what happened on 2026-08-21 before Kim corrected it.
+
+- **The OE sensor has nineteen channels and we sample two.** `OE_SENSOR_ALIASES` in
+  `acquire_scope_data.py`: `0 battery`, **`1 temp_amb`**, **`2 temp_mch`**, `3 mic_amb`, `4 mic_mch`,
+  `5 adxl1002`, `6-8 adxl362 xyz`, `9-14 ism330 acc+gyro`, `15-17 mmc5603 xyz`, `18 drv425`. The
+  config's `oe.sensors: [3, 4]` takes only the microphones. **Sensors 1 and 2 are temperature
+  measured by the OE unit itself**, on the bearing, arriving in the same capture on the same
+  `tick_start` axis — a second temperature co-located with the microphone, for a mask change from
+  `0x18` to `0x1E` and almost no extra transfer time (a handful of values against 74,000 per mic).
+  Not enabled; worth doing before the next long run.
 
 - **The OE sensor drops off the air for 10-14 minutes at a time, and comes back on its own.**
   Measured across the 13 h run of 2026-08-20/21: **six gaps**, at 13:03, 14:54, 18:27, 21:37, 21:55
