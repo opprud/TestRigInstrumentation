@@ -3,7 +3,7 @@ id: 0001
 title: Integrate BearingBrain OE ultrasound-mic sampling into test runs
 area: ble
 role: dev
-status: hw-test
+status: done
 assignee: pi-claude
 branch: ticket/0001-ble-oe-integration
 pr: 2
@@ -96,3 +96,29 @@ documents only (`git log --author` confirms no code). So the split from here is:
 **The rig is not free until ~03:08** (13 h run `20260818_135505`, ticket 0005), and the
 sensor is not mounted, so hw-test happens at the rig after that. Ticket moves to
 `hw-test` on merge, and to `done` only when the sensor has actually been sampled.
+
+## Data validation — OE delivers usable data (2026-08-21, architect)
+
+Verified against the 15-min OE test `scope_20260820_112759.hdf5` (5 records) and confirmed at scale
+by the 13 h run `20260820_125647` (249 records, tick-synced, 0 sweep skips). **Acceptance met; status → done.**
+
+**The data is usable, not merely present:**
+- Structured signal, not noise: the machine mic carries ~2x the energy of the ambient mic (rms 52
+  vs 25), and mic energy tracks RPM on the ascending steps (490 -> 890 -> 1192 rpm gives mic_mch rms
+  52 -> 81 -> 189). Correct sensor hierarchy plus a real speed response.
+- Well-formed: each record carries `tick_start`, `near_sweep`, `sample_rate_hz` and the `telem_*`
+  snapshot; the visualiser's cross-reference to the scope sweep works.
+
+**80 kHz is definitive (Kim, 2026-08-21) — the "~5 % window coverage" is NOT a low rate.**
+The visualiser flags that samples fill only ~5 % of the `t_start..t_stop` window and computes an
+"implied ~4 kHz" (n / window). That is a red herring: the device records a short **~0.93 s burst**
+(74 k samples / 80 kHz) then spends ~18 s transferring it over BLE, so the window is dominated by
+transfer, not recording. The frequency axis is **80 kHz**. Do not re-open the 4 kHz question.
+
+**Learning for the analysts (feedback):** in the 15-min test the mic energy showed a component
+**beyond instantaneous RPM** — at 490 rpm the rms doubled from the start (52) to the end (114) of the
+run, and the descending 691 rpm record (273) exceeded the ascending 1192 rpm record (189). A
+time / hysteresis / thermal component — exactly the "grows over the run" signature an endurance test
+is meant to surface. Preliminary only (5 records, fresh bearing, 15 min). **Action: run the same
+analysis on the 13 h dataset** (249 records, full 40 -> 100 C profile), where a real run-in /
+degradation trend would be visible.

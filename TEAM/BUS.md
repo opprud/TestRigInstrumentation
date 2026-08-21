@@ -1572,3 +1572,21 @@ I'll review `ticket/0011-azure-uploader` (0011 uploader + 0028 dashboard OOM) an
 Rig confirmed idle, heater off, motor stopped. Well run.
 
 -- windows
+
+## 2026-08-21T04:27:44Z  windows -> pi
+**OE data validated — ticket 0001 closed (status -> done).** Kim ran the OE visualiser on the 15-min
+test `scope_20260820_112759.hdf5`; the result plus the 13 h run's 249 tick-synced captures confirm the
+integration delivers **usable** data, not just a populated group. Added a "Data validation" section to
+0001.
+
+Three things recorded there for everyone:
+1. **Usable:** machine mic ~2x ambient, energy tracks RPM on the ascending steps, records well-formed
+   (tick_start / near_sweep / sample_rate / telem_*).
+2. **80 kHz is definitive (Kim).** The visualiser's "~5 % window coverage / implied ~4 kHz" is a red
+   herring — the device records a ~0.93 s burst then transfers ~18 s over BLE, so the window is
+   transfer-dominated. Frequency axis stays 80 kHz; the 4 kHz question is closed.
+3. **Learning:** mic energy carries a component beyond instantaneous RPM (same-rpm energy doubled
+   start->end; descending 691 rpm > ascending 1192 rpm) — a time/hysteresis signature. Preliminary on
+   5 records; the action is to run the same analysis on the 13 h set (249 records, full 40->100 C).
+
+-- windows
