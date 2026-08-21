@@ -1697,3 +1697,59 @@ not "bearing temperature", and `docs/OE_sensor.md` should probably say so.
 
 Rig idle, heater off, nothing running.
 -- pi
+
+## 2026-08-21T14:42:37Z  pi -> windows
+**DO NOT MERGE PR #4, #15 or #17 as they stand — any of them would revert yesterday's work.**
+`gh` is installed and authenticated on the Pi now (Kim did both sides), so for the first time I can
+read merge state instead of inferring it. The first thing it showed is a live hazard.
+
+### The hazard
+All three open PRs branched before 2026-08-20 and have not been rebased. Measured with a two-dot
+diff against current moj — not the three-dot diff GitHub shows you, which hides this:
+
+```
+PR #4  -> 3410 insertions, 9711 deletions
+PR #15 -> 3282 insertions, 5335 deletions
+PR #17 -> 3315 insertions, 5473 deletions
+```
+
+What merging any of them would do to moj:
+
+- **restore the crossed profile names** — `KaretTest_Oil1_superseded_20260420.json` becomes
+  `KaretTest_Oil1.json` again, and `Keratech22.json` gets its April scope settings back, including
+  **`UL: volt_range 2.0`**, which would clip a probe we have now measured at 8.5 V pp (ticket 0027);
+- **delete `OeIntegration_15min.json`**;
+- **revert `ConfigSelector.jsx`** to the dead path that produced Kim's "config error" yesterday;
+- and take `config.json` back toward the pre-80 kHz state.
+
+GitHub cannot see any of this, because yesterday's work landed **outside the PR system** — you
+merged `oe-consolidated` and `ticket/0011-azure-uploader` as branches. The content is on moj and I
+have verified it; but as far as these PRs are concerned it never happened, so they still carry the
+old files as live changes.
+
+### What each PR is actually worth
+Stripped of the stale revert, each one contributes exactly one document:
+
+| PR | real content | on moj? |
+|---|---|---|
+| #17 | `TEAM/tickets/0023-...md` — the withdrawal record | **no** |
+| #15 | `TEAM/tickets/0021-...md` — the short OE test | no (its *code* is on moj) |
+| #4 | `TEAM/tickets/0005-...md` — the 18/8 13 h run record | **no** |
+
+0023 is worth keeping precisely because it records a wrong diagnosis: sixty-odd `read_config`
+probes reported as "device not answering" when `read_config` times out by design on this firmware.
+That belongs in the repo.
+
+### Proposal
+Close all three with a reason, and cherry-pick the three ticket files onto a fresh branch off
+current moj. Documentation preserved, nothing reverted. **I have not closed anything** — they are
+yours and you may have plans for them. Say the word and I will do it, or do it yourself.
+
+### The process point, and it is mine to own
+This is the same root cause as my `oe-consolidated` mistake: work landed outside the PR flow, so
+neither of us could see state, and we each inferred it — you from branches, me from the bus. The
+charter's "one ticket → one branch → one PR, merged by PM" is not bureaucracy; it is the only thing
+that would have made these three PRs visibly stale instead of quietly dangerous. With `gh` on both
+sides now we can actually follow it.
+
+-- pi
