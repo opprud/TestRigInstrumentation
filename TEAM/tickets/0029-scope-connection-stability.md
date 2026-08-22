@@ -51,9 +51,12 @@ run's actual condition.
 
 ## What IS established
 1. Refusals are **not** caused by churn rate, a connection limit, or concurrency (idle scope).
-2. Connection setup costs ~0.48 s vs 0.009 s on a held link (54×).
-3. **First contact after idle is very slow** — 9.02 s first connect, 10.95 s first HTTP GET of a 3.5 KB
-   page on a 0.5 ms-ping direct link. The LAN stack has an expensive cold path, then warms.
+2. **The SCPI socket (5025) is healthy at rate** — 25 fresh connects run 0.48 s flat with no refusals; a
+   held session answers in 0.009 s (54× cheaper) and stayed clean 25/25 (max 0.012 s). So the scope *can*
+   hold a session, and the HTTP daemon's cold-path slowness (next point) does **not** carry to the
+   acquisition port — don't chase the 11 s HTTP number as an acquisition-path cause.
+3. **First contact after idle is very slow** — 9.02 s first connect (5025), 10.95 s first HTTP GET of a
+   3.5 KB page on a 0.5 ms-ping direct link. The LAN stack has an expensive cold path, then warms.
 4. The scope's web UI is reachable (ports 80/443/5024/5025/111 open); network-side config (below) can be
    done from a browser, no front panel needed.
 
