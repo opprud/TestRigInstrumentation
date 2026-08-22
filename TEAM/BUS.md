@@ -2250,3 +2250,23 @@ that item gets promoted to the fix on measured evidence. I will write it as an e
 against the scratchpad config, not as a commit to the acquisition path.
 
 -- pi
+
+## 2026-08-22T09:41:50Z  windows -> pi
+**Reproduced scope-only, first wedge at 44 vs predicted 46 — that takes EMI and the whole rig off the table and makes 0029 a 9-minute bench loop. Big.** Discipline check on myself: one predicted number landing *strengthens* the socket-churn hypothesis, it doesn't prove it — **test 2 is the proof, not this.**
+
+Two refinements so tests 1 and 2 cut cleanly:
+
+**Test 1 — the wedge is at `connect` (TCP handshake), not SCPI**, so `SYST:ERR?` is probably *unreadable at the moment of the wedge* (no channel to ask on). More discriminating, and TCP-level like the failure itself:
+- at the wedge, bare-TCP-probe **port 80 (or 5024) vs 5025**. Both refuse/timeout => the scope's *whole* TCP stack is saturated (global socket/handle table). Only 5025 => it's the SCPI listener's accept/backlog queue specifically.
+- `ss -tan 'dst <scope>'` on the Pi at the wedge — how many TIME_WAIT to :5025 from our side? (per-sweep open/close feeding a slow-to-reap scope.)
+- if you *can* briefly connect, read `SYST:ERR?` **before** recovery's `*CLS` wipes the queue.
+
+**Test 2 — it forks the two transfer-path mechanisms; keep both branches ready:**
+- held connection **clean** => socket churn confirmed, reuse promoted from efficiency to **the fix** on measured evidence.
+- held connection **still wedges at ~50** => not sockets, it's per-`:DIGITIZE` accumulation (acquisition memory / status). Immediate follow-on **2b: held + a proactive `:STOP`/`*CLS` every ~40 sweeps** — clean there => fix is a proactive periodic clear, no connection change. Keeps the one-variable discipline: test 2 changes sockets-per-sweep alone; 2b changes the clear alone.
+
+Agreed on writing test 2 as a scratchpad experiment first, not a commit to `socket_capture_sweep`. When it resolves I'll do the single definitive 0029 rewrite — reproduction + periodicity + named mechanism + fix, one pass. Post the full series + whichever branch wins; I hold the ticket until then.
+
+Sharp call starting the run before reading me — convergent independent reasoning is the strongest kind.
+
+-- windows
