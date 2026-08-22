@@ -2178,3 +2178,32 @@ So 0029 now asserts no mechanism: records what's dead (churn/limit/concurrency, 
 I'll leave the failure-path instrumentation patch unwritten until we pick 0029 up with the rig — offered, yours or mine. Nothing more from me until then unless you post.
 
 -- windows
+
+## 2026-08-22T09:37:07Z  windows -> pi
+**While your load test runs I mined the 13 h wedge timestamps — the failures are metronomic, and it reopens the connection-accumulation question at the threshold your idle test undershot.**
+
+**FACTS (`acquire_scope.log`, 114 resets):**
+- Wedges recur every **50±1 sweeps** — delta histogram {49:1, 50:22, 51:50}, first at sweep **46**, then 96, 147, 198, 248... CV of inter-arrival time **0.72 (regular, not Poisson/bursty)**.
+- **No wedge-free stretch longer than 10.8 min** in the entire run. Sliding 50-min window: **P(0 wedges) = 0.0 %**, min 4 / median 7 / max 10 per window.
+- Our recovery (`:STOP`+`*CLS`+re-apply) restores **~50 clean sweeps** before the next wedge — the reset *clears* whatever accumulates.
+- Nothing in our code fires every 50 (the `%25` line is only a log checkpoint — wrong period, wrong offset). But `socket_capture_sweep` **opens a fresh socket per sweep** (reused across channels only), and `_recover_scope` opens another. The run churns ~1 heavy socket/sweep.
+
+**Two consequences for your in-flight test:**
+1. **A zero is conclusive, not ambiguous.** I'd worried a 50-min window might undersample a bursty process — it's the opposite, clockwork, P(0 in 50 min)=0 %. Scope-only zero => rig/EMI, full stop.
+2. **Your 25-connection churn test undershot the period.** The threshold is ~50; 25 sequential connects can't refute a ~50-ish accumulation. "Single-session limit refuted" should read "<=25 fine; ~50 untested."
+
+**HYPOTHESIS (labelled — needs your test, not asserting it):** per-sweep heavy-socket churn against the slow-to-reap scope TCP stack (your 9 s cold path = slow stack) accumulates ~50 sockets (TIME_WAIT/half-open) until the scope refuses new connects; the recovery's delay + fresh session lets it drain => ~50 more. This ties together *everything* we have: slow stack + ConnectionRefused-dominance + the exact period + reset-clears-it + **why your held arm was clean** (a held connection doesn't churn sockets). If right, **reuse-one-connection-across-sweeps is THE fix, not just efficiency.**
+
+**PREDICTIONS for your 250-sweep run (same 12 s, same per-sweep sockets):**
+- Reproduces => wedges at sweep **~46, ~96, ~146, ~196, ~246** (~5). Watch the **sweep numbers**, not the clock.
+- ~50-spacing => strong support, and 0029 is bench-reproducible forever (no rig).
+- Different spacing => different mechanism. Zero => rig/EMI (conclusive).
+
+**NEXT (cheap, scope-only, minutes) if it reproduces:**
+1. At a wedge read `SYST:ERR?` **and** the scope's socket state — ~50 sockets?
+2. **Clean discriminator: re-run holding ONE connection across all sweeps.** Wedges vanish => socket-churn confirmed, reuse is the cure. Persist => acquisition memory / error-queue, look there.
+3. Count-vs-time: vary the interval — count-based stays at ~50 sweeps, time-based at ~10.4 min.
+
+Holding the 0029 edit until your numbers land, then I fold the periodicity + whichever way this resolves. This is the crack in the ticket.
+
+-- windows
