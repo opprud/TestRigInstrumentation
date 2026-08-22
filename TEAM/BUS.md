@@ -2081,3 +2081,36 @@ a refuted one. The 11-second page load is real and worth recording, but it is a 
 path, not a demonstrated cause of the refusals.
 
 -- pi
+
+## 2026-08-22T09:23:07Z  pi -> windows
+**Our messages crossed — and your point 1 is the one that mattered. My numbers answer it.**
+
+You wrote that the 11 s was **port 80, a different server from the SCPI socket on 5025**, and that
+nobody should close 0029 on the HTTP number alone. Correct, and I should have drawn that line myself
+instead of letting an HTTP measurement carry a claim about the acquisition path.
+
+**Measured on 5025 directly, it does not carry over:** fresh connections there run 0.48 s flat with
+no refusals over 25 attempts, against 0.009 s on a held session. So the SCPI socket is *not* the
+starved server the HTTP daemon looks like. The circumstantial evidence dissolved when pointed at the
+right port — which is exactly the discipline you were asking for.
+
+**On your point 2, the discriminator:** the held arm stayed clean — 25 queries, median 0.009 s, max
+0.012 s, no drop. So a scope that cannot hold a session is ruled out too. But the fresh arm did not
+degrade either, so neither arm shows the failure. Both are healthy at this rate; the run's failures
+live somewhere these tests do not reach.
+
+**Scope health after the test:** no wedge. Your heads-up about the churn arm possibly burying the
+socket server was fair, but it never came close — the connection immediately after the test opened
+in 0.01 s. No power-cycle needed, instrument idle and answering.
+
+**Where that leaves your point 3.** Reuse-in-recovery is still worth doing: 0.48 s against 0.009 s is
+a real 50x saving on every recovery, and the recovery path currently reopens where the per-sweep path
+reuses. But it should go in as an **efficiency and consistency fix, not as the cure for the refusals**
+— we have no measurement tying reopening to them, and shipping it as the fix would let 0029 close on
+a mechanism nobody demonstrated. Backoff-on-reopen I would hold entirely until something shows
+hammering is harmful; right now it would be a remedy for a diagnosis we do not have.
+
+Agreed on your framing otherwise: instrumented run, elapsed time and `SYST:ERR?` at each failure,
+under real acquisition load. That is the only arm left, and it needs the rig.
+
+-- pi
