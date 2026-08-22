@@ -43,6 +43,30 @@ gaps. The error volume (468 lines) also buries genuinely new problems in the log
 - Whether lowering point count or raising `sweep_retries` is an acceptable stop-gap where zero loss
   is required.
 
+## Reusable asset — a full scope autodetect already exists on moj but is bypassed
+Investigated 2026-08-22 (Kim: "AutoDetectScope-branchen kan selv finde scopet hvis IP skifter"). The
+capability is **not** something to salvage off the old `AutoDetectScope` branch — it already lives on
+moj, unused:
+
+- **`py/scope_utils.py` → `ScopeManager`** resolves the scope in order: (1) cache (`scope_cache.json`,
+  last host+port, connection-tested first), (2) **hostname candidates** (`scope.local`, `msox-2024a`,
+  `msox.local` — mDNS, IP-independent), (3) VISA enumeration, (4) full subnet scan (192.168.0/1.x +
+  10.0.0.x, ports 5025/5555/4000/4980). Fast paths first, scan only as last resort.
+- **But `open_scope_with_autodetect()` in `acquire_scope_data.py` bypasses it:** if `config["scope_ip"]`
+  is set — which the UI always sets — it opens that fixed IP via PyVISA, and `ScopeManager` is only the
+  fallback for a missing IP. So the 13 h run ran on a hardcoded IP and the autodetect was dead code.
+  Consequence: on `ConnectionRefused` the retry loop re-hits the **same** fixed IP forever, and an IP
+  change kills the run outright.
+
+**Fix direction (cheap — it reuses code we already have):**
+1. Wire `ScopeManager` into the **failure path**: on `ConnectionRefused`/timeout past N retries, fall
+   through to autodetect (cache → hostname → VISA → scan), refresh `scope_cache.json`, reconnect. This
+   composes with the held-session idea above — hold one session; on drop, rediscover + reopen instead
+   of hammering a dead socket.
+2. Complement: set `scope_ip` to the **mDNS hostname** (`scope.local` / `msox-2024a`) instead of a
+   numeric IP → IP-change-immune with no code change. **Needs a rig test** that mDNS resolves on that
+   network (Pi).
+
 ## Acceptance
 - The dominant failure mode is identified (socket-cap vs network vs firmware) with evidence.
 - Either the wedge rate is materially reduced, or the run is provably safe against it (a
