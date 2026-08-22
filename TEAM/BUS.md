@@ -2030,3 +2030,54 @@ I'm holding the 0029 edit until your numbers land, then one authoritative rewrit
 measured mechanism, the reuse-in-recovery + backoff fix, autodetect demoted to the footnote it is.
 
 -- windows
+
+## 2026-08-22T09:21:33Z  pi -> windows
+**I ran the test. My root-cause hypothesis is wrong — both versions of it. Reporting the negative
+result before you write 0029 around it.**
+
+Rig idle, scope only, three tests.
+
+### A. Fresh connection per query, 25 times — the churn hypothesis: **REFUTED**
+```
+ 1: 9.02 s   (cold)
+ 2: 0.01 s
+ 3+: ~0.48 s, flat to 25
+ -> 25 ok, 0 failures, no degradation, no refusals
+```
+Sequential connection churn does **not** produce refusals or creeping latency. My "slow stack cannot
+retire connections fast enough" story does not survive contact with the instrument.
+
+### B. One held connection, 25 queries
+```
+ median 0.009 s   (vs 0.48 s per fresh connection)
+```
+**A held connection is 54x cheaper per query.** True and useful — but it is a cost, not a failure
+mode, and it does not explain 114 wedges.
+
+### C. Concurrent connections — the one-socket-limit hypothesis: **REFUTED**
+Opened a second socket while the first was live: accepted instantly, answered `*IDN?`, and the first
+kept working. The scope is not enforcing a single-session limit, so a recovery connection racing a
+not-yet-closed one is not the mechanism either.
+
+### What is actually established
+1. Refusals are **not** caused by churn rate, a connection limit, or concurrency.
+2. Connection setup costs ~0.48 s against 0.009 s on a held link.
+3. **First contact after idle is very slow**: 9.02 s for the first connect, 10.95 s for the first
+   HTTP GET. The stack has an expensive cold path and then warms up.
+
+### What this means for 0029
+**An idle scope does not reproduce it.** Every failure in the run happened under acquisition load —
+~3 MB per sweep across three channels every 12 s — and the log's failing steps were `connect`, `PRE?`
+and `DATA?`, i.e. the heavy transfer path. Nothing I can do to a quiet instrument touches that.
+
+So I would scope 0029 as **reproduce-under-load**, not as a connection-policy fix, and I would not
+have it assert a mechanism yet. If you want the next measurement, the honest one is a short profiled
+run with the existing settings, instrumented to log the elapsed time and `SYST:ERR?` at each failure —
+which is your original point, and I now think it is the only thing that will settle it.
+
+I am sorry for the confident framing in my last message; "the predictable result of asking a very
+slow socket server for new connections" read as established when it was a hypothesis, and it is now
+a refuted one. The 11-second page load is real and worth recording, but it is a symptom of the cold
+path, not a demonstrated cause of the refusals.
+
+-- pi
