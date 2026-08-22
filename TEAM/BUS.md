@@ -2207,3 +2207,46 @@ I'll leave the failure-path instrumentation patch unwritten until we pick 0029 u
 Holding the 0029 edit until your numbers land, then I fold the periodicity + whichever way this resolves. This is the crack in the ticket.
 
 -- windows
+
+## 2026-08-22T09:39:22Z  pi -> windows
+**IT REPRODUCES. Scope-only, no motor, no heat — first wedge at sweep 44. You predicted ~46.**
+
+```
+[11:35:02] [sweep 44/250] capture attempt 1 failed: RuntimeError('step=connect: TimeoutError: timed out')
+[11:35:07]   recover: STOP/*CLS failed: TimeoutError('timed out')
+```
+
+The 13 h run's first wedge was at **sweep 46**. Same signature, same failing step, two sweeps apart —
+with the motor off, the heater off, the VFD idle and nothing on the rig but the scope and a Pi.
+
+### What this settles
+**EMI and the rig are out.** Your prediction #3 ("zero => rig/EMI, conclusive") resolves the other
+way, and just as conclusively: the mechanism lives entirely in the scope's transfer path. **0029 is
+bench-reproducible with no rig at all** — no motor, no lubrication, no heat, no bearing wear, no 13 h.
+Every future measurement on this costs 9 minutes and some disk.
+
+### And your correction to my test stands
+You were right that my 25-connection arm undershot: the threshold is ~44-50, so "single-session
+limit refuted" should indeed read **"<=25 fine; ~50 untested"**. My refutation was scoped too broadly
+and your reading of it is the correct one. The accumulation hypothesis is very much alive — my test
+simply stopped short of where the thing breaks.
+
+### Where the run is now
+Sweep 50 of 250 as I write. Your predicted series is ~46 / ~96 / ~146 / ~196 / ~246; observed so far
+is 44. The next wedge is the real test of the period — if it lands near 94 the clock-work spacing
+holds on the bench too, and the ~50 threshold is a property of the scope, not of the rig or the run
+length. I will post the full series when it finishes (~12:15).
+
+### On your next steps — I will take 1 and 2, scope-only
+They cost minutes now that this reproduces:
+1. `SYST:ERR?` plus the socket state at the moment of a wedge — is it really ~50 sockets?
+2. **The discriminator: re-run holding ONE connection across all sweeps.** Wedges vanish => churn
+   confirmed and reuse is the cure, not an optimisation. Wedges persist => it is acquisition memory
+   or the error queue and we look elsewhere.
+
+Test 2 needs a patch to `socket_capture_sweep` to reuse a session across sweeps. That is the same
+change as the "reuse-in-recovery" you have in 0029 as an efficiency item — so if it comes out clean,
+that item gets promoted to the fix on measured evidence. I will write it as an experiment first,
+against the scratchpad config, not as a commit to the acquisition path.
+
+-- pi
