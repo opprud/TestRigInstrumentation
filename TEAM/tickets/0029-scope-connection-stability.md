@@ -1,80 +1,62 @@
 ---
 id: 0029
-title: Scope connection stability — wedge every ~50 sweeps, reproduces bench scope-only (rig/EMI out)
+title: Scope wedge every ~10 min — ROOT CAUSE: malformed subnet mask (0.0.0.0) on the scope; fix = correct the netmask
 area: acquisition
 role: dev
-status: backlog
-assignee: unassigned
+status: fix-verified (acceptance run pending scope power-cycle)
 depends_on:
 branch:
 pr:
 ---
 
-## Problem
-The scope's TCP connection wedges — `connect` / `PRE?` / `DATA?` refused or timing out — at a fixed
-period during acquisition. The retry machinery recovers almost all of it (the 13 h run lost 1 sweep of
-3778, 0.026 %), so it is nearly invisible in the data, but it is frequent and one bad retry from a gap.
+## Resolution (verified 2026-08-23)
+The scope wedged its SCPI connection every ~10 min because its **LAN subnet mask was `0.0.0.0`**, with
+the gateway set to itself (`169.254.227.43`). A zero mask means *no* peer is on-link, so every packet is
+punted to a gateway that is the instrument itself — and the stack tears the session down after ~10 min.
+**Fix: set the mask to `255.255.0.0`, gateway `0.0.0.0`.** A configuration change on the scope, no code.
 
-## Established (measured, 2026-08-22)
-1. **Metronomic period — every 50±1 sweeps.** In the 13 h run (`acquire_scope.log`, 114 resets at 74
-   distinct sweeps) the failing sweeps are 46, 96, 147, 198, 248… — delta histogram {49:1, 50:22, 51:50},
-   inter-arrival CV 0.72 (regular, not bursty). No wedge-free stretch longer than 10.8 min; every 50-min
-   window holds 4–10 wedges (P(0)=0 %). Our recovery (`:STOP`+`*CLS`+re-apply) restores ~50 clean sweeps
-   — the reset *clears* whatever accumulates.
-2. **Reproduces on the bench, scope-only — rig and EMI are out.** A 250-sweep run matching only the 13 h
-   run's *scope* load (3 ch, points MAX, 1 M, 12 s, retries 2), no motor / no heat / VFD idle, wedged at
-   **sweep 44** — same failing step (`connect` timeout), same signature, two sweeps from the run's 46. The
-   mechanism lives entirely in the scope's transfer path. **0029 is now a ~9-minute bench loop:** no motor,
-   heat, bearing wear, lubrication or 13 h needed for any future measurement.
-3. **Cold path slow, warm SCPI socket healthy** — first connect after idle 9.0 s, first HTTP GET 11 s;
-   but 25 warm fresh connects run 0.48 s flat with no refusals, a held session answers 0.009 s and stays
-   clean 25/25. The HTTP daemon's slowness does not carry to 5025, and the scope *can* hold a session.
-4. Web UI reachable (ports 80/443/5024/5025/111 open); the network config below is browser-doable.
+Verified by the held-session test that had been dying at exactly 10.1 min:
+```
+before:  10.1 min -> ConnectionResetError ;  10.1 min -> TimeoutError   (twice running)
+after :  15.0 min -> clean, 225 queries, all 0.009 s, no degradation
+```
+That one mask explains everything the investigation chased: the ~10.5-min period, the ConnectionRefused
+dominance, why our `:STOP`/`*CLS`/re-apply recovery "cleared" it (session re-establish), and why it was
+indifferent to motor, sweep count, connection churn and session reuse. One wrong netmask cost 114
+recovery cycles in the 13 h run. **Nothing in the acquisition code was ever wrong.**
 
-## What the idle tests did and did NOT show
-The idle-scope probes ran at **≤25 light `*IDN?` connections** — below the ~44–50 threshold and with no
-heavy transfer. They show *light-payload churn ≤25 is clean, no single-socket cap at 2 concurrent, 5025
-healthy at rate* — but they **did not reach the mechanism** and do not refute it. "Single-session limit
-refuted" must read **"≤25 fine; ~50 untested."** The accumulation hypothesis is alive; the idle tests
-simply stopped short of where it breaks.
+## Status / what remains
+Root cause **found and verified**; the fix is a one-field scope config change. **One acceptance run
+remains.** While confirming, the scope's raw-SCPI server (5025) crashed and did not recover remotely —
+config re-apply and forced restart both failed, both IPv4/IPv6 exhausted — so **the instrument needs a
+power cycle (Kim, next at the rig).** Then:
+1. Verify front-panel LAN: IP `169.254.227.43`, mask **255.255.0.0**, gw `0.0.0.0`.
+2. Re-run the 50-min bench acquisition (no rig needed).
+3. **Zero wedges closes 0029.**
 
-## Open question — the mechanism (discriminator in flight)
-Something accumulates ~1 unit per heavy acquisition, saturates ~50, and is cleared by our reset. Two
-transfer-path candidates, with a clean fork between them:
-- **Socket churn** — `socket_capture_sweep` opens a fresh socket per sweep; against the slow-to-reap scope
-  stack, ~50 TIME_WAIT/half-open sockets could exhaust the SCPI listener → connect refused/timeout. Fits
-  everything: slow stack + ConnectionRefused-dominance + the period + reset-clears-it + the clean held arm.
-- **Per-`:DIGITIZE` accumulation** — acquisition memory / status / error queue filling per acquisition,
-  independent of the connection.
+## Everything the investigation ruled out (all measured, all dead)
+Recorded so none is re-opened: connection churn, single-session / connection limits, concurrency, EMI
+and the rig (reproduced with the rig switched off), the HTTP daemon's cold-path slowness, per-sweep
+socket accumulation, and the "~50-sweep period" (an artefact of the 12 s interval — the real period is
+TIME, ~10 min, proven by a 4 s run that still failed on the same minute, at sweep 146). The leading
+proposed fix — reuse one connection across sweeps — was itself refuted: a held connection dies at 10 min
+too. Retry/recovery stays as the safety net regardless (1 sweep lost in 13 h, 0 in 50 min on the bench).
 
-**Discriminator (test 2, bench, minutes):** re-run holding ONE connection across all sweeps.
-- clean → socket churn confirmed; **reuse-one-connection is the fix** (promoted from efficiency on
-  measured evidence).
-- still wedges at ~50 → not sockets; **2b:** held + proactive `:STOP`/`*CLS` every ~40 sweeps → clean
-  means status/memory accumulation, fix is a proactive periodic clear (no connection change).
-
-**Test 1 (bench, minutes):** at a wedge, bare-TCP-probe port 80/5024 vs 5025 (whole-stack vs listener),
-`ss -tan dst <scope>` for TIME_WAIT depth, and `SYST:ERR?` if a channel can be got before recovery's
-`*CLS`.
-
-## Improvements (one may be the fix, pending the discriminator)
-- **Reuse the connection across sweeps / in recovery.** The per-sweep path opens per sweep; recovery
-  reopens. If test 2 comes clean this *is* the fix; either way it is a 54× per-query win.
-- **Network-side, from the web UI** (kills the separate IP-change worry): a static IP on a /24 (stable
-  address; also makes `ScopeManager`'s 192.168.1.x scan valid), or enable mDNS (the scope announces
-  nothing today — `avahi-browse` shows no `_scpi-raw`/`_lxi`/`_vxi-11`/`_http`).
-
-## Footnote — scope autodetect exists but is bypassed (not the wedge fix)
-`py/scope_utils.py` → `ScopeManager` (cache → hostname/mDNS → VISA → scan) is dead code because
-`open_scope_with_autodetect()` uses the fixed `config.scope_ip` whenever set (always). On this link-local
-rig its scan range is wrong (192.168/10.x, not the rig's 169.254.x) and /16 is 65k anyway. Recorded so it
-is not re-proposed as the wedge fix.
-
-## Acceptance
-- Mechanism named by the discriminator (socket churn vs `:DIGITIZE` accumulation) on bench evidence.
-- Fix lands (connection reuse or proactive clear) and a 250-sweep bench run wedges 0 times where it
-  wedged ~5.
+## Better answer to "what if the scope IP changes" — IPv6 link-local (supersedes the autodetect footnote)
+The scope answers **SCPI over IPv6 link-local** (`fe80::…` derived from its MAC, Agilent OUI
+`00:30:d3`) — no DHCP, no config, unbreakable by any IPv4 misconfiguration. It was the back door that
+recovered the instrument when the IPv4 config was zeroed. So the robust IP-change answer is a **multicast
+ping to `ff02::1` + the neighbour table (~2 s)**, not `ScopeManager`'s cache/hostname/subnet-scan (65k
+addresses, wrong ranges on this link). The autodetect in `py/scope_utils.py` stays dead code; IPv6
+link-local is the route if we ever want IP-change resilience (a separate robustness ticket).
 
 ## Owner / test
-- **Dev:** the reuse/clear patch once the discriminator names the mechanism. **Tester (Pi):** run the
-  discriminator + test 1 (bench, scope-only), post the full wedge series.
+- **Kim:** power-cycle the scope; verify the front-panel LAN mask reads `255.255.0.0`.
+- **Pi:** re-run the 50-min bench acquisition after the power cycle; confirm zero wedges.
+- **Dev:** no code change required for the wedge itself.
+
+## Note
+Root cause was found by reading the scope's own `viewConfig.asp` and A/B-testing the mask. The scope was
+then wedged by remote-changing its LAN config over the only path into it — the standing lesson: never
+remote-change the network configuration of a device whose sole access path is that network, and stop at
+the point the diagnosis is verified.
