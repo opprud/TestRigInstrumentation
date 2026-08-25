@@ -3,7 +3,7 @@ id: 0031
 title: Per-gain load-cell tare — cmd_tare stores one shared tare_offset; raw counts scale with gain
 area: firmware
 role: dev
-status: backlog
+status: done — per-gain tare (t128/t64) implemented in fw v1.2.5, 2026-08-25; escalated by measurement (the two zeros were 4.1 kg apart, run crosses 128->64)
 depends_on:
 branch:
 pr:
