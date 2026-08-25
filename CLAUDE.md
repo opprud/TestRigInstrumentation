@@ -357,8 +357,8 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 ## Load cell & firmware — auto gain scaling
 
-`firmware/src/main.cpp` is **v1.2.2, and it is the version actually flashed on the board**
-(flashed 2026-08-25 with the rig apart for load-cell calibration; `INFO` reports `fw=1.2.2`).
+`firmware/src/main.cpp` is **v1.2.3, and it is the version actually flashed on the board**
+(flashed 2026-08-25 with the rig apart for load-cell calibration; `INFO` reports `fw=1.2.3`).
 `auto_scale(raw)` auto-switches the HX711 gain **128 ↔ 64 ↔ 32** (high gain/resolution for
 light loads, drops for heavy) with hysteresis, a 3-read stability gate, **per-gain slope**, an
 ADC-saturation guard (`ERR 21`), and it emits `OK AUTOGAIN gain=N` when it switches. v1.2.1 added
@@ -371,6 +371,15 @@ value), 8 ms glitch floor, median filter and `TACHDIAG?`.
 > board was dead to `util_tool.py`, `test_runner.py` and the dashboard alike. Fixed in **v1.2.2**,
 > which also restores the `ERR 11 line_too_long` guard. If a future edit touches `loop()`, verify
 > with a raw `PING` over serial before trusting the board.
+
+> **v1.2.2 reported the switching sample through the wrong gain's slope (fixed in v1.2.3).**
+> The HX711 applies a new gain only from its *next* conversion, but `cmd_load()` called
+> `auto_scale(raw)` first and then `slope()`, so the one reading in which a switch happened was
+> scaled by the gain it was about to move to. Measured on the bench: a settled unloaded reading
+> stepped 1778 g -> 889 g on the `OK AUTOGAIN gain=128` line, a clean 2x, and stepped back on the
+> next read. It would have looked like the load cell jumping, not like a scaling bug, and it would
+> have survived calibration. `cmd_load()` now captures `slope()` **before** `auto_scale()`; verified
+> continuous across a switch (1777.9 -> 1777.7 -> 1771.6).
 
 **Calibration was wiped by the flash and must be redone.** The EEPROM `CAL_VERSION` differs from
 v1.1.0's, so `loadCal()` rejected the stored record and `resetCal()` ran: after flashing the board
@@ -414,7 +423,7 @@ git show 07cf7907:firmware/src/main.cpp > firmware/src/main.cpp   # roll back
 > firmware there brings a second `setup()`/`loop()` and the build fails at link time with duplicate
 > symbols. (The separate `seeed-xiao-rp2040-tach-v111` env does set one, onto `src_tach_v111/`.)
 
-**What v1.2.2 still does not have, that v1.1.0 did:** `SETPPR`/`PPR?` — `PULSES_PER_REV` is
+**What v1.2.3 still does not have, that v1.1.0 did:** `SETPPR`/`PPR?` — `PULSES_PER_REV` is
 hardcoded to 1 (fine: one reflective mark), so `util_tool.py setppr` errors against it.
 
 **Flashing:** `pio run -e seeed-xiao-rp2040 --target upload`. Confirm what is actually *running*
@@ -537,7 +546,7 @@ as the code's own comment requires, and the redundant second `connect()` and the
 5. **Move the Azure SAS out of `config.json`.**
 6. **Confirm rpm/Hz empirically** with the now-working sensor and refine the 59.5 factor if a
    temperature-dependent value is warranted for the analysis.
-7. **Load-cell calibration after the v1.2.2 flash** — the firmware is flashed and verified
+7. **Load-cell calibration after the v1.2.3 flash** — the firmware is flashed and verified
    (2026-08-25); host parsers are done. Remaining: with the scale unit off the rig, run
    `calibrate --gain 128` and `--gain 64` with a known weight, then check `CAL?`. Optional: fold
    `SETPPR` back in from v1.1.0, and give `tare` a per-gain record.

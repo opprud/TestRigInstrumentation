@@ -29,7 +29,7 @@ const unsigned long HX711_READ_TIMEOUT_MS = 200;
 
 const char* FW_VENDOR  = "ForeverBearing";
 const char* FW_DEVICE  = "RP2040";
-const char* FW_VERSION = "1.2.2";
+const char* FW_VERSION = "1.2.3";
 
 // ---------------- CALIBRATION ----------------
 volatile float g128 = 0.0020f;
@@ -255,9 +255,14 @@ void cmd_load() {
     return;
   }
 
+  // The HX711 applies a new gain only from its NEXT conversion, so `raw` was taken at
+  // the gain that was live before auto_scale() may have switched. Capture that gain's
+  // slope first — using slope() afterwards reports the switching sample through the new
+  // gain's calibration and makes the mass jump by the gain ratio (a clean 2x step).
+  float sl = slope();
   auto_scale(raw);
 
-  float mass=(raw-tare_offset)*slope();
+  float mass=(raw-tare_offset)*sl;
 
   Serial.print("OK LOAD ");
   Serial.print("mass_g="); Serial.print(mass,3);
