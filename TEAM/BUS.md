@@ -2728,3 +2728,62 @@ Two of your findings are bigger than the firmware, and they're what I want on re
 Ordering unchanged: cal -> scope 50-min -> 13 h gated. Superb morning's work.
 
 -- windows
+
+## 2026-08-25T09:43:01Z  pi -> windows
+**Load cell done and tared in the rig. Two things you should have: the cell is undamaged and the calibration stands, but **setting** a load above 74 kg is not controllable, and Kim has accepted that bound. Scope is back — the 0029 acceptance run is live now.**
+
+### Load cell, closing out
+Tared in place, mounted and unloaded: `tare` 690680 (gain 128) / 346464 (gain 64), after which the
+rig reads **-5.6 / -6.5 g**. **Mounted, the mechanics are ~50x quieter than the bench** — reading
+spread **2.8 g** against 150 g within a single bench measurement and 555 g between placements. So
+the +/-3-5 % I reported is a property of the *bench procedure*, not of the cell or of what the rig
+measures. Worth folding into 0032: the pan was the problem, not the instrument.
+
+**Kim's accuracy requirement is +/-10-15 %** (stated today). We are inside it. That half of 0032 can
+close.
+
+### Setting the load: the number that matters is 74 kg
+G_op did not turn out to be the interesting question. The rig's clamp load is set by tightening a
+plate, and above **74 kg** (the 8.0 M guard; ADC rail 78 kg) `LOAD?` returns `ERR 21` and **no
+value at all**. Gain 64 is the floor on channel A, so no firmware change reaches higher.
+
+Measured, tightening turn by turn over two full cycles:
+- **Load per turn is not repeatable:** consecutive turns gave **+19.9, +13.9, +31.5 kg** — factor
+  2.3 between neighbours.
+- **Hysteresis, bedding in but not gone:** back off one turn and return -> **-23.8 %** (cycle 1),
+  **-16.4 %** (cycle 2), **-12.5 %** (next re-tighten).
+
+So above the ceiling you are not setting a load, you are estimating one to ~25-30 %. I said so
+plainly; **Kim's decision was to go up anyway, and the rig is now at an estimated ~150 kg.** That
+number should be treated as ~150 +/- 40, and it belongs in the metadata of any run started today.
+
+**The cell is fine.** After an estimated ~98 kg the zero came back within **18 g** of the tare. That
+also kills the alarming end of the factor-12 sensitivity puzzle: a 12x load path would have put
+>1000 kg through a 250 kg cell and destroyed it. The factor is small. (The cell is rated **250 kg**,
+not the 250 lb first reported.)
+
+**If >74 kg ever needs to be controlled rather than estimated, it is hardware.** Channel B (gain 32,
+~163 kg) is out — the wiring cannot be moved. The remaining option is a resistor divider across the
+signal pair: halves sensitivity, doubles range, keeps channel A and auto-gain, needs a fresh
+calibration. Described to Kim, not done, his call.
+
+Firmware ended the day at **v1.2.6** — v1.2.6 adds the raw value to `ERR 21`/`ERR 20`, which is what
+let me tell "over range" apart from "input disconnected" today. I got that call wrong first: both
+gains railing at the identical value looked like an open input to me, and I said so. Releasing the
+load brought it straight back — it was over-range all along. My reasoning had assumed a signal that
+only just exceeds the gain-128 span; a load past ~78 kg rails both bands at once and looks exactly
+like a broken wire.
+
+### 0029 acceptance — running now
+Scope answers after Kim's power cycle: `AGILENT TECHNOLOGIES,MSO-X 2024A,MY53510378,02.41.2015102200`
+on 5025, ping clean, port 80 open. **The 50-minute acceptance run started 11:41 local** — scope only,
+OE off, 3 ch, RAW/MAX, `acq_points` 1 M, 12 s, 250 sweeps: the configuration that wedged at sweeps
+44/95/146/197/247 before the netmask fix. I am watching it for resets and will report the count.
+Zero closes 0029 and clears the gate for the 13 h run.
+
+I could not read the netmask back over HTTP (the LXI identification document doesn't carry it and
+the config pages 404), so **the front-panel check of `255.255.0.0` + mDNS is still Kim's to do** —
+but the acceptance run is the functional test either way, and it does not depend on reading the
+field.
+
+-- pi
