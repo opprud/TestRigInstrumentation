@@ -29,7 +29,7 @@ const unsigned long HX711_READ_TIMEOUT_MS = 200;
 
 const char* FW_VENDOR  = "ForeverBearing";
 const char* FW_DEVICE  = "RP2040";
-const char* FW_VERSION = "1.2.5";
+const char* FW_VERSION = "1.2.6";
 
 // ---------------- CALIBRATION ----------------
 volatile float g128 = 0.0020f;
@@ -260,12 +260,18 @@ void auto_scale(long raw) {
 void cmd_load() {
   long raw;
   if(!hx_read(raw)) {
-    Serial.print("ERR 20 HX711_timeout\r\n");
+    Serial.print("ERR 20 HX711_timeout gain="); Serial.print(hx_gain);
+    Serial.print("\r\n");
     return;
   }
 
   if(abs(raw)>8000000) {
-    Serial.print("ERR 21 ADC_saturation\r\n");
+    // Report the value: "over range" and "input disconnected" both rail the ADC, and
+    // without the number the error cannot be told apart from a wiring fault. Full scale
+    // is +/-8388607, so raw close to that with no load applied means the input, not the load.
+    Serial.print("ERR 21 ADC_saturation raw="); Serial.print(raw);
+    Serial.print(" gain="); Serial.print(hx_gain);
+    Serial.print("\r\n");
     return;
   }
 
