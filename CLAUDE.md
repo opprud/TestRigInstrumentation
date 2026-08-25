@@ -421,6 +421,12 @@ The two slopes differ by 1.991 — the factor 2 they must, which is the one clea
 the whole exercise. **Both are ~2.3x from the factory defaults**, so writing them is a large
 improvement over what the flash left behind.
 
+> **Kim's accuracy requirement for load is +/-10-15 % (stated 2026-08-25), and we are at +/-3-5 %.**
+> So the placement scatter below, alarming as it looks, is comfortably inside what the work needs —
+> it is documented so nobody over-claims, not because it must be improved. What is *not* covered by
+> that tolerance is the factor-5 question further down: that is force actually reaching the cell,
+> not measurement error, and no tolerance makes it safe.
+
 > **The dominant error is mechanical, and it is huge: the same 6 kg placed four times read
 > 2023357 / 2056850 / 2137756 / 2144042 counts — a spread of 555 g (9.3 %), sd 275 g.** Electrical
 > noise on the same cell is +/- 25 counts (+/- 0.1 g), so **placement is ~2750x worse than the
