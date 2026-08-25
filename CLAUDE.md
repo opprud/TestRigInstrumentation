@@ -443,6 +443,17 @@ improvement over what the flash left behind.
 > python3 util_tool.py --port /dev/ttyACM0 setgain --gain auto
 > ```
 
+**Tared in place 2026-08-25, mounted and unloaded** — `tare` 690680 (gain 128) / 346464 (gain 64),
+after which an unloaded rig reads **-5.6 g / -6.5 g**. The band ratio is 1.994, as it must be.
+
+> **Mounted, the mechanics are ~50x quieter than the bench.** Reading spread with the unit in the
+> rig is **2.8 g**, against 150 g within a single bench measurement and 555 g between placements of
+> the same weights. The instability was the pan and the loose weights, not the cell — the cell
+> itself behaves well. It also means the +/- 3-5 % slope uncertainty is a property of *how we
+> calibrated*, not of what the rig measures: a calibration performed through the rig's own load
+> path would be far better, and that is the route if the load figure ever needs to be trusted
+> tighter.
+
 **The rig runs in gain 64.** At 102809 counts/kg, ~62 kg sits near 6.2 M counts — above the 2.5 M
 step-up threshold, so the band is stable during a run; the board sits at 128 only while unloaded
 and crosses to 64 as load applies. That crossing is exactly why per-gain tare had to exist.
