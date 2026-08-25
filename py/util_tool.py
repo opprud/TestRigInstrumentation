@@ -155,10 +155,17 @@ def set_cal(ser, slope, tare):
 
 
 def set_gain(ser, gain):
-    """Pin the HX711 gain. Firmware >= 1.2.0 auto-switches gain on load, and slope is
-    stored per gain, so calibration must be done with the gain held fixed."""
-    if int(gain) not in (32, 64, 128):
-        raise ValueError("gain must be 32, 64 or 128")
+    """Pin the HX711 gain, or hand it back to auto with gain="auto". Firmware >= 1.2.4
+    treats an explicit SETGAIN as manual mode and stops auto_scale() from overriding it,
+    which is what a calibration needs: slope and tare are both stored per gain."""
+    if str(gain).lower() == "auto":
+        stat, head, payload = send_cmd(ser, "SETGAIN AUTO")
+        if stat != "OK":
+            raise RuntimeError(f"SETGAIN AUTO failed: {stat} {head} {payload}")
+        return {"status": "OK", "type": "SETGAIN", "mode": "auto"}
+    if int(gain) not in (64, 128):
+        # 32 is HX711 channel B, a different input entirely — firmware rejects it.
+        raise ValueError("gain must be 64, 128 or 'auto'")
     stat, head, payload = send_cmd(ser, f"SETGAIN {int(gain)}")
     if stat != "OK":
         raise RuntimeError(f"SETGAIN failed: {stat} {head} {payload}")
@@ -256,12 +263,12 @@ def main():
     p_cal = sub.add_parser("calibrate", help="Guided calibration with known weight")
     p_cal.add_argument("--weight-g", type=float, required=True, help="known calibration weight in grams")
     p_cal.add_argument("--settle-sec", type=float, default=5.0, help="settling time after putting/removing weight")
-    p_cal.add_argument("--gain", type=int, choices=(32, 64, 128), default=None,
-                       help="pin the HX711 gain first (fw >= 1.2.0: slope is stored per gain, "
+    p_cal.add_argument("--gain", type=int, choices=(64, 128), default=None,
+                       help="pin the HX711 gain first (slope and tare are stored per gain, "
                             "so calibrate each gain you will actually use)")
 
-    p_setgain = sub.add_parser("setgain", help="Pin HX711 gain (32/64/128)")
-    p_setgain.add_argument("--gain", type=int, choices=(32, 64, 128), required=True)
+    p_setgain = sub.add_parser("setgain", help="Pin HX711 gain (64/128), or 'auto'")
+    p_setgain.add_argument("--gain", required=True, choices=("64", "128", "auto"))
 
     p_settime = sub.add_parser("settime", help="Set device epoch")
     p_settime.add_argument("--unix-ms", type=int, default=None, help="UNIX epoch in ms (defaults to host now)")

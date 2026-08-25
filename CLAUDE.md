@@ -357,8 +357,8 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 ## Load cell & firmware — auto gain scaling
 
-`firmware/src/main.cpp` is **v1.2.3, and it is the version actually flashed on the board**
-(flashed 2026-08-25 with the rig apart for load-cell calibration; `INFO` reports `fw=1.2.3`).
+`firmware/src/main.cpp` is **v1.2.5, and it is the version actually flashed on the board**
+(flashed 2026-08-25 with the rig apart for load-cell calibration; `INFO` reports `fw=1.2.5`).
 `auto_scale(raw)` auto-switches the HX711 gain **128 ↔ 64 ↔ 32** (high gain/resolution for
 light loads, drops for heavy) with hysteresis, a 3-read stability gate, **per-gain slope**, an
 ADC-saturation guard (`ERR 21`), and it emits `OK AUTOGAIN gain=N` when it switches. v1.2.1 added
@@ -381,17 +381,71 @@ value), 8 ms glitch floor, median filter and `TACHDIAG?`.
 > have survived calibration. `cmd_load()` now captures `slope()` **before** `auto_scale()`; verified
 > continuous across a switch (1777.9 -> 1777.7 -> 1771.6).
 
+> **Three more defects, all found on hardware the same day (v1.2.4, v1.2.5).**
+> - **`SETGAIN` pinned nothing.** `auto_scale()` runs inside every `LOAD?` and overrode the gain
+>   that had just been set, so a calibration could not hold a band: pinning 128, 64 and 32 in turn
+>   all produced the same ~3.31 M reading because every one of them was dragged back to 64.
+>   `SETGAIN <n>` is now **manual mode** (auto_scale returns immediately) and `SETGAIN AUTO` hands
+>   control back. `CAL?` reports `mode=auto|manual`. Manual is RAM-only — a reset returns to auto.
+> - **Gain 32 is HX711 *channel B*, not the load cell.** Unloaded reads 884096 at gain 128 and
+>   443600 at 64 (a clean 2x) but **2177** at 32 — an unconnected input. The auto ladder stepped
+>   down into it above 7.5 M and would have read channel B noise as load. The ladder is now
+>   128 <-> 64 only, and `SETGAIN 32` returns `ERR 35`.
+> - **Tare was one value shared by all gains** while slope was per gain. Measured: zero is 881372
+>   counts at 128 and 442361 at 64 — **4.1 kg apart** once scaled, and a run crosses 128 -> 64 as
+>   load applies, so one shared tare is wrong in whichever band it was not taken in. v1.2.5 stores
+>   `t128`/`t64` alongside `g128`/`g64`; `TARE` and `SETCAL` write the active band's pair.
+
 **Calibration was wiped by the flash and must be redone.** The EEPROM `CAL_VERSION` differs from
 v1.1.0's, so `loadCal()` rejected the stored record and `resetCal()` ran: after flashing the board
 reports factory defaults (`slope=0.004 tare=0 gain=64`). Slope is stored **per gain** (`g128`,
 `g64`, `g32`), so calibrate each gain the rig will actually reach:
 
 ```bash
-python3 util_tool.py --port /dev/ttyACM0 setgain --gain 128
-python3 util_tool.py --port /dev/ttyACM0 calibrate --gain 128 --weight-g 10000
-# repeat for 64, and for 32 if loads get that heavy
-python3 util_tool.py --port /dev/ttyACM0 cal      # CAL? reports slope + tare + gain
+python3 util_tool.py --port /dev/ttyACM0 setgain --gain 128   # or 64, or auto
+python3 util_tool.py --port /dev/ttyACM0 calibrate --gain 128 --weight-g 2000
+python3 util_tool.py --port /dev/ttyACM0 cal      # CAL? reports slope + tare + gain + mode
 ```
+
+### The bench calibration of 2026-08-25 — and why its tare is worthless
+
+Measured with the scale unit **off the rig**, weights on the pan, gain pinned per band. Ladder
+1/2/4/6 kg (the 6 kg point repeated four times), least-squares over the loaded points:
+
+| | slope | tare (line intercept) | verified against 6 kg |
+|---|---|---|---|
+| gain 128 | `0.004820812` g/count (207434 counts/kg) | 854943 | 6139 g (+2.3 %) |
+| gain 64 | `0.009726785` g/count (102809 counts/kg) | 431818 | 5980 g (-0.3 %) |
+
+The two slopes differ by 1.991 — the factor 2 they must, which is the one clean internal check in
+the whole exercise. **Both are ~2.3x from the factory defaults**, so writing them is a large
+improvement over what the flash left behind.
+
+> **The dominant error is mechanical, and it is huge: the same 6 kg placed four times read
+> 2023357 / 2056850 / 2137756 / 2144042 counts — a spread of 555 g (9.3 %), sd 275 g.** Electrical
+> noise on the same cell is +/- 25 counts (+/- 0.1 g), so **placement is ~2750x worse than the
+> electronics**. Treat the slope as good to **+/- 3-5 %, not better** — at the rig's ~62 kg that is
+> +/- 3 kg. Anything quoting logged load to tighter than that is quoting noise.
+
+> **The 10 kg weight never reached the cell.** Loaded, it read *below* empty (861841 vs 884533 at
+> gain 128, i.e. -104 g). Twice, after repositioning. It rests on the frame beside the pan rather
+> than on it. It is excluded from the fit entirely — and it is why the calibrated range is 1-6 kg
+> while the rig runs at ~62 kg, a **10x extrapolation** that nothing here validates.
+
+> **Do not use the bench tare in the rig.** Over the session the unloaded raw drifted from 881372
+> to 802769 counts — **379 g** — and after calibration an empty pan read -252 g (gain 128) /
+> -288 g (64). The zero wanders with the mechanics; only the slope travels with the unit. **After
+> remounting the scale unit, tare in place, unloaded, in both bands:**
+>
+> ```bash
+> python3 util_tool.py --port /dev/ttyACM0 setgain --gain 128 && python3 util_tool.py --port /dev/ttyACM0 tare
+> python3 util_tool.py --port /dev/ttyACM0 setgain --gain 64  && python3 util_tool.py --port /dev/ttyACM0 tare
+> python3 util_tool.py --port /dev/ttyACM0 setgain --gain auto
+> ```
+
+**The rig runs in gain 64.** At 102809 counts/kg, ~62 kg sits near 6.2 M counts — above the 2.5 M
+step-up threshold, so the band is stable during a run; the board sits at 128 only while unloaded
+and crosses to 64 as load applies. That crossing is exactly why per-gain tare had to exist.
 
 `util_tool.py` gained `setgain` and `calibrate --gain` for this (2026-08-25). `calibrate` reads
 `CAL?` before and after and **aborts if the gain auto-switched mid-measurement** — the loaded and
@@ -423,7 +477,7 @@ git show 07cf7907:firmware/src/main.cpp > firmware/src/main.cpp   # roll back
 > firmware there brings a second `setup()`/`loop()` and the build fails at link time with duplicate
 > symbols. (The separate `seeed-xiao-rp2040-tach-v111` env does set one, onto `src_tach_v111/`.)
 
-**What v1.2.3 still does not have, that v1.1.0 did:** `SETPPR`/`PPR?` — `PULSES_PER_REV` is
+**What v1.2.5 still does not have, that v1.1.0 did:** `SETPPR`/`PPR?` — `PULSES_PER_REV` is
 hardcoded to 1 (fine: one reflective mark), so `util_tool.py setppr` errors against it.
 
 **Flashing:** `pio run -e seeed-xiao-rp2040 --target upload`. Confirm what is actually *running*
@@ -546,10 +600,13 @@ as the code's own comment requires, and the redundant second `connect()` and the
 5. **Move the Azure SAS out of `config.json`.**
 6. **Confirm rpm/Hz empirically** with the now-working sensor and refine the 59.5 factor if a
    temperature-dependent value is warranted for the analysis.
-7. **Load-cell calibration after the v1.2.3 flash** — the firmware is flashed and verified
-   (2026-08-25); host parsers are done. Remaining: with the scale unit off the rig, run
-   `calibrate --gain 128` and `--gain 64` with a known weight, then check `CAL?`. Optional: fold
-   `SETPPR` back in from v1.1.0, and give `tare` a per-gain record.
+7. **Load-cell: tare in the rig, then judge whether the bench slope is good enough.** Firmware
+   v1.2.5 is flashed and the bench slope is written per gain (see "Load cell & firmware"). Two
+   things remain, in order: **(a)** tare both bands once the scale unit is remounted and unloaded —
+   the bench zero is meaningless and the board currently reads ~-270 g empty; **(b)** decide whether
+   +/- 3-5 % on load is acceptable for the analysis. If it is not, the fix is not more weights on
+   the pan — it is loading the cell through the rig's own load path, because placement, not
+   electronics, is what limits us.
 8. **BLE OE sensor integration** — **validated against the real sensor 2026-08-20** (tickets 0001,
    0021, 0024, 0025): `/oe_samples` fills, 5 of 5 capture cycles succeed, sweeps stay at zero
    skips, and both streams share one time axis. Remaining before a 13 h run: set
