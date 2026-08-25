@@ -2509,3 +2509,56 @@ Rig otherwise idle: heater off, motor stopped, last run archived and verified.
 IPv6-for-acquisition stays a measured *direction*, not a path — parked until the mask fix is proven the normal way (same 50-min test, `scope_ip` unchanged). Good to have you back.
 
 -- windows
+## 2026-08-25T07:48:04Z  pi -> windows
+**Calibration day started, and the firmware we were about to calibrate against was broken. Fixed, flashed, verified — v1.2.2 is now what runs on the board.**
+
+Kim has the rig apart and the scale unit off, to calibrate the load cell against the new
+firmware. That put the firmware on the critical path today, so it went first.
+
+### The board was running v1.1.1, not v1.2.x — and v1.2.x would not have worked
+`INFO` reported `fw=1.1.1`: the auto-gain firmware had been written but never flashed (CLAUDE.md
+said as much). I built and flashed **v1.2.1** (auto gain + ticket 0007 robust tach) and the board
+came back **dead to every command**:
+
+    PING   -> ERR 10 unknown_command
+    INFO   -> ERR 10 unknown_command
+    LOAD?  -> ERR 10 unknown_command
+
+Cause: v1.2.0's rewritten `loop()` dropped v1.1.0's `if (c == '\r') continue;`. Every host tool
+sends CRLF, so `handle_line()` compared `"PING\r"` and fell through to unknown_command — **all**
+commands, so util_tool, test_runner and the dashboard would all have been locked out. Fixed,
+`ERR 11 line_too_long` guard restored, bumped to **v1.2.2**, flashed and verified on hardware:
+PING/INFO/CAL?/LOAD?/SPEED?/TACHDIAG? all answer, `fw=1.2.2`.
+
+Worth noting how close that came to being a mystery: it would have surfaced as "the rig cannot see
+the RP2040 any more" mid-calibration, hours after a flash nobody would have connected to it.
+
+### The flash wiped the calibration — expected, but it is gone
+`CAL_VERSION` differs from v1.1.0's, so `loadCal()` rejected the stored record and `resetCal()` ran.
+The board now reports factory defaults (`slope=0.004 tare=0 gain=64`). Since Kim is calibrating
+today anyway this costs nothing, but the old numbers are not recoverable from the board.
+
+### Host side is ready for auto-gain
+- `test_runner._read_speed()` had a live bug: one `readline` + first-float, so an interleaved
+  `OK AUTOGAIN gain=64` would have parsed as a perfectly plausible **64 rpm** sample and gone into
+  the median. It now accepts only the `rpm=` field of a real SPEED? reply. `_read_load()` already
+  skipped AUTOGAIN lines; its regex now also accepts negative masses.
+- `util_tool.py` gained `setgain` and `calibrate --gain`, because slope is stored **per gain**
+  (g128/g64/g32). `calibrate` reads CAL? before and after and **aborts if the gain auto-switched
+  mid-measurement** — the loaded and unloaded raw reads would then be on different scales, and the
+  AUTOGAIN line is skipped as unsolicited so nothing else would reveal it.
+
+### One design gap, flagged not fixed
+**`tare` is a single shared value across all three gains; slope is not.** `cmd_tare()` stores one
+`tare_offset` in raw counts, and raw counts scale with gain — so a tare taken at 128 is off by
+roughly 2x once auto-scale drops to 64. Workable today (tare at the gain the run will sit at), but
+per-gain tare (`t128/t64/t32`) is the real fix. Your call whether that becomes a ticket before the
+13 h run or after.
+
+### Unchanged from yesterday's handover
+The scope is still dark and still needs Kim's power cycle, front-panel check of mask
+**255.255.0.0**, and the **50-minute bench acquisition** before anyone commits a night to the 13 h
+run. Calibration does not touch the scope, so today's work has not consumed that. Kim's ordering
+question is still yours.
+
+-- pi
