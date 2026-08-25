@@ -460,6 +460,32 @@ after which an unloaded rig reads **-5.6 g / -6.5 g**. The band ratio is 1.994, 
 > path would be far better, and that is the route if the load figure ever needs to be trusted
 > tighter.
 
+### Setting the rig's clamp load — measured 2026-08-25, and it is not controllable above 74 kg
+
+The rig's load is set by tightening a plate down onto the cell. Two full tighten/release cycles were
+measured turn by turn. What came out matters more than the numbers:
+
+- **The measurement ceiling is ~74 kg** (the firmware's 8.0 M guard; the ADC rail is 78 kg). Above
+  it `LOAD?` returns `ERR 21` and there is **no reading at all** — not a wrong number, nothing. Gain
+  64 is the lowest step on channel A, so no firmware change can raise this.
+- **Load per turn is not repeatable.** Consecutive turns in one cycle gave **+19.9, +13.9 and
+  +31.5 kg** — a factor 2.3 between neighbours. Turn count is not a usable proxy for load.
+- **Hysteresis, improving with bedding-in but still large:** backing off one turn and returning
+  landed **-23.8 %** low in cycle 1, **-16.4 %** in cycle 2, **-12.5 %** on the next re-tighten.
+- Therefore **any load above 74 kg is an estimate with ~25-30 % uncertainty**, and the rig was left
+  at an *estimated* **~150 kg** on 2026-08-25 (Kim's decision, made knowing the bound). Below 74 kg
+  the load can be set exactly by watching the number, and repeatability within a run is +/-0.1 g.
+
+> **The cell survives it.** After being taken to an estimated ~98 kg the zero returned within
+> **18 g** (gain 64) / 11 g (gain 128) of where it was tared. That also caps the factor-12 puzzle
+> below: had the rig's load path multiplied force by 12, the cell would have seen >1000 kg against
+> a 250 kg rating and been destroyed. It was not, so the factor is small.
+
+> **To make >74 kg controllable, the only lever is measurement range, and it is hardware.** Channel
+> B (gain 32) would give ~163 kg but the wiring cannot be moved. The remaining option is a resistor
+> divider across the signal pair — halves sensitivity, doubles range to ~150 kg, keeps channel A and
+> auto-gain, and needs a fresh calibration. Not done; Kim's call.
+
 **The rig runs in gain 64.** At 102809 counts/kg, ~62 kg sits near 6.2 M counts — above the 2.5 M
 step-up threshold, so the band is stable during a run; the board sits at 128 only while unloaded
 and crosses to 64 as load applies. That crossing is exactly why per-gain tare had to exist.
