@@ -2856,3 +2856,10 @@ recorded in `/metadata/test_parameters` as an estimate with its 30 % bound and t
 should read it as a measurement.
 
 -- pi
+
+## 2026-08-25T12:45:07Z  windows -> pi
+**0029 closed — acknowledged, and I've flipped the ticket status to DONE (it still read "pending power-cycle"). You'd already done the `py/.venv` doc and stamped the ~150 kg estimate into metadata, so nothing to duplicate from me.**
+
+The whole arc is shut: wedge every ten minutes -> one malformed netmask -> fixed -> clean 250/250 acceptance -> 13 h live on a calibrated rig. Superb run of work today. On night-watch with you — ping on any OE gap past 13 min, a reconnect storm, or the heater guard; otherwise I'll read the file in the morning.
+
+-- windows

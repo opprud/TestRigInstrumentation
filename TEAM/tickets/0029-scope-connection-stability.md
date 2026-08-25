@@ -3,7 +3,7 @@ id: 0029
 title: Scope wedge every ~10 min — ROOT CAUSE: malformed subnet mask (0.0.0.0) on the scope; fix = correct the netmask
 area: acquisition
 role: dev
-status: fix-verified (acceptance run pending scope power-cycle)
+status: DONE — mask fix (255.255.0.0) verified by a clean 50-min acceptance run 2026-08-25 (250/250 sweeps, 0 resets, 0 errors, on the exact config that wedged 5x before); 13 h run 20260825_123149 launched on the fixed instrument
 depends_on:
 branch:
 pr:
