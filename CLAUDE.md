@@ -106,6 +106,28 @@ Run a profiled test directly (paths are relative to the `py/` working directory)
 py/.venv/bin/python acquire_scope_data.py config.json ../react/public/config/<profile>.json
 ```
 
+> **A run started from the command line never switches the heater on.** The oil heater sits on a
+> Shelly relay (channel 0, `shelly_control.py`), and only the dashboard/`api_server.py` turns it
+> **on**; `acquire_scope_data.py` arms `heater_guard.py`, which only ever turns it **off**. So a
+> headless run sets the Omron's setpoint, the Omron faithfully calls for heat, and nothing supplies
+> any — the bearing then simply tracks motor friction. Caught 2026-08-25 two hours into a 13 h run:
+> the bearing had gone 25 -> 34 C while the motor ran at 3000 rpm and then **fell back to 32** when
+> the speed dropped, which is the signature. Switch it on by hand and confirm the temperature
+> actually climbs before committing the night:
+>
+> ```bash
+> py/.venv/bin/python shelly_control.py --on heater      # channel 0
+> py/.venv/bin/python shelly_control.py --status         # may read "???" — trust the temperature, not this
+> ```
+>
+> `--status` frequently reports `???` for a channel (no retained MQTT state), so it cannot confirm
+> the switch. The bearing temperature rising is the only proof that counts.
+
+> **Killing a run leaves its heater guard behind, and the next run gets a second one.** The guard is
+> detached (`start_new_session`) with a deadline fixed at the *original* run's end. Restart a run
+> later than the first and the stale guard will switch the heater off part-way through the new one.
+> Terminate the old guard (`pkill -f heater_guard.py`, or by pid) before restarting.
+
 > **Use `py/.venv`, not the repo-root `.venv`.** Both exist and both have `pyvisa`, `h5py`, `serial`
 > and `numpy`, but **only `py/.venv` has `bleak`**. Launched from the root venv a run starts and
 > looks entirely normal — `py/ble` degrades to `OeUnavailable` by design so an absent BLE stack can
