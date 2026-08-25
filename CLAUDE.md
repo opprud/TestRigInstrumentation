@@ -357,10 +357,49 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 ## Load cell & firmware — auto gain scaling
 
-`firmware/src/main.cpp` **is now v1.2.0 (auto gain scaling)** — this is the chosen firmware going
-forward. `auto_scale(raw)` auto-switches the HX711 gain **128 ↔ 64 ↔ 32** (high gain/resolution for
-light loads, drops for heavy) with hysteresis, a 3-read stability gate, **per-gain calibration**, an
-ADC-saturation guard (`ERR 21`), and it emits `OK AUTOGAIN gain=N` when it switches.
+`firmware/src/main.cpp` is **v1.2.2, and it is the version actually flashed on the board**
+(flashed 2026-08-25 with the rig apart for load-cell calibration; `INFO` reports `fw=1.2.2`).
+`auto_scale(raw)` auto-switches the HX711 gain **128 ↔ 64 ↔ 32** (high gain/resolution for
+light loads, drops for heavy) with hysteresis, a 3-read stability gate, **per-gain slope**, an
+ADC-saturation guard (`ERR 21`), and it emits `OK AUTOGAIN gain=N` when it switches. v1.2.1 added
+the robust tach from ticket 0007 — 1.5 s timeout (rpm → 0 when the signal is lost, no more frozen
+value), 8 ms glitch floor, median filter and `TACHDIAG?`.
+
+> **v1.2.0/v1.2.1 were unusable and never ran on the rig: the parser lost the CR strip.** Their
+> `loop()` dropped v1.1.0's `if (c == '\r') continue;`, so every host command — all tools send
+> `CRLF` — parsed as `"PING\r"` and came back `ERR 10 unknown_command`. **Every** command, so the
+> board was dead to `util_tool.py`, `test_runner.py` and the dashboard alike. Fixed in **v1.2.2**,
+> which also restores the `ERR 11 line_too_long` guard. If a future edit touches `loop()`, verify
+> with a raw `PING` over serial before trusting the board.
+
+**Calibration was wiped by the flash and must be redone.** The EEPROM `CAL_VERSION` differs from
+v1.1.0's, so `loadCal()` rejected the stored record and `resetCal()` ran: after flashing the board
+reports factory defaults (`slope=0.004 tare=0 gain=64`). Slope is stored **per gain** (`g128`,
+`g64`, `g32`), so calibrate each gain the rig will actually reach:
+
+```bash
+python3 util_tool.py --port /dev/ttyACM0 setgain --gain 128
+python3 util_tool.py --port /dev/ttyACM0 calibrate --gain 128 --weight-g 10000
+# repeat for 64, and for 32 if loads get that heavy
+python3 util_tool.py --port /dev/ttyACM0 cal      # CAL? reports slope + tare + gain
+```
+
+`util_tool.py` gained `setgain` and `calibrate --gain` for this (2026-08-25). `calibrate` reads
+`CAL?` before and after and **aborts if the gain auto-switched mid-measurement** — the loaded and
+unloaded raw reads would then be on different scales, and nothing else would show it because the
+`OK AUTOGAIN` line is skipped as unsolicited.
+
+> **`tare` is a single value shared across all three gains — slope is not.** `cmd_tare()` writes one
+> `tare_offset` in raw counts, but raw counts scale with gain, so a tare taken at 128 is wrong by
+> roughly 2× once auto-scale drops to 64. Tare at the gain the run will sit at, and treat a
+> zero-offset error after a gain switch as expected, not as a fault. Per-gain tare (`t128/t64/t32`)
+> is the real fix and is not implemented.
+
+**Host-side parsing is done (2026-08-25).** `util_tool.py`'s `send_cmd(expect_arg=…)` and
+`test_runner.py`'s `_read_load()` both read past `OK AUTOGAIN` lines, and `_read_speed()` now does
+too — it previously took one line and `_parse_first_float`, so an interleaved `OK AUTOGAIN gain=64`
+parsed as a perfectly plausible **64 rpm** sample. It now accepts only the `rpm=` field of a real
+`SPEED?` reply. `_read_load()`'s regex also accepts negative masses.
 
 The previous **v1.1.0 (manual gain)** was overwritten in place; it is preserved **in git history**,
 not as a second file — `main.cpp` is the only source in `firmware/src/`. To read or roll back:
@@ -370,29 +409,17 @@ git show 07cf7907:firmware/src/main.cpp            # view v1.1.0
 git show 07cf7907:firmware/src/main.cpp > firmware/src/main.cpp   # roll back
 ```
 
-> **Do not keep a second `.cpp` in `firmware/src/`.** `platformio.ini` sets no `build_src_filter`,
-> so PlatformIO compiles *every* source in that directory. A copy of the old firmware there brings a
-> second `setup()`/`loop()` and the build fails at link time with duplicate symbols.
+> **Do not keep a second `.cpp` in `firmware/src/`.** `platformio.ini` sets no `build_src_filter`
+> for the default env, so PlatformIO compiles *every* source in that directory. A copy of the old
+> firmware there brings a second `setup()`/`loop()` and the build fails at link time with duplicate
+> symbols. (The separate `seeed-xiao-rp2040-tach-v111` env does set one, onto `src_tach_v111/`.)
 
-v1.1.0 has manual `SETGAIN 64|128`, `SETPPR`/`PPR?`, and a 100 µs glitch filter in the tach ISR
-(`if (dt > 100) …`) that v1.2.0 does **not**.
+**What v1.2.2 still does not have, that v1.1.0 did:** `SETPPR`/`PPR?` — `PULSES_PER_REV` is
+hardcoded to 1 (fine: one reflective mark), so `util_tool.py setppr` errors against it.
 
-**Tradeoffs v1.2.0 carries** (fine for the current single-mark rig, but know them before you flash):
-- No `SETPPR`/`PPR?` — `PULSES_PER_REV` is hardcoded to 1 (OK: one reflective mark). `util_tool.py
-  setppr` will error against it.
-- No 100 µs ISR debounce.
-- Still **no tach timeout** — a lost tacho signal freezes at the last value (see the tacho known-issue).
-
-**Renaming the source does NOT reflash the board.** The RP2040 keeps running whatever was last
-flashed (still v1.1.0's behaviour) until you build + upload v1.2.0 (`pio run --target upload`).
-Confirm what is actually *running* with the `INFO` command (reports `fw=`), not by looking at the
-source. And **only flash when the rig is idle** — the same board serves the tacho *and* the load
-cell during a run, so flashing mid-test breaks both.
-
-**After flashing, on the Python side:** with auto-scale live, `LOAD?` produces unsolicited
-`OK AUTOGAIN gain=N` lines — verify `util_tool.py` / `test_runner.py`'s response parser **skips**
-non-matching lines, or a gain switch mid-read will desync it. Then **re-TARE and re-run SETCAL per
-gain** — calibration is gain-dependent.
+**Flashing:** `pio run -e seeed-xiao-rp2040 --target upload`. Confirm what is actually *running*
+with `INFO` (`fw=`), not by looking at the source. And **only flash when the rig is idle** — the
+same board serves the tacho *and* the load cell during a run, so flashing mid-test breaks both.
 
 ---
 
@@ -510,10 +537,10 @@ as the code's own comment requires, and the redundant second `connect()` and the
 5. **Move the Azure SAS out of `config.json`.**
 6. **Confirm rpm/Hz empirically** with the now-working sensor and refine the 59.5 factor if a
    temperature-dependent value is warranted for the analysis.
-7. **Load-cell auto gain scaling** — `main.cpp` is now v1.2.0 (see "Load cell & firmware").
-   Remaining: flash it when the rig is idle (`pio run --target upload`), make the `LOAD?` parser
-   tolerant of `OK AUTOGAIN` lines, and re-TARE + SETCAL per gain. Optional: fold
-   `SETPPR`/debounce/tach-timeout back in from the preserved v1.1.0.
+7. **Load-cell calibration after the v1.2.2 flash** — the firmware is flashed and verified
+   (2026-08-25); host parsers are done. Remaining: with the scale unit off the rig, run
+   `calibrate --gain 128` and `--gain 64` with a known weight, then check `CAL?`. Optional: fold
+   `SETPPR` back in from v1.1.0, and give `tare` a per-gain record.
 8. **BLE OE sensor integration** — **validated against the real sensor 2026-08-20** (tickets 0001,
    0021, 0024, 0025): `/oe_samples` fills, 5 of 5 capture cycles succeed, sweeps stay at zero
    skips, and both streams share one time axis. Remaining before a 13 h run: set

@@ -29,7 +29,7 @@ const unsigned long HX711_READ_TIMEOUT_MS = 200;
 
 const char* FW_VENDOR  = "ForeverBearing";
 const char* FW_DEVICE  = "RP2040";
-const char* FW_VERSION = "1.2.1";
+const char* FW_VERSION = "1.2.2";
 
 // ---------------- CALIBRATION ----------------
 volatile float g128 = 0.0020f;
@@ -406,12 +406,17 @@ void loop(){
 
   while(Serial.available()){
     char c=Serial.read();
+    if(c=='\r') continue;          // hosts send CRLF; a kept '\r' made every
+                                   // command parse as "PING\r" -> unknown_command
     if(c=='\n'){
       buf[i]=0;
       handle_line(buf);
       i=0;
     } else if(i<127){
       buf[i++]=c;
+    } else {
+      i=0;
+      Serial.print("ERR 11 line_too_long\r\n");
     }
   }
 }

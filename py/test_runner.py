@@ -317,8 +317,26 @@ class TestRunner:
                     rp_ser.write(b"SPEED?\r\n")
                     time.sleep(0.07)
 
-                    line = rp_ser.readline().decode("ascii", errors="ignore").strip()
-                    v = _parse_first_float(line)
+                    # Firmware v1.2.x can interleave an unsolicited
+                    # "OK AUTOGAIN gain=N" line here. Its number parses as a
+                    # plausible rpm (64 or 128), so read past it and accept
+                    # only the "rpm=" field of an actual SPEED reply.
+                    v = None
+                    _deadline = time.monotonic() + 0.5
+                    for _ in range(4):
+                        if time.monotonic() > _deadline:
+                            break
+                        line = rp_ser.readline().decode("ascii", errors="ignore").strip()
+                        if not line:
+                            break
+                        if "rpm=" in line:
+                            v = _parse_first_float(line.split("rpm=", 1)[1])
+                            break
+                        if "AUTOGAIN" in line:
+                            print(f"[runner] load cell gain switch: {line}", flush=True)
+                        if line.startswith("ERR"):
+                            print(f"[runner] SPEED? -> {line}", flush=True)
+                            break
                     if v is None:
                         continue
 
@@ -371,7 +389,7 @@ class TestRunner:
                     line = rp_ser.readline().decode("ascii", errors="ignore").strip()
                     if not line:
                         break
-                    m = _re.search(r"mass_g=([\d.]+)", line)
+                    m = _re.search(r"mass_g=(-?[\d.]+)", line)
                     if m:
                         return float(m.group(1))
                     if line.startswith("ERR"):

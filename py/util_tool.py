@@ -18,7 +18,7 @@ Protocol (ASCII, CRLF-terminated):
   PPR?                 -> OK PPR ppr=<int>
 
 Subcommands:
-  ping | info | tare | load | speed | setcal | calibrate | settime | setppr | cal
+  ping | info | tare | load | speed | setcal | calibrate | settime | setppr | setgain | cal
 
 Use --json to emit JSON for automation.
 """
@@ -154,12 +154,23 @@ def set_cal(ser, slope, tare):
     return {"status": "OK", "type": "SETCAL", "slope": slope, "tare": int(tare)}
 
 
+def set_gain(ser, gain):
+    """Pin the HX711 gain. Firmware >= 1.2.0 auto-switches gain on load, and slope is
+    stored per gain, so calibration must be done with the gain held fixed."""
+    if int(gain) not in (32, 64, 128):
+        raise ValueError("gain must be 32, 64 or 128")
+    stat, head, payload = send_cmd(ser, f"SETGAIN {int(gain)}")
+    if stat != "OK":
+        raise RuntimeError(f"SETGAIN failed: {stat} {head} {payload}")
+    return {"status": "OK", "type": "SETGAIN", "gain": int(gain)}
+
+
 def get_cal(ser):
     stat, head, payload = send_cmd(ser, "CAL?")
     if stat != "OK":
         raise RuntimeError(f"CAL? failed: {stat} {head} {payload}")
     kv = parse_kv((head + " " + payload).strip())
-    for k in ("slope", "tare"):
+    for k in ("slope", "tare", "gain"):
         if k in kv:
             kv[k] = as_number(kv[k])
     return {"status": "OK", "type": "CAL", **kv}
@@ -245,6 +256,12 @@ def main():
     p_cal = sub.add_parser("calibrate", help="Guided calibration with known weight")
     p_cal.add_argument("--weight-g", type=float, required=True, help="known calibration weight in grams")
     p_cal.add_argument("--settle-sec", type=float, default=5.0, help="settling time after putting/removing weight")
+    p_cal.add_argument("--gain", type=int, choices=(32, 64, 128), default=None,
+                       help="pin the HX711 gain first (fw >= 1.2.0: slope is stored per gain, "
+                            "so calibrate each gain you will actually use)")
+
+    p_setgain = sub.add_parser("setgain", help="Pin HX711 gain (32/64/128)")
+    p_setgain.add_argument("--gain", type=int, choices=(32, 64, 128), required=True)
 
     p_settime = sub.add_parser("settime", help="Set device epoch")
     p_settime.add_argument("--unix-ms", type=int, default=None, help="UNIX epoch in ms (defaults to host now)")
@@ -283,6 +300,17 @@ def main():
         elif args.cmd == "tachdiag":
             out = read_tachdiag(ser)
         elif args.cmd == "calibrate":
+            # fw >= 1.2.0 stores slope per gain and switches gain by itself under load.
+            # Pin it first, and read it back at the end: a switch between the loaded and
+            # the unloaded read silently invalidates the whole measurement, and read_load
+            # skips the "OK AUTOGAIN" line so nothing else would show it.
+            gain_before = None
+            if args.gain is not None:
+                _ = set_gain(ser, args.gain)
+            try:
+                gain_before = get_cal(ser).get("gain")
+            except Exception:
+                pass
             # Tare with no load
             _ = do_tare(ser)
             # Ask user to place weight; wait
@@ -300,11 +328,23 @@ def main():
             delta = raw_loaded - tare_raw
             if delta == 0:
                 raise RuntimeError("Calibration failed: raw delta is zero. Check wiring/weight.")
+            gain_after = None
+            try:
+                gain_after = get_cal(ser).get("gain")
+            except Exception:
+                pass
+            if gain_before is not None and gain_after is not None and gain_before != gain_after:
+                raise RuntimeError(
+                    f"Calibration aborted: HX711 gain auto-switched {gain_before} -> {gain_after} "
+                    "during the measurement, so the two raw reads are on different scales. "
+                    "Re-run with --gain to pin it, using a weight that stays inside that gain's range."
+                )
             slope = float(args.weight_g) / float(delta)
             _ = set_cal(ser, slope, tare_raw)
             out = {
                 "status": "OK",
                 "type": "CALIBRATE",
+                "gain": gain_after if gain_after is not None else args.gain,
                 "weight_g": args.weight_g,
                 "raw_loaded": raw_loaded,
                 "tare_raw": tare_raw,
@@ -314,6 +354,9 @@ def main():
 
         elif args.cmd == "settime":
             out = set_time_now(ser, args.unix_ms)
+
+        elif args.cmd == "setgain":
+            out = set_gain(ser, args.gain)
 
         elif args.cmd == "setppr":
             out = set_ppr(ser, args.ppr)
