@@ -103,8 +103,15 @@ are in `requirements.txt`.
 
 Run a profiled test directly (paths are relative to the `py/` working directory):
 ```bash
-python3 acquire_scope_data.py config.json ../react/public/config/<profile>.json
+py/.venv/bin/python acquire_scope_data.py config.json ../react/public/config/<profile>.json
 ```
+
+> **Use `py/.venv`, not the repo-root `.venv`.** Both exist and both have `pyvisa`, `h5py`, `serial`
+> and `numpy`, but **only `py/.venv` has `bleak`**. Launched from the root venv a run starts and
+> looks entirely normal — `py/ble` degrades to `OeUnavailable` by design so an absent BLE stack can
+> never kill a run — and produces a file with **no `/oe_samples` group at all**, with nothing in the
+> run log to say why. Caught 2026-08-25 only because Kim asked for the OE sensor to be checked
+> before a 13 h run that was about to be started from the wrong one.
 Manual mode (no profile — uses `config.json` acquisition defaults only, no motor/temp):
 ```bash
 python3 acquire_scope_data.py config.json
