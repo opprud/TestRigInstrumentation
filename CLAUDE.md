@@ -128,6 +128,24 @@ py/.venv/bin/python acquire_scope_data.py config.json ../react/public/config/<pr
 > later than the first and the stale guard will switch the heater off part-way through the new one.
 > Terminate the old guard (`pkill -f heater_guard.py`, or by pid) before restarting.
 
+> **The heater guard can exit WITHOUT switching the heater off — check the Omron PV after every run.**
+> The guard triggers on `run_end` and sends OFF up to 12 times, but if it cannot *confirm* the switch it
+> logs `state UNKNOWN — command was sent, but could not confirm` and finally
+> `heater guard exiting WITHOUT confirmation`, and stops. It is not a bug — the guard is correctly saying
+> it lost the ability to act — but the heater is then still on and nothing else will touch it. Caught
+> 2026-08-26: the Pi froze at the end of a 13 h run, the guard failed all 12 attempts between 04:13 and
+> 04:19, and the bearing was found **still regulating at PV 100 C against SV 100 C two hours and sixteen
+> minutes later**. **After every run, read the temperature — not `--status`, which returns `???`.** A
+> heater that is really off shows a falling PV within a minute or two:
+>
+> ```bash
+> py/.venv/bin/python shelly_control.py --off heater
+> py/.venv/bin/python omron_temp_poll.py --port /dev/ttyUSB0 --get-pv --once --json   # repeat; it must fall
+> ```
+>
+> Tracked in ticket 0033 (the Pi freeze) — the fix is an *external* watchdog that can cut the heater when
+> the Pi itself is gone; ticket 0017's extra retries cannot help when the host is the thing that failed.
+
 > **Use `py/.venv`, not the repo-root `.venv`.** Both exist and both have `pyvisa`, `h5py`, `serial`
 > and `numpy`, but **only `py/.venv` has `bleak`**. Launched from the root venv a run starts and
 > looks entirely normal — `py/ble` degrades to `OeUnavailable` by design so an absent BLE stack can
@@ -373,6 +391,15 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 - **Secret in `config.json`.** An Azure Blob **SAS connection string** is stored in cleartext
   in `py/config.json`. It should be moved to an environment variable / secret store and
   rotated; do not commit it.
+
+- **Two Azure containers are in live use, and the dashboard points at the wrong one for archives.**
+  Both live on account **`csfbst001`**. The **dashboard** uploads to container **`data`** (hard-coded in
+  `react/src/hooks/useAzureUpload.js`); **`py/tools/upload_to_azure.py`** uploads to container
+  **`eceherning`** under a `<run_id>/` prefix. **The 13 h runs of record are in `eceherning` only** — they
+  are not in `data`, so browsing the dashboard's container finds older ad-hoc uploads that look plausible
+  and are the wrong data. (`config.json → azure.default_container` is `auherning3bearingtester`, which
+  **does not exist** at all — dead and misleading; ticket 0010.) Sending someone a dataset means sending
+  account + container + blob, not a filename.
 
 - **`control` parameters are per-profile only.** Motor constants such as `rpm_per_hz_guess`
   currently have to be repeated in every profile.
