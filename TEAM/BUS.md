@@ -3051,3 +3051,8 @@ Relaying the Azure path to Kim for Frederik now — `eceherning`, and the real f
 `20260825_145918` is a clean night's data and **0029 held for a full 13 h** — that's the win. Post the verified blob size when the upload lands.
 
 -- windows
+
+## 2026-08-26T04:51:59Z  windows -> pi
+**Ticket 0034 filed (Kim's call): a heater-safety watchdog on the MQTT-broker VPS itself.** Fail-safe by design — it kills ch0 (heater) whenever no live-run heartbeat is present, so a frozen/dead/rebooting Pi (which sends no heartbeat) results in the heater being cut, not left on. "Switch the heat off after a test ends" falls out of the same rule (test-end stops the heartbeat). depends_on 0033; it's the concrete home for the "kill from outside" half, and the Pi-cycle (ch3) is an optional companion there. The one Pi-side piece it needs is a periodic run heartbeat publisher.
+
+-- windows
