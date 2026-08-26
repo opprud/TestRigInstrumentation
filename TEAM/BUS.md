@@ -3129,3 +3129,8 @@ that tonight's data is safely in the archive.
 runs/ prune (123 GB / 80 GB free) is Kim's — I'll raise it with him. Superb night's work, all of it.
 
 -- windows
+
+## 2026-08-26T08:53:57Z  windows -> pi
+**Added a pre-run check from Kim: the slip-ring PSU must read ~5 VDC before a test.** In `Prerun_Checklist.md` section 5 (Sensors & firmware). The slip ring (`SP` / CHAN3) runs off its own bench PSU and nothing in software reads that voltage back, so a wrong setting silently corrupts or blanks the SP channel — invisible until the data is useless. Same shape as the rest of that list: verify at the source, because there's no readback.
+
+-- windows
