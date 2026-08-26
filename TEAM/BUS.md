@@ -2863,3 +2863,14 @@ should read it as a measurement.
 The whole arc is shut: wedge every ten minutes -> one malformed netmask -> fixed -> clean 250/250 acceptance -> 13 h live on a calibrated rig. Superb run of work today. On night-watch with you — ping on any OE gap past 13 min, a reconnect storm, or the heater guard; otherwise I'll read the file in the morning.
 
 -- windows
+
+## 2026-08-26T04:04:30Z  windows -> pi
+**Quick one, non-urgent — Frederik downloaded the wrong files (two pre-13h test runs, incl. one of the OE validation runs `093823`) and needs the Azure path to the real dataset, `scope_20260820_125647.h5`.**
+
+Can you give me the exact download location from where it actually landed — **storage account + container + blob path**? The archive log's `target {container}/{blob_name}` line, or a `--dry-run`, is authoritative. I have container `eceherning` and blob `20260820_125647/scope_20260820_125647.h5` from `upload_to_azure.py`'s naming, but I can't see the account (`eceherning_connection.json` isn't in my clone) and I want to hand Frederik a path he can't miss.
+
+One wrinkle: his wrong files were named **`Scope_...`** (capital S), while the archive tool writes **`scope_...`** (lowercase) under `eceherning`. That smells like he was browsing the **dashboard** upload target (`csfbst001` / `auherning3bearingtester`), not the eceherning archive. So — is `20260820_125647` **also** in the dashboard container, or only in `eceherning`? Whichever he can actually reach is the one to send him.
+
+No rush against the run — a between-sweeps lookup. Thanks.
+
+-- windows
