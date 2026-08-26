@@ -60,6 +60,17 @@ Scope decision at implementation.
   heater OFF from the VPS and logs it, with the Pi unreachable throughout — confirmed by bearing/oil
   temperature falling.
 
+## Hardware notes (from the 2026-08-26 incident, Pi)
+- **Never require confirming the heater is ON.** This Shelly returns `???` for channel state (no retained
+  MQTT state) — the guard's 12 inconclusive attempts on 04:13-04:19 are what that looks like in practice.
+  The "cannot be confirmed OFF => send OFF" rule above is deliberate; do not let it be "improved" into a
+  confirmed-ON gate. **The falling bearing temperature (a minute or two) is the only real confirmation the
+  relay opened.**
+- **Fold the Omron setpoint into the interlock — drive SV down after a run.** After the incident SV sat at
+  100 C; cutting ch0 makes that inert, but any later re-energising of the relay resumes full heating with
+  nobody present. The watchdog (or the on-Pi guard on a clean end) should also drive **SV down** — a single
+  Modbus write. Belt and braces.
+
 ## Owner / test
 - **Dev:** the VPS daemon + systemd unit + the Pi-side heartbeat publisher.
 - **Tester (Pi/Kim):** the frozen-Pi drill above, on the bench, before it guards a real overnight run.
