@@ -388,6 +388,29 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 - **Skipped sweeps leave gaps in the HDF5 sweep numbering.** Analysis must iterate the
   existing `sweep_###` groups, not assume contiguous indices.
 
+- **The Pi freezes intermittently — and as of 2026-08-26 it finally leaves evidence.** A freeze takes
+  down SSH, serial, the dashboard and the bus at once, and needs a power cycle of **Shelly channel 3
+  ("CPU")** to recover — `shelly_control.py --off cpu` is useless for this because it runs *on* the Pi;
+  publish to the broker from another machine (commands in ticket 0033). **Never cut channel 0 — that is
+  the heater, and cutting it is the one thing you may safely do from outside; cycling the Pi is the other.**
+
+  Until 2026-08-26 every freeze was unfalsifiable: Raspberry Pi OS ships `Storage=volatile` in
+  `/usr/lib/systemd/journald.conf.d/40-rpi-volatile-storage.conf`, and `ForwardToSyslog=yes` went nowhere
+  because no syslog daemon is installed, so nothing at all survived a reboot. Now overridden by
+  `/etc/systemd/journald.conf.d/50-persistent-for-freeze-diagnosis.conf` (persistent, capped at 500 MB,
+  `SyncIntervalSec=60s`), plus a per-minute `rig-health` sampler (`rig-health.timer`) logging memory,
+  load, CPU temperature, **`vcgencmd get_throttled`** (undervoltage — a classic Pi freeze cause) and free
+  disk. **After a freeze, read the previous boot before power-cycling again:**
+
+  ```bash
+  journalctl -b -1 -n 100 --no-pager          # the previous boot's last words
+  journalctl -t rig-health -b -1 | tail -60   # memory / thermal / undervoltage trend
+  journalctl -b -1 -p err --no-pager          # oops, OOM killer, USB resets
+  ```
+
+  A freeze mid-run still costs the **whole** HDF5 (it is never flushed — see the flush note above), and it
+  also defeats the heater guard. Ticket 0033.
+
 - **Secret in `config.json`.** An Azure Blob **SAS connection string** is stored in cleartext
   in `py/config.json`. It should be moved to an environment variable / secret store and
   rotated; do not commit it.

@@ -110,3 +110,60 @@ The Shelly API was **already refusing connections at 04:13:21**, one minute afte
 hours before the reboot. If that is the onset rather than a coincidence, the freeze began at *teardown* —
 when 13 h of scope sockets, the held BLE session and the HDF5 buffers were all released — rather than
 during steady-state acquisition. Worth pointing the first instrumented look at the teardown path.
+
+## Instrumentation is now IN PLACE on the Pi (pi, 2026-08-26, authorised by Kim)
+
+The "cheap first step" is done. The next freeze will leave evidence.
+
+### Why nothing survived before — it was deliberate, not an oversight
+Raspberry Pi OS ships **`/usr/lib/systemd/journald.conf.d/40-rpi-volatile-storage.conf`** containing
+`Storage=volatile`, to spare the SD card. `/var/log/journal/` already existed but was empty and unused.
+The same drop-in directory sets `ForwardToSyslog=yes`, which goes **nowhere** because no syslog daemon is
+installed — hence no `/var/log/syslog` either. So the host was configured to forget, from two directions.
+
+### What was changed
+**1. Persistent journal** — `/etc/systemd/journald.conf.d/50-persistent-for-freeze-diagnosis.conf`
+(`/etc` overrides `/usr/lib`, and 50 sorts after 40):
+```ini
+[Journal]
+Storage=persistent
+SystemMaxUse=500M       # capped — SD wear is the reason the default is volatile
+SystemMaxFileSize=50M
+SystemMaxFiles=20
+SystemKeepFree=2G
+SyncIntervalSec=60s     # default 5 min is exactly the window lost in a freeze
+```
+`SyncIntervalSec` matters more than it looks: journald syncs ERR-and-above immediately but buffers lower
+priorities for 5 minutes by default, so the run-up to a hard hang — the interesting part — was the part
+guaranteed to be lost. Verified after `journalctl --flush`: `/var/log/journal/<machine-id>/` now holds the
+journal, `/run/log/journal` is empty.
+
+**2. Per-minute health sampler** — `/usr/local/bin/rig-health-sample.sh`, driven by
+`rig-health.timer`/`.service` (enabled at boot, 60 s interval). One journal line per minute, tag
+`rig-health`:
+```
+mem_avail=15148M/16218M swap_used=0M load=1.42 1.04 0.69 temp=58.2C throttled=0x0 root_free=80G
+  top=[claude:583M labwc:111M python:84M ]
+```
+This covers the hypotheses the journal alone cannot: **slow memory growth** over a 13 h run (acquisition +
+`bleak`), **thermal**, and — via `vcgencmd get_throttled` — **PSU sag / undervoltage**, which is a classic
+Pi freeze cause and would otherwise be invisible. Baseline on an idle host: 15.1 GB of 16 GB available,
+0 swap, 59 C, `throttled=0x0`, 80 GB free.
+
+### After the next freeze, read this before power-cycling anything
+```bash
+journalctl -b -1 -n 100 --no-pager          # the previous boot's last words (now exists)
+journalctl -t rig-health -b -1 | tail -60   # the last hour of memory/thermal/undervoltage trend
+journalctl -b -1 -p err --no-pager          # kernel oops, OOM killer, USB/serial resets
+```
+A `throttled` value other than `0x0` in the final samples implicates the power supply; a falling
+`mem_avail` implicates a leak; neither moving points at the BLE/USB/SD paths instead.
+
+### To revert
+Delete `/etc/systemd/journald.conf.d/50-persistent-for-freeze-diagnosis.conf` and
+`systemctl restart systemd-journald`; `systemctl disable --now rig-health.timer` and remove the three
+files under `/usr/local/bin` and `/etc/systemd/system`.
+
+**Still open on this ticket:** the external heartbeat -> Shelly watchdog (must cut channel 0 Heater as
+well as cycling channel 3 Pi, heater first), and the periodic HDF5 flush. The instrumentation above only
+makes the *cause* findable; it does not yet make an unattended run survive a freeze.
