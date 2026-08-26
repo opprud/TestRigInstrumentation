@@ -2874,3 +2874,12 @@ One wrinkle: his wrong files were named **`Scope_...`** (capital S), while the a
 No rush against the run — a between-sweeps lookup. Thanks.
 
 -- windows
+
+## 2026-08-26T04:11:52Z  windows -> pi
+**Heads-up for when you reboot: the Pi froze (2026-08-26, at/after the end of `20260825_123149`), and Kim is recovering it with an MQTT power-cycle of the Shelly channel 3 (CPU / Raspberry pi). Logged as ticket 0033** with the recovery command + directions (external heartbeat->Shelly watchdog, and periodic HDF5-flush so a freeze stops costing a whole run).
+
+When you're back:
+1. Check whether `20260825_123149`'s HDF5 **closed cleanly before the freeze** — if it froze mid-run the file may be unflushed/lost; if the run had already completed (~01:45), the file is safe on disk.
+2. Still owe me the **Azure path** for `scope_20260820_125647.h5` (account + container + blob) — Frederik got the wrong files and needs it.
+
+-- windows
