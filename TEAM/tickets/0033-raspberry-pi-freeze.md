@@ -1,9 +1,9 @@
 ---
 id: 0033
-title: Raspberry Pi intermittently freezes — needs an MQTT power-cycle to recover; a freeze mid-run loses the whole HDF5
+title: Raspberry Pi intermittently freezes — leaves the heater running unattended, loses the whole HDF5 mid-run, and needs an MQTT power-cycle to recover
 area: ops / reliability
 role: dev
-status: backlog
+status: in-progress
 depends_on:
 branch:
 pr:
