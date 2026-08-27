@@ -1,7 +1,7 @@
 {
-  "name": "Noise floor decoupled 30-50-70",
-  "description": "Ticket 0035 - system noise floor with the motor coupling DISCONNECTED from the rig shaft, so no bearing signal reaches the sensors. Control experiment for the lubrication-vs-temperature finding: does the noise floor itself rise with temperature? Two conditions at each of 30/50/70 C - motor OFF (pure sensor/thermal/environmental floor) and motor ON but decoupled (rpm staircase 600-3000, the motor's own EMI/vibration into the sensors). Motor-on minus motor-off isolates the motor's contribution. The motor is held OFF through both heating ramps, which also yields a continuous motor-off baseline across the whole 30-70 C span, not just at the three plateaus. Scope channels and acquisition are IDENTICAL to Keratech22.json and the speeds are drawn from its own staircase, so every cell overlays directly onto the 13 h data. PREREQUISITES: coupling physically off; OE sensor awake; heater switched ON (a CLI-started run never turns it on - start from the dashboard or set shelly_control.py --on heater by hand). NOTE: if the tach's reflective mark sits on the rig side of the coupling, rpm_meas reads 0 for the whole test - control is open_loop so this is harmless, and the speed of record is 59.83 x vfd_cmd_hz. Ramps are 50 min each, sized from the 30 C/h max heating rate measured on run 20260825_145918; with the bearing decoupled there is no friction heat, so PV may fall short of SV. Analysis must key on the logged omron_pv_c, not on the target.",
-  "duration_minutes": 166,
+  "name": "Noise floor decoupled 40-50-70",
+  "description": "Ticket 0035 - system noise floor with the motor coupling DISCONNECTED from the rig shaft, so no bearing signal reaches the sensors. Control experiment for the lubrication-vs-temperature finding: does the noise floor itself rise with temperature? Two conditions at each of 40/50/70 C - motor ON but decoupled (rpm staircase 600-3000) and motor OFF (pure sensor/thermal/environmental floor). Motor-on minus motor-off isolates the motor's own contribution. TEMPERATURES 40/50/70 (changed from 30 on 2026-08-27, Kim's call, on two measurements): (a) with the shaft stationary the oil is not stirred, so the rig overshot SV 30 to 38 C within two minutes and then sat at 36 and would not come down - 30 C is not holdable; (b) Keratech22's own temperature steps are 40/45/50.../100, so 40/50/70 overlay exactly onto three real 13 h steps while 30 C has no counterpart in that data at all. ORDER (Kim): at each temperature the decoupled staircase runs FIRST, then the motor-off baseline immediately after at the same temperature - minimal time between the two conditions being subtracted - and that baseline runs straight into the next motor-off ramp, so motor-off is one continuous block. The 20-25 min settle before each staircase is NOT slack: heating is fast but overshoots ~8 C and decays slowly, and measuring inside that transient would corrupt exactly what the test measures. CONFIRMED 2026-08-27: the tach's reflective mark is on the RIG side of the coupling, so rpm_meas reads 0 for the whole test and there is NO independent speed readback - the drive is the only witness. Kim confirmed by eye that the motor turns. Speed of record is 59.83 x vfd_cmd_hz. Cross-check the motor-on segments against UL/AE energy, which must rise with commanded Hz if the motor really ran. Analysis keys on logged omron_pv_c, never the target. NOTE: SP/CHAN3 is known bad (ticket 0038 - no rotation-correlated signal), so its 'noise floor' here is expected to be unchanged; that is a prediction this test can falsify, not a result.",
+  "duration_minutes": 126,
   "control": {
     "rpm_per_hz_guess": 59.5,
     "open_loop": true
@@ -13,56 +13,104 @@
         "value": 0
       },
       {
-        "time_sec": 599,
+        "time_sec": 1199,
         "value": 0
       },
       {
-        "time_sec": 600,
+        "time_sec": 1200,
         "value": 600
       },
       {
-        "time_sec": 779,
+        "time_sec": 1379,
         "value": 600
       },
       {
-        "time_sec": 780,
+        "time_sec": 1380,
         "value": 1200
       },
       {
-        "time_sec": 959,
+        "time_sec": 1559,
         "value": 1200
       },
       {
-        "time_sec": 960,
+        "time_sec": 1560,
         "value": 1800
       },
       {
-        "time_sec": 1139,
+        "time_sec": 1739,
         "value": 1800
       },
       {
-        "time_sec": 1140,
+        "time_sec": 1740,
         "value": 2400
       },
       {
-        "time_sec": 1319,
+        "time_sec": 1919,
         "value": 2400
       },
       {
-        "time_sec": 1320,
+        "time_sec": 1920,
         "value": 3000
       },
       {
-        "time_sec": 1499,
+        "time_sec": 2099,
         "value": 3000
       },
       {
-        "time_sec": 1500,
+        "time_sec": 2100,
         "value": 0
+      },
+      {
+        "time_sec": 2399,
+        "value": 0
+      },
+      {
+        "time_sec": 2400,
+        "value": 0
+      },
+      {
+        "time_sec": 3599,
+        "value": 0
+      },
+      {
+        "time_sec": 3600,
+        "value": 600
+      },
+      {
+        "time_sec": 3779,
+        "value": 600
+      },
+      {
+        "time_sec": 3780,
+        "value": 1200
+      },
+      {
+        "time_sec": 3959,
+        "value": 1200
+      },
+      {
+        "time_sec": 3960,
+        "value": 1800
+      },
+      {
+        "time_sec": 4139,
+        "value": 1800
+      },
+      {
+        "time_sec": 4140,
+        "value": 2400
+      },
+      {
+        "time_sec": 4319,
+        "value": 2400
+      },
+      {
+        "time_sec": 4320,
+        "value": 3000
       },
       {
         "time_sec": 4499,
-        "value": 0
+        "value": 3000
       },
       {
         "time_sec": 4500,
@@ -74,156 +122,124 @@
       },
       {
         "time_sec": 4800,
+        "value": 0
+      },
+      {
+        "time_sec": 6299,
+        "value": 0
+      },
+      {
+        "time_sec": 6300,
         "value": 600
       },
       {
-        "time_sec": 4979,
+        "time_sec": 6479,
         "value": 600
       },
       {
-        "time_sec": 4980,
+        "time_sec": 6480,
         "value": 1200
       },
       {
-        "time_sec": 5159,
+        "time_sec": 6659,
         "value": 1200
       },
       {
-        "time_sec": 5160,
+        "time_sec": 6660,
         "value": 1800
       },
       {
-        "time_sec": 5339,
+        "time_sec": 6839,
         "value": 1800
       },
       {
-        "time_sec": 5340,
+        "time_sec": 6840,
         "value": 2400
       },
       {
-        "time_sec": 5519,
+        "time_sec": 7019,
         "value": 2400
       },
       {
-        "time_sec": 5520,
+        "time_sec": 7020,
         "value": 3000
       },
       {
-        "time_sec": 5699,
+        "time_sec": 7199,
         "value": 3000
       },
       {
-        "time_sec": 5700,
+        "time_sec": 7200,
         "value": 0
       },
       {
-        "time_sec": 8699,
+        "time_sec": 7499,
         "value": 0
       },
       {
-        "time_sec": 8700,
+        "time_sec": 7500,
         "value": 0
       },
       {
-        "time_sec": 8999,
-        "value": 0
-      },
-      {
-        "time_sec": 9000,
-        "value": 600
-      },
-      {
-        "time_sec": 9179,
-        "value": 600
-      },
-      {
-        "time_sec": 9180,
-        "value": 1200
-      },
-      {
-        "time_sec": 9359,
-        "value": 1200
-      },
-      {
-        "time_sec": 9360,
-        "value": 1800
-      },
-      {
-        "time_sec": 9539,
-        "value": 1800
-      },
-      {
-        "time_sec": 9540,
-        "value": 2400
-      },
-      {
-        "time_sec": 9719,
-        "value": 2400
-      },
-      {
-        "time_sec": 9720,
-        "value": 3000
-      },
-      {
-        "time_sec": 9899,
-        "value": 3000
-      },
-      {
-        "time_sec": 9900,
-        "value": 0
-      },
-      {
-        "time_sec": 9959,
+        "time_sec": 7559,
         "value": 0
       }
     ],
     "temperature": [
       {
         "time_sec": 0,
-        "value": 30
+        "value": 40
       },
       {
-        "time_sec": 1499,
-        "value": 30
+        "time_sec": 1199,
+        "value": 40
       },
       {
-        "time_sec": 1500,
+        "time_sec": 1200,
+        "value": 40
+      },
+      {
+        "time_sec": 2399,
+        "value": 40
+      },
+      {
+        "time_sec": 2400,
         "value": 50
       },
       {
-        "time_sec": 4499,
+        "time_sec": 3599,
         "value": 50
       },
       {
-        "time_sec": 4500,
+        "time_sec": 3600,
         "value": 50
       },
       {
-        "time_sec": 5699,
+        "time_sec": 4799,
         "value": 50
       },
       {
-        "time_sec": 5700,
+        "time_sec": 4800,
         "value": 70
       },
       {
-        "time_sec": 8699,
+        "time_sec": 6299,
         "value": 70
       },
       {
-        "time_sec": 8700,
+        "time_sec": 6300,
         "value": 70
       },
       {
-        "time_sec": 9899,
+        "time_sec": 7499,
         "value": 70
       },
       {
-        "time_sec": 9900,
+        "time_sec": 7500,
         "value": 25
       },
       {
-        "time_sec": 9959,
+        "time_sec": 7559,
         "value": 25
       }
     ]
