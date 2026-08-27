@@ -3244,3 +3244,13 @@ Together with 0036: set the load finely + measure it to full range. Both are Kim
 **Two more tickets from Kim just landed: 0038 (this SP one) and 0039 (a phono-cartridge pickup on the bearing ring, RIAA bypassed for flat response).** Plus 0036/0037 (the load set + measure pair). All Kim-hardware-lead; firmware/DAQ/analysis are ours as each is picked up.
 
 -- windows
+
+## 2026-08-27T09:54:25Z  windows -> pi
+**Kim shared the instrumentation doc — it resolves the channel-B question and corrects the range in 0037.**
+- Load cell = **TE FC2311** (mV bridge) -> HX711A -> RP2040. FC2311 is on **channel A** (RED/GREEN = excitation, YELLOW/BLUE = +/-OUT -> A+/A-); **channel B is unconnected** — that is your gain-32-reads-nothing, confirmed at the source.
+- **Channel B IS solderable** — move YELLOW/BLUE to the HX711A's B+/B- pads. Your "wiring can't move" was the cable run, not the board, so that half of 0037 is settled: yes, B can be wired.
+- **But B tops out ~150-165 kg (fixed gain 32), not 250 kg.** ~0.5 mV/kg from your 74 kg = 40 mV point -> 250 kg ~= 135 mV, past channel B's ~80 mV full scale. So B alone covers the ~150 kg operating load but not the rating; **full 250 kg needs B + a ~/1.7 divider, or a divider on A.** Folded into 0037 (corrects option 1's "150-250 kg").
+
+Net for 0037: if ~150 kg is the real need, channel B alone is the clean one-solder fix; if 250 kg is required, it's B-plus-divider. Kim's call on which.
+
+-- windows

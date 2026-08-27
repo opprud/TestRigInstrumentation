@@ -27,6 +27,26 @@ at the ~150 kg operating load the cell reads over-range (`ERR 21`, `mass_g` null
    tolerance and tempco carefully, because they sit in the measurement and their drift/mismatch shows up as
    load error.
 
+## What the instrumentation doc settles (FB-Instrumentation PDF, shared 2026-08-26)
+- **Load cell = TE Connectivity FC2311** (millivolt-output resistive Wheatstone bridge) -> **HX711A** ->
+  RP2040 over USB. FC2311 wires: RED = V+ (E+), GREEN = GND (E-), YELLOW = +OUTPUT (A+), BLUE = -OUTPUT
+  (A-) — i.e. **wired to HX711 channel A.** Channel B (B+/B-) is **unconnected**, which is exactly why
+  gain-32 read nothing.
+- **"Move to channel B" is solderable, so that discrepancy is resolved: yes.** Re-land the signal pair
+  (YELLOW +OUT / BLUE -OUT) on the HX711A's **B+/B-** pads, excitation RED/GREEN unchanged. The board
+  exposes the B pins — Kim's read is right; Pi's "wiring can't move" was about the cable run, not the board.
+- **But channel B does NOT reach 250 kg.** Channel B is fixed **gain 32** ~= 2x the gain-64 range that rails
+  at 74 kg, so it reaches only **~150-165 kg** — it **covers the ~150 kg operating load** but not the full
+  250 kg rating. Empirically the FC2311 puts out ~40 mV at 74 kg (~0.5 mV/kg), so 250 kg ~= 135 mV, past
+  channel B's ~80 mV full scale. (This corrects the "150-250 kg" in option 1 above — channel B tops out
+  near the operating load, not the rating.)
+
+**So the decision this forces:**
+- **If measuring the ~150 kg operating load is enough:** channel B alone is the clean answer — one
+  re-solder, no resistors in the bridge signal, re-enable gain 32 in firmware + re-calibrate.
+- **If the full 250 kg is genuinely required:** channel B is not sufficient — add a modest resistor divider
+  (~/1.7 into channel B) or size a divider on channel A for 250 kg. Then the divider trade-offs below apply.
+
 ## Trade-offs
 - **Channel B:** no added analog components in the signal (best for noise/drift), but gain 32 is coarser
   (fewer counts per kg), it depends on the wiring being feasible, and the firmware currently *disabled*
