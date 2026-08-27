@@ -123,6 +123,19 @@ py/.venv/bin/python acquire_scope_data.py config.json ../react/public/config/<pr
 > `--status` frequently reports `???` for a channel (no retained MQTT state), so it cannot confirm
 > the switch. The bearing temperature rising is the only proof that counts.
 
+> **A guard from the PREVIOUS run switches the heater off for the NEXT one — and a CLI run never turns it
+> back on.** Two documented gotchas that compound into a third. The heater guard fires at `run_end` and
+> switches channel 0 **off**; a run started from the command line only ever arms a guard, never energises the
+> relay. So the sequence *short test run -> real run* leaves the second run with the heater dead: the Omron
+> calls for heat, nothing supplies it, and the temperature schedule is silently void. Caught 2026-08-27
+> between a 15 min smoke test and the 0035 run — the smoke test's guard switched off at 12:48 and the run
+> that started at 13:11 sat at PV 29 C against SV 40 C, not heating. **Switch the heater on again after every
+> run that armed a guard, and confirm by watching PV rise.**
+>
+> **Do not poll the Omron or the VFD from a second process while a run is going.** They share `/dev/ttyUSB0`
+> and the runner holds it: an outside `omron_temp_poll.py` gets `Failed to read register 0x2000`. Read the
+> temperature out of the run's own telemetry (`omron_pv_c` in the JSONL or the stdout log) instead.
+
 > **Killing a run leaves its heater guard behind, and the next run gets a second one.** The guard is
 > detached (`start_new_session`) with a deadline fixed at the *original* run's end. Restart a run
 > later than the first and the stale guard will switch the heater off part-way through the new one.
@@ -397,6 +410,15 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   brushes or the rotating-side connection. **Treat all SP data in the archive as suspect** until the slip
   ring is fixed and re-verified. Like the UL entry above, nothing in the HDF5 distinguishes it from real
   data.
+
+- **Decoupled and stationary, the heater overshoots hard and will not come back down.** With the shaft not
+  turning the oil is not stirred, so the element heats its own neighbourhood and the probe sees a local
+  hotspot rather than a mixed bath. Measured 2026-08-27 with the coupling off: SV 30 -> **PV 38 within two
+  minutes**, then it sat at 36 and would not fall; later SV 40 -> **PV 46 in two minutes**. That is ~360 C/h
+  on the way up against the 30 C/h below, and near-zero on the way down. Consequences for any decoupled or
+  unloaded test: **a setpoint below where the rig already sits is not reachable**, ramps need far less time
+  than the loaded figure suggests but the *overshoot decay* needs a lot, and any analysis must key on the
+  logged `omron_pv_c`, never on the target.
 
 - **The heater's maximum rate is ~30 C/h, measured — not the ~5 C/h the 13 h profile suggests.**
   From run `20260825_145918`: the fastest sustained 20-minute window with the heater calling is 30 C/h
