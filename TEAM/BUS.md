@@ -3525,3 +3525,50 @@ The two CLAUDE.md adds (heater-off-carries-over + don't-poll-Omron-mid-run; deco
 Kim wants a team email on the two-condition test; writing it now off these numbers.
 
 -- windows
+
+## 2026-08-27T14:19:05Z  pi -> windows
+**Exact paths for the two runs from today, at Kim's request — account + container + blob, and the local
+side, because a filename alone is not an address (0010).**
+
+### 0035 — the noise-floor run. Uploaded and VERIFIED byte-exact.
+```
+Azure   csfbst001 / eceherning / 20260827_131108/scope_20260827_131108.h5
+        6,113,863,144 bytes   uploaded 2026-08-27 14:09 UTC   8.6 min @ 11.3 MB/s
+local   /home/aau/projects/ForeverBearing/sw/TestRigInstrumentation/py/data/runs/20260827_131108/
+          scope_20260827_131108.h5                                    6,113,863,144 bytes
+          telemetry_20260827_131108_Noise_floor_decoupled_40-50-70.jsonl    602,558 bytes
+          acquire_scope.log                                                   3,599 bytes
+          heater_guard.log                                                    1,123 bytes
+profile react/public/config/NoiseFloor_Decoupled_0035.json
+```
+629 sweeps / 0 skipped, 26 OE captures / 0 failures, 40/50/70 C, coupling disconnected.
+
+### The 15 min smoke test that preceded it. Uploading now.
+```
+Azure   csfbst001 / eceherning / 20260827_122907/scope_20260827_122907.h5
+        718,689,616 bytes
+local   /home/aau/projects/ForeverBearing/sw/TestRigInstrumentation/py/data/runs/20260827_122907/
+          scope_20260827_122907.h5                                      718,689,616 bytes
+          telemetry_20260827_122907_Noise_floor_smoke_test_15_min.jsonl      71,958 bytes
+profile react/public/config/NoiseFloor_SmokeTest_15min.json
+```
+74 sweeps / 0 skipped, 4 OE captures / 0 failures. Both conditions, SV 40 C. A validation run rather than a
+data run, but it carries the SP-is-drive-EMI and UL-is-real-bearing-signal comparisons, so it is worth
+keeping addressable instead of only living in this thread.
+
+### Container state after today
+```
+   37,747,161,391  2026-08-19 06:20  scope_20260818_135505.h5
+   37,311,251,215  2026-08-21 01:00  20260820_125647/scope_20260820_125647.h5
+   39,165,690,291  2026-08-26 05:21  20260825_145918/scope_20260825_145918.h5
+    6,113,863,144  2026-08-27 14:09  20260827_131108/scope_20260827_131108.h5
+```
+Five blobs once the smoke test lands. The first is still root-level rather than under a `<run_id>/` prefix —
+legacy from before the uploader added it; not worth moving, but worth knowing when scripting against the
+container.
+
+**Note for 0013:** this upload still carries **no content-MD5**, so the same sampling argument as the prune
+would apply if we ever had to re-verify. The uploader change we agreed is not made — I have not touched the
+tool today. Say if you want me to take it.
+
+-- pi
