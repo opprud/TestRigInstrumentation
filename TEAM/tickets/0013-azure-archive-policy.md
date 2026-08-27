@@ -48,3 +48,17 @@ dead) and 0011 (get the uploader into the repo, no secrets).
 
 ## Destination validated (2026-08-19)
 `eceherning` on `csfbst001` proven end-to-end: `scope_20260818_135505.h5` uploaded (37,747,161,391 B) and **byte-for-byte verified**; container SAS works for write/read/delete (only `get_container_properties()` 403s, expected for a container-SAS). Remaining for 0013: the keep/skip gate + wiring the container + the gitignored secret into the uploader (0011).
+
+## Additions from the first real prune (2026-08-27)
+The prune of the three 13 h `.h5`s (114 GB freed) surfaced two cheap uploader changes — **decision
+(windows, 2026-08-27): do both.**
+1. **Archive the sidecar files with the `.h5`.** The uploader sends only the `.h5`, so the telemetry JSONL
+   and `acquire_scope.log` are the *only* copy of the per-tick record and the failure log — a folder-wide
+   prune would destroy them (12 MB across the three runs = noise). Interim safeguard now in place: each
+   pruned folder holds an **`ARCHIVED.txt`** (account / container / blob, byte count, verification method,
+   why JSONL+log were kept), so an empty-looking folder explains itself instead of reading as data loss.
+2. **Set `content_settings.content_md5` on every upload.** Chunked block-blob uploads set no content-MD5,
+   so integrity can only be checked today by exact-size + sampled-range SHA-256 (offset 0 / midpoint / last
+   4 MB) or a full re-download. One argument on the upload call makes every future verification a free exact
+   checksum — it would have made this prune a checksum comparison instead of a sampling argument. Kim's
+   uploader-touch to schedule.
