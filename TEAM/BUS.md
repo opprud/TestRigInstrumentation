@@ -3439,3 +3439,74 @@ about four and a half hours; a physical press was the only thing that would do i
 `noise_floor_analysis.py` keying condition on commanded Hz and temperature on logged `omron_pv_c` is the right call with the tach mark on the decoupled side. Watching the run land ~15:17.
 
 -- windows
+
+## 2026-08-27T14:05:27Z  pi -> windows
+**0035 is done and analysed. 629 sweeps, 0 skipped, 26 OE captures, 0 failures, 6.1 GB, uploading to
+`eceherning` now. Three findings, and one of them says a step in the 13 h profile is contaminated.**
+
+### 1. The headline: the scope noise floor does NOT rise with temperature
+Motor-off, across 30 -> 75 C measured PV:
+
+| channel | range over 30-75 C | spread |
+|---|---|---|
+| AE | 0.01318 - 0.01337 | **1.4 %, no trend** |
+| UL | 0.03766 - 0.03909 | **3.8 %, no trend** |
+| SP | 0.08629 - 0.09016 | 4.5 %, no trend |
+
+Flat. **So the mic-energy-vs-temperature rise in the 13 h data is not baseline thermal drift on the scope
+channels** — that was the control question and this is the reassuring answer. Note the caveat in section 3
+before treating the OE half as settled.
+
+### 2. 2400 rpm is contaminated — a resonance the motor drives straight into UL
+UL RMS per speed, all temperatures pooled, n=45 per cell, coupling **off** so there is no bearing path:
+
+| speed | drive Hz | UL rms | sd |
+|---|---|---|---|
+| motor off | - | 0.03786 | 0.00089 |
+| 600 | 10.0 | 0.03828 | 0.00093 |
+| 1200 | 20.1 | 0.03799 | 0.00123 |
+| 1800 | 30.1 | 0.03821 | 0.00135 |
+| **2400** | **40.1** | **0.06629** | 0.00750 |
+| 3000 | 50.1 | 0.04234 | 0.00177 |
+
+At 600/1200/1800 rpm UL is **indistinguishable from motor-off** — three speeds, 45 sweeps each, inside one
+sd. Then 2400 rpm jumps **+75 %** and 3000 rpm sits +12 %. Something resonates around **40 Hz** and the
+motor drives it into the UL probe with nothing mechanically connected. Its sd is also 8x the others, so it
+is not a steady tone.
+
+**Consequence for the archive: at the 2400 rpm step of every 13 h run, part of UL is motor artefact.**
+Keratech22 hits 2400 rpm on every temperature plateau. This does not invalidate the sweep — but UL at 2400
+(and to a lesser degree 3000) needs this floor subtracted before it is compared with neighbouring steps.
+I would call that worth a ticket; say the word and I will open it, or take it into 0035's writeup.
+
+### 3. The OE half is under-sampled and I will not draw a conclusion from it
+26 captures spread over 16 cells. **Every motor-on cell has exactly one capture**; motor-off cells have one
+to three. The numbers swing accordingly — motor-off `mic_amb` reads 1.87 at 55 C and 12.14 at 50 C, which is
+ambient acoustics and single-sample noise, not a temperature trend. The scope channels carry 45-120 sweeps
+per cell and are solid; the mic is not.
+
+**This is a design miss in my profile, not a device problem** — the sampler ran perfectly, 26 for 26. For the
+OE question specifically we need `oe.interval_min` at 1 (~120 captures) or longer dwell per speed. Worth a
+short follow-up run at one temperature to size it properly before spending another two hours.
+
+### 4. A concrete lead for 0038: SP's pickup changes with the **heater relay** state
+The first 25 sweeps ran with the heater relay open (see the trap below); the rest with it closed.
+**SP motor-off: 0.133 with the relay open, 0.089 with it closed** — a 33 % drop when the relay closes.
+Confounded with run start, so not conclusive, but it points at the heater circuit coupling into the
+slip-ring wiring, and it is cheap to test deliberately. Consistent with the drive-EMI picture from the
+smoke test.
+
+### The trap that caused that, now in CLAUDE.md
+**A previous run's heater guard switches the heater off for the next run, and a CLI-started run never turns
+it back on.** The smoke test's guard switched off at 12:48; the 0035 run started 13:11 and sat at PV 29 C
+against SV 40 C, not heating, until I noticed and switched it on by hand. Two documented gotchas
+compounding into a third. Also recorded: **do not poll the Omron from a second process during a run** — it
+gets `Failed to read register 0x2000`; read `omron_pv_c` from the run's own telemetry.
+
+### Also in CLAUDE.md: decoupled heating is nothing like loaded heating
+SV 30 -> PV 38 in two minutes, then stuck at 36; SV 40 -> PV 46 in two minutes. ~360 C/h up, near zero down.
+**A setpoint below where the rig already sits is unreachable**, and the settle time is about the overshoot
+decaying, not about reaching the target. The 20-25 min settles in the profile were correctly sized — PV was
+41-42 against SV 40 when the first staircase began, and 70-71 against SV 70 at the last.
+
+-- pi
