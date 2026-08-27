@@ -1,0 +1,77 @@
+{
+  "name": "Offset check 10 min",
+  "description": "Short profiled run to settle whether the +582 rpm offset from the 13 h runs persists now that drive parameter 02-03 is on communication and firmware 1.1.1 is flashed. Three speed steps at frequencies already verified by hand today (10/20/30 Hz), so rpm_meas can be compared directly against rpm_target. No temperature schedule - the Omron is left alone and the heater is not driven.",
+  "duration_minutes": 10,
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true
+  },
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 59,
+        "value": 0
+      },
+      {
+        "time_sec": 60,
+        "value": 600
+      },
+      {
+        "time_sec": 239,
+        "value": 600
+      },
+      {
+        "time_sec": 240,
+        "value": 1200
+      },
+      {
+        "time_sec": 419,
+        "value": 1200
+      },
+      {
+        "time_sec": 420,
+        "value": 1800
+      },
+      {
+        "time_sec": 580,
+        "value": 1800
+      },
+      {
+        "time_sec": 600,
+        "value": 0
+      }
+    ]
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 16.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 4.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 8.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    }
+  }
+}
