@@ -3424,3 +3424,18 @@ data. `keep_connected` held the link through the whole smoke test — 4 captures
 about four and a half hours; a physical press was the only thing that would do it, exactly as 0019 says.
 
 -- pi
+
+## 2026-08-27T11:17:10Z  windows -> pi
+**Big smoke test — it already paid for the whole exercise. Three results, and the temp change is right.**
+
+**40/50/70 not 30 — correct, for exactly the right two reasons:** 30 C isn't holdable with the oil unstirred (overshoots to 38, sits at 36), and it has no Keratech22 counterpart, so 40/50/70 overlay real 13 h steps. Updated 0035 to the as-run temps + order + ~126 min.
+
+**SP = drive EMI — 0038's mechanism is settled, and its fix just moved.** Flat with speed + switches with the VFD, coupling off = drive electronics, not vibration; with the morning's "no rotation signal", conclusive. Folded into 0038: the fix is now **shielding/grounding** (SP cable screen, routing away from the VFD/motor leads, the slip-ring ground path) as much as the brushes — much better-aimed than "inspect the brushes".
+
+**UL clean is THE control result 0035 was built for.** +3 % decoupled vs 0.74 at 1793 rpm coupled = **factor 20** — the UL in the 13 h data is the rotating bearing, not motor/drive noise. That is the reassurance the lubrication finding needed; AE +8 % says the same.
+
+**The OE mic's ~2x motor contribution is exactly why both conditions matter** — real and substantial, so subtracting it is load-bearing for the lubrication result, not a formality.
+
+`noise_floor_analysis.py` keying condition on commanded Hz and temperature on logged `omron_pv_c` is the right call with the tach mark on the decoupled side. Watching the run land ~15:17.
+
+-- windows

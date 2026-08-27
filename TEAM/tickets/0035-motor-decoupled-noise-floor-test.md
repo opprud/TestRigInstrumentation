@@ -39,16 +39,19 @@ to see how the noise floor behaves with temperature.
   temperature steps, the pre-run checklist (incl. the new slip-ring ~5 VDC check).
 
 ## Profile — BUILT 2026-08-27 (`react/public/config/NoiseFloor_Decoupled_0035.json`)
-- **Temperatures: 30 / 50 / 70 C** — 30 C is the held low (Kim + windows converged on it; the rig's own
-  resting point drifts 24 -> 28 C on friction alone, so a held nominal is the comparable choice).
+- **Temperatures: 40 / 50 / 70 C** (as-run, changed from 30 by Kim 2026-08-27). **30 C is not holdable
+  decoupled** — with the shaft stationary the oil is not stirred, so it overshoots SV 30 to 38 C and sits at
+  36; and Keratech22 has **no 30 C step**, so 40/50/70 overlay three *real* 13 h temperature steps exactly.
+  As-run order: staircase first at each temperature, motor-off baseline immediately after (the 20-25 min
+  settle before each staircase is the overshoot decaying — measuring inside it would corrupt the result).
 - At each temperature, **two segments**: **motor-off baseline** (10 min at 30, 5 min at 50/70) then a
   **decoupled staircase** 600 / 1200 / 1800 / 2400 / 3000 rpm, 3 min each. Speeds + acquisition +
   `scope_channels` copied from `Keratech22.json` verbatim, so every cell overlays the 13 h data without
   rescaling. ~830 sweeps, ~8 GB, ~33 OE captures at 5 min.
-- **Duration ~2 h 46 min, not "under an hour" — the heater sets the floor.** Measured rate from the 13 h run
-  is 30 C/h with the heater calling, so 30->50 and 50->70 are ~40 min each (50 min + 5 min settle allowed):
-  ~110 min of ramp vs ~55 min of measurement. It does not compress without dropping a temperature, and Kim
-  chose the three deliberately.
+- **Duration ~126 min as-run** (630 sweeps, ~6 GB, ~25 OE captures on a held link) — the heater sets the
+  floor; measured heating rate is ~30 C/h with the heater calling, so the settle before each staircase is
+  overshoot decaying, not slack. (The earlier ~2 h 46 estimate was for the dropped 30 C low; 40/50/70 lands
+  at ~126 min.)
 - **The ramps are the design, not dead time:** the motor is held OFF through both ramps, so those 110 min
   are a **continuous motor-off baseline sweeping 30 -> 70 C** — the baseline temperature trend as a curve
   rather than three points, and the segment most likely to expose heater-relay switching into the sensors.

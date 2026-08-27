@@ -29,6 +29,17 @@ fault is **downstream of the supply.** Go straight to the wiring and the slip ri
 
 (The ~5 VDC PSU check stays in the pre-run checklist regardless — cheap insurance for future runs.)
 
+## Diagnosis advanced (0035 smoke test, 2026-08-27) — SP is picking up drive EMI
+The decoupled smoke test settles the mechanism. With the coupling **off** (no mechanical path at all), SP
+jumps **+43 %** the moment the motor runs, and the jump is **flat with speed** (energy ~0.033-0.037 across
+600 -> 3000 rpm). Motor *vibration* would scale with speed; something that switches on with the VFD and
+ignores speed is **drive-electronics EMI**. Combined with the morning's coupled run (SP shows *no*
+rotation-correlated signal), the two are conclusive: **SP responds to the drive, not to the shaft.**
+
+**So the fix is shielding + grounding as much as brushes.** Check the SP cable screen and its grounding,
+route it away from the VFD and motor leads, and check the slip-ring ground path — alongside the wiring /
+brushes above. The rotation-correlated signal we want is buried under (or absent beneath) the EMI.
+
 ## Test
 - PSU at ~5 VDC, shaft spinning, look at CHAN3 for a rotation-correlated signal (scope live view or a short
   capture). Returns -> PSU was the cause, done. Still dead -> check wiring, then inspect the slip ring.
