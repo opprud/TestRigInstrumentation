@@ -385,6 +385,25 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   `not advertising after 3 scans over 155s` and clear themselves. **Wait one or two cycles before
   touching the hardware**; a run in progress recovers by itself.
 
+- **⚠️ SP / CHAN3 (slip ring) carries no rotation-correlated signal — measured 2026-08-27, ticket 0038.**
+  The channel is not dead: it reads ~0.18 V rms of broadband content. It simply does not care whether the
+  shaft is turning. Measured across one run, standstill to 1793 rpm, UL rose **19x** and AE **3x** while
+  **SP did not move at all** (0.143 / 0.185 / 0.181 / 0.184 V rms at 0 / 587 / 1187 / 1793 rpm). The
+  spectrum settles it: SP's energy sits almost entirely **above 50 kHz** and rises only 30 % from stopped
+  to full speed, while UL's 5-50 kHz band goes **0.0034 -> 0.272, a factor 79**. That is broadband HF
+  pickup, not a mechanical measurement. It does not clip (clip fraction 0.00 %) — the large Vpp is
+  isolated spikes — and the DC-coupled mean is -0.019 V, so the bench PSU's 5 V is not arriving as a DC
+  level either. **Kim measured ~5 VDC at the supply**, so the supply is good and the fault is downstream:
+  brushes or the rotating-side connection. **Treat all SP data in the archive as suspect** until the slip
+  ring is fixed and re-verified. Like the UL entry above, nothing in the HDF5 distinguishes it from real
+  data.
+
+- **The heater's maximum rate is ~30 C/h, measured — not the ~5 C/h the 13 h profile suggests.**
+  From run `20260825_145918`: the fastest sustained 20-minute window with the heater calling is 30 C/h
+  (41 -> 51 C, and again 50 -> 60 C). `Keratech22.json` looks far slower only because its SV rises 5 C per
+  hour, so the heater is never the limit there. Size temperature ramps in new profiles from 30 C/h — and
+  expect **less** with the bearing decoupled or unloaded, where there is no friction heat.
+
 - **Skipped sweeps leave gaps in the HDF5 sweep numbering.** Analysis must iterate the
   existing `sweep_###` groups, not assume contiguous indices.
 
@@ -414,6 +433,17 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 - **Secret in `config.json`.** An Azure Blob **SAS connection string** is stored in cleartext
   in `py/config.json`. It should be moved to an environment variable / secret store and
   rotated; do not commit it.
+
+- **The three 13 h HDF5s are no longer on the Pi — they live in Azure only (deleted 2026-08-27).**
+  `20260818_135505`, `20260820_125647` and `20260825_145918` were removed from the SD card on Kim's
+  instruction to free space (114.2 GB; the Pi went from 65 % to 16 % used). Each run folder still exists and
+  now holds an **`ARCHIVED.txt`** naming account/container/blob and the exact byte count. Verified before
+  deletion by exact size **plus** SHA-256 of three 4 MB ranges per blob (offset 0, midpoint, last 4 MB) —
+  all nine identical. **The blobs carry no content-MD5** (chunked block-blob upload does not set one), so
+  they cannot be proven byte-exact again without a 114 GB download. **The telemetry JSONL and
+  `acquire_scope.log` were deliberately kept** — the uploader archives only the `.h5`, so those 12 MB are
+  the only copy in existence of the per-tick record and of the account of what went wrong (ticket 0013).
+  **Anyone pruning `data/runs/` must delete the `.h5` only, never the folder.**
 
 - **Two Azure containers are in live use, and the dashboard points at the wrong one for archives.**
   Both live on account **`csfbst001`**. The **dashboard** uploads to container **`data`** (hard-coded in

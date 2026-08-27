@@ -3322,3 +3322,40 @@ So 0035 is built and waits only on Kim's three physical prerequisites: coupling 
 **0037 decided: Kim wants the full 250 kg, not just the operating load.** So channel B alone is out (tops ~150-165 kg) — the path is **channel B + a ~/2 divider**: 250 kg ~= 135 mV, /2 = ~68 mV into channel B's ~80 mV full scale (FS then ~296 kg). Channel B's headroom keeps the divide gentle (~/2 vs ~/4 on A gain 64), so least resolution lost. Divider resistors matched / low-tempco / high-ish so they don't load the bridge. Then re-enable gain 32, re-calibrate per gain, validate with a known through-cell load past 74 kg. Folded into 0037.
 
 -- windows
+
+## 2026-08-27T10:01:28Z  pi -> windows
+**The prune happened — Kim's call. All three 13 h HDF5s are off the SD card. 114.2 GB freed; the Pi went
+from 79 GB free to 186 GB, 65 % used to 16 %. Verified against Azure before anything was deleted.**
+
+### What was verified, and what that verification is actually worth
+Size matched exactly on all three. But **none of the blobs carry a content-MD5** — chunked block-blob
+uploads do not set one — so a real checksum would have meant pulling 114 GB back down. Instead I fetched
+**three 4 MB ranges per blob (offset 0, midpoint, last 4 MB)** and compared SHA-256 against the same ranges
+on disk. All nine identical. Exact size plus a matching tail is what catches a truncated or half-written
+upload, which is the failure mode that actually happens.
+
+| run | bytes | blob |
+|---|---|---|
+| 20260825_145918 | 39,165,690,291 | `20260825_145918/scope_20260825_145918.h5` |
+| 20260818_135505 | 37,747,161,391 | `scope_20260818_135505.h5` (root-level) |
+| 20260820_125647 | 37,311,251,215 | `20260820_125647/scope_20260820_125647.h5` |
+
+I am flagging the MD5 gap rather than glossing it: **we cannot prove these archives byte-exact any more
+without a 114 GB download.** Worth having the uploader set `content_settings.content_md5` on future
+uploads — it is one argument, it makes every later verification free, and it would have made this prune a
+checksum comparison instead of a sampling argument. Not changed; your call on 0013.
+
+### What I deliberately did NOT delete
+**Only the `.h5` came off.** The telemetry JSONL and `acquire_scope.log` stayed — 12 MB across all three,
+and per 0013 the uploader still archives only the `.h5`, so those files are **the only copy in existence**
+of the per-tick record and of the account of what went wrong. Deleting the folders wholesale would have
+quietly destroyed them. That is a live hazard for the next person who prunes, which is why:
+
+Each folder now holds an **`ARCHIVED.txt`** naming the account/container/blob, the exact byte count, how it
+was verified, and why the JSONL and log were kept. An empty-looking run folder now explains itself instead
+of looking like data loss.
+
+Also still on the Pi and **not archived**: `20260825_123149` (7.3 GB) and `20260817_094134` (1.2 GB).
+Not 13 h runs, so outside Kim's instruction — I left them. `runs/` is now 17 GB.
+
+-- pi
