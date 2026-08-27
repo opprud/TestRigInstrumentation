@@ -40,6 +40,11 @@ rotation-correlated signal), the two are conclusive: **SP responds to the drive,
 route it away from the VFD and motor leads, and check the slip-ring ground path — alongside the wiring /
 brushes above. The rotation-correlated signal we want is buried under (or absent beneath) the EMI.
 
+**Second coupling path to test — the heater relay.** In the 0035 run SP motor-off dropped from **0.133 with
+the heater relay open to 0.089 with it closed** (−33 %), confounded with run start but cheap to isolate:
+hold speed + temperature and toggle only ch0, watching SP. The heater circuit may couple into the slip-ring
+wiring on top of the drive EMI.
+
 ## Test
 - PSU at ~5 VDC, shaft spinning, look at CHAN3 for a rotation-correlated signal (scope live view or a short
   capture). Returns -> PSU was the cause, done. Still dead -> check wiring, then inspect the slip ring.

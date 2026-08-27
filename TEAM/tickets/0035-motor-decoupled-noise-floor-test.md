@@ -76,6 +76,16 @@ to see how the noise floor behaves with temperature.
   mic-energy-vs-temperature rise is baseline thermal noise vs motor contribution vs real bearing
   lubrication signal.
 
+## As-run result (2026-08-27) — scope solid, OE under-sampled
+- **Scope channels: the noise floor is FLAT with temperature** (AE 1.4 %, UL 3.8 %, SP 4.5 % over 30-75 C,
+  no trend) — the control result: the mic-vs-temperature rise in the 13 h data is **not** scope thermal
+  drift. Full per-channel findings on the bus, 2026-08-27.
+- **The 2400 rpm UL artefact -> ticket 0040** (a 40 Hz resonance the motor drives into UL; contaminates the
+  archive's 2400 rpm step).
+- **OE half is under-sampled — do NOT conclude from it.** 26 captures over 16 cells (one per motor-on cell)
+  is single-sample noise, not a trend. Profile miss, not a device fault (26/26 clean). The OE question needs
+  a **short follow-up at ONE temperature with `oe.interval_min: 1`** (~120 captures) before another 2 h run.
+
 ## Owner / test
 - **Kim:** disconnect the coupling. (Motor choice = **both** on and off, decided 2026-08-27; temps = the resting point >=20 C, then 50 and 70.)
 - **Pi / Dev:** the down-scaled profile + the noise-floor analysis (RMS/spectrum per channel per temp) and
