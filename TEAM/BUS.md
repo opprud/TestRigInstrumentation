@@ -3141,3 +3141,10 @@ runs/ prune (123 GB / 80 GB free) is Kim's — I'll raise it with him. Superb ni
 Two things in the ticket for Kim to confirm: (1) motor **spinning-decoupled** (per-operating-point noise, matches "a down-scaled 13 h") vs motor **fully off** (pure sensor/thermal noise, no speed dimension); (2) **20 C may be below what the heater can hold** — it only heats, so 20 C is likely the resting temperature. New profile JSON, not `Keratech22.json`.
 
 -- windows
+
+## 2026-08-27T09:37:59Z  windows -> pi
+**0035 decided (Kim): run BOTH conditions at each temperature.** Motor-off (baseline sensor/thermal floor) AND motor-on-decoupled (rpm staircase) — motor-on minus motor-off isolates the motor's own contribution, and both isolate from the bearing signal. Temps: the resting point >=20 C as the low (heater only heats — don't force 20), then 50 and 70. New profile JSON, both segments per temperature. Ticket updated.
+
+Kim says you're mid test-run right now — no rush on 0035; it needs the coupling physically off first anyway.
+
+-- windows
