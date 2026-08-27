@@ -38,16 +38,29 @@ to see how the noise floor behaves with temperature.
 - Everything else as a normal run: same scope channels + settings, OE sampling on, the heater driving the
   temperature steps, the pre-run checklist (incl. the new slip-ring ~5 VDC check).
 
-## Profile — down-scaled, both conditions per temperature
-- Temperatures: **the resting/ambient point (>=20 C) as the low, then 50 and 70 C.** Kim (2026-08-27): the
-  heater only heats, so don't try to pull down to 20 C — take whatever valid temperature the rig rests at
-  above 20 C as the bottom point, then heat to 50 and 70.
-- At each temperature, **two segments**:
-  1. **Motor off** — a few minutes at rest -> the baseline noise floor for that temperature.
-  2. **Motor on, decoupled** — a short rpm staircase (a handful of speeds spanning the range, a few minutes
-     each).
-- Enough sweeps per (condition, speed, temp) cell for a stable RMS + spectrum. Total target well under an
-  hour. New profile JSON (not `Keratech22.json` — different intent, fewer temps, decoupled).
+## Profile — BUILT 2026-08-27 (`react/public/config/NoiseFloor_Decoupled_0035.json`)
+- **Temperatures: 30 / 50 / 70 C** — 30 C is the held low (Kim + windows converged on it; the rig's own
+  resting point drifts 24 -> 28 C on friction alone, so a held nominal is the comparable choice).
+- At each temperature, **two segments**: **motor-off baseline** (10 min at 30, 5 min at 50/70) then a
+  **decoupled staircase** 600 / 1200 / 1800 / 2400 / 3000 rpm, 3 min each. Speeds + acquisition +
+  `scope_channels` copied from `Keratech22.json` verbatim, so every cell overlays the 13 h data without
+  rescaling. ~830 sweeps, ~8 GB, ~33 OE captures at 5 min.
+- **Duration ~2 h 46 min, not "under an hour" — the heater sets the floor.** Measured rate from the 13 h run
+  is 30 C/h with the heater calling, so 30->50 and 50->70 are ~40 min each (50 min + 5 min settle allowed):
+  ~110 min of ramp vs ~55 min of measurement. It does not compress without dropping a temperature, and Kim
+  chose the three deliberately.
+- **The ramps are the design, not dead time:** the motor is held OFF through both ramps, so those 110 min
+  are a **continuous motor-off baseline sweeping 30 -> 70 C** — the baseline temperature trend as a curve
+  rather than three points, and the segment most likely to expose heater-relay switching into the sensors.
+
+## Baked into the profile (beyond the original ticket)
+1. **SV is driven to 25 C in the last minute** — the 0034 heater fail-safe, in the profile itself.
+2. **`rpm_meas` may read 0 all test** if the tach's reflective mark ends up on the rig side of the
+   disconnected coupling. `open_loop: true` makes that harmless, but the **speed of record is
+   `59.83 x vfd_cmd_hz`** — analysis must not read `rpm_meas=0` as "motor off". Stamped in the profile.
+3. **PV may fall short of SV** — decoupled there is no friction heat, and the 30 C/h was measured *with* the
+   motor spinning. Analysis keys on logged `omron_pv_c`, never the target: a 70 C cell landing at 65 C is
+   valid, a mislabelled one is not.
 
 ## Analysis
 - Per channel (UL / AE / SP, mic_amb / mic_mch): **RMS + spectrum** for motor-off and motor-on at each

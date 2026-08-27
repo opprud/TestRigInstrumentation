@@ -19,13 +19,15 @@ a usable signal, so **SP data must be treated as suspect until this is fixed and
   that test meaningless.
 - Any run's SP channel is untrustworthy until this is fixed.
 
-## Likely causes, cheapest first
-1. **Slip-ring excitation PSU not at ~5 VDC.** The slip ring runs off its own bench PSU with no software
-   readback (now a pre-run checklist item, added 2026-08-26). A wrong voltage would leave SP dead or garbage.
-   **First step: measure the PSU, set it to ~5 VDC, spin the shaft and see if the rotation signal returns.**
-   This may be the whole of it.
-2. **Wiring** — slip-ring signal / excitation lines to CHAN3 or to the PSU (loose, swapped, broken).
-3. **The slip ring itself** — worn brushes / poor contact, so nothing transfers off the rotating shaft.
+## Likely causes — PSU already ruled out (Pi/Kim, 2026-08-27)
+**The PSU is good:** Kim measured it at ~5 VDC *before* today's run, so the excitation is verified and the
+fault is **downstream of the supply.** Go straight to the wiring and the slip ring, not the PSU.
+1. **Wiring / the rotating-side connection** — slip-ring signal or excitation lines to CHAN3 (loose,
+   swapped, broken), including the joint where the signal transfers onto the rotating shaft.
+2. **The slip ring itself** — worn / dirty brushes or poor contact, so nothing transfers off the rotating
+   shaft. With a good PSU and intact wiring, this is the prime suspect.
+
+(The ~5 VDC PSU check stays in the pre-run checklist regardless — cheap insurance for future runs.)
 
 ## Test
 - PSU at ~5 VDC, shaft spinning, look at CHAN3 for a rotation-correlated signal (scope live view or a short
