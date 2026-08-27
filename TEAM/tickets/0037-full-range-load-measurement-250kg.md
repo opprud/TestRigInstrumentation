@@ -41,11 +41,14 @@ at the ~150 kg operating load the cell reads over-range (`ERR 21`, `mass_g` null
   channel B's ~80 mV full scale. (This corrects the "150-250 kg" in option 1 above — channel B tops out
   near the operating load, not the rating.)
 
-**So the decision this forces:**
-- **If measuring the ~150 kg operating load is enough:** channel B alone is the clean answer — one
-  re-solder, no resistors in the bridge signal, re-enable gain 32 in firmware + re-calibrate.
-- **If the full 250 kg is genuinely required:** channel B is not sufficient — add a modest resistor divider
-  (~/1.7 into channel B) or size a divider on channel A for 250 kg. Then the divider trade-offs below apply.
+**Decision (Kim, 2026-08-27): the full 250 kg range is required — "we want to experiment up to 250 kg."**
+So channel B alone is not enough (it tops out ~150-165 kg). The path is **channel B (gain 32) + a modest
+resistor divider (~/2)**: 250 kg ~= 135 mV, /2 = ~68 mV, which fits channel B's ~80 mV full scale with
+headroom (full scale then ~296 kg). Using channel B's range keeps the divide gentle (~/2 here vs ~/4 on
+channel A gain 64), losing the least resolution. Choose the divider resistors **matched, low-tempco, and
+high enough not to load the bridge**, since they sit in the measurement (see trade-offs). Then re-enable
+gain 32 in firmware, re-calibrate per gain, and validate with a known load applied **through the cell**
+past 74 kg — ideally near 150-250 kg.
 
 ## Trade-offs
 - **Channel B:** no added analog components in the signal (best for noise/drift), but gain 32 is coarser
