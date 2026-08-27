@@ -1,0 +1,259 @@
+{
+  "name": "Noise floor decoupled 30-50-70",
+  "description": "Ticket 0035 - system noise floor with the motor coupling DISCONNECTED from the rig shaft, so no bearing signal reaches the sensors. Control experiment for the lubrication-vs-temperature finding: does the noise floor itself rise with temperature? Two conditions at each of 30/50/70 C - motor OFF (pure sensor/thermal/environmental floor) and motor ON but decoupled (rpm staircase 600-3000, the motor's own EMI/vibration into the sensors). Motor-on minus motor-off isolates the motor's contribution. The motor is held OFF through both heating ramps, which also yields a continuous motor-off baseline across the whole 30-70 C span, not just at the three plateaus. Scope channels and acquisition are IDENTICAL to Keratech22.json and the speeds are drawn from its own staircase, so every cell overlays directly onto the 13 h data. PREREQUISITES: coupling physically off; OE sensor awake; heater switched ON (a CLI-started run never turns it on - start from the dashboard or set shelly_control.py --on heater by hand). NOTE: if the tach's reflective mark sits on the rig side of the coupling, rpm_meas reads 0 for the whole test - control is open_loop so this is harmless, and the speed of record is 59.83 x vfd_cmd_hz. Ramps are 50 min each, sized from the 30 C/h max heating rate measured on run 20260825_145918; with the bearing decoupled there is no friction heat, so PV may fall short of SV. Analysis must key on the logged omron_pv_c, not on the target.",
+  "duration_minutes": 166,
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true
+  },
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 599,
+        "value": 0
+      },
+      {
+        "time_sec": 600,
+        "value": 600
+      },
+      {
+        "time_sec": 779,
+        "value": 600
+      },
+      {
+        "time_sec": 780,
+        "value": 1200
+      },
+      {
+        "time_sec": 959,
+        "value": 1200
+      },
+      {
+        "time_sec": 960,
+        "value": 1800
+      },
+      {
+        "time_sec": 1139,
+        "value": 1800
+      },
+      {
+        "time_sec": 1140,
+        "value": 2400
+      },
+      {
+        "time_sec": 1319,
+        "value": 2400
+      },
+      {
+        "time_sec": 1320,
+        "value": 3000
+      },
+      {
+        "time_sec": 1499,
+        "value": 3000
+      },
+      {
+        "time_sec": 1500,
+        "value": 0
+      },
+      {
+        "time_sec": 4499,
+        "value": 0
+      },
+      {
+        "time_sec": 4500,
+        "value": 0
+      },
+      {
+        "time_sec": 4799,
+        "value": 0
+      },
+      {
+        "time_sec": 4800,
+        "value": 600
+      },
+      {
+        "time_sec": 4979,
+        "value": 600
+      },
+      {
+        "time_sec": 4980,
+        "value": 1200
+      },
+      {
+        "time_sec": 5159,
+        "value": 1200
+      },
+      {
+        "time_sec": 5160,
+        "value": 1800
+      },
+      {
+        "time_sec": 5339,
+        "value": 1800
+      },
+      {
+        "time_sec": 5340,
+        "value": 2400
+      },
+      {
+        "time_sec": 5519,
+        "value": 2400
+      },
+      {
+        "time_sec": 5520,
+        "value": 3000
+      },
+      {
+        "time_sec": 5699,
+        "value": 3000
+      },
+      {
+        "time_sec": 5700,
+        "value": 0
+      },
+      {
+        "time_sec": 8699,
+        "value": 0
+      },
+      {
+        "time_sec": 8700,
+        "value": 0
+      },
+      {
+        "time_sec": 8999,
+        "value": 0
+      },
+      {
+        "time_sec": 9000,
+        "value": 600
+      },
+      {
+        "time_sec": 9179,
+        "value": 600
+      },
+      {
+        "time_sec": 9180,
+        "value": 1200
+      },
+      {
+        "time_sec": 9359,
+        "value": 1200
+      },
+      {
+        "time_sec": 9360,
+        "value": 1800
+      },
+      {
+        "time_sec": 9539,
+        "value": 1800
+      },
+      {
+        "time_sec": 9540,
+        "value": 2400
+      },
+      {
+        "time_sec": 9719,
+        "value": 2400
+      },
+      {
+        "time_sec": 9720,
+        "value": 3000
+      },
+      {
+        "time_sec": 9899,
+        "value": 3000
+      },
+      {
+        "time_sec": 9900,
+        "value": 0
+      },
+      {
+        "time_sec": 9959,
+        "value": 0
+      }
+    ],
+    "temperature": [
+      {
+        "time_sec": 0,
+        "value": 30
+      },
+      {
+        "time_sec": 1499,
+        "value": 30
+      },
+      {
+        "time_sec": 1500,
+        "value": 50
+      },
+      {
+        "time_sec": 4499,
+        "value": 50
+      },
+      {
+        "time_sec": 4500,
+        "value": 50
+      },
+      {
+        "time_sec": 5699,
+        "value": 50
+      },
+      {
+        "time_sec": 5700,
+        "value": 70
+      },
+      {
+        "time_sec": 8699,
+        "value": 70
+      },
+      {
+        "time_sec": 8700,
+        "value": 70
+      },
+      {
+        "time_sec": 9899,
+        "value": 70
+      },
+      {
+        "time_sec": 9900,
+        "value": 25
+      },
+      {
+        "time_sec": 9959,
+        "value": 25
+      }
+    ]
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 16.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 4.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 8.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    }
+  }
+}
