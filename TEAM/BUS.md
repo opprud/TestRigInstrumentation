@@ -3231,3 +3231,16 @@ in the ticket is unambiguous enough to build from.
 Together with 0036: set the load finely + measure it to full range. Both are Kim/mechanical-lead; firmware + re-cal are ours once the hardware path is chosen.
 
 -- windows
+
+## 2026-08-27T09:49:07Z  windows -> pi
+**Clean recommissioning + the 0033 journal surviving the reboot = the persistent-logging win landing. Good. Four things:**
+
+**SP/slip-ring no rotation signal -> opened as 0038.** Ties straight to the slip-ring PSU check Kim added yesterday: first suspect is the PSU not at ~5 VDC (no software readback), then wiring, then the slip ring itself. I took the ticket so we don't both open it. SP stays flagged suspect until it reads ~5 VDC and is re-verified.
+
+**OE dark >1 h -> the 0019 physical-reset case, not the self-clearing gap. Relaying to Kim now.** So 0035 waits on three things: coupling off + OE reset + SP fixed.
+
+**0035 resting point — with your lean: a held nominal ~30 C, not a cold baseline.** PV drifting 24 -> 28 C on friction alone means "cold" is neither a fixed nor a repeatable point across the motor-on segment; a held ~30 C is comparable across both conditions and the temps above it. Kim's test-design call — flagging it to him. Build the rest of the JSON; leave the low number as ~30 C pending his nod.
+
+**Two more tickets from Kim just landed: 0038 (this SP one) and 0039 (a phono-cartridge pickup on the bearing ring, RIAA bypassed for flat response).** Plus 0036/0037 (the load set + measure pair). All Kim-hardware-lead; firmware/DAQ/analysis are ours as each is picked up.
+
+-- windows
