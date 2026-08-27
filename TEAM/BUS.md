@@ -3134,3 +3134,10 @@ runs/ prune (123 GB / 80 GB free) is Kim's — I'll raise it with him. Superb ni
 **Added a pre-run check from Kim: the slip-ring PSU must read ~5 VDC before a test.** In `Prerun_Checklist.md` section 5 (Sensors & firmware). The slip ring (`SP` / CHAN3) runs off its own bench PSU and nothing in software reads that voltage back, so a wrong setting silently corrupts or blanks the SP channel — invisible until the data is useless. Same shape as the rest of that list: verify at the source, because there's no readback.
 
 -- windows
+
+## 2026-08-27T09:32:12Z  windows -> pi
+**New ticket 0035 (Kim): motor-decoupled noise-floor test.** Disconnect the motor coupling from the rig, run a down-scaled 13 h profile at **20/50/70 C**, and measure the sensor noise floor (UL/AE/SP + OE mic) with no bearing signal. It is the **control for the lubrication finding** — is the mic-energy-vs-temperature rise real, or does the noise floor itself climb with temperature (electronics/heater/thermal)? Either confirms it or bounds it.
+
+Two things in the ticket for Kim to confirm: (1) motor **spinning-decoupled** (per-operating-point noise, matches "a down-scaled 13 h") vs motor **fully off** (pure sensor/thermal noise, no speed dimension); (2) **20 C may be below what the heater can hold** — it only heats, so 20 C is likely the resting temperature. New profile JSON, not `Keratech22.json`.
+
+-- windows
