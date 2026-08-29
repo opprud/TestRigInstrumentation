@@ -1,0 +1,98 @@
+{
+  "name": "Range check 12 min",
+  "description": "Verification run for the scope vertical ranges re-sized on 2026-08-29 (UL 10 V, AE 4 V, SP 6 V on a +5 V offset). Steps through EVERY speed the 13 h profile reaches - 600/1200/1800/2400/3000 rpm, 2 min each, with a standstill minute at each end. The point is the top of the staircase: the 10 min offset profile stops at 1800 rpm and cannot show clipping at 2400/3000, and AE peaks at 1.93 V against a 2.00 V ceiling at exactly 2400 rpm - the same resonance 0035 found on UL. No temperature schedule; the heater is not driven. Check the captured data for samples resting on the range limits before trusting the new ranges.",
+  "duration_minutes": 12,
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true
+  },
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 59,
+        "value": 0
+      },
+      {
+        "time_sec": 60,
+        "value": 600
+      },
+      {
+        "time_sec": 179,
+        "value": 600
+      },
+      {
+        "time_sec": 180,
+        "value": 1200
+      },
+      {
+        "time_sec": 299,
+        "value": 1200
+      },
+      {
+        "time_sec": 300,
+        "value": 1800
+      },
+      {
+        "time_sec": 419,
+        "value": 1800
+      },
+      {
+        "time_sec": 420,
+        "value": 2400
+      },
+      {
+        "time_sec": 539,
+        "value": 2400
+      },
+      {
+        "time_sec": 540,
+        "value": 3000
+      },
+      {
+        "time_sec": 659,
+        "value": 3000
+      },
+      {
+        "time_sec": 660,
+        "value": 0
+      },
+      {
+        "time_sec": 719,
+        "value": 0
+      }
+    ],
+    "temperature": []
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 10.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 4.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 6.0,
+      "volt_offset": 5.0,
+      "coupling": "DC"
+    }
+  }
+}
