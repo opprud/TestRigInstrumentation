@@ -1,6 +1,6 @@
 {
   "name": "Keratech 22",
-  "description": "Kappa-mapping test: bearing d=25/D=52/dpw=38.5, VG100 oil. 13 temperature steps (40-100C in 5C increments), each held constant. Each step: 2 min stabilization at RPM=0, then staircase sweep 100->3000->100 with 60s hold per RPM level.",
+  "description": "Kappa-mapping test: bearing d=25/D=52/dpw=38.5, VG100 oil. 13 temperature steps (40-100C in 5C increments), each held constant. Each step: 2 min stabilization at RPM=0, then staircase sweep 100->3000->100 with 60s hold per RPM level. SP/CHAN3 volt_offset is 5.0 because the slip ring sits on its ~5 V excitation pedestal; measured 2026-08-29 the channel spans 1.8-8.4 V. The old 8.0/0.0 window (-4 to +4 V) clipped more than half of it. Runs before 2026-08-29 were taken with the scope probe's GROUND LEAD DETACHED, which removed the DC reference and is why SP looked like it sat at 0 V and carried no rotation signal - see ticket 0038.",
   "duration_minutes": 793,
   "bearing": {
     "d_mm": 25,
@@ -6396,8 +6396,8 @@
     },
     "SP": {
       "timebase_range": 0.2,
-      "volt_range": 8.0,
-      "volt_offset": 0.0,
+      "volt_range": 16.0,
+      "volt_offset": 5.0,
       "coupling": "DC"
     }
   }

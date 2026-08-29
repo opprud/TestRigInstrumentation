@@ -398,27 +398,40 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   `not advertising after 3 scans over 155s` and clear themselves. **Wait one or two cycles before
   touching the hardware**; a run in progress recovers by itself.
 
-- **⚠️ SP / CHAN3 (slip ring) carries no rotation-correlated signal — measured 2026-08-27, ticket 0038.**
-  The channel is not dead: it reads ~0.18 V rms of broadband content. It simply does not care whether the
-  shaft is turning. Measured across one run, standstill to 1793 rpm, UL rose **19x** and AE **3x** while
-  **SP did not move at all** (0.143 / 0.185 / 0.181 / 0.184 V rms at 0 / 587 / 1187 / 1793 rpm). The
-  spectrum settles it: SP's energy sits almost entirely **above 50 kHz** and rises only 30 % from stopped
-  to full speed, while UL's 5-50 kHz band goes **0.0034 -> 0.272, a factor 79**. That is broadband HF
-  pickup, not a mechanical measurement. It does not clip (clip fraction 0.00 %) — the large Vpp is
-  isolated spikes — and the DC-coupled mean is -0.019 V, so the bench PSU's 5 V is not arriving as a DC
-  level either. **Kim measured ~5 VDC at the supply**, so the supply is good and the fault is downstream:
-  brushes or the rotating-side connection. **Treat all SP data in the archive as suspect** until the slip
-  ring is fixed and re-verified. Like the UL entry above, nothing in the HDF5 distinguishes it from real
-  data.
+- **⚠️ Every SP / CHAN3 reading in the archive was taken through a DETACHED scope probe ground
+  — all of it is invalid (found 2026-08-29, ticket 0038).** The slip ring itself works. The probe's
+  ground lead was off, which removed the DC reference and left the tip acting as an antenna. With the
+  ground attached CHAN3 sits at a rock-steady **Vavg 4.87 V** — the slip ring's own ~5 V excitation —
+  and its excursions grow with rotation (Vpp 3.6 V at rest, 6.4 V at 1800 rpm) and shrink again when
+  the shaft stops. Kim also turned the shaft by hand and watched the voltage follow it.
 
-- **Decoupled and stationary, the heater overshoots hard and will not come back down.** With the shaft not
-  turning the oil is not stirred, so the element heats its own neighbourhood and the probe sees a local
-  hotspot rather than a mixed bath. Measured 2026-08-27 with the coupling off: SV 30 -> **PV 38 within two
-  minutes**, then it sat at 36 and would not fall; later SV 40 -> **PV 46 in two minutes**. That is ~360 C/h
-  on the way up against the 30 C/h below, and near-zero on the way down. Consequences for any decoupled or
-  unloaded test: **a setpoint below where the rig already sits is not reachable**, ramps need far less time
-  than the loaded figure suggests but the *overshoot decay* needs a lot, and any analysis must key on the
-  logged `omron_pv_c`, never on the target.
+  **SP mean is the discriminator: ~5 V means the ground was attached, ~0 V means it was not.** All 23
+  runs still on the Pi, back to **2026-06-29**, read −0.014 to −0.039 V. Assume the same for the
+  archived blobs unless checked — it is one sweep's SP mean per file. **Do not analyse SP from any run
+  before 2026-08-29.** UL and AE are unaffected: separate probes, correct DC levels, correct rotation
+  response throughout.
+
+  This retracts the 2026-08-27 conclusion that SP carried no rotation signal, and the follow-up that
+  it was drive EMI (“+43 % with the motor on, flat with speed”) — that is what a floating probe does
+  near a running VFD, not a property of the slip ring.
+
+  **The channel now needs `volt_range 16.0 / volt_offset 5.0`** (it spans 1.8–8.4 V; the old 8.0/0.0
+  window clipped over half of it). Applied to all seven live profiles and to the scope.
+
+- **⚠️ The tachometer over-triggers after the 2026-08-29 re-assembly — `rpm_meas` is unusable.**
+  `TACHDIAG?` reports **303,253 glitches against 319,484 pulses (95 % rejected)**, and `SPEED?` returns
+  a fixed **7368 rpm at both 10 Hz and 20 Hz** because the firmware's 8 ms glitch floor pins the
+  period at 8.143 ms. The pulse count is frozen at standstill, so it is not electrical noise: the
+  OGT500 is seeing tens of transitions per revolution instead of the one reflective mark, and needs
+  **mechanical re-alignment**. Open-loop runs are unaffected (they ignore the tach) and the speed of
+  record stays `59.83 × vfd_cmd_hz`, but closed loop would chase a meaningless number.
+
+- **A run now switches its own scope channels on — it did not before (fixed 2026-08-29).**
+  `:DIGITIZE` with no argument digitises only the channels the scope is **currently displaying**, and
+  that display state was never part of the profile: it persisted from whatever anyone last did at the
+  front panel. Someone looking at CHAN3 alone left CHAN1 and CHAN2 switched off, and a run started
+  then would have captured one sensor of three while the profile still claimed all three.
+  `apply_scope_channels()` now sends `:CHANx:DISP ON` before the range/offset/coupling settings.
 
 - **The heater's maximum rate is ~30 C/h, measured — not the ~5 C/h the 13 h profile suggests.**
   From run `20260825_145918`: the fastest sustained 20-minute window with the heater calling is 30 C/h

@@ -773,6 +773,13 @@ def _apply_scope_channel_settings(ip: str, port: int, channels: list, profile_cf
                 print(f"[scope_channels] Unknown alias '{alias}', skipping")
             continue
         try:
+            # Turn the channel ON first. ":DIGITIZE" with no argument digitises only the
+            # channels the scope is currently *displaying*, and that display state is not
+            # part of the profile -- it persists from whatever anyone last did at the front
+            # panel. Found 2026-08-29 with CHAN1/CHAN2 switched off after someone looked at
+            # CHAN3 alone: a run started then would have captured one sensor of three, and
+            # the profile would still have claimed all three.
+            _scope_write(ip, port, f":{src}:DISP ON")
             if "timebase_range" in settings:
                 _scope_write(ip, port, f":TIM:RANG {settings['timebase_range']}")
             if "volt_range" in settings:

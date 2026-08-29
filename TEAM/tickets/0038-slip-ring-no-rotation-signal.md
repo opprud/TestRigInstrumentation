@@ -1,54 +1,94 @@
 ---
 id: 0038
-title: Slip-ring (SP / CHAN3) carries no rotation-correlated signal — verify PSU ~5 VDC, then wiring / slip-ring hardware
+title: Slip-ring (SP / CHAN3) read through a DETACHED scope probe ground for at least two months — all archived SP data is invalid
 area: instrumentation / hardware
 role: hardware
-status: backlog
+status: root-caused
 depends_on:
 branch:
 pr:
 ---
 
-## Problem
-In the 2026-08-27 post-power-cycle recommissioning run the **SP / slip-ring channel (CHAN3) showed no
-rotation-correlated signal** — nothing that tracks the shaft turning. The slip-ring path is not delivering
-a usable signal, so **SP data must be treated as suspect until this is fixed and re-verified** (Pi, 2026-08-27).
+## Resolution (2026-08-29) — it was the scope probe's ground lead, not the slip ring
 
-## Blocks
-- **0035** (motor-decoupled noise-floor test) needs a working SP channel; a dead SP makes the SP part of
-  that test meaningless.
-- Any run's SP channel is untrustworthy until this is fixed.
+The slip ring **works**. The original diagnosis in this ticket was wrong, and so was the
+"SP is picking up drive EMI" refinement built on top of it. Both were measured through a
+**scope probe whose ground lead was detached**, which removed the DC reference and left the
+probe tip acting as an antenna.
 
-## Likely causes — PSU already ruled out (Pi/Kim, 2026-08-27)
-**The PSU is good:** Kim measured it at ~5 VDC *before* today's run, so the excitation is verified and the
-fault is **downstream of the supply.** Go straight to the wiring and the slip ring, not the PSU.
-1. **Wiring / the rotating-side connection** — slip-ring signal or excitation lines to CHAN3 (loose,
-   swapped, broken), including the joint where the signal transfers onto the rotating shaft.
-2. **The slip ring itself** — worn / dirty brushes or poor contact, so nothing transfers off the rotating
-   shaft. With a good PSU and intact wiring, this is the prime suspect.
+Kim found the loose ground while re-assembling the rig. Two independent confirmations followed:
 
-(The ~5 VDC PSU check stays in the pre-run checklist regardless — cheap insurance for future runs.)
+1. **The 5 V pedestal came back.** With the ground attached, CHAN3 sits at a rock-steady
+   **Vavg = 4.87 V** at every speed — the slip ring's own ~5 V excitation, the same voltage Kim
+   measured at the PSU. Every archived run reads **SP mean = -0.02 V**: no pedestal, because there
+   was no reference.
+2. **Kim turned the shaft by hand and watched the slip-ring voltage follow it.** Direct, physical,
+   and not dependent on any of our software.
 
-## Diagnosis advanced (0035 smoke test, 2026-08-27) — SP is picking up drive EMI
-The decoupled smoke test settles the mechanism. With the coupling **off** (no mechanical path at all), SP
-jumps **+43 %** the moment the motor runs, and the jump is **flat with speed** (energy ~0.033-0.037 across
-600 -> 3000 rpm). Motor *vibration* would scale with speed; something that switches on with the VFD and
-ignores speed is **drive-electronics EMI**. Combined with the morning's coupled run (SP shows *no*
-rotation-correlated signal), the two are conclusive: **SP responds to the drive, not to the shaft.**
+Measured across speed with the ground attached (200 ms window, CHAN3 at 40 V full scale):
 
-**So the fix is shielding + grounding as much as brushes.** Check the SP cable screen and its grounding,
-route it away from the VFD and motor leads, and check the slip-ring ground path — alongside the wiring /
-brushes above. The rotation-correlated signal we want is buried under (or absent beneath) the EMI.
+| condition | Vpp | Vmax | Vmin | Vavg |
+|---|---|---|---|---|
+| standstill | 3.60 | 6.6 | 2.8 | **4.87** |
+| 600 rpm | 6.20 | 7.8 | 2.0 | **4.87** |
+| 1200 rpm | 5.60 | 8.4 | 1.8 | **4.87** |
+| 1800 rpm | 6.40 | 8.2 | 1.8 | **4.87** |
+| 2400 rpm | 2.00 | 6.0 | 3.6 | **4.87** |
+| 3000 rpm | 2.20 | 6.0 | 3.8 | **4.87** |
+| stopped again | 3.80 | 6.6 | 3.2 | **4.87** |
 
-**Second coupling path to test — the heater relay.** In the 0035 run SP motor-off dropped from **0.133 with
-the heater relay open to 0.089 with it closed** (−33 %), confounded with run start but cheap to isolate:
-hold speed + temperature and toggle only ch0, watching SP. The heater circuit may couple into the slip-ring
-wiring on top of the drive EMI.
+The mean never moves; the **excursions** grow with rotation and shrink again when it stops, and
+they are repeatable in both directions. Note the swing is **not monotonic with speed** — it peaks
+around 600-1800 rpm and falls back at 2400-3000. Unexplained, and worth understanding before SP is
+used quantitatively.
 
-## Test
-- PSU at ~5 VDC, shaft spinning, look at CHAN3 for a rotation-correlated signal (scope live view or a short
-  capture). Returns -> PSU was the cause, done. Still dead -> check wiring, then inspect the slip ring.
+## The damage: how far back does it go?
 
-## Owner / test
-- **Kim / hardware:** verify PSU voltage; check wiring; inspect the slip ring if the first two are clean.
-- **Pi:** re-verify SP shows a rotation-correlated signal after each step.
+**At least 2026-06-29, the oldest run still on the Pi.** SP's DC mean is a clean discriminator —
+~5 V with the ground attached, ~0 V without — so it can be read straight out of any archived file.
+Every one of the **23 runs still on disk reads -0.014 to -0.039 V**:
+
+```
+20260629_123929  20260629_124229  20260629_124542
+20260817_093300  20260817_094134  20260817_101906  20260817_103152  20260817_112734
+20260818_075336  20260818_081609  20260818_083247
+20260819_102659  20260819_104244
+20260820_091355  20260820_091646  20260820_093823  20260820_103317  20260820_105246  20260820_112759
+20260825_123149  20260827_111736  20260827_122907  20260827_131108
+```
+
+**Every SP dataset in the archive is invalid**, including the three 13 h runs and the 0035
+noise-floor run. The four blobs in `eceherning` were not checked directly (114 GB), but they were
+taken inside this window, so the same applies unless someone proves otherwise — and the check is
+one sweep's SP mean per file.
+
+**Nothing else is affected.** UL and AE have their own probes and their own grounds, and both show
+correct DC levels and correct rotation response throughout. The 0035 conclusion that the UL/AE
+noise floor is flat with temperature stands, and so does the finding that UL responds to the
+bearing by a factor 20 over the decoupled floor.
+
+## What this retracts
+
+- **"SP carries no rotation-correlated signal"** (2026-08-27) — wrong. It carries one; we had no
+  reference to see it against.
+- **"SP is drive EMI: +43 % with the motor on, flat with speed"** (0035 smoke test) — that is what a
+  floating probe does near a running VFD. Not a property of the slip ring.
+- **"SP motor-off drops from 0.133 to 0.089 when the heater relay closes"** — same cause. A floating
+  tip responds to anything nearby switching.
+
+## Follow-on work, now that the channel is real
+
+1. **Scope range corrected (done 2026-08-29).** SP spans **1.8 - 8.4 V**, so the old
+   `volt_range 8.0 / volt_offset 0.0` window (-4 to +4 V) clipped over half of it. Now
+   **`volt_range 16.0 / volt_offset 5.0`** in all seven live profiles and on the scope. Can be
+   tightened to 8.0/5.0 once a full run shows no clipping.
+2. **The trigger needs a deliberate level.** The scope triggers on **CHAN3 itself**, negative edge.
+   The level had to be re-set for the 5 V pedestal. What the right level is depends on what the
+   slip ring actually carries — if it has a once-per-revolution feature the level belongs on that,
+   not at mid-swing. **Needs one clean capture of the SP waveform to decide.**
+3. **Re-verify SP against speed** through the normal acquisition path and confirm the rotation
+   response survives into the HDF5.
+
+## Owner
+- **Kim / hardware:** found it. Keep the probe ground in the pre-run checklist.
+- **Pi:** scope range + profiles done; trigger level and the SP waveform characterisation open.
