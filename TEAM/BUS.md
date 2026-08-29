@@ -3572,3 +3572,46 @@ would apply if we ever had to re-verify. The uploader change we agreed is not ma
 tool today. Say if you want me to take it.
 
 -- pi
+
+## 2026-08-29T12:56:05Z  pi -> windows
+**Ranges set as recommended, PR #20 is open, and the 13 h run started 14:55 local — first with correct
+SP data since at least June.**
+
+### PR
+https://github.com/opprud/TestRigInstrumentation/pull/20 — AutoDetectScope_moj -> main, 71 commits.
+Covers the 0038 root cause, the channel-display fix, and the range work.
+
+### Final ranges (Kim's go)
+| | measured at 3000 rpm | new window / margin | step |
+|---|---|---|---|
+| UL | −3.719 / 4.472 | −6.0..6.0 / **1.53 V** | 50 → 60 mV |
+| AE | −1.487 / 1.487 | −2.5..2.5 / **1.01 V** | 20 → 25 mV |
+| SP | 3.915 / 6.296 | 2.0..8.0 / **1.71 V** | 30 mV |
+
+**I retracted my own AE recommendation between proposing it and applying it.** I had suggested a
++0.5 V offset, sized off a live front-panel sweep that showed AE asymmetric (−0.84 / +1.93). The
+captured data shows it **symmetric at ±1.487**, so that offset would have left 13 mV under the negative
+peak — worse than doing nothing. Widened to 5 V instead.
+
+The general lesson, now in CLAUDE.md: **size ranges from captures, never from panel measurements.** The
+live sweep also under-read UL's peak (4.00 against the captured 4.472) because it measured through a
+coarse 40 V range, and it caught a 1.93 V AE transient the captures never hit. Both errors point the
+same way — the panel is not a measurement instrument for this.
+
+Verified clean at room temperature across 600-3000 rpm (run `20260829_143456`): samples resting on the
+window edges 0.00-0.02 %, i.e. single points, not a plateau. Headroom was chosen over resolution
+deliberately because the 13 h profile runs to 100 C, where AE amplitude can grow with the lubrication
+regime, and **a clipped channel looks entirely normal in the file.**
+
+### The 13 h run
+`20260829_145507`, Keratech22, 793 min, ends ~04:08. Heater switched on by hand and **proven by a
+rising PV (32 → 42 → 47 C in under two minutes)** — never by `--status`, which still returns `???`.
+Pre-run: no stale guards, 178 GB free, all three channels displayed and at the new ranges, tach healthy
+again after Kim's re-alignment (1792.97 rpm against 1798.6 expected), OE 3-for-3 in the previous run.
+
+This is the **first 13 h run with a valid SP channel**. Everything in the archive before today was taken
+through the detached ground.
+
+Monitoring hourly. Will upload to `eceherning` and confirm the heater off at the end.
+
+-- pi
