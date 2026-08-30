@@ -29,15 +29,23 @@ const unsigned long HX711_READ_TIMEOUT_MS = 200;
 
 const char* FW_VENDOR  = "ForeverBearing";
 const char* FW_DEVICE  = "RP2040";
-const char* FW_VERSION = "1.2.1";
+const char* FW_VERSION = "1.2.6";
 
 // ---------------- CALIBRATION ----------------
 volatile float g128 = 0.0020f;
 volatile float g64  = 0.0040f;
-volatile float g32  = 0.0080f;
 
-volatile long tare_offset = 0;
+// Tare is per gain, like slope. The offset is in raw counts and raw counts scale with
+// gain, so one shared tare is wrong in whichever band it was not measured in. Measured
+// 2026-08-25 on the bench: zero reads 881372 counts at gain 128 and 442361 at 64 — the
+// two differ by 4.1 kg once scaled, and a rig run crosses from 128 to 64 as load applies.
+volatile long t128 = 0;
+volatile long t64  = 0;
 volatile uint8_t hx_gain = 64;
+// SETGAIN <n> pins the gain (manual mode) so a calibration can hold one band; SETGAIN AUTO
+// hands it back to auto_scale(). RAM only, defaults to auto on boot — a reset never leaves
+// the board silently pinned.
+volatile bool auto_gain_enabled = true;
 
 // ---------------- EEPROM ----------------
 struct CalRecord {
@@ -46,9 +54,9 @@ struct CalRecord {
 
   float g128;
   float g64;
-  float g32;
 
-  int32_t tare;
+  int32_t t128;
+  int32_t t64;
   uint8_t gain;
   uint8_t pad[3];
 
@@ -56,7 +64,7 @@ struct CalRecord {
 };
 
 static const uint32_t CAL_MAGIC = 0x43414C33;
-static const uint32_t CAL_VERSION = 0x00030000;
+static const uint32_t CAL_VERSION = 0x00040000;
 
 // ---------------- GLOBAL ----------------
 HX711 hx;
@@ -107,9 +115,9 @@ void saveCal() {
 
   r.g128=g128;
   r.g64=g64;
-  r.g32=g32;
 
-  r.tare=tare_offset;
+  r.t128=t128;
+  r.t64=t64;
   r.gain=hx_gain;
 
   r.crc=crc32_span((uint8_t*)&r,sizeof(r)-4);
@@ -130,9 +138,9 @@ bool loadCal() {
 
   g128=r.g128;
   g64=r.g64;
-  g32=r.g32;
 
-  tare_offset=r.tare;
+  t128=r.t128;
+  t64=r.t64;
   hx_gain=r.gain;
 
   return true;
@@ -141,8 +149,8 @@ bool loadCal() {
 void resetCal() {
   g128=0.0020f;
   g64=0.0040f;
-  g32=0.0080f;
-  tare_offset=0;
+  t128=0;
+  t64=0;
   hx_gain=64;
   saveCal();
 }
@@ -209,14 +217,18 @@ void apply_gain() {
   hx_read(dummy);
 }
 
+long tare_now() {
+  return (hx_gain==128) ? t128 : t64;
+}
+
 float slope() {
-  if(hx_gain==128) return g128;
-  if(hx_gain==64)  return g64;
-  return g32;
+  return (hx_gain==128) ? g128 : g64;
 }
 
 // ---------------- AUTO SCALE ----------------
 void auto_scale(long raw) {
+  if(!auto_gain_enabled) return;
+
   if(abs(raw-last_raw)<50000) stable_counter++;
   else stable_counter=0;
 
@@ -226,9 +238,11 @@ void auto_scale(long raw) {
 
   uint8_t newg=hx_gain;
 
+  // NOTE: gain 32 is HX711 **channel B**, a different physical input — the load cell is on
+  // channel A. Measured unloaded: 884096 counts at 128 and 443600 at 64 (a clean 2x), but
+  // 2177 at 32. The old ladder stepped down into channel B above 7.5 M and read an
+  // unconnected input as if it were load. The ladder now stays on channel A: 128 <-> 64.
   if(hx_gain==128 && abs(raw)>6500000) newg=64;
-  else if(hx_gain==64 && abs(raw)>7500000) newg=32;
-  else if(hx_gain==32 && abs(raw)<5000000) newg=64;
   else if(hx_gain==64 && abs(raw)<2500000) newg=128;
 
   if(newg!=hx_gain) {
@@ -246,18 +260,30 @@ void auto_scale(long raw) {
 void cmd_load() {
   long raw;
   if(!hx_read(raw)) {
-    Serial.print("ERR 20 HX711_timeout\r\n");
+    Serial.print("ERR 20 HX711_timeout gain="); Serial.print(hx_gain);
+    Serial.print("\r\n");
     return;
   }
 
   if(abs(raw)>8000000) {
-    Serial.print("ERR 21 ADC_saturation\r\n");
+    // Report the value: "over range" and "input disconnected" both rail the ADC, and
+    // without the number the error cannot be told apart from a wiring fault. Full scale
+    // is +/-8388607, so raw close to that with no load applied means the input, not the load.
+    Serial.print("ERR 21 ADC_saturation raw="); Serial.print(raw);
+    Serial.print(" gain="); Serial.print(hx_gain);
+    Serial.print("\r\n");
     return;
   }
 
+  // The HX711 applies a new gain only from its NEXT conversion, so `raw` was taken at
+  // the gain that was live before auto_scale() may have switched. Capture that gain's
+  // slope first — using slope() afterwards reports the switching sample through the new
+  // gain's calibration and makes the mass jump by the gain ratio (a clean 2x step).
+  float sl = slope();
+  long  tr = tare_now();
   auto_scale(raw);
 
-  float mass=(raw-tare_offset)*slope();
+  float mass=(raw-tr)*sl;
 
   Serial.print("OK LOAD ");
   Serial.print("mass_g="); Serial.print(mass,3);
@@ -269,7 +295,7 @@ void cmd_load() {
 void cmd_tare() {
   long raw;
   if(!hx_read(raw)) return;
-  tare_offset=raw;
+  if(hx_gain==128) t128=raw; else t64=raw;
   saveCal();
   Serial.print("OK TARE\r\n");
 }
@@ -278,11 +304,8 @@ void cmd_setcal(char* a) {
   float s=atof(strtok(a," "));
   long t=atol(strtok(NULL," "));
 
-  if(hx_gain==128) g128=s;
-  else if(hx_gain==64) g64=s;
-  else g32=s;
-
-  tare_offset=t;
+  if(hx_gain==128) { g128=s; t128=t; }
+  else             { g64=s;  t64=t;  }
   saveCal();
 
   Serial.print("OK SETCAL\r\n");
@@ -322,24 +345,39 @@ void cmd_settime(char* a) {
 }
 
 void cmd_setgain(char* a) {
-  int g=atoi(a);
-  if(g!=32 && g!=64 && g!=128) {
+  if(a && (!strcmp(a,"AUTO") || !strcmp(a,"auto"))) {
+    auto_gain_enabled=true;
+    stable_counter=0;
+    Serial.print("OK SETGAIN mode=auto gain=");
+    Serial.print(hx_gain);
+    Serial.print("\r\n");
+    return;
+  }
+
+  int g=a?atoi(a):0;
+  // 32 is channel B, not the load cell — see auto_scale().
+  if(g!=64 && g!=128) {
     Serial.print("ERR 35 invalid_gain\r\n");
     return;
   }
   hx_gain=g;
+  auto_gain_enabled=false;      // pinned: a calibration must stay in one band
   apply_gain();
   saveCal();
-  Serial.print("OK SETGAIN\r\n");
+  Serial.print("OK SETGAIN mode=manual gain=");
+  Serial.print(g);
+  Serial.print("\r\n");
 }
 
 void cmd_cal() {
   Serial.print("OK CAL slope=");
   Serial.print(slope(),9);
   Serial.print(" tare=");
-  Serial.print(tare_offset);
+  Serial.print(tare_now());
   Serial.print(" gain=");
   Serial.print(hx_gain);
+  Serial.print(" mode=");
+  Serial.print(auto_gain_enabled?"auto":"manual");
   Serial.print("\r\n");
 }
 
@@ -406,12 +444,17 @@ void loop(){
 
   while(Serial.available()){
     char c=Serial.read();
+    if(c=='\r') continue;          // hosts send CRLF; a kept '\r' made every
+                                   // command parse as "PING\r" -> unknown_command
     if(c=='\n'){
       buf[i]=0;
       handle_line(buf);
       i=0;
     } else if(i<127){
       buf[i++]=c;
+    } else {
+      i=0;
+      Serial.print("ERR 11 line_too_long\r\n");
     }
   }
 }

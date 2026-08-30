@@ -103,8 +103,68 @@ are in `requirements.txt`.
 
 Run a profiled test directly (paths are relative to the `py/` working directory):
 ```bash
-python3 acquire_scope_data.py config.json ../react/public/config/<profile>.json
+py/.venv/bin/python acquire_scope_data.py config.json ../react/public/config/<profile>.json
 ```
+
+> **A run started from the command line never switches the heater on.** The oil heater sits on a
+> Shelly relay (channel 0, `shelly_control.py`), and only the dashboard/`api_server.py` turns it
+> **on**; `acquire_scope_data.py` arms `heater_guard.py`, which only ever turns it **off**. So a
+> headless run sets the Omron's setpoint, the Omron faithfully calls for heat, and nothing supplies
+> any — the bearing then simply tracks motor friction. Caught 2026-08-25 two hours into a 13 h run:
+> the bearing had gone 25 -> 34 C while the motor ran at 3000 rpm and then **fell back to 32** when
+> the speed dropped, which is the signature. Switch it on by hand and confirm the temperature
+> actually climbs before committing the night:
+>
+> ```bash
+> py/.venv/bin/python shelly_control.py --on heater      # channel 0
+> py/.venv/bin/python shelly_control.py --status         # may read "???" — trust the temperature, not this
+> ```
+>
+> `--status` frequently reports `???` for a channel (no retained MQTT state), so it cannot confirm
+> the switch. The bearing temperature rising is the only proof that counts.
+
+> **A guard from the PREVIOUS run switches the heater off for the NEXT one — and a CLI run never turns it
+> back on.** Two documented gotchas that compound into a third. The heater guard fires at `run_end` and
+> switches channel 0 **off**; a run started from the command line only ever arms a guard, never energises the
+> relay. So the sequence *short test run -> real run* leaves the second run with the heater dead: the Omron
+> calls for heat, nothing supplies it, and the temperature schedule is silently void. Caught 2026-08-27
+> between a 15 min smoke test and the 0035 run — the smoke test's guard switched off at 12:48 and the run
+> that started at 13:11 sat at PV 29 C against SV 40 C, not heating. **Switch the heater on again after every
+> run that armed a guard, and confirm by watching PV rise.**
+>
+> **Do not poll the Omron or the VFD from a second process while a run is going.** They share `/dev/ttyUSB0`
+> and the runner holds it: an outside `omron_temp_poll.py` gets `Failed to read register 0x2000`. Read the
+> temperature out of the run's own telemetry (`omron_pv_c` in the JSONL or the stdout log) instead.
+
+> **Killing a run leaves its heater guard behind, and the next run gets a second one.** The guard is
+> detached (`start_new_session`) with a deadline fixed at the *original* run's end. Restart a run
+> later than the first and the stale guard will switch the heater off part-way through the new one.
+> Terminate the old guard (`pkill -f heater_guard.py`, or by pid) before restarting.
+
+> **The heater guard can exit WITHOUT switching the heater off — check the Omron PV after every run.**
+> The guard triggers on `run_end` and sends OFF up to 12 times, but if it cannot *confirm* the switch it
+> logs `state UNKNOWN — command was sent, but could not confirm` and finally
+> `heater guard exiting WITHOUT confirmation`, and stops. It is not a bug — the guard is correctly saying
+> it lost the ability to act — but the heater is then still on and nothing else will touch it. Caught
+> 2026-08-26: the Pi froze at the end of a 13 h run, the guard failed all 12 attempts between 04:13 and
+> 04:19, and the bearing was found **still regulating at PV 100 C against SV 100 C two hours and sixteen
+> minutes later**. **After every run, read the temperature — not `--status`, which returns `???`.** A
+> heater that is really off shows a falling PV within a minute or two:
+>
+> ```bash
+> py/.venv/bin/python shelly_control.py --off heater
+> py/.venv/bin/python omron_temp_poll.py --port /dev/ttyUSB0 --get-pv --once --json   # repeat; it must fall
+> ```
+>
+> Tracked in ticket 0033 (the Pi freeze) — the fix is an *external* watchdog that can cut the heater when
+> the Pi itself is gone; ticket 0017's extra retries cannot help when the host is the thing that failed.
+
+> **Use `py/.venv`, not the repo-root `.venv`.** Both exist and both have `pyvisa`, `h5py`, `serial`
+> and `numpy`, but **only `py/.venv` has `bleak`**. Launched from the root venv a run starts and
+> looks entirely normal — `py/ble` degrades to `OeUnavailable` by design so an absent BLE stack can
+> never kill a run — and produces a file with **no `/oe_samples` group at all**, with nothing in the
+> run log to say why. Caught 2026-08-25 only because Kim asked for the OE sensor to be checked
+> before a 13 h run that was about to be started from the wrong one.
 Manual mode (no profile — uses `config.json` acquisition defaults only, no motor/temp):
 ```bash
 python3 acquire_scope_data.py config.json
@@ -338,12 +398,96 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   `not advertising after 3 scans over 155s` and clear themselves. **Wait one or two cycles before
   touching the hardware**; a run in progress recovers by itself.
 
+- **⚠️ Every SP / CHAN3 reading in the archive was taken through a DETACHED scope probe ground
+  — all of it is invalid (found 2026-08-29, ticket 0038).** The slip ring itself works. The probe's
+  ground lead was off, which removed the DC reference and left the tip acting as an antenna. With the
+  ground attached CHAN3 sits at a rock-steady **Vavg 4.87 V** — the slip ring's own ~5 V excitation —
+  and its excursions grow with rotation (Vpp 3.6 V at rest, 6.4 V at 1800 rpm) and shrink again when
+  the shaft stops. Kim also turned the shaft by hand and watched the voltage follow it.
+
+  **SP mean is the discriminator: ~5 V means the ground was attached, ~0 V means it was not.** All 23
+  runs still on the Pi, back to **2026-06-29**, read −0.014 to −0.039 V. Assume the same for the
+  archived blobs unless checked — it is one sweep's SP mean per file. **Do not analyse SP from any run
+  before 2026-08-29.** UL and AE are unaffected: separate probes, correct DC levels, correct rotation
+  response throughout.
+
+  This retracts the 2026-08-27 conclusion that SP carried no rotation signal, and the follow-up that
+  it was drive EMI (“+43 % with the motor on, flat with speed”) — that is what a floating probe does
+  near a running VFD, not a property of the slip ring.
+
+  **The channel now needs `volt_range 16.0 / volt_offset 5.0`** (it spans 1.8–8.4 V; the old 8.0/0.0
+  window clipped over half of it). Applied to all seven live profiles and to the scope.
+
+- **⚠️ The tachometer over-triggers after the 2026-08-29 re-assembly — `rpm_meas` is unusable.**
+  `TACHDIAG?` reports **303,253 glitches against 319,484 pulses (95 % rejected)**, and `SPEED?` returns
+  a fixed **7368 rpm at both 10 Hz and 20 Hz** because the firmware's 8 ms glitch floor pins the
+  period at 8.143 ms. The pulse count is frozen at standstill, so it is not electrical noise: the
+  OGT500 is seeing tens of transitions per revolution instead of the one reflective mark, and needs
+  **mechanical re-alignment**. Open-loop runs are unaffected (they ignore the tach) and the speed of
+  record stays `59.83 × vfd_cmd_hz`, but closed loop would chase a meaningless number.
+
+- **A run now switches its own scope channels on — it did not before (fixed 2026-08-29).**
+  `:DIGITIZE` with no argument digitises only the channels the scope is **currently displaying**, and
+  that display state was never part of the profile: it persisted from whatever anyone last did at the
+  front panel. Someone looking at CHAN3 alone left CHAN1 and CHAN2 switched off, and a run started
+  then would have captured one sensor of three while the profile still claimed all three.
+  `apply_scope_channels()` now sends `:CHANx:DISP ON` before the range/offset/coupling settings.
+
+- **The heater's maximum rate is ~30 C/h, measured — not the ~5 C/h the 13 h profile suggests.**
+  From run `20260825_145918`: the fastest sustained 20-minute window with the heater calling is 30 C/h
+  (41 -> 51 C, and again 50 -> 60 C). `Keratech22.json` looks far slower only because its SV rises 5 C per
+  hour, so the heater is never the limit there. Size temperature ramps in new profiles from 30 C/h — and
+  expect **less** with the bearing decoupled or unloaded, where there is no friction heat.
+
 - **Skipped sweeps leave gaps in the HDF5 sweep numbering.** Analysis must iterate the
   existing `sweep_###` groups, not assume contiguous indices.
+
+- **The Pi freezes intermittently — and as of 2026-08-26 it finally leaves evidence.** A freeze takes
+  down SSH, serial, the dashboard and the bus at once, and needs a power cycle of **Shelly channel 3
+  ("CPU")** to recover — `shelly_control.py --off cpu` is useless for this because it runs *on* the Pi;
+  publish to the broker from another machine (commands in ticket 0033). **Never cut channel 0 — that is
+  the heater, and cutting it is the one thing you may safely do from outside; cycling the Pi is the other.**
+
+  Until 2026-08-26 every freeze was unfalsifiable: Raspberry Pi OS ships `Storage=volatile` in
+  `/usr/lib/systemd/journald.conf.d/40-rpi-volatile-storage.conf`, and `ForwardToSyslog=yes` went nowhere
+  because no syslog daemon is installed, so nothing at all survived a reboot. Now overridden by
+  `/etc/systemd/journald.conf.d/50-persistent-for-freeze-diagnosis.conf` (persistent, capped at 500 MB,
+  `SyncIntervalSec=60s`), plus a per-minute `rig-health` sampler (`rig-health.timer`) logging memory,
+  load, CPU temperature, **`vcgencmd get_throttled`** (undervoltage — a classic Pi freeze cause) and free
+  disk. **After a freeze, read the previous boot before power-cycling again:**
+
+  ```bash
+  journalctl -b -1 -n 100 --no-pager          # the previous boot's last words
+  journalctl -t rig-health -b -1 | tail -60   # memory / thermal / undervoltage trend
+  journalctl -b -1 -p err --no-pager          # oops, OOM killer, USB resets
+  ```
+
+  A freeze mid-run still costs the **whole** HDF5 (it is never flushed — see the flush note above), and it
+  also defeats the heater guard. Ticket 0033.
 
 - **Secret in `config.json`.** An Azure Blob **SAS connection string** is stored in cleartext
   in `py/config.json`. It should be moved to an environment variable / secret store and
   rotated; do not commit it.
+
+- **The three 13 h HDF5s are no longer on the Pi — they live in Azure only (deleted 2026-08-27).**
+  `20260818_135505`, `20260820_125647` and `20260825_145918` were removed from the SD card on Kim's
+  instruction to free space (114.2 GB; the Pi went from 65 % to 16 % used). Each run folder still exists and
+  now holds an **`ARCHIVED.txt`** naming account/container/blob and the exact byte count. Verified before
+  deletion by exact size **plus** SHA-256 of three 4 MB ranges per blob (offset 0, midpoint, last 4 MB) —
+  all nine identical. **The blobs carry no content-MD5** (chunked block-blob upload does not set one), so
+  they cannot be proven byte-exact again without a 114 GB download. **The telemetry JSONL and
+  `acquire_scope.log` were deliberately kept** — the uploader archives only the `.h5`, so those 12 MB are
+  the only copy in existence of the per-tick record and of the account of what went wrong (ticket 0013).
+  **Anyone pruning `data/runs/` must delete the `.h5` only, never the folder.**
+
+- **Two Azure containers are in live use, and the dashboard points at the wrong one for archives.**
+  Both live on account **`csfbst001`**. The **dashboard** uploads to container **`data`** (hard-coded in
+  `react/src/hooks/useAzureUpload.js`); **`py/tools/upload_to_azure.py`** uploads to container
+  **`eceherning`** under a `<run_id>/` prefix. **The 13 h runs of record are in `eceherning` only** — they
+  are not in `data`, so browsing the dashboard's container finds older ad-hoc uploads that look plausible
+  and are the wrong data. (`config.json → azure.default_container` is `auherning3bearingtester`, which
+  **does not exist** at all — dead and misleading; ticket 0010.) Sending someone a dataset means sending
+  account + container + blob, not a filename.
 
 - **`control` parameters are per-profile only.** Motor constants such as `rpm_per_hz_guess`
   currently have to be repeated in every profile.
@@ -357,10 +501,155 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 ## Load cell & firmware — auto gain scaling
 
-`firmware/src/main.cpp` **is now v1.2.0 (auto gain scaling)** — this is the chosen firmware going
-forward. `auto_scale(raw)` auto-switches the HX711 gain **128 ↔ 64 ↔ 32** (high gain/resolution for
-light loads, drops for heavy) with hysteresis, a 3-read stability gate, **per-gain calibration**, an
-ADC-saturation guard (`ERR 21`), and it emits `OK AUTOGAIN gain=N` when it switches.
+`firmware/src/main.cpp` is **v1.2.5, and it is the version actually flashed on the board**
+(flashed 2026-08-25 with the rig apart for load-cell calibration; `INFO` reports `fw=1.2.5`).
+`auto_scale(raw)` auto-switches the HX711 gain **128 ↔ 64 ↔ 32** (high gain/resolution for
+light loads, drops for heavy) with hysteresis, a 3-read stability gate, **per-gain slope**, an
+ADC-saturation guard (`ERR 21`), and it emits `OK AUTOGAIN gain=N` when it switches. v1.2.1 added
+the robust tach from ticket 0007 — 1.5 s timeout (rpm → 0 when the signal is lost, no more frozen
+value), 8 ms glitch floor, median filter and `TACHDIAG?`.
+
+> **v1.2.0/v1.2.1 were unusable and never ran on the rig: the parser lost the CR strip.** Their
+> `loop()` dropped v1.1.0's `if (c == '\r') continue;`, so every host command — all tools send
+> `CRLF` — parsed as `"PING\r"` and came back `ERR 10 unknown_command`. **Every** command, so the
+> board was dead to `util_tool.py`, `test_runner.py` and the dashboard alike. Fixed in **v1.2.2**,
+> which also restores the `ERR 11 line_too_long` guard. If a future edit touches `loop()`, verify
+> with a raw `PING` over serial before trusting the board.
+
+> **v1.2.2 reported the switching sample through the wrong gain's slope (fixed in v1.2.3).**
+> The HX711 applies a new gain only from its *next* conversion, but `cmd_load()` called
+> `auto_scale(raw)` first and then `slope()`, so the one reading in which a switch happened was
+> scaled by the gain it was about to move to. Measured on the bench: a settled unloaded reading
+> stepped 1778 g -> 889 g on the `OK AUTOGAIN gain=128` line, a clean 2x, and stepped back on the
+> next read. It would have looked like the load cell jumping, not like a scaling bug, and it would
+> have survived calibration. `cmd_load()` now captures `slope()` **before** `auto_scale()`; verified
+> continuous across a switch (1777.9 -> 1777.7 -> 1771.6).
+
+> **Three more defects, all found on hardware the same day (v1.2.4, v1.2.5).**
+> - **`SETGAIN` pinned nothing.** `auto_scale()` runs inside every `LOAD?` and overrode the gain
+>   that had just been set, so a calibration could not hold a band: pinning 128, 64 and 32 in turn
+>   all produced the same ~3.31 M reading because every one of them was dragged back to 64.
+>   `SETGAIN <n>` is now **manual mode** (auto_scale returns immediately) and `SETGAIN AUTO` hands
+>   control back. `CAL?` reports `mode=auto|manual`. Manual is RAM-only — a reset returns to auto.
+> - **Gain 32 is HX711 *channel B*, not the load cell.** Unloaded reads 884096 at gain 128 and
+>   443600 at 64 (a clean 2x) but **2177** at 32 — an unconnected input. The auto ladder stepped
+>   down into it above 7.5 M and would have read channel B noise as load. The ladder is now
+>   128 <-> 64 only, and `SETGAIN 32` returns `ERR 35`.
+> - **Tare was one value shared by all gains** while slope was per gain. Measured: zero is 881372
+>   counts at 128 and 442361 at 64 — **4.1 kg apart** once scaled, and a run crosses 128 -> 64 as
+>   load applies, so one shared tare is wrong in whichever band it was not taken in. v1.2.5 stores
+>   `t128`/`t64` alongside `g128`/`g64`; `TARE` and `SETCAL` write the active band's pair.
+
+**Calibration was wiped by the flash and must be redone.** The EEPROM `CAL_VERSION` differs from
+v1.1.0's, so `loadCal()` rejected the stored record and `resetCal()` ran: after flashing the board
+reports factory defaults (`slope=0.004 tare=0 gain=64`). Slope is stored **per gain** (`g128`,
+`g64`, `g32`), so calibrate each gain the rig will actually reach:
+
+```bash
+python3 util_tool.py --port /dev/ttyACM0 setgain --gain 128   # or 64, or auto
+python3 util_tool.py --port /dev/ttyACM0 calibrate --gain 128 --weight-g 2000
+python3 util_tool.py --port /dev/ttyACM0 cal      # CAL? reports slope + tare + gain + mode
+```
+
+### The bench calibration of 2026-08-25 — and why its tare is worthless
+
+Measured with the scale unit **off the rig**, weights on the pan, gain pinned per band. Ladder
+1/2/4/6 kg (the 6 kg point repeated four times), least-squares over the loaded points:
+
+| | slope | tare (line intercept) | verified against 6 kg |
+|---|---|---|---|
+| gain 128 | `0.004820812` g/count (207434 counts/kg) | 854943 | 6139 g (+2.3 %) |
+| gain 64 | `0.009726785` g/count (102809 counts/kg) | 431818 | 5980 g (-0.3 %) |
+
+The two slopes differ by 1.991 — the factor 2 they must, which is the one clean internal check in
+the whole exercise. **Both are ~2.3x from the factory defaults**, so writing them is a large
+improvement over what the flash left behind.
+
+> **Kim's accuracy requirement for load is +/-10-15 % (stated 2026-08-25), and we are at +/-3-5 %.**
+> So the placement scatter below, alarming as it looks, is comfortably inside what the work needs —
+> it is documented so nobody over-claims, not because it must be improved. What is *not* covered by
+> that tolerance is the factor-5 question further down: that is force actually reaching the cell,
+> not measurement error, and no tolerance makes it safe.
+
+> **The dominant error is mechanical, and it is huge: the same 6 kg placed four times read
+> 2023357 / 2056850 / 2137756 / 2144042 counts — a spread of 555 g (9.3 %), sd 275 g.** Electrical
+> noise on the same cell is +/- 25 counts (+/- 0.1 g), so **placement is ~2750x worse than the
+> electronics**. Treat the slope as good to **+/- 3-5 %, not better** — at the rig's ~62 kg that is
+> +/- 3 kg. Anything quoting logged load to tighter than that is quoting noise.
+
+> **The 10 kg weight never reached the cell.** Loaded, it read *below* empty (861841 vs 884533 at
+> gain 128, i.e. -104 g). Twice, after repositioning. It rests on the frame beside the pan rather
+> than on it. It is excluded from the fit entirely — and it is why the calibrated range is 1-6 kg
+> while the rig runs at ~62 kg, a **10x extrapolation** that nothing here validates.
+
+> **Do not use the bench tare in the rig.** Over the session the unloaded raw drifted from 881372
+> to 802769 counts — **379 g** — and after calibration an empty pan read -252 g (gain 128) /
+> -288 g (64). The zero wanders with the mechanics; only the slope travels with the unit. **After
+> remounting the scale unit, tare in place, unloaded, in both bands:**
+>
+> ```bash
+> python3 util_tool.py --port /dev/ttyACM0 setgain --gain 128 && python3 util_tool.py --port /dev/ttyACM0 tare
+> python3 util_tool.py --port /dev/ttyACM0 setgain --gain 64  && python3 util_tool.py --port /dev/ttyACM0 tare
+> python3 util_tool.py --port /dev/ttyACM0 setgain --gain auto
+> ```
+
+**Tared in place 2026-08-25, mounted and unloaded** — `tare` 690680 (gain 128) / 346464 (gain 64),
+after which an unloaded rig reads **-5.6 g / -6.5 g**. The band ratio is 1.994, as it must be.
+
+> **Mounted, the mechanics are ~50x quieter than the bench.** Reading spread with the unit in the
+> rig is **2.8 g**, against 150 g within a single bench measurement and 555 g between placements of
+> the same weights. The instability was the pan and the loose weights, not the cell — the cell
+> itself behaves well. It also means the +/- 3-5 % slope uncertainty is a property of *how we
+> calibrated*, not of what the rig measures: a calibration performed through the rig's own load
+> path would be far better, and that is the route if the load figure ever needs to be trusted
+> tighter.
+
+### Setting the rig's clamp load — measured 2026-08-25, and it is not controllable above 74 kg
+
+The rig's load is set by tightening a plate down onto the cell. Two full tighten/release cycles were
+measured turn by turn. What came out matters more than the numbers:
+
+- **The measurement ceiling is ~74 kg** (the firmware's 8.0 M guard; the ADC rail is 78 kg). Above
+  it `LOAD?` returns `ERR 21` and there is **no reading at all** — not a wrong number, nothing. Gain
+  64 is the lowest step on channel A, so no firmware change can raise this.
+- **Load per turn is not repeatable.** Consecutive turns in one cycle gave **+19.9, +13.9 and
+  +31.5 kg** — a factor 2.3 between neighbours. Turn count is not a usable proxy for load.
+- **Hysteresis, improving with bedding-in but still large:** backing off one turn and returning
+  landed **-23.8 %** low in cycle 1, **-16.4 %** in cycle 2, **-12.5 %** on the next re-tighten.
+- Therefore **any load above 74 kg is an estimate with ~25-30 % uncertainty**, and the rig was left
+  at an *estimated* **~150 kg** on 2026-08-25 (Kim's decision, made knowing the bound). Below 74 kg
+  the load can be set exactly by watching the number, and repeatability within a run is +/-0.1 g.
+
+> **The cell survives it.** After being taken to an estimated ~98 kg the zero returned within
+> **18 g** (gain 64) / 11 g (gain 128) of where it was tared. That also caps the factor-12 puzzle
+> below: had the rig's load path multiplied force by 12, the cell would have seen >1000 kg against
+> a 250 kg rating and been destroyed. It was not, so the factor is small.
+
+> **To make >74 kg controllable, the only lever is measurement range, and it is hardware.** Channel
+> B (gain 32) would give ~163 kg but the wiring cannot be moved. The remaining option is a resistor
+> divider across the signal pair — halves sensitivity, doubles range to ~150 kg, keeps channel A and
+> auto-gain, and needs a fresh calibration. Not done; Kim's call.
+
+**The rig runs in gain 64.** At 102809 counts/kg, ~62 kg sits near 6.2 M counts — above the 2.5 M
+step-up threshold, so the band is stable during a run; the board sits at 128 only while unloaded
+and crosses to 64 as load applies. That crossing is exactly why per-gain tare had to exist.
+
+`util_tool.py` gained `setgain` and `calibrate --gain` for this (2026-08-25). `calibrate` reads
+`CAL?` before and after and **aborts if the gain auto-switched mid-measurement** — the loaded and
+unloaded raw reads would then be on different scales, and nothing else would show it because the
+`OK AUTOGAIN` line is skipped as unsolicited.
+
+> **`tare` is a single value shared across all three gains — slope is not.** `cmd_tare()` writes one
+> `tare_offset` in raw counts, but raw counts scale with gain, so a tare taken at 128 is wrong by
+> roughly 2× once auto-scale drops to 64. Tare at the gain the run will sit at, and treat a
+> zero-offset error after a gain switch as expected, not as a fault. Per-gain tare (`t128/t64/t32`)
+> is the real fix and is not implemented.
+
+**Host-side parsing is done (2026-08-25).** `util_tool.py`'s `send_cmd(expect_arg=…)` and
+`test_runner.py`'s `_read_load()` both read past `OK AUTOGAIN` lines, and `_read_speed()` now does
+too — it previously took one line and `_parse_first_float`, so an interleaved `OK AUTOGAIN gain=64`
+parsed as a perfectly plausible **64 rpm** sample. It now accepts only the `rpm=` field of a real
+`SPEED?` reply. `_read_load()`'s regex also accepts negative masses.
 
 The previous **v1.1.0 (manual gain)** was overwritten in place; it is preserved **in git history**,
 not as a second file — `main.cpp` is the only source in `firmware/src/`. To read or roll back:
@@ -370,29 +659,17 @@ git show 07cf7907:firmware/src/main.cpp            # view v1.1.0
 git show 07cf7907:firmware/src/main.cpp > firmware/src/main.cpp   # roll back
 ```
 
-> **Do not keep a second `.cpp` in `firmware/src/`.** `platformio.ini` sets no `build_src_filter`,
-> so PlatformIO compiles *every* source in that directory. A copy of the old firmware there brings a
-> second `setup()`/`loop()` and the build fails at link time with duplicate symbols.
+> **Do not keep a second `.cpp` in `firmware/src/`.** `platformio.ini` sets no `build_src_filter`
+> for the default env, so PlatformIO compiles *every* source in that directory. A copy of the old
+> firmware there brings a second `setup()`/`loop()` and the build fails at link time with duplicate
+> symbols. (The separate `seeed-xiao-rp2040-tach-v111` env does set one, onto `src_tach_v111/`.)
 
-v1.1.0 has manual `SETGAIN 64|128`, `SETPPR`/`PPR?`, and a 100 µs glitch filter in the tach ISR
-(`if (dt > 100) …`) that v1.2.0 does **not**.
+**What v1.2.5 still does not have, that v1.1.0 did:** `SETPPR`/`PPR?` — `PULSES_PER_REV` is
+hardcoded to 1 (fine: one reflective mark), so `util_tool.py setppr` errors against it.
 
-**Tradeoffs v1.2.0 carries** (fine for the current single-mark rig, but know them before you flash):
-- No `SETPPR`/`PPR?` — `PULSES_PER_REV` is hardcoded to 1 (OK: one reflective mark). `util_tool.py
-  setppr` will error against it.
-- No 100 µs ISR debounce.
-- Still **no tach timeout** — a lost tacho signal freezes at the last value (see the tacho known-issue).
-
-**Renaming the source does NOT reflash the board.** The RP2040 keeps running whatever was last
-flashed (still v1.1.0's behaviour) until you build + upload v1.2.0 (`pio run --target upload`).
-Confirm what is actually *running* with the `INFO` command (reports `fw=`), not by looking at the
-source. And **only flash when the rig is idle** — the same board serves the tacho *and* the load
-cell during a run, so flashing mid-test breaks both.
-
-**After flashing, on the Python side:** with auto-scale live, `LOAD?` produces unsolicited
-`OK AUTOGAIN gain=N` lines — verify `util_tool.py` / `test_runner.py`'s response parser **skips**
-non-matching lines, or a gain switch mid-read will desync it. Then **re-TARE and re-run SETCAL per
-gain** — calibration is gain-dependent.
+**Flashing:** `pio run -e seeed-xiao-rp2040 --target upload`. Confirm what is actually *running*
+with `INFO` (`fw=`), not by looking at the source. And **only flash when the rig is idle** — the
+same board serves the tacho *and* the load cell during a run, so flashing mid-test breaks both.
 
 ---
 
@@ -510,10 +787,13 @@ as the code's own comment requires, and the redundant second `connect()` and the
 5. **Move the Azure SAS out of `config.json`.**
 6. **Confirm rpm/Hz empirically** with the now-working sensor and refine the 59.5 factor if a
    temperature-dependent value is warranted for the analysis.
-7. **Load-cell auto gain scaling** — `main.cpp` is now v1.2.0 (see "Load cell & firmware").
-   Remaining: flash it when the rig is idle (`pio run --target upload`), make the `LOAD?` parser
-   tolerant of `OK AUTOGAIN` lines, and re-TARE + SETCAL per gain. Optional: fold
-   `SETPPR`/debounce/tach-timeout back in from the preserved v1.1.0.
+7. **Load-cell: tare in the rig, then judge whether the bench slope is good enough.** Firmware
+   v1.2.5 is flashed and the bench slope is written per gain (see "Load cell & firmware"). Two
+   things remain, in order: **(a)** tare both bands once the scale unit is remounted and unloaded —
+   the bench zero is meaningless and the board currently reads ~-270 g empty; **(b)** decide whether
+   +/- 3-5 % on load is acceptable for the analysis. If it is not, the fix is not more weights on
+   the pan — it is loading the cell through the rig's own load path, because placement, not
+   electronics, is what limits us.
 8. **BLE OE sensor integration** — **validated against the real sensor 2026-08-20** (tickets 0001,
    0021, 0024, 0025): `/oe_samples` fills, 5 of 5 capture cycles succeed, sweeps stay at zero
    skips, and both streams share one time axis. Remaining before a 13 h run: set

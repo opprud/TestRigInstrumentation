@@ -1,6 +1,6 @@
 {
   "name": "Rehearsal 15 min",
-  "description": "Short dry-run: same scope/acquisition path as Keratech22, gentle RPM staircase, NO temperature schedule (Omron left untouched, heater relay off).",
+  "description": "Short dry-run: same scope/acquisition path as Keratech22, gentle RPM staircase, NO temperature schedule (Omron left untouched, heater relay off). SP/CHAN3 volt_offset is 5.0 because the slip ring sits on its ~5 V excitation pedestal; measured 2026-08-29 the channel spans 1.8-8.4 V. The old 8.0/0.0 window (-4 to +4 V) clipped more than half of it. Runs before 2026-08-29 were taken with the scope probe's GROUND LEAD DETACHED, which removed the DC reference and is why SP looked like it sat at 0 V and carried no rotation signal - see ticket 0038.",
   "duration_minutes": 15,
   "control": {
     "rpm_per_hz_guess": 59.5,
@@ -65,20 +65,20 @@
   "scope_channels": {
     "UL": {
       "timebase_range": 0.2,
-      "volt_range": 16.0,
+      "volt_range": 12.0,
       "volt_offset": 0.0,
       "coupling": "DC"
     },
     "AE": {
       "timebase_range": 0.2,
-      "volt_range": 4.0,
+      "volt_range": 5.0,
       "volt_offset": 0.0,
       "coupling": "DC"
     },
     "SP": {
       "timebase_range": 0.2,
-      "volt_range": 8.0,
-      "volt_offset": 0.0,
+      "volt_range": 6.0,
+      "volt_offset": 5.0,
       "coupling": "DC"
     }
   }

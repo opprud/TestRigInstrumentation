@@ -1,119 +1,122 @@
 {
-  "scope_ip": "169.254.227.43",
-  "bearing": {
-    "manufacturer": "SKF",
-    "model": "SYJ25",
-    "material": "Chrome steel",
-    "bore_mm": 25,
-    "Rolling elements": 9,
-    "cage_type": "Steel",
-    "dynamic_load_rating_N": 14000,
-    "Max speed_rpm": 7000,
-    "notes": "Test bearing for ForeverBearing endurance testing"
+ "scope_ip": "169.254.227.43",
+ "bearing": {
+  "manufacturer": "SKF",
+  "model": "SYJ25",
+  "material": "Chrome steel",
+  "bore_mm": 25,
+  "Rolling elements": 9,
+  "cage_type": "Steel",
+  "dynamic_load_rating_N": 14000,
+  "Max speed_rpm": 7000,
+  "notes": "Test bearing for ForeverBearing endurance testing"
+ },
+ "lubricant": {
+  "product_name": "Keratech 22",
+  "manufacturer": "Kerax",
+  "base_oil": "Parafin Oil",
+  "nlgi_grade": "N/A",
+  "additives": "None",
+  "flash_point_c": 185,
+  "quantity_applied_ml": "0.5",
+  "application_method": "Manual application",
+  "application_date": "2026-03-16",
+  "batch_number": "N/A",
+  "notes": "Initial test, new bearing"
+ },
+ "acquisition": {
+  "points": 40000,
+  "samples": 500,
+  "interval_sec": 20,
+  "waveform_format": "WORD",
+  "points_mode": "RAW",
+  "trigger_sweep": "AUTO",
+  "acq_type": "NORM"
+ },
+ "dashboard_preview": {
+  "points": 1000,
+  "samples": 1,
+  "decimation_ratio": 250,
+  "fast_mode": true,
+  "throttle_ms": 2000,
+  "notes": "Lightweight acquisition for dashboard preview - adjustable decimation rate and throttling"
+ },
+ "channels": [
+  {
+   "name": "UL",
+   "source": "CHAN1",
+   "enabled": true,
+   "notes": "Kistler acoustic emission probe"
   },
-  "lubricant": {
-    "product_name": "Keratech 22",
-    "manufacturer": "Kerax",
-    "base_oil": "Parafin Oil",
-    "nlgi_grade": "N/A",
-    "additives": "None",
-    "flash_point_c": 185,
-    "quantity_applied_ml": "0.5",
-    "application_method": "Manual application",
-    "application_date": "2026-03-16",
-    "batch_number": "N/A",
-    "notes": "Initial test, new bearing"
+  {
+   "name": "AE",
+   "source": "CHAN2",
+   "enabled": true,
+   "notes": "Piezo accelerometer"
   },
-  "acquisition": {
-    "points": 40000,
-    "samples": 500,
-    "interval_sec": 20,
-    "waveform_format": "WORD",
-    "points_mode": "RAW",
-    "trigger_sweep": "AUTO",
-    "acq_type": "NORM"
+  {
+   "name": "SP",
+   "source": "CHAN3",
+   "enabled": true,
+   "notes": "Sl\u00e6bering"
   },
-  "dashboard_preview": {
-    "points": 1000,
-    "samples": 1,
-    "decimation_ratio": 250,
-    "fast_mode": true,
-    "throttle_ms": 2000,
-    "notes": "Lightweight acquisition for dashboard preview - adjustable decimation rate and throttling"
-  },
-  "channels": [
-    {
-      "name": "UL",
-      "source": "CHAN1",
-      "enabled": true,
-      "notes": "Kistler acoustic emission probe"
-    },
-    {
-      "name": "AE",
-      "source": "CHAN2",
-      "enabled": true,
-      "notes": "Piezo accelerometer"
-    },
-    {
-      "name": "SP",
-      "source": "CHAN3",
-      "enabled": true,
-      "notes": "Sl\u00e6bering"
-    },
-    {
-      "name": "Temp",
-      "source": "CHAN4",
-      "enabled": false,
-      "notes": "Temperature"
-    }
-  ],
-  "telemetry": {
-    "enabled": false,
-    "rp2040_port": "/dev/tty.usbmodemXXXX",
-    "modbus_config": "modbus_config.json",
-    "notes": "Using RS VFD, no filter"
-  },
-  "test_parameters": {
-    "test_name": "Oil & sensor test",
-    "target_rpm": 500,
-    "target_temperature_c": 60,
-    "expected_load_g": 200,
-    "duration_minutes": 60,
-    "notes": "Standard t"
-  },
-  "store": {
-    "output_file": "data/keratech22.hdf5",
-    "timestamped": true,
-    "compress": "gzip",
-    "compression_level": 4,
-    "chunk": false,
-    "attrs": {
-      "project": "ForeverBearing",
-      "operator": "morten",
-      "scope_model": "MSO-X 2024A"
-    }
-  },
-  "scope": {
-    "preferred_port": 5025
-  },
-  "azure": {
-    "connection_string": "BlobEndpoint=https://csfbst001.blob.core.windows.net/;QueueEndpoint=https://csfbst001.queue.core.windows.net/;FileEndpoint=https://csfbst001.file.core.windows.net/;TableEndpoint=https://csfbst001.table.core.windows.net/;SharedAccessSignature=sv=2025-11-05&ss=b&srt=co&sp=rwdlactf&se=2126-04-10T06:33:12Z&st=2026-04-10T06:33:12Z&spr=https&sig=mLYdG%2F%2F%2BBvdWkmjCUZmI7gww4pfMynDByS%2BbJgTeOC0%3D",
-    "default_container": "auherning3bearingtester"
-  },
-  "oe": {
-    "enabled": true,
-    "device_address": "03:24:71:01:04:54",
-    "interval_min": 3,
-  "keep_connected": true,
-    "sensors": [
-      3,
-      4
-    ],
-    "notes": "BearingBrain OE BLE sensor. sensors 3+4 = mic_amb + mic_mch (mask 0x18). device_address must be the MAC as seen by BlueZ (ble_debug_scan.py), not a macOS UUID. Disabled by default; enabling adds an /oe_samples group to the run HDF5. sample_rate_hz is stamped onto each /oe_samples dataset; the device does not send it with the data. Sample rate is 80 kHz for both mics, confirmed by Kim 2026-08-20. The vendor pdm_mic_config.json claims 100 kHz and is wrong for this custom PDM firmware. Runs before 2026-08-20 stamped 100000 and their frequency axes are 25 percent high.",
-    "sample_rate_hz": {
-      "3": 80000,
-      "4": 80000,
-      "_source": "Confirmed 80 kHz by Kim 2026-08-20. The vendor pdm_mic_config.json says 100000, which is WRONG for this custom PDM firmware; do not restore it from that file."
-    }
+  {
+   "name": "Temp",
+   "source": "CHAN4",
+   "enabled": false,
+   "notes": "Temperature"
   }
+ ],
+ "telemetry": {
+  "enabled": false,
+  "rp2040_port": "/dev/tty.usbmodemXXXX",
+  "modbus_config": "modbus_config.json",
+  "notes": "Using RS VFD, no filter"
+ },
+ "test_parameters": {
+  "test_name": "Keratech 22, 13 h, clamp load ~150 kg (estimated)",
+  "target_rpm": 500,
+  "target_temperature_c": 60,
+  "expected_load_g": 150000,
+  "duration_minutes": 60,
+  "notes": "Standard t",
+  "clamp_load_kg_estimated": 150.0,
+  "clamp_load_uncertainty_pct": 30.0,
+  "clamp_load_method": "Set 2026-08-25 by counting tightening turns ABOVE the load cell's 74 kg measurement ceiling, so it is NOT measured. Load per turn varied +19.9/+13.9/+31.5 kg between neighbouring turns and hysteresis on release was 12-24 %, hence the 30 % bound. Treat as 150 +/- 40 kg. Loads at or below 74 kg can be set exactly by reading the cell."
+ },
+ "store": {
+  "output_file": "data/keratech22.hdf5",
+  "timestamped": true,
+  "compress": "gzip",
+  "compression_level": 4,
+  "chunk": false,
+  "attrs": {
+   "project": "ForeverBearing",
+   "operator": "morten",
+   "scope_model": "MSO-X 2024A"
+  }
+ },
+ "scope": {
+  "preferred_port": 5025
+ },
+ "azure": {
+  "connection_string": "BlobEndpoint=https://csfbst001.blob.core.windows.net/;QueueEndpoint=https://csfbst001.queue.core.windows.net/;FileEndpoint=https://csfbst001.file.core.windows.net/;TableEndpoint=https://csfbst001.table.core.windows.net/;SharedAccessSignature=sv=2025-11-05&ss=b&srt=co&sp=rwdlactf&se=2126-04-10T06:33:12Z&st=2026-04-10T06:33:12Z&spr=https&sig=mLYdG%2F%2F%2BBvdWkmjCUZmI7gww4pfMynDByS%2BbJgTeOC0%3D",
+  "default_container": "auherning3bearingtester"
+ },
+ "oe": {
+  "enabled": true,
+  "device_address": "03:24:71:01:04:54",
+  "interval_min": 5,
+  "keep_connected": true,
+  "sensors": [
+   3,
+   4
+  ],
+  "notes": "BearingBrain OE BLE sensor. sensors 3+4 = mic_amb + mic_mch (mask 0x18). device_address must be the MAC as seen by BlueZ (ble_debug_scan.py), not a macOS UUID. Disabled by default; enabling adds an /oe_samples group to the run HDF5. sample_rate_hz is stamped onto each /oe_samples dataset; the device does not send it with the data. Sample rate is 80 kHz for both mics, confirmed by Kim 2026-08-20. The vendor pdm_mic_config.json claims 100 kHz and is wrong for this custom PDM firmware. Runs before 2026-08-20 stamped 100000 and their frequency axes are 25 percent high.",
+  "sample_rate_hz": {
+   "3": 80000,
+   "4": 80000,
+   "_source": "Confirmed 80 kHz by Kim 2026-08-20. The vendor pdm_mic_config.json says 100000, which is WRONG for this custom PDM firmware; do not restore it from that file."
+  }
+ }
 }

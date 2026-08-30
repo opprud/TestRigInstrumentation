@@ -1,0 +1,275 @@
+{
+  "name": "Noise floor decoupled 40-50-70",
+  "description": "Ticket 0035 - system noise floor with the motor coupling DISCONNECTED from the rig shaft, so no bearing signal reaches the sensors. Control experiment for the lubrication-vs-temperature finding: does the noise floor itself rise with temperature? Two conditions at each of 40/50/70 C - motor ON but decoupled (rpm staircase 600-3000) and motor OFF (pure sensor/thermal/environmental floor). Motor-on minus motor-off isolates the motor's own contribution. TEMPERATURES 40/50/70 (changed from 30 on 2026-08-27, Kim's call, on two measurements): (a) with the shaft stationary the oil is not stirred, so the rig overshot SV 30 to 38 C within two minutes and then sat at 36 and would not come down - 30 C is not holdable; (b) Keratech22's own temperature steps are 40/45/50.../100, so 40/50/70 overlay exactly onto three real 13 h steps while 30 C has no counterpart in that data at all. ORDER (Kim): at each temperature the decoupled staircase runs FIRST, then the motor-off baseline immediately after at the same temperature - minimal time between the two conditions being subtracted - and that baseline runs straight into the next motor-off ramp, so motor-off is one continuous block. The 20-25 min settle before each staircase is NOT slack: heating is fast but overshoots ~8 C and decays slowly, and measuring inside that transient would corrupt exactly what the test measures. CONFIRMED 2026-08-27: the tach's reflective mark is on the RIG side of the coupling, so rpm_meas reads 0 for the whole test and there is NO independent speed readback - the drive is the only witness. Kim confirmed by eye that the motor turns. Speed of record is 59.83 x vfd_cmd_hz. Cross-check the motor-on segments against UL/AE energy, which must rise with commanded Hz if the motor really ran. Analysis keys on logged omron_pv_c, never the target. NOTE: SP/CHAN3 is known bad (ticket 0038 - no rotation-correlated signal), so its 'noise floor' here is expected to be unchanged; that is a prediction this test can falsify, not a result. SP/CHAN3 volt_offset is 5.0 because the slip ring sits on its ~5 V excitation pedestal; measured 2026-08-29 the channel spans 1.8-8.4 V. The old 8.0/0.0 window (-4 to +4 V) clipped more than half of it. Runs before 2026-08-29 were taken with the scope probe's GROUND LEAD DETACHED, which removed the DC reference and is why SP looked like it sat at 0 V and carried no rotation signal - see ticket 0038.",
+  "duration_minutes": 126,
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true
+  },
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 1199,
+        "value": 0
+      },
+      {
+        "time_sec": 1200,
+        "value": 600
+      },
+      {
+        "time_sec": 1379,
+        "value": 600
+      },
+      {
+        "time_sec": 1380,
+        "value": 1200
+      },
+      {
+        "time_sec": 1559,
+        "value": 1200
+      },
+      {
+        "time_sec": 1560,
+        "value": 1800
+      },
+      {
+        "time_sec": 1739,
+        "value": 1800
+      },
+      {
+        "time_sec": 1740,
+        "value": 2400
+      },
+      {
+        "time_sec": 1919,
+        "value": 2400
+      },
+      {
+        "time_sec": 1920,
+        "value": 3000
+      },
+      {
+        "time_sec": 2099,
+        "value": 3000
+      },
+      {
+        "time_sec": 2100,
+        "value": 0
+      },
+      {
+        "time_sec": 2399,
+        "value": 0
+      },
+      {
+        "time_sec": 2400,
+        "value": 0
+      },
+      {
+        "time_sec": 3599,
+        "value": 0
+      },
+      {
+        "time_sec": 3600,
+        "value": 600
+      },
+      {
+        "time_sec": 3779,
+        "value": 600
+      },
+      {
+        "time_sec": 3780,
+        "value": 1200
+      },
+      {
+        "time_sec": 3959,
+        "value": 1200
+      },
+      {
+        "time_sec": 3960,
+        "value": 1800
+      },
+      {
+        "time_sec": 4139,
+        "value": 1800
+      },
+      {
+        "time_sec": 4140,
+        "value": 2400
+      },
+      {
+        "time_sec": 4319,
+        "value": 2400
+      },
+      {
+        "time_sec": 4320,
+        "value": 3000
+      },
+      {
+        "time_sec": 4499,
+        "value": 3000
+      },
+      {
+        "time_sec": 4500,
+        "value": 0
+      },
+      {
+        "time_sec": 4799,
+        "value": 0
+      },
+      {
+        "time_sec": 4800,
+        "value": 0
+      },
+      {
+        "time_sec": 6299,
+        "value": 0
+      },
+      {
+        "time_sec": 6300,
+        "value": 600
+      },
+      {
+        "time_sec": 6479,
+        "value": 600
+      },
+      {
+        "time_sec": 6480,
+        "value": 1200
+      },
+      {
+        "time_sec": 6659,
+        "value": 1200
+      },
+      {
+        "time_sec": 6660,
+        "value": 1800
+      },
+      {
+        "time_sec": 6839,
+        "value": 1800
+      },
+      {
+        "time_sec": 6840,
+        "value": 2400
+      },
+      {
+        "time_sec": 7019,
+        "value": 2400
+      },
+      {
+        "time_sec": 7020,
+        "value": 3000
+      },
+      {
+        "time_sec": 7199,
+        "value": 3000
+      },
+      {
+        "time_sec": 7200,
+        "value": 0
+      },
+      {
+        "time_sec": 7499,
+        "value": 0
+      },
+      {
+        "time_sec": 7500,
+        "value": 0
+      },
+      {
+        "time_sec": 7559,
+        "value": 0
+      }
+    ],
+    "temperature": [
+      {
+        "time_sec": 0,
+        "value": 40
+      },
+      {
+        "time_sec": 1199,
+        "value": 40
+      },
+      {
+        "time_sec": 1200,
+        "value": 40
+      },
+      {
+        "time_sec": 2399,
+        "value": 40
+      },
+      {
+        "time_sec": 2400,
+        "value": 50
+      },
+      {
+        "time_sec": 3599,
+        "value": 50
+      },
+      {
+        "time_sec": 3600,
+        "value": 50
+      },
+      {
+        "time_sec": 4799,
+        "value": 50
+      },
+      {
+        "time_sec": 4800,
+        "value": 70
+      },
+      {
+        "time_sec": 6299,
+        "value": 70
+      },
+      {
+        "time_sec": 6300,
+        "value": 70
+      },
+      {
+        "time_sec": 7499,
+        "value": 70
+      },
+      {
+        "time_sec": 7500,
+        "value": 25
+      },
+      {
+        "time_sec": 7559,
+        "value": 25
+      }
+    ]
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 6.0,
+      "volt_offset": 5.0,
+      "coupling": "DC"
+    }
+  }
+}

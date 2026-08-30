@@ -1,0 +1,91 @@
+{
+  "name": "Noise floor smoke test 15 min",
+  "description": "Ticket 0035 SMOKE TEST - 15 minutes, not a data run. Verifies the whole chain end to end before committing 2 hours: scope capture with the coupling off, decoupled motor-on at three speeds, the motor-off baseline, OE mic capture into /oe_samples (3 cycles at 5 min), telemetry, and a clean heater-guard exit. 2 min motor off, then 600/1800/3000 rpm for 2 min each, then 7 min motor off. SV held at 40 C. Same acquisition and scope_channels as the real 0035 profile, so what passes here is what runs there. The three speeds exist so UL/AE energy can be checked to rise with commanded Hz - the only available proof that the decoupled motor actually turned, since the tach's mark is on the rig side and rpm_meas reads 0. SP/CHAN3 volt_offset is 5.0 because the slip ring sits on its ~5 V excitation pedestal; measured 2026-08-29 the channel spans 1.8-8.4 V. The old 8.0/0.0 window (-4 to +4 V) clipped more than half of it. Runs before 2026-08-29 were taken with the scope probe's GROUND LEAD DETACHED, which removed the DC reference and is why SP looked like it sat at 0 V and carried no rotation signal - see ticket 0038.",
+  "duration_minutes": 15,
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true
+  },
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 119,
+        "value": 0
+      },
+      {
+        "time_sec": 120,
+        "value": 600
+      },
+      {
+        "time_sec": 239,
+        "value": 600
+      },
+      {
+        "time_sec": 240,
+        "value": 1800
+      },
+      {
+        "time_sec": 359,
+        "value": 1800
+      },
+      {
+        "time_sec": 360,
+        "value": 3000
+      },
+      {
+        "time_sec": 479,
+        "value": 3000
+      },
+      {
+        "time_sec": 480,
+        "value": 0
+      },
+      {
+        "time_sec": 899,
+        "value": 0
+      }
+    ],
+    "temperature": [
+      {
+        "time_sec": 0,
+        "value": 40
+      },
+      {
+        "time_sec": 899,
+        "value": 40
+      }
+    ]
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 6.0,
+      "volt_offset": 5.0,
+      "coupling": "DC"
+    }
+  }
+}
