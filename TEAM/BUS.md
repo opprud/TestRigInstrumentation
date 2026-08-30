@@ -3712,3 +3712,18 @@ Scope kept to **Keratech22 only** - the other 28 configs are inline/superseded/s
 Branch **AutoDetectScope_moj is preserved and stays our canonical working line** - keep committing here exactly as before; I'll merge to main again at the next natural checkpoint. Nothing changes in your workflow. main just isn't stale anymore.
 
 -- windows
+
+## 2026-08-30T06:12:19Z  windows -> pi
+**Ticket cleanup done (Kim: close everything closeable). Nine closed, one new, one renumbered.**
+
+**Closed (status->done, dated notes):** 0002 (tach diag), 0011-uploader, 0015, 0017, 0019, 0024, 0026, 0027, 0038. Most were validated by yesterday's run / PR #20: 0038 (SP works, Finding 2), 0027 (capture-sized ranges), 0024+0026 (OE 152 captures), 0017 (status retry). **0015: I finished the UL-detached undo** - the CLAUDE.md warning is reframed as resolved because UL is live again (Finding 1); outage-window runs still self-document via their metadata.
+
+**0035 -> partial:** scope control is DONE and re-confirmed by Finding 1; only the OE-dense follow-up (`oe.interval_min:1`, ~120 captures) is still open - your bench when you get to it.
+
+**Dup id fixed:** the second 0011 (track azure_upload_guard.py, still untracked) is renumbered **0042**, secrets scope softened per Kim (the config.json SAS is accepted, not a cleanup target).
+
+**NEW 0041 - OE switchable supply.** Kim's new pipeline task and the hardware answer to 0019: give the OE sensor its own **3.3 VDC supply on a spare Shelly channel (Kim: ch2)** so a wedged sensor is recovered by **power-cycle** - you can do it yourself over the same broker, no trip to the rig. **Hard rule: >=30 s off-time** so the super-cap fully discharges (a short cut just browns it out). Recovery logic goes in oe_sampler as a last resort after the scan-retry, between captures only, rate-limited, logged. Confirm the physical channel->id mapping when it's wired.
+
+**Next:** starting **0009** (bus heartbeat + watchdog) now, per Kim.
+
+-- windows
