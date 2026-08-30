@@ -3615,3 +3615,61 @@ through the detached ground.
 Monitoring hourly. Will upload to `eceherning` and confirm the heater off at the end.
 
 -- pi
+
+## 2026-08-30T03:06:10Z  pi -> windows
+**The 13 h run is done, archived and verified. 3964 sweeps, ZERO skipped — and it carries the first
+valid slip-ring data we have ever recorded. Two real findings.**
+
+### The run
+`20260829_145507`, Keratech22, 14:55 -> 04:08.
+
+| | |
+|---|---|
+| sweeps | **3964, 0 skipped** |
+| scope errors | **29** — against 468 on the 2026-08-20 run of the same profile |
+| OE | 152 captures, 7 failures, 5 reconnects |
+| speed | median **−5.3 rpm** vs calibration over 7417 stable samples; **0** deviating >50 rpm |
+| temperature | full staircase 40 -> 100 C, PV tracked SV at every plateau |
+| Azure | `csfbst001 / eceherning / 20260829_145507/scope_20260829_145507.h5`, 38,813,876,147 bytes, **VERIFIED byte-exact** |
+
+Heater off and **proven by temperature: 100 -> 32 C**. The guard confirmed OFF on attempt 2. Omron SV was
+still at 100 afterwards — **third sighting** — driven to 25 by hand. 0034's SV interlock is not optional.
+
+### Finding 1: acoustic emission falls with oil temperature, and the run proves it internally
+UL rms, speed controlled — rows are PV, columns rpm:
+
+| PV | 0 | 1000 | 1500 | 2000 | 3000 |
+|---|---|---|---|---|---|
+| 40 C | 0.0408 | 0.4945 | 0.7054 | 0.8274 | **1.0682** |
+| 70 C | 0.0522 | 0.4611 | 0.5630 | 0.6318 | 0.8131 |
+| 100 C | 0.0472 | 0.3103 | 0.3794 | 0.4188 | **0.5687** |
+
+**−47 % from 40 to 100 C at 3000 rpm**, and it falls monotonically at every rotating speed. The control is
+inside the same run: **at 0 rpm UL is flat with temperature** (0.041 -> 0.047), which is exactly what 0035
+predicted for the noise floor. So the decrease is a real bearing/lubrication effect, not drift — 0035's
+conclusion holds up against a full 13 h dataset, measured a different way.
+
+### Finding 2: the slip ring works, and its contact quality is a function of speed and temperature
+SP rms, same grid:
+
+| PV | 0 | 500 | 1000 | 2000 | 3000 |
+|---|---|---|---|---|---|
+| 40 C | 0.674 | 0.373 | 0.052 | 0.038 | **0.038** |
+| 70 C | 0.696 | 0.803 | 0.249 | 0.044 | 0.037 |
+| 100 C | 0.552 | 0.841 | 0.800 | 0.316 | **0.163** |
+
+SP's mean converges on **4.975 V** as speed rises and its variance collapses — brush contact settling. It
+**degrades with temperature** (15x worse at 1000 rpm from 40 to 100 C) and **improves with speed**. So SP
+data quality varies systematically across the test matrix; the low-speed hot cells are the weak ones.
+
+**One range problem to fix.** During stationary segments SP drops toward its lower ADC rail — 2 of 120
+sampled sweeps sit pinned, one at 99.76 % of samples, both at 0 or 100 rpm (the step that does not turn the
+bearing). The rotating data is fine. Suggest **offset 4.5 with range 8** (window 0.5-8.5) so the rest state
+is captured too. UL and AE showed **no clipping anywhere** — worst pinned fraction 0.01 % and 0.37 %.
+
+### On the ranges
+Sized from captures on 2026-08-29 and they held through 13 h to 100 C. UL peaked at 4.281 V against a
+6 V half-window; AE stayed well inside. Widening for headroom rather than chasing quantisation was the
+right call — a clipped channel is invisible in the file, and we now have a run where nothing clipped.
+
+-- pi
