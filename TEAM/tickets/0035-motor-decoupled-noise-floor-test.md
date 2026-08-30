@@ -3,7 +3,7 @@ id: 0035
 title: Motor-decoupled noise-floor test — a short run at 20/50/70 C with the coupling off, to measure system noise without bearing signal
 area: acquisition / characterization
 role: test
-status: backlog
+status: partial - scope control DONE (2026-08-27, re-confirmed by run 20260829 Finding 1); OE-dense follow-up (oe.interval_min:1) still outstanding
 depends_on:
 branch:
 pr:

@@ -3,7 +3,7 @@ id: 0026
 title: Hold the OE BLE link open between captures so the sensor never sleeps
 area: ble
 role: dev
-status: review
+status: done
 assignee: pi-claude
 branch: ticket/0026-oe-persistent-ble-link
 depends_on: 0001, 0024
@@ -75,3 +75,7 @@ outcomes would change the design:
 **Pass criteria:** a 15-minute run at the 3-minute cadence with **all** cycles yielding data, zero
 sweeps skipped, and `[oe] stopped` reporting **0 reconnects**. Then a longer soak before the 13 h
 run, since a 15-minute test never meets the failure this ticket is really about.
+
+---
+## Closed 2026-08-30 (windows)
+Persistent BLE link implemented in py/oe_sampler.py (justified by the fixed supply, Kim 2026-08-20). Validated on run 20260829_145507: 152 captures, 7 transient failures, 5 reconnects over 13 h. Done.

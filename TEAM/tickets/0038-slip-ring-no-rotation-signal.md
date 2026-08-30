@@ -3,7 +3,7 @@ id: 0038
 title: Slip-ring (SP / CHAN3) read through a DETACHED scope probe ground for at least two months — all archived SP data is invalid
 area: instrumentation / hardware
 role: hardware
-status: root-caused
+status: done
 depends_on:
 branch:
 pr:
@@ -92,3 +92,7 @@ bearing by a factor 20 over the decoupled floor.
 ## Owner
 - **Kim / hardware:** found it. Keep the probe ground in the pre-run checklist.
 - **Pi:** scope range + profiles done; trigger level and the SP waveform characterisation open.
+
+---
+## Closed 2026-08-30 (windows)
+Root cause = detached scope-probe GROUND lead (not the slip ring, not EMI). Fixed by reattaching the ground. Validated by run 20260829_145507 -- first valid SP data ever (Finding 2: SP works; contact quality varies with speed and temperature). SP window widened to 0.5-8.5 V (PR #20) to capture the rest state. The pre-2026-08-29 archive stays invalid (permanent caveat kept in CLAUDE.md). Residual curiosity: SP swing is non-monotonic with speed -- noted for analysis, not a blocker.

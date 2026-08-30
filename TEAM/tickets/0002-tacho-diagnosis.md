@@ -3,7 +3,7 @@ id: 0002
 title: Diagnose tacho measured-vs-commanded speed gap (slip vs artifact)
 area: control
 role: dev
-status: diagnosed
+status: done
 assignee: pi-claude
 branch:
 pr:
@@ -33,3 +33,7 @@ Decide whether the persistent gap between **measured** and **commanded/target** 
 
 ## Fix (follow-up → ticket 0003 when ready)
 Eliminate the spurious ~9.7 Hz pulse source: check electrical pickup (shielding/grounding of the OGT500 signal line), a stationary reflection in the sensor's field, or stray ambient light; and/or add debounce + validation in the RP2040 tach ISR plus a tach timeout (it currently holds the last value). Re-verify against an independent hand-tach / phone-strobe reading. Also investigate the saturation ceiling at 2963 rpm.
+
+---
+## Closed 2026-08-30 (windows)
+Diagnosis delivered: the measured-vs-commanded gap was old tach firmware (a phantom second pulse), not real slip. Fixed by the robust firmware (0007) and the calibration (0016); tach read 1792.97 vs 1798.6 expected on run 20260829. Nothing further here.

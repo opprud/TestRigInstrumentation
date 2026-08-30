@@ -3,7 +3,7 @@ id: 0024
 title: OE captures succeed only 2 of 6 cycles — the sensor sleeps and we stop looking too soon
 area: ble
 role: dev
-status: review
+status: done
 assignee: pi-claude
 branch: ticket/0024-oe-capture-reliability
 depends_on: 0001, 0021
@@ -81,3 +81,7 @@ keeping: a 13 h run will meet sleep windows this 15-minute test never saw.
 **A 13 h run is now worth starting**, with the caveat that the UL probe is still detached
 (0015), so it would be OE + accelerometer + slip ring, not a full data run.
 
+
+---
+## Closed 2026-08-30 (windows)
+Root cause (the sensor sleeps at 30 s idle and we stopped scanning too soon) fixed by holding the BLE link open between captures (0026). Run 20260829_145507 got 152 captures with only 7 transient failures / 5 reconnects. Done.

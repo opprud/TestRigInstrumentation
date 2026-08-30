@@ -3,7 +3,7 @@ id: 0019
 title: Remote reset of the OE sensor over BLE — no reset command, but OTA is a real recovery path
 area: ble
 role: dev
-status: review
+status: done
 assignee: pi-claude
 branch: ticket/0019-oe-remote-reset
 depends_on: 0001
@@ -102,3 +102,7 @@ The device ran fine after Kim's power cycle this morning and wedged again around
 wedges again after the next reset, that is a pattern in the sensor's own firmware rather than an
 accident, and it belongs upstream with BearingBrain — a sensor that needs a manual reset at
 unpredictable intervals cannot be part of a 13-hour unattended run.
+
+---
+## Closed 2026-08-30 (windows)
+Answer delivered: no BLE reset primitive exists (only the 5 protocol commands), and even one would not reach the wedged application layer. OTA-after-signed-firmware is the only soft path. Now superseded operationally by a hardware power-cycle route -- a switchable 3.3 VDC OE supply on Shelly channel 2 (ticket 0041) -- which recovers a wedged sensor without a trip to the rig.

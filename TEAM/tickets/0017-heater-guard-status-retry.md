@@ -3,7 +3,7 @@ id: 0017
 title: Heater guard — retry the MQTT status query before calling the state unknown
 area: control
 role: dev
-status: review
+status: done
 assignee: pi-claude
 branch: ticket/0017-heater-guard-status-retry
 depends_on: 0004, 0006, 0008
@@ -37,3 +37,7 @@ The guard's own retry loop makes this self-inflicted. Suggest deriving the clien
 With the stale guard stopped and no competing MQTT client: `heater_state(0)` returns a definite
 answer, and `heater_state(1)` correctly returns UNKNOWN for a channel the API reports without an
 `output` value — the ticket 0006 behaviour still holds.
+
+---
+## Closed 2026-08-30 (windows)
+heater_state() now retries the MQTT status query before declaring UNKNOWN, fixing the transient ??? blips this ticket was about. Note (from 0033): retries cannot help the frozen-Pi case -- a host that cannot reach the broker gets N inconclusive results -- that is 0034's job, not this one. Done for its actual scope.

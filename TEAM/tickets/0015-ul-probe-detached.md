@@ -3,7 +3,7 @@ id: 0015
 title: UL probe detached for OE sensor mounting — mark the affected runs
 area: ops
 role: tester
-status: review
+status: done
 assignee: pi-claude
 branch: ticket/0015-ul-probe-detached
 pr:
@@ -57,3 +57,7 @@ expected marking is missing** (fails loudly rather than half-clearing). Then com
 
 **Do NOT run it before the probe is on and verified** — it would mark a still-detached run as OK,
 the exact inverse of the failure this ticket guards against. Prepared and dry-run-verified 2026-08-20.
+
+---
+## Closed 2026-08-30 (windows)
+Marking task complete during the outage (config.json + profile + HDF5 metadata + CLAUDE.md all carried the note). UL has since been refitted and is measuring again -- run 20260829_145507 Finding 1 is genuine UL bearing signal across the full staircase -- so the documented undo is executed: config.json and profile notes were already cleared, and the stale CLAUDE.md warning is now reframed as resolved. Outage-window runs still self-document via /metadata/test_parameters/ul_probe_status.

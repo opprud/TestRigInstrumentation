@@ -3,7 +3,7 @@ id: 0011
 title: Put the Azure archive uploader in the repo, with the secret kept out
 area: ops
 role: dev
-status: review
+status: done
 assignee: pi-claude
 branch: ticket/0011-azure-uploader
 depends_on: 0010, 0013
@@ -54,3 +54,7 @@ is the signature used here. `total` is `None` on some stream paths, so the hook 
 size measured locally.
 
 **Not yet exercised on a real large upload.** The first one will be the 13 h run of 2026-08-20.
+
+---
+## Closed 2026-08-30 (windows)
+py/tools/upload_to_azure.py is in the repo: log-scrubbed SAS, blob-size verification, idempotent SKIP, 5% progress. It archived run 20260829_145507 (38,813,876,147 bytes, byte-verified). The separate azure_upload_guard.py tracking is its own ticket (renumbered 0042).

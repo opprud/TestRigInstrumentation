@@ -285,14 +285,11 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 ## Known issues / gotchas
 
-- **⚠️ UL PROBE DETACHED since 2026-08-19 — CHAN1 is not measuring.** The ultrasound probe was
-  unscrewed to make room for mounting the BearingBrain OE BLE sensor, pending a mechanical change.
-  CHAN1 (alias `UL`) records whatever sits on a disconnected cable. **The `UL` group in the HDF5
-  looks entirely normal** — same 500,000 points, same scaling attributes — so nothing in the file
-  distinguishes it from real data except the note now stamped into
-  `/metadata/test_parameters/ul_probe_status`. **Do not analyse UL data from runs in this period.**
-  Remove this entry, the `config.json` note and the profile note together when the probe is
-  refitted.
+- **UL probe: refitted and measuring again (resolved 2026-08-30, ticket 0015).** It was detached
+  from 2026-08-19 for OE-sensor mounting; runs from that outage window carry `ul_probe_status` in
+  their own `/metadata/test_parameters`, so **do not analyse UL from those specific files** — but the
+  channel is live now. Run `20260829_145507` onward is genuine UL (Finding 1: UL RMS tracks bearing
+  temperature across the speed staircase). The `config.json` and profile notes were already cleared.
 
 
 - **The scope wedges intermittently at high resolution — frequently, not occasionally.** Quantified on the 13 h run `20260820_125647` (`acquire_scope.log`): **114 reset/recovery cycles (~one every 7 minutes), 468 error lines, dominated by `ConnectionRefused` (280) and `TimeoutError` (149)**. The resilience machinery absorbs nearly all of it — **1 sweep lost of 3778 (0.026 %)** — but it is masked, not eliminated: the run is one un-recovered retry from a real gap. `ConnectionRefused` dominating points at the scope's own LXI socket server dropping/capping connections, not just network latency. Lower the point count or raise `sweep_retries` for zero-loss runs; root cause tracked in **ticket 0029**.

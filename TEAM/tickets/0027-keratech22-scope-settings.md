@@ -3,7 +3,7 @@ id: 0027
 title: Keratech22.json carried April scope settings that would clip UL 4x
 area: control
 role: dev
-status: review
+status: done
 assignee: pi-claude
 branch: ticket/0027-keratech22-scope-settings
 depends_on:
@@ -84,3 +84,7 @@ Also updated to follow the file: `py/tools/unmark_ul.py` (the architect's tool t
 
 The retired file keeps the corrected scope settings from this ticket. Belt and braces: it is marked
 "do not run", but if someone runs it anyway it will no longer clip.
+
+---
+## Closed 2026-08-30 (windows)
+scope_channels/acquisition rewritten from the run's measured HDF5 (the name/filename cross was the trap). Superseded and hardened by the capture-sized ranges merged in PR #20 (2026-08-30): UL/AE/SP now sized from real captures, SP window 0.5-8.5 V. Done.
