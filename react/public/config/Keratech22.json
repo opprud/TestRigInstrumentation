@@ -1,6 +1,6 @@
 {
   "name": "Keratech 22",
-  "description": "Kappa-mapping test: bearing d=25/D=52/dpw=38.5, VG100 oil. 13 temperature steps (40-100C in 5C increments), each held constant. Each step: 2 min stabilization at RPM=0, then staircase sweep 100->3000->100 with 60s hold per RPM level. SP/CHAN3 volt_offset is 5.0 because the slip ring sits on its ~5 V excitation pedestal; measured 2026-08-29 the channel spans 1.8-8.4 V. The old 8.0/0.0 window (-4 to +4 V) clipped more than half of it. Runs before 2026-08-29 were taken with the scope probe's GROUND LEAD DETACHED, which removed the DC reference and is why SP looked like it sat at 0 V and carried no rotation signal - see ticket 0038.",
+  "description": "Kappa-mapping test: bearing d=25/D=52/dpw=38.5, VG100 oil. 13 temperature steps (40-100C in 5C increments), each held constant. Each step: 2 min stabilization at RPM=0, then staircase sweep 100->3000->100 with 60s hold per RPM level. SP/CHAN3 is volt_offset 4.5 / volt_range 8.0 (window 0.5-8.5 V): the slip ring sits on its ~5 V excitation pedestal (channel spans 1.8-8.4 V spinning, measured 2026-08-29) but drops toward its lower rail during the stationary 0/100 rpm segments, where the 13 h run 20260829_145507 caught it pinned low (2 of 120 sweeps). Widened downward from the earlier 5.0/6.0 (2.0-8.0 V) to capture that rest state; the original 8.0/0.0 window (-4 to +4 V) clipped more than half of it. Runs before 2026-08-29 were taken with the scope probe's GROUND LEAD DETACHED, which removed the DC reference and is why SP looked like it sat at 0 V and carried no rotation signal - see ticket 0038. The run ends with a 60 s SV=25 C cooldown hold (temperature setpoints 47520-47580 s) so the Omron setpoint returns in-band at run end instead of being left at 100 C; the earlier single value:0 at the 47580 duration boundary never took (SV stayed at 100 across three runs) - see ticket 0034.",
   "duration_minutes": 793,
   "bearing": {
     "d_mm": 25,
@@ -6364,12 +6364,16 @@
         "value": 100
       },
       {
-        "time_sec": 47579,
+        "time_sec": 47519,
         "value": 100
       },
       {
+        "time_sec": 47520,
+        "value": 25
+      },
+      {
         "time_sec": 47580,
-        "value": 0
+        "value": 25
       }
     ]
   },
@@ -6396,8 +6400,8 @@
     },
     "SP": {
       "timebase_range": 0.2,
-      "volt_range": 6.0,
-      "volt_offset": 5.0,
+      "volt_range": 8.0,
+      "volt_offset": 4.5,
       "coupling": "DC"
     }
   }
