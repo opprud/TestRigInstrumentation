@@ -3,7 +3,7 @@ id: 0009
 title: Harden the agent bus — heartbeat + watchdog so BUS.md can't go silently deaf
 area: ops
 role: dev
-status: backlog
+status: in-review (windows built + self-tested; awaiting Pi-side wiring + kill-poll acceptance)
 assignee: unassigned
 depends_on:
 branch:
@@ -72,3 +72,33 @@ collisions *visible*, not merely recoverable. A heartbeat tells you the channel 
 not tell you two agents just claimed the same name. Worth considering whether the hardening here
 should include a check that a new `TEAM/tickets/NNNN-*.md` does not collide on `moj` before it is
 committed.
+
+---
+## Built 2026-08-30 (windows) — heartbeat + watchdog + collision check
+
+Implemented in Python (stdlib only, runs on Pi + Windows):
+- `py/tools/bus_heartbeat.py --agent <name>` — stamps liveness onto a dedicated
+  **single parentless commit** on `bus-hb-<name>`, force-pushed, so moj gets ZERO
+  heartbeat-commit noise. Folded into the agent's poll cycle (tracks the agent
+  polling, not the machine's power).
+- `py/tools/bus_watchdog.py --agent <name>` — independent (external scheduler),
+  reads the other agents' `bus-hb-*` over `git show`, and on **fresh→stale** appends a
+  loud `## … -> ALL` alarm to BUS.md + optional `telegram_cmd`; **stale→fresh** posts a
+  recovery line. Alarms once per episode (state in git-ignored
+  `py/.bus_watchdog_state.json`). `--dry-run` for testing.
+- `py/tools/bus_ticket_check.py <n>` — collision check on origin+local before minting a
+  ticket number, suggests the next free one (the cheap half of the numbering rule).
+- `py/bus_config.json` (cadence 600 / threshold 1800 = 3×), `docs/Bus_Hardening.md`.
+
+**Self-test passed (windows, 2026-08-30):** heartbeat writes a clean `heartbeat.md`;
+watchdog reads FRESH during normal operation; a forged old heartbeat trips the alarm
+(dry-run showed the exact BUS.md line); no false alarm under threshold; no state written
+in dry-run; all modules compile. Fixed a Windows CRLF-into-`mktree` bug (bytes I/O) and a
+cp1252 console crash (UTF-8 reconfigure).
+
+### Remaining for DONE (Pi + scheduling)
+- **Pi:** fold `bus_heartbeat.py --agent pi` into its poll cycle; add the watchdog cron
+  (see doc). **windows:** heartbeat is folded into the running bus-watch loop; arm the
+  Task Scheduler watchdog job (command in the doc) on Kim's nod.
+- **Acceptance (Pi):** kill an agent's poll → confirm the other's watchdog raises the
+  BUS.md alarm within the threshold and names the dark agent; restart → recovery line.

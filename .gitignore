@@ -54,6 +54,10 @@ react/build/
 tmp/
 temp/
 
+# Agent-bus watchdog local state (ticket 0009); the log is covered by *.log above
+.bus_watchdog_state.json
+py/.bus_watchdog_state.json
+
 # Auto-generated inline test profiles written by the dashboard at run time
 react/public/config/inline_*.json
 

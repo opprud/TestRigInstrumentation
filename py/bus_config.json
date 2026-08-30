@@ -1,0 +1,8 @@
+{
+  "branch": "AutoDetectScope_moj",
+  "agents": ["windows", "pi"],
+  "heartbeat_cadence_sec": 600,
+  "stale_threshold_sec": 1800,
+  "telegram_cmd": null,
+  "_notes": "Agent-bus hardening (ticket 0009). heartbeat_cadence_sec: how often each agent runs bus_heartbeat.py (fold into the poll cycle). stale_threshold_sec: the watchdog alarms if another agent's heartbeat is older than this -- keep it >= 2-3x cadence so a legitimate quiet stretch never trips it (600/1800 = 3x). telegram_cmd: optional shell command run on an alarm, with {msg} substituted for the alarm text; null = no external notify (the loud log line and the BUS.md line always fire regardless). agents: add a name here and the watchdog will start expecting its bus-hb-<name> heartbeat."
+}
