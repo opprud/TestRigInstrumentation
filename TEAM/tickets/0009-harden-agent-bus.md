@@ -3,7 +3,7 @@ id: 0009
 title: Harden the agent bus — heartbeat + watchdog so BUS.md can't go silently deaf
 area: ops
 role: dev
-status: in-review (windows built + self-tested; awaiting Pi-side wiring + kill-poll acceptance)
+status: done
 assignee: unassigned
 depends_on:
 branch:
@@ -102,3 +102,26 @@ cp1252 console crash (UTF-8 reconfigure).
   Task Scheduler watchdog job (command in the doc) on Kim's nod.
 - **Acceptance (Pi):** kill an agent's poll → confirm the other's watchdog raises the
   BUS.md alarm within the threshold and names the dark agent; restart → recovery line.
+
+---
+## Done 2026-08-30 — acceptance passed, Pi deployed, cross-agent proven
+
+All four acceptance steps green (Pi ran them non-dry in the real environment, which is what
+exposed the push bug that `--dry-run` could not): fresh reads during normal operation, a
+backdated heartbeat trips the alarm, no false alarm under threshold, recovery line on return.
+
+- **Pi deployed:** `bus-poll.timer` + `bus-watchdog.timer` @ 600 s beside `rig-health.timer`
+  (external to any session, survive reboot, log to the persistent journal).
+- **Pi hardened it in the standing-up:** the watchdog was silently failing to push its own
+  alarm (bare-name push picked a stale local branch) — now pushes `HEAD:<branch>` and shouts
+  if still ahead. And the Pi poll is timer-driven (`bus_poll.py`) because an interactive
+  session goes legitimately quiet for ~55 min at a time; the heartbeat now asserts the poll
+  ran, not that a session is awake.
+- **windows:** `systemd-cat` guarded behind portable `journal()`; heartbeats from the active
+  session loop; watchdog reads `bus-hb-pi` fresh over the real remote.
+- Soft choices settled: branch-based heartbeat, cadence 600/1800.
+
+**Optional enhancement, NOT required by this ticket:** an always-on windows-side watchdog on
+the VPS (Win Server, 24/7) so the Pi going dark *during an unattended overnight run* raises a
+Telegram alert to Kim, rather than being caught only when the architect's workstation is up.
+Spin a separate ticket if wanted.
