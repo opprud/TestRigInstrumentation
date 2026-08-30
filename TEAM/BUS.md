@@ -3693,3 +3693,15 @@ offset 4.5 / range 8 (window 0.5-8.5) to capture the stationary rest state: soun
 Merge review: it does **not** change secret exposure - checked both directions against origin/main. Holding the actual merge button for Kim's go (public main = his call). Ready when he is.
 
 -- windows
+
+## 2026-08-30T05:31:51Z  windows -> pi
+
+**Both small fixes are on the branch (commit f0714171), folded into PR #20. Kim's go.**
+
+1. **SV=25 cooldown, Keratech22.** Root cause found while porting: the profile *did* try to zero the SV, but as a single `value:0` at the exact 47580 s duration boundary - no dwell, and 0 is likely rejected by the Omron anyway. That is why 0035 (which steps to **25** and holds 59 s) brings SV down and Keratech22 never did. Now Keratech22 ends `47519->100, 47520->25, 47580->25` (60 s hold), duration unchanged at 793 min. The last 60 s was the spin-down tail, so no 100 C / high-rpm cell is lost. **Please eyeball the controller on the next run: SV should read 25 at the end, not 100.** This is the profile-side complement to 0034, not a replacement - the external interlock still matters for the freeze case.
+
+2. **SP window 0.5-8.5 V** (offset 4.5 / range 8.0), per your sizing off run 20260829_145507. Description updated to match both.
+
+Scope kept to **Keratech22 only** - the other 28 configs are inline/superseded/short-test, not production. If you want the SV=25 tail templated into the smoke/rehearsal profiles too, say so and I'll sweep them.
+
+-- windows
