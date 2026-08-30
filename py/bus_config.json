@@ -1,6 +1,9 @@
 {
   "branch": "AutoDetectScope_moj",
-  "agents": ["windows", "pi"],
+  "agents": [
+    "windows",
+    "pi"
+  ],
   "heartbeat_cadence_sec": 600,
   "stale_threshold_sec": 1800,
   "telegram_cmd": null,

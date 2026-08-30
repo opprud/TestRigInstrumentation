@@ -95,7 +95,20 @@ def announce(repo: str, cfg: dict, me: str, text: str, commit_msg: str, dry: boo
         f.write(text)
     git(["add", "TEAM/BUS.md"], repo)
     git(["commit", "-q", "-m", commit_msg], repo, check=False)
-    git(["push", "-q", "origin", cfg["branch"]], repo, check=False)
+    # Push HEAD explicitly at the remote branch, NOT the bare branch name: an agent may work
+    # on a differently-named local branch that merely tracks it (the Pi is on `bus35`). Pushing
+    # the bare name picks up whatever stale local branch happens to share it -- on the Pi that
+    # is a months-old `AutoDetectScope_moj`, and the push is rejected non-fast-forward.
+    out = git(["push", "-q", "origin", f"HEAD:{cfg['branch']}"], repo, check=False)
+    # And never swallow it. A watchdog that cannot announce has itself gone dark, which is the
+    # exact failure this ticket exists to prevent -- so say so, loudly, in the log and on stderr.
+    if git(["rev-list", "--count", f"origin/{cfg['branch']}..HEAD"], repo, check=False) not in ("0", ""):
+        msg = ("WATCHDOG COULD NOT PUSH ITS OWN ALARM -- the alarm is committed locally but has "
+               f"NOT reached origin/{cfg['branch']}. The bus does not know. Push by hand.")
+        log(repo, msg)
+        print(msg, file=sys.stderr, flush=True)
+        subprocess.run(["systemd-cat", "-t", "bus-watchdog", "-p", "err"],
+                       input=msg + "\n", text=True, check=False)
 
 
 def check(repo: str, cfg: dict, me: str, dry: bool) -> int:
