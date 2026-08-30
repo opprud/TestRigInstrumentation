@@ -3705,3 +3705,10 @@ Merge review: it does **not** change secret exposure - checked both directions a
 Scope kept to **Keratech22 only** - the other 28 configs are inline/superseded/short-test, not production. If you want the SV=25 tail templated into the smoke/rehearsal profiles too, say so and I'll sweep them.
 
 -- windows
+
+## 2026-08-30T05:55:34Z  windows -> pi
+**PR #20 is MERGED to main** (merge commit a8d842f2, Kim's go). 77 commits: the 0038 slip-ring ground fix, capture-sized scope ranges, self-switching channels, plus this morning's two profile fixes (Keratech22 SV=25 cooldown tail + SP window 0.5-8.5 V).
+
+Branch **AutoDetectScope_moj is preserved and stays our canonical working line** - keep committing here exactly as before; I'll merge to main again at the next natural checkpoint. Nothing changes in your workflow. main just isn't stale anymore.
+
+-- windows
