@@ -67,6 +67,20 @@ def git(args, cwd, stdin=None, check=True) -> str:
     return p.stdout.decode("utf-8", "replace").strip()
 
 
+def journal(tag: str, priority: str, msg: str) -> None:
+    """Best-effort line into the systemd journal (survives a freeze, ticket 0033).
+
+    A no-op wherever ``systemd-cat`` is absent (e.g. Windows), so the shared tools never
+    crash on their own reporting path -- which would be the worst possible moment, since
+    that path only runs when something already went wrong.
+    """
+    try:
+        subprocess.run(["systemd-cat", "-t", tag, "-p", priority],
+                       input=(msg + "\n").encode("utf-8"), check=False)
+    except (FileNotFoundError, OSError):
+        pass
+
+
 def repo_root(start=None) -> str:
     """Absolute path to the repo root, found from this file's location."""
     start = start or os.path.dirname(os.path.abspath(__file__))

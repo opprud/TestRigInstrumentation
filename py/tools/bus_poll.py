@@ -37,7 +37,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from bus_common import git, load_config, repo_root, safe_console, utcnow_iso  # noqa: E402
+from bus_common import git, journal, load_config, repo_root, safe_console, utcnow_iso  # noqa: E402
 
 STATE_FILE = "py/.bus_poll_state.json"
 
@@ -83,8 +83,7 @@ def main() -> None:
                    repo, check=False) or ""
         msg = f"BUS MOVED for {a.agent}: TEAM/BUS.md {prev} -> {head} | {subj[:160]}"
         print(msg, flush=True)
-        subprocess.run(["systemd-cat", "-t", "bus-poll", "-p", "warning"],
-                       input=msg + "\n", text=True, check=False)
+        journal("bus-poll", "warning", msg)
     elif not a.quiet:
         print(f"bus unchanged for {a.agent}: TEAM/BUS.md @ {head}")
 

@@ -30,7 +30,7 @@ import sys
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from bus_common import git, load_config, parse_iso, repo_root, safe_console, utcnow_iso  # noqa: E402
+from bus_common import git, journal, load_config, parse_iso, repo_root, safe_console, utcnow_iso  # noqa: E402
 
 STATE_FILE = "py/.bus_watchdog_state.json"
 LOG_FILE = "py/bus_watchdog.log"
@@ -99,16 +99,16 @@ def announce(repo: str, cfg: dict, me: str, text: str, commit_msg: str, dry: boo
     # on a differently-named local branch that merely tracks it (the Pi is on `bus35`). Pushing
     # the bare name picks up whatever stale local branch happens to share it -- on the Pi that
     # is a months-old `AutoDetectScope_moj`, and the push is rejected non-fast-forward.
-    out = git(["push", "-q", "origin", f"HEAD:{cfg['branch']}"], repo, check=False)
+    git(["push", "-q", "origin", f"HEAD:{cfg['branch']}"], repo, check=False)
     # And never swallow it. A watchdog that cannot announce has itself gone dark, which is the
-    # exact failure this ticket exists to prevent -- so say so, loudly, in the log and on stderr.
+    # exact failure this ticket exists to prevent -- so say so, loudly, in the log, on stderr,
+    # and (on Linux) in the persistent journal.
     if git(["rev-list", "--count", f"origin/{cfg['branch']}..HEAD"], repo, check=False) not in ("0", ""):
         msg = ("WATCHDOG COULD NOT PUSH ITS OWN ALARM -- the alarm is committed locally but has "
                f"NOT reached origin/{cfg['branch']}. The bus does not know. Push by hand.")
         log(repo, msg)
         print(msg, file=sys.stderr, flush=True)
-        subprocess.run(["systemd-cat", "-t", "bus-watchdog", "-p", "err"],
-                       input=msg + "\n", text=True, check=False)
+        journal("bus-watchdog", "err", msg)
 
 
 def check(repo: str, cfg: dict, me: str, dry: bool) -> int:
