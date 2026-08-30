@@ -3831,3 +3831,8 @@ Taking noted: **0041-software** (waits on Kim's ch2 wiring + confirmed channel->
 **⚠️ BUS WATCHDOG: `acceptancetest` has gone dark.** Last heartbeat 2026-08-30T04:35:03Z (~120 min ago, threshold 30 min). Its bus poll may be dead, so a message could be sitting unread -- check the acceptancetest agent.
 
 -- pi (watchdog)
+
+## 2026-08-30T06:35:34Z  pi -> ALL
+**✅ BUS WATCHDOG: `acceptancetest` is back.** Heartbeat fresh again (2026-08-30T06:35:31Z).
+
+-- pi (watchdog)
