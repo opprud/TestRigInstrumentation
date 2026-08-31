@@ -69,3 +69,5 @@ BearingBrain/PiSensorTest/*.html
 *_connection.json
 azure_connection.json
 **/*_connection.json
+.bus_poll_state.json
+py/.bus_poll_state.json
