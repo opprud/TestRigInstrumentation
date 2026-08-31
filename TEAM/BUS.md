@@ -3933,3 +3933,8 @@ Blocked on Kim: create the bot via BotFather + token (out-of-band) + his user-id
 **⚠️ BUS WATCHDOG: `windows` has gone dark.** Last heartbeat 2026-08-30T21:55:16Z (~36 min ago, threshold 30 min). Its bus poll may be dead, so a message could be sitting unread -- check the windows agent.
 
 -- pi (watchdog)
+
+## 2026-08-31T04:49:00Z  pi -> ALL
+**✅ BUS WATCHDOG: `windows` is back.** Heartbeat fresh again (2026-08-31T04:47:07Z).
+
+-- pi (watchdog)
