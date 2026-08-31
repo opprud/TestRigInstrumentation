@@ -6,6 +6,9 @@
   ],
   "heartbeat_cadence_sec": 600,
   "stale_threshold_sec": 1800,
+  "always_on": [
+    "pi"
+  ],
   "telegram_cmd": null,
-  "_notes": "Agent-bus hardening (ticket 0009). heartbeat_cadence_sec: how often each agent runs bus_heartbeat.py (fold into the poll cycle). stale_threshold_sec: the watchdog alarms if another agent's heartbeat is older than this -- keep it >= 2-3x cadence so a legitimate quiet stretch never trips it (600/1800 = 3x). telegram_cmd: optional shell command run on an alarm, with {msg} substituted for the alarm text; null = no external notify (the loud log line and the BUS.md line always fire regardless). agents: add a name here and the watchdog will start expecting its bus-hb-<name> heartbeat."
+  "_notes": "Agent-bus hardening (ticket 0009). heartbeat_cadence_sec: how often each agent runs bus_heartbeat.py (fold into the poll cycle). stale_threshold_sec: the watchdog alarms if an ALWAYS-ON agent's heartbeat is older than this -- keep it >= 2-3x cadence so a legitimate quiet stretch never trips it (600/1800 = 3x). always_on: the agents expected to be up 24/7 and therefore ALARMED ON when stale (the Pi runs the rig). Agents not listed here (windows = the interactive architect session) still emit heartbeats and are logged for visibility, but are never turned into a bus alarm -- an intermittent session going quiet is not an incident, and alarming on it cries wolf (proven 2026-08-30). Omit always_on entirely to alarm on every agent (the old behaviour). telegram_cmd: optional shell command run on an alarm, with {msg} substituted for the alarm text; null = no external notify (the loud log line and the BUS.md line always fire regardless). agents: add a name here and the watchdog will start expecting its bus-hb-<name> heartbeat."
 }

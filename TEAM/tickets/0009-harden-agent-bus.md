@@ -125,3 +125,15 @@ backdated heartbeat trips the alarm, no false alarm under threshold, recovery li
 the VPS (Win Server, 24/7) so the Pi going dark *during an unattended overnight run* raises a
 Telegram alert to Kim, rather than being caught only when the architect's workstation is up.
 Spin a separate ticket if wanted.
+
+---
+## Addendum 2026-08-31 (windows) — `always_on` set, the cry-wolf fix
+
+2026-08-30 22:31 the Pi's watchdog correctly saw windows' heartbeat stale (36-min gap) and posted
+"windows dark" -- but windows is the interactive architect session, legitimately quiet for long
+stretches, so that is a false positive *by design*, and "a watchdog that cries wolf gets ignored".
+Added `always_on` to `bus_config.json` (default = all agents, backward-compatible): only listed agents
+(the Pi) are ALARMED ON when stale; others (windows) still emit heartbeats and are logged for
+visibility but never raise a bus alarm. The watchdog gates the alarm/recovery on membership. Pi pulls +
+restarts `bus-watchdog.timer` to adopt. Catching the always-on Pi *itself* going dark 24/7 is the
+separate optional VPS-watcher enhancement.

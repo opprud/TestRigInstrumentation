@@ -113,16 +113,27 @@ def announce(repo: str, cfg: dict, me: str, text: str, commit_msg: str, dry: boo
 
 def check(repo: str, cfg: dict, me: str, dry: bool) -> int:
     others = [x for x in cfg["agents"] if x != me]
+    # Only agents expected to be always-on are alarmed on when stale. The architect (windows)
+    # is an interactive session that goes legitimately quiet for long stretches, so alarming on
+    # it cries wolf (proven 2026-08-30: pi's watchdog posted "windows dark" after a 36-min gap
+    # while nothing was wrong). Best-effort agents are still read and logged for visibility, just
+    # never turned into a bus alarm. Default = all agents, so this is backward-compatible.
+    always_on = cfg.get("always_on", cfg["agents"])
     threshold = cfg["stale_threshold_sec"]
     state = load_state(repo)
     alarms = 0
     for other in others:
         age, ts = heartbeat_age(repo, other)
+        watched = other in always_on
         if age is None:
             log(repo, f"{other}: unknown (no heartbeat branch yet) -- not alarming")
             continue
         status = "fresh" if age <= threshold else "stale"
-        log(repo, f"{other}: {status} age={int(age)}s (threshold {threshold}s) last={ts}")
+        tag = "" if watched else " [best-effort, not alarmed]"
+        log(repo, f"{other}: {status} age={int(age)}s (threshold {threshold}s){tag} last={ts}")
+        if not watched:
+            state[other] = status
+            continue
         prev = state.get(other, "init")
         if status == "stale" and prev != "stale":
             mins = int(age // 60)
