@@ -772,7 +772,15 @@ def _apply_scope_channel_settings(ip: str, port: int, channels: list, profile_cf
             if DEBUG:
                 print(f"[scope_channels] Unknown alias '{alias}', skipping")
             continue
-        try:
+        # Retry the whole per-channel block. The scope's LXI socket refuses connections
+        # intermittently at startup (ticket 0029), and a single ConnectionRefused here used to
+        # leave that channel at whatever range it happened to carry from the last session while
+        # the run recorded the profile's numbers in its metadata. Seen 2026-09-01: the SP window
+        # fix (8.0/4.5) never reached the scope, so SP still clipped at standstill through a run
+        # whose profile said otherwise. The file looks entirely valid either way.
+        last_err = None
+        for attempt in range(1, 4):
+          try:
             # Turn the channel ON first. ":DIGITIZE" with no argument digitises only the
             # channels the scope is currently *displaying*, and that display state is not
             # part of the profile -- it persists from whatever anyone last did at the front
@@ -790,7 +798,16 @@ def _apply_scope_channel_settings(ip: str, port: int, channels: list, profile_cf
                 _scope_write(ip, port, f":{src}:COUP {settings['coupling']}")
             if DEBUG:
                 print(f"[scope_channels] Applied {alias} ({src}): {settings}")
-        except Exception as e:
+            last_err = None
+            break
+          except Exception as e:
+            last_err = e
+            if attempt < 3:
+                print(f"[scope_channels] {alias} attempt {attempt}/3 failed ({e!r}); retrying",
+                      flush=True)
+                time.sleep(1.0 * attempt)
+        if last_err is not None:
+            e = last_err
             # Never DEBUG-gated and never silent: an unapplied channel setting means
             # the waveform is digitised at the wrong volts/div, and the resulting file
             # still looks perfectly valid afterwards.

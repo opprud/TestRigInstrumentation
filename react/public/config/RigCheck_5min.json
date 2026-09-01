@@ -1,0 +1,74 @@
+{
+  "name": "Rig check 5 min",
+  "description": "Short pre-run check, 5 min. Verifies the whole chain before committing 13 hours: three scope channels at the current ranges, decoupled-free motor control, telemetry, OE capture, and a clean heater-guard exit. Speeds 600/1200/1800 rpm are the same ones the 13 h staircase uses, so UL and AE compare directly against run 20260829_145507 at matching operating points. That comparison matters on 2026-09-01: a retaining ring that holds the bearing in place was found LOOSE and has been fixed, and a rattling ring would have dominated UL/AE in the earlier run. No temperature schedule - the heater is not driven and the Omron is left alone.",
+  "duration_minutes": 5,
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true
+  },
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 59,
+        "value": 0
+      },
+      {
+        "time_sec": 60,
+        "value": 600
+      },
+      {
+        "time_sec": 139,
+        "value": 600
+      },
+      {
+        "time_sec": 140,
+        "value": 1200
+      },
+      {
+        "time_sec": 219,
+        "value": 1200
+      },
+      {
+        "time_sec": 220,
+        "value": 1800
+      },
+      {
+        "time_sec": 299,
+        "value": 1800
+      }
+    ],
+    "temperature": []
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 8.0,
+      "volt_offset": 4.5,
+      "coupling": "DC"
+    }
+  }
+}
