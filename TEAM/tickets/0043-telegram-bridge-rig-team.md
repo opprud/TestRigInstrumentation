@@ -3,7 +3,7 @@ id: 0043
 title: Telegram bridge for the rig agent team — two-way phone access to windows + Pi Claude (talk, receive answers, get alerts)
 area: ops / integration
 role: dev
-status: backlog
+status: in-progress (MVP built + self-tested; awaiting bot token to go live)
 depends_on: 0009, 0033, 0034
 branch:
 pr:
@@ -85,3 +85,25 @@ is wired) — each **behind a confirm step**, never a single tap.
 - **Kim:** the bot, token, user-id, and the two decisions above.
 - **Pi / test:** stand up `tg-bridge.service`; verify inbound auth (only Kim), a round-trip
   answer, and that a 0009 watchdog alarm reaches the phone.
+
+---
+## MVP built 2026-09-02 (windows) — outbound notifications + read-only commands
+
+`py/tools/tg_bridge.py`, stdlib-only (urllib), self-contained, runs on the repo it sits in so it
+works on the Pi and for `--selftest` on the architect's box.
+- **Outbound:** forwards new bus posts matching `notify_patterns` (watchdog / run-complete / heater /
+  freeze / upload-FAILED) to Kim's chat. Natural target for 0009's `telegram_cmd` and 0034's alerts.
+- **Inbound (read-only):** `/status` (heartbeats + latest run + last bus post), `/bus [n]`,
+  `/tickets`, `/help`. **Only `allowed_user_id` is acted on**; a fixed command set, never shell.
+- **Secrets:** `py/tg_connection.json` (token + user id) is git-ignored via the existing
+  `*_connection.json` rule; `py/tg_config.json` holds non-secret settings; token scrubbed from logs.
+- Config: `py/tg_config.json`; template: `py/tg_connection.json.example`; docs: `docs/Telegram_Bridge.md`.
+
+**Self-test passed** (no token): config loads, `/status` `/tickets` `/bus` render from the repo, the
+token file is confirmed git-ignored and the `.example` tracked.
+
+### To go live (Kim + Pi)
+- **Kim:** create the bot via BotFather, put the token + your user id in `py/tg_connection.json`,
+  message the bot once. (Blocked on this — no token yet.)
+- **Pi:** `tg-bridge.service` (or a `--once` timer) beside the bus timers.
+- Then MVP-2→4: safety ops behind a confirm, richer `/status`, model-backed freetext.

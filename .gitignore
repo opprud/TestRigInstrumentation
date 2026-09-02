@@ -58,6 +58,11 @@ temp/
 .bus_watchdog_state.json
 py/.bus_watchdog_state.json
 
+# Telegram bridge (ticket 0043): local state; the token file py/tg_connection.json is
+# already ignored by *_connection.json above, and the log by *.log
+.tg_bridge_state.json
+py/.tg_bridge_state.json
+
 # Auto-generated inline test profiles written by the dashboard at run time
 react/public/config/inline_*.json
 

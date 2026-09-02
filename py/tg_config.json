@@ -1,0 +1,9 @@
+{
+  "branch": "AutoDetectScope_moj",
+  "poll_timeout_sec": 30,
+  "bus_check_interval_sec": 60,
+  "notify_patterns": ["BUS WATCHDOG", "gone dark", "is back", "complete", "archived", "heater", "freeze", "FAILED"],
+  "max_notify_chars": 1200,
+  "commands_enabled": ["status", "bus", "tickets", "help"],
+  "_notes": "Telegram bridge (ticket 0043), NON-SECRET settings only. The token + your Telegram user id live in py/tg_connection.json (git-ignored) or the env. notify_patterns: a new bus post is pushed to Telegram if its text contains any of these (case-insensitive) -- keep it to genuinely notable events so the phone doesn't buzz on every post. bus_check_interval_sec: how often outbound bus events are checked. poll_timeout_sec: Telegram long-poll timeout for inbound. commands_enabled: the read-only command set; safety ops are deliberately not here yet."
+}

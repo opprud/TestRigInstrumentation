@@ -1,0 +1,6 @@
+{
+  "_README": "Copy this to py/tg_connection.json (that name is git-ignored) and fill in the real values. NEVER commit the real file -- a bot token is a control channel. Get the token from BotFather; get your numeric user id from @userinfobot. chat_id is where outbound notifications go (your DM = same as your user id, or a group's id). Env vars TG_BOT_TOKEN / TG_ALLOWED_USER_ID / TG_CHAT_ID override this file.",
+  "bot_token": "123456789:PUT-THE-BOTFATHER-TOKEN-HERE",
+  "allowed_user_id": 0,
+  "chat_id": 0
+}
