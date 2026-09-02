@@ -107,3 +107,10 @@ token file is confirmed git-ignored and the `.example` tracked.
   message the bot once. (Blocked on this — no token yet.)
 - **Pi:** `tg-bridge.service` (or a `--once` timer) beside the bus timers.
 - Then MVP-2→4: safety ops behind a confirm, richer `/status`, model-backed freetext.
+
+### MVP-3 safety-ops constraint (pi, 2026-09-02) — do not lose this
+When heater-off / pi-cycle / oe-cycle land, a confirm step is NOT enough on its own. They must be gated
+on **no run in progress**, OR on an explicit confirm that **names the run they would interrupt** ("this
+will cut the heater during run 20260902_102643 — send CONFIRM to proceed"). A phone is an easy place to
+fat-finger a heater-off at 3 a.m. mid-run. The read-only MVP was kept control-free precisely so it could
+go live *during* a 13 h run without pausing anything — that property must survive the safety-ops step.
