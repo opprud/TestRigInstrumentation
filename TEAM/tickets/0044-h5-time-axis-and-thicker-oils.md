@@ -45,4 +45,6 @@ self-describing once the section is updated.
 - [x] Code + config + docs committed (windows)
 - [ ] Pi: apply after the current 13h run finishes (do NOT restart mid-run)
 - [ ] Pi: size measurement old-vs-new
-- [ ] Kim/Morten: oil B + C specs into `docs/Lubricant_Plan.md`
+- [x] Oil names from Kim 2/9: **Foodlube 22** (same VG as baseline -> chemistry axis) +
+      **Foodlube 150** (~7x viscosity -> film-thickness axis) — table updated
+- [ ] Kim/Morten: datasheet details (exact product line, cSt@40C, flash point, batch)

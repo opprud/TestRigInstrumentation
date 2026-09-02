@@ -9,14 +9,20 @@ rig, their specs, and how a run is tagged with its oil.
 | # | Product | Manufacturer | Base | Viscosity (ISO VG / cSt@40C) | Flash point | Batch | Status |
 |---|---------|--------------|------|------------------------------|-------------|-------|--------|
 | A | Keratech 22 | Kerax | Paraffin oil | 22 (assumed from name — confirm) | 185 C | N/A | Baseline, applied 2026-03-16, all runs to date |
-| B | TBD | TBD | TBD | TBD — "slightly thicker" than A | TBD | TBD | Planned |
-| C | TBD | TBD | TBD | TBD — "slightly thicker" than A | TBD | TBD | Planned |
+| B | Foodlube 22 | ROCOL (Foodlube series — confirm) | Food-grade (NSF H1 class — confirm on datasheet) | VG 22 (per name) | TBD (datasheet) | TBD | Chosen 2026-09-02 (Kim) |
+| C | Foodlube 150 | ROCOL (Foodlube series — confirm) | Food-grade (NSF H1 class — confirm on datasheet) | VG 150 (per name) | TBD (datasheet) | TBD | Chosen 2026-09-02 (Kim) |
 
-Fill B and C when Kim/Morten choose the products (name, manufacturer, viscosity grade,
-flash point, batch number). "Slightly thicker" = the working hypothesis is a higher
-viscosity film -> later transition out of full-film lubrication (see
-`docs/OE_sensor.md`: the OE mic tracks the lubrication regime — thicker oil should
-shift the temperature at which asperity noise rises).
+Note the design this pair gives us — better than "two thicker oils":
+- **Foodlube 22 vs Keratech 22 = same viscosity grade, different chemistry** — a clean
+  chemistry/additive comparison at constant film thickness.
+- **Foodlube 150 vs Foodlube 22 = same chemistry family, ~7x viscosity** — a clean
+  viscosity comparison (VG 150 is a big step, not "slightly" thicker).
+Working hypothesis unchanged: higher viscosity -> thicker film -> later transition out
+of full-film lubrication (see `docs/OE_sensor.md`: the OE mic tracks the lubrication
+regime — the VG 150 runs should shift the temperature at which asperity noise rises;
+the Foodlube 22 runs tell us whether chemistry alone moves it at all).
+Still needed from the datasheets/cans: exact product names (Hi-Power line?), cSt@40C,
+flash point, batch numbers.
 
 ## How a run is tagged with its oil
 
