@@ -3,7 +3,7 @@ id: 0013
 title: Azure archive policy — upload only valid, analysis-worthy tests to the real container
 area: ops
 role: dev
-status: backlog
+status: done
 assignee: unassigned
 depends_on: 0010, 0011
 branch:
@@ -62,3 +62,25 @@ The prune of the three 13 h `.h5`s (114 GB freed) surfaced two cheap uploader ch
    4 MB) or a full re-download. One argument on the upload call makes every future verification a free exact
    checksum — it would have made this prune a checksum comparison instead of a sampling argument. Kim's
    uploader-touch to schedule.
+
+---
+## Done 2026-09-02 (windows) — implemented in py/tools/upload_to_azure.py
+
+All three parts landed and tested:
+1. **Sidecars.** Every non-`.h5` file in the run folder (telemetry JSONL, `acquire_scope.log`,
+   `GROUND_TRUTH.txt`, config) now uploads beside the `.h5` under the same `<run>/` prefix. This is
+   the fix for the 2026-08-29 loss — telemetry can no longer be lost to a folder prune — and it
+   **supersedes the interim `ARCHIVED.txt` safeguard**: the sidecars are in Azure now, not merely
+   noted. `--no-sidecars` opts out; a non-sidecar-sized file (>256 MB) is skipped loudly.
+2. **content_md5.** Computed in a pre-upload read pass and stored on the blob, so every future
+   verification is a free exact checksum instead of size + sampled SHA. `--no-md5` skips the extra
+   read pass on slow media. (Blobs already present are left untouched by skip-if-identical, so this
+   applies to new uploads; a backfill would be a separate pass.)
+3. **Keep/skip gate — opt-out.** A run folder carrying a `DO_NOT_ARCHIVE*` marker (any extension) is
+   skipped; `--force` overrides. Unmarked runs archive exactly as before, so nothing that used to be
+   archived silently stops. Matches Pi's "marked do-not-archive" fault-reference convention — **Pi to
+   confirm the exact marker filename** so the two sides agree.
+
+Tested on Windows: gate skip, clear-path passes the gate, sidecar discovery (excludes the `.h5`),
+marker detection + `--force`. The real upload path is a minimal extension of the proven uploader
+(same `upload_blob` + `content_settings`). Credential handling, scrubbing, and size-verify unchanged.
