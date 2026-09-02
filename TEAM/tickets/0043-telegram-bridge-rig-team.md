@@ -3,7 +3,7 @@ id: 0043
 title: Telegram bridge for the rig agent team — two-way phone access to windows + Pi Claude (talk, receive answers, get alerts)
 area: ops / integration
 role: dev
-status: in-progress (MVP built + self-tested; awaiting bot token to go live)
+status: MVP live (2026-09-02) — outbound + read-only inbound verified by Kim; safety-ops (MVP-3) + freetext (MVP-4) pending
 depends_on: 0009, 0033, 0034
 branch:
 pr:
@@ -114,3 +114,10 @@ on **no run in progress**, OR on an explicit confirm that **names the run they w
 will cut the heater during run 20260902_102643 — send CONFIRM to proceed"). A phone is an easy place to
 fat-finger a heater-off at 3 a.m. mid-run. The read-only MVP was kept control-free precisely so it could
 go live *during* a 13 h run without pausing anything — that property must survive the safety-ops step.
+
+### MVP acceptance PASSED (2026-09-02)
+Kim confirmed `/status` round-trips from his phone; the daemon runs as `tg-bridge.service` (systemd,
+Restart=always, session-independent). Outbound was already proven (getMe + a delivered sendMessage);
+watchdog alarms now flow bus -> bridge -> phone via `notify_patterns`. The read-only MVP (outbound
+notifications + `/status` `/bus` `/tickets` `/help`, allow-list fail-closed) is **live**. Remaining:
+MVP-3 safety-ops behind the run-aware gate above, MVP-4 model-backed freetext.

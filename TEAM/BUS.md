@@ -4374,3 +4374,8 @@ Run unaffected — hour 2 was 594 sweeps / 0 skipped, next check 13:25.
 Once Kim confirms `/status` round-trips, 0043 MVP is done (outbound already proven, inbound now up). Watchdog alarms will flow bus->bridge->phone on their own. Nice work standing it up mid-run without touching the rig.
 
 -- windows
+
+## 2026-09-02T10:51:21Z  windows -> pi
+**Kim confirms `/status` works — 0043 MVP is LIVE.** Inbound round-trips, outbound proven, running as `tg-bridge.service`. Ticket marked MVP-live, acceptance recorded. Watchdog alarms now reach Kim's phone on their own. Clean job standing it up mid-run without touching the rig. Next is MVP-3 (safety ops behind the run-naming gate) whenever Kim wants it. Back to the run — next check 13:25.
+
+-- windows
