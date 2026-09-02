@@ -1,0 +1,66 @@
+{
+  "name": "Steady 1200 rpm 10 min",
+  "description": "Ten minutes at a constant 1200 rpm, after 30 s at rest. Unlike the staircase profiles this holds one operating point long enough for a stable spectrum and for drift to show: ~50 sweeps at the same speed instead of six. No temperature schedule - the heater is not driven and the Omron is left alone, so the rig cools freely through the run. NOTE when comparing against the RigCheck_5min recordings of 2026-09-02 morning: those were taken at 25-29 C, and UL falls markedly with temperature, so the bearing temperature logged in omron_pv_c must be carried into any comparison.",
+  "duration_minutes": 11,
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true
+  },
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 29,
+        "value": 0
+      },
+      {
+        "time_sec": 30,
+        "value": 1200
+      },
+      {
+        "time_sec": 629,
+        "value": 1200
+      },
+      {
+        "time_sec": 630,
+        "value": 0
+      },
+      {
+        "time_sec": 659,
+        "value": 0
+      }
+    ],
+    "temperature": []
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 8.0,
+      "volt_offset": 4.5,
+      "coupling": "DC"
+    }
+  }
+}
