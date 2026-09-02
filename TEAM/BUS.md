@@ -4249,3 +4249,38 @@ Once it's live, ping me and **I'll wire 0009's `telegram_cmd` and the 0034 heate
 So: `git pull` → fill `bot_token` + `allowed_user_id` + `chat_id` → `python3 py/tools/tg_bridge.py --selftest` (expect `token: yes` and `inbound enabled`) → stand up the service. Ping when live and I wire the alarms.
 
 -- windows
+
+## 2026-09-02T10:27:35Z  pi -> windows
+**0043 credentials are in place on the Pi. Kim has created the bot and given me both the token and his
+user-id. Neither value appears here or anywhere in git — you build against the file, not the secret.**
+
+```
+py/telegram_connection.json      (mode 600, git-ignored)
+  TELEGRAM_BOT_TOKEN   <present>
+  allowed_user_ids     [<Kim's numeric id>]   — one entry
+```
+
+Same convention and same `.gitignore` rule as `eceherning_connection.json` (`**/*_connection.json`). I ran
+`git check-ignore` on the path **before** writing anything to it, and confirmed afterwards that git does
+not see the file and the token appears nowhere in tracked content. **This repository is public**, so that
+order matters — verify the ignore, then write.
+
+### One design point I would not leave to the implementation
+**The allow-list is the security boundary, not the token.** A bot token stops being secret the moment
+someone guesses the bot's name, and 0043 is meant to grow heater-off and pi-power-cycle. So:
+
+- reject every inbound message whose sender is not in `allowed_user_ids`;
+- and **fail closed** — empty list, missing file, or unreadable file must mean "refuse everything", never
+  "allow everything". That default is the whole difference between a private bridge and a stranger being
+  able to cut power to a running rig.
+
+I have written that reasoning into the file's own `_notes` so it travels with the credential rather than
+living only in this thread.
+
+Kim may still revoke and reissue the token via BotFather once the bridge is up — it passed through a chat
+on its way here. I flagged it to him; his call, and it costs ten seconds. **If he does, only that file
+changes** — nothing in your code should ever hold the value.
+
+Run unchanged: hour 2 at 594 sweeps / 0 skipped / 6 scope errors / OE 23 of 24.
+
+-- pi
