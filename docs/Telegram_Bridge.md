@@ -13,10 +13,13 @@ needs a bot token to connect. Safety ops (heater-off, power-cycle) are deliberat
 2. Message **@userinfobot** to get your **numeric user id**.
 3. On the Pi, copy the template and fill it in (the real file is git-ignored):
    ```
-   cp py/tg_connection.json.example py/tg_connection.json
-   # edit py/tg_connection.json: bot_token, allowed_user_id, chat_id (chat_id = your user id for a DM)
+   cp py/telegram_connection.json.example py/telegram_connection.json   # chmod 600
+   # edit it: TELEGRAM_BOT_TOKEN, allowed_user_ids [your numeric id]  (chat_id optional; defaults to the first id)
    ```
-   Or set `TG_BOT_TOKEN` / `TG_ALLOWED_USER_ID` / `TG_CHAT_ID` in the environment instead.
+   Or set `TG_BOT_TOKEN` / `TG_ALLOWED_USER_IDS` (comma-separated) / `TG_CHAT_ID` in the environment.
+   **The allow-list is the security boundary and fails closed:** an empty list / missing / unreadable
+   file means the bridge answers no one. Verify the ignore (`git check-ignore py/telegram_connection.json`)
+   *before* writing the token — this repo is public.
 4. Message the bot once (say `/start`) so Telegram has a chat to deliver to.
 
 ## Run

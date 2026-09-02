@@ -1,0 +1,5 @@
+{
+  "_README": "Copy this to py/telegram_connection.json (that name is git-ignored via *_connection.json) and fill in the real values. NEVER commit the real file. The ALLOW-LIST, not the token, is the security boundary: a bot token stops being secret the moment someone guesses the bot name, and 0043 grows heater-off / power-cycle, so the bridge FAILS CLOSED -- an empty list, a missing file, or an unreadable file means 'refuse everyone', never 'answer anyone'. Get the token from BotFather; get your numeric id from @userinfobot. allowed_user_ids is a LIST (add ids to authorize more people). chat_id (optional) is where outbound notifications go; it defaults to the first allowed id (your DM). Env overrides: TG_BOT_TOKEN / TG_ALLOWED_USER_IDS (comma-separated) / TG_CHAT_ID.",
+  "TELEGRAM_BOT_TOKEN": "123456789:PUT-THE-BOTFATHER-TOKEN-HERE",
+  "allowed_user_ids": [0]
+}

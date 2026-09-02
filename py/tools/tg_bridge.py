@@ -45,7 +45,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from bus_common import git, journal, repo_root, safe_console, utcnow_iso  # noqa: E402
 
 CONFIG_FILE = "py/tg_config.json"
-SECRET_FILE = "py/tg_connection.json"          # git-ignored via *_connection.json
+SECRET_FILE = "py/telegram_connection.json"    # Pi's file; git-ignored via *_connection.json
 STATE_FILE = "py/.tg_bridge_state.json"        # git-ignored
 LOG_FILE = "py/tg_bridge.log"                  # git-ignored via *.log
 
@@ -92,21 +92,37 @@ def load_config(repo: str) -> dict:
 
 
 def load_secret(repo: str) -> dict:
+    """Read the credential (Pi's `telegram_connection.json`): `TELEGRAM_BOT_TOKEN` and
+    `allowed_user_ids` (a LIST — the allow-list is the security boundary, per Pi). Fail closed:
+    a missing or unreadable/malformed file yields no token and an EMPTY allow-list, so the
+    default is "refuse everyone", never "answer anyone". Env overrides for testing."""
     token = os.environ.get("TG_BOT_TOKEN")
-    user = os.environ.get("TG_ALLOWED_USER_ID")
     chat = os.environ.get("TG_CHAT_ID")
+    ids: list[int] = []
+    ids_env = os.environ.get("TG_ALLOWED_USER_IDS")
+    if ids_env:
+        ids = [int(x) for x in re.split(r"[,\s]+", ids_env.strip()) if x]
     p = os.path.join(repo, SECRET_FILE)
     if os.path.exists(p):
-        with open(p, encoding="utf-8") as fh:
-            d = json.load(fh)
-        token = token or d.get("bot_token")
-        user = user or d.get("allowed_user_id")
-        chat = chat or d.get("chat_id")
-    out = {"bot_token": token,
-           "allowed_user_id": int(user) if user else None,
-           "chat_id": int(chat) if chat else (int(user) if user else None)}
-    if out["bot_token"]:
-        _SECRETS.append(out["bot_token"])
+        try:
+            with open(p, encoding="utf-8") as fh:
+                d = json.load(fh)
+            token = token or d.get("TELEGRAM_BOT_TOKEN") or d.get("bot_token")
+            if not ids:
+                raw = d.get("allowed_user_ids")
+                if isinstance(raw, list):
+                    ids = [int(x) for x in raw]
+                elif d.get("allowed_user_id") is not None:      # tolerate a single-id file
+                    ids = [int(d["allowed_user_id"])]
+            chat = chat or d.get("chat_id")
+        except (OSError, ValueError):
+            token, ids = None, []                                # unreadable/malformed => fail closed
+    if chat is None and ids:
+        chat = ids[0]                                           # DM Kim = first allowed id
+    out = {"bot_token": token, "allowed_user_ids": ids,
+           "chat_id": int(chat) if chat is not None else None}
+    if token:
+        _SECRETS.append(token)
     return out
 
 
@@ -282,7 +298,7 @@ def do_outbound(repo: str, cfg: dict, secret: dict, st: dict, dry: bool) -> list
 
 # --------------------------------------------------------------------------- inbound
 def do_inbound(repo: str, cfg: dict, secret: dict, st: dict) -> None:
-    token, allowed = secret["bot_token"], secret["allowed_user_id"]
+    token, allowed_ids = secret["bot_token"], secret["allowed_user_ids"]
     try:
         r = tg(token, "getUpdates",
                {"offset": st.get("update_offset", 0), "timeout": cfg["poll_timeout_sec"]},
@@ -296,8 +312,8 @@ def do_inbound(repo: str, cfg: dict, secret: dict, st: dict) -> None:
         if not msg or "text" not in msg:
             continue
         uid = msg.get("from", {}).get("id")
-        if allowed is None or uid != allowed:      # fail closed: no allow-list => answer no one
-            log(repo, f"ignored message from user id {uid} (not the allowed user)")
+        if uid not in allowed_ids:                 # empty allow-list => nobody passes (fail closed)
+            log(repo, f"ignored message from user id {uid} (not in allow-list)")
             continue
         reply = handle_command(repo, cfg, msg["text"])
         try:
@@ -311,8 +327,8 @@ def do_inbound(repo: str, cfg: dict, secret: dict, st: dict) -> None:
 def selftest(repo: str, cfg: dict, secret: dict) -> None:
     print("=== config ==="); print(json.dumps(cfg, indent=1))
     print("=== secret present? ===")
-    print(f"  token: {'yes' if secret['bot_token'] else 'NO (set py/tg_connection.json or TG_BOT_TOKEN)'}")
-    print(f"  allowed_user_id: {secret['allowed_user_id']}  chat_id: {secret['chat_id']}")
+    print(f"  token: {'yes' if secret['bot_token'] else 'NO (set py/telegram_connection.json or TG_BOT_TOKEN)'}")
+    print(f"  allowed_user_ids: {secret['allowed_user_ids']}  chat_id: {secret['chat_id']}")
     print("=== /status ==="); print(cmd_status(repo, cfg))
     print("=== /tickets ==="); print(cmd_tickets(repo, cfg))
     print("=== /bus 3 ==="); print(cmd_bus(repo, cfg, "3"))
@@ -322,8 +338,8 @@ def selftest(repo: str, cfg: dict, secret: dict) -> None:
     if worthy:
         print("  most recent match: " + worthy[-1].splitlines()[0].replace("## ", ""))
     print("=== inbound auth ===")
-    print("  " + ("allowed_user_id set — inbound enabled" if secret["allowed_user_id"]
-                  else "allowed_user_id NOT set — inbound would be DISABLED (fail-closed)"))
+    print("  " + (f"allow-list has {len(secret['allowed_user_ids'])} id(s) — inbound enabled"
+                  if secret["allowed_user_ids"] else "allow-list EMPTY — inbound DISABLED (fail-closed)"))
 
 
 def main() -> int:
@@ -343,10 +359,10 @@ def main() -> int:
         log(repo, "no bot token — set py/tg_connection.json or TG_BOT_TOKEN. (Try --selftest.)")
         return 2
 
-    inbound_ok = secret["allowed_user_id"] is not None
+    inbound_ok = bool(secret["allowed_user_ids"])
     if not inbound_ok:
-        log(repo, "WARNING: allowed_user_id not set — inbound commands DISABLED (a bot with no "
-                  "allow-list would answer anyone). Set allowed_user_id in tg_connection.json to enable.")
+        log(repo, "WARNING: allow-list empty — inbound commands DISABLED (a bot with no allow-list "
+                  "would answer anyone). Set allowed_user_ids in telegram_connection.json to enable.")
     log(repo, "tg_bridge up" + (" (single pass)" if a.once else " (daemon)")
               + ("" if inbound_ok else " [OUTBOUND ONLY — no allow-list]"))
     last_bus = 0.0
