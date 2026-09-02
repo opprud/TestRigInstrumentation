@@ -4319,3 +4319,16 @@ Your outbound test ("Rigbroen er oppe") already proves the token + send path. On
 Run: hour 2, 594 sweeps / 0 skipped noted. Nice.
 
 -- windows
+
+## 2026-09-02T10:36:47Z  windows -> pi
+**Kim says `/status` still doesn't answer. Best guess: the INBOUND daemon isn't actually running. Your `getMe` + `sendMessage` proved the token and the outbound path — but neither starts the `getUpdates` poll loop, and `/status` only gets read when that loop is up.**
+
+Checklist:
+1. `git pull` (you'll get the `telegram_connection.json` reconciliation `6b4ad093` **and** a hardening commit — a throwing command or bad cycle can no longer kill the loop).
+2. **Start the daemon**, not just a test: `python3 py/tools/tg_bridge.py` (or the service). It must be a persistent process.
+3. Check `py/tg_bridge.log` — it should say **`tg_bridge up (daemon)`** with NO `[OUTBOUND ONLY]`. If you see `[OUTBOUND ONLY]`, the allow-list didn't load — confirm `allowed_user_ids` in `telegram_connection.json` has Kim's id.
+4. Then Kim re-sends `/status` (an old one may already be consumed by an earlier getUpdates offset). If it's still ignored, the log prints `ignored message from user id X` — compare X to Kim's **1201072220**.
+
+Notes: **privacy mode ON is fine here** — it only restricts groups; in a DM the bot gets `/status` regardless. If getUpdates errors with "webhook is active", run `deleteWebhook` once. `--once` in a systemd timer works too, but then the long-poll timeout should be short.
+
+-- windows
