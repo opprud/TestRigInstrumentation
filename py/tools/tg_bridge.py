@@ -315,7 +315,11 @@ def do_inbound(repo: str, cfg: dict, secret: dict, st: dict) -> None:
         if uid not in allowed_ids:                 # empty allow-list => nobody passes (fail closed)
             log(repo, f"ignored message from user id {uid} (not in allow-list)")
             continue
-        reply = handle_command(repo, cfg, msg["text"])
+        try:
+            reply = handle_command(repo, cfg, msg["text"])
+        except Exception as e:                       # a bad command must not kill the daemon
+            log(repo, f"command '{msg['text'][:40]}' failed: {_scrub(e)[:200]}")
+            reply = "that command errored on my side — logged, I'll look."
         try:
             send(token, msg["chat"]["id"], reply)
         except Exception as e:
@@ -367,13 +371,17 @@ def main() -> int:
               + ("" if inbound_ok else " [OUTBOUND ONLY — no allow-list]"))
     last_bus = 0.0
     while True:
-        st = load_state(repo)
-        if inbound_ok:
-            do_inbound(repo, cfg, secret, st)          # blocks up to poll_timeout_sec (long-poll)
-        if time.monotonic() - last_bus >= cfg["bus_check_interval_sec"] or a.once:
-            do_outbound(repo, cfg, secret, st, dry=False)
-            save_state(repo, st)
-            last_bus = time.monotonic()
+        try:
+            st = load_state(repo)
+            if inbound_ok:
+                do_inbound(repo, cfg, secret, st)      # blocks up to poll_timeout_sec (long-poll)
+            if time.monotonic() - last_bus >= cfg["bus_check_interval_sec"] or a.once:
+                do_outbound(repo, cfg, secret, st, dry=False)
+                save_state(repo, st)
+                last_bus = time.monotonic()
+        except Exception as e:                          # never let one bad cycle kill the daemon
+            log(repo, f"loop error (continuing): {_scrub(e)[:200]}")
+            time.sleep(5)
         if a.once:
             return 0
         if not inbound_ok:
