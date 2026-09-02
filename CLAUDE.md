@@ -436,6 +436,27 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   hour, so the heater is never the limit there. Size temperature ramps in new profiles from 30 C/h — and
   expect **less** with the bearing decoupled or unloaded, where there is no friction heat.
 
+- **⚠️ 2026-09-02 IS A HARD BOUNDARY IN THE DATA: the bench was stripped and rebuilt.** Bearing cleaned,
+  clearances measured, everything re-tightened properly. Do **not** compare absolute levels across that
+  date — after a rebuild the rig is mechanically a different specimen: clearances, preload and seating
+  all changed on purpose.
+
+  Everything recorded **before** it was taken on a rig whose bearing retaining ring **had never been
+  seated correctly in its lock**. It worked its way out three times on 2026-09-01/02 before the cause was
+  found. How far back that goes is unknown, so treat the ring's state as unknown for every earlier run,
+  including the three 13 h runs.
+
+  What that does and does not undermine:
+  - **Amplitude comparisons across the boundary: void.** Re-baseline everything after the rebuild.
+  - **The UL-falls-with-oil-temperature finding: still standing, but re-confirm it.** It reproduced across
+    two 13 h runs (−42 to −50 % from 40 to 100 C at 1500-3000 rpm) with the 0 rpm floor flat in both, and
+    ring state was shown not to move UL amplitude above the ~26 % run-to-run wander. A post-rebuild run is
+    the clean test.
+  - **Any pre-run-check baseline: must be re-measured.** Numbers from before are gone.
+
+  **The first run after reassembly is the most valuable measurement on the rig** — it defines the
+  reference every later run is read against. Treat it as a baseline, not as a warm-up.
+
 - **Skipped sweeps leave gaps in the HDF5 sweep numbering.** Analysis must iterate the
   existing `sweep_###` groups, not assume contiguous indices.
 
