@@ -250,9 +250,20 @@ def notify_worthy(body: str, cfg: dict) -> bool:
 
 
 def do_outbound(repo: str, cfg: dict, secret: dict, st: dict, dry: bool) -> list[str]:
-    """Forward new notify-worthy bus posts to Kim. Returns the messages sent (for --selftest)."""
+    """Forward new notify-worthy bus posts to Kim. Returns the messages sent.
+
+    On the VERY FIRST run (no stored watermark) it baselines to the latest post and sends
+    nothing — otherwise a fresh bridge would forward the whole bus history's alarms at once
+    and flood the phone. After that, only posts newer than the watermark go out.
+    """
     posts = bus_posts(repo, cfg["branch"])
-    last = st.get("last_notified_ts", "")
+    if not posts:
+        return []
+    if "last_notified_ts" not in st:
+        if not dry:
+            st["last_notified_ts"] = posts[-1][0]
+        return []
+    last = st["last_notified_ts"]
     sent = []
     for ts, body in posts:
         if ts <= last or not notify_worthy(body, cfg):
@@ -264,7 +275,7 @@ def do_outbound(repo: str, cfg: dict, secret: dict, st: dict, dry: bool) -> list
                 send(secret["bot_token"], secret["chat_id"], msg)
             except Exception as e:
                 log(repo, f"outbound send failed: {_scrub(e)[:200]}")
-    if posts and not dry:
+    if not dry:
         st["last_notified_ts"] = posts[-1][0]
     return sent
 
@@ -285,8 +296,8 @@ def do_inbound(repo: str, cfg: dict, secret: dict, st: dict) -> None:
         if not msg or "text" not in msg:
             continue
         uid = msg.get("from", {}).get("id")
-        if allowed is not None and uid != allowed:
-            log(repo, f"ignored message from unauthorized user id {uid}")
+        if allowed is None or uid != allowed:      # fail closed: no allow-list => answer no one
+            log(repo, f"ignored message from user id {uid} (not the allowed user)")
             continue
         reply = handle_command(repo, cfg, msg["text"])
         try:
@@ -305,11 +316,14 @@ def selftest(repo: str, cfg: dict, secret: dict) -> None:
     print("=== /status ==="); print(cmd_status(repo, cfg))
     print("=== /tickets ==="); print(cmd_tickets(repo, cfg))
     print("=== /bus 3 ==="); print(cmd_bus(repo, cfg, "3"))
-    print("=== outbound (dry) — notify-worthy posts not yet notified ===")
-    sent = do_outbound(repo, cfg, secret, load_state(repo), dry=True)
-    print(f"  would send {len(sent)} message(s); most recent:")
-    if sent:
-        print("  " + sent[-1].splitlines()[0])
+    print("=== outbound — notify-worthy posts in history (a fresh bridge baselines to now, no flood) ===")
+    worthy = [b for _, b in bus_posts(repo, cfg["branch"]) if notify_worthy(b, cfg)]
+    print(f"  {len(worthy)} post(s) match notify_patterns; on a live start only NEW matches forward.")
+    if worthy:
+        print("  most recent match: " + worthy[-1].splitlines()[0].replace("## ", ""))
+    print("=== inbound auth ===")
+    print("  " + ("allowed_user_id set — inbound enabled" if secret["allowed_user_id"]
+                  else "allowed_user_id NOT set — inbound would be DISABLED (fail-closed)"))
 
 
 def main() -> int:
@@ -329,17 +343,25 @@ def main() -> int:
         log(repo, "no bot token — set py/tg_connection.json or TG_BOT_TOKEN. (Try --selftest.)")
         return 2
 
-    log(repo, "tg_bridge up" + (" (single pass)" if a.once else " (daemon)"))
+    inbound_ok = secret["allowed_user_id"] is not None
+    if not inbound_ok:
+        log(repo, "WARNING: allowed_user_id not set — inbound commands DISABLED (a bot with no "
+                  "allow-list would answer anyone). Set allowed_user_id in tg_connection.json to enable.")
+    log(repo, "tg_bridge up" + (" (single pass)" if a.once else " (daemon)")
+              + ("" if inbound_ok else " [OUTBOUND ONLY — no allow-list]"))
     last_bus = 0.0
     while True:
         st = load_state(repo)
-        do_inbound(repo, cfg, secret, st)
+        if inbound_ok:
+            do_inbound(repo, cfg, secret, st)          # blocks up to poll_timeout_sec (long-poll)
         if time.monotonic() - last_bus >= cfg["bus_check_interval_sec"] or a.once:
             do_outbound(repo, cfg, secret, st, dry=False)
             save_state(repo, st)
             last_bus = time.monotonic()
         if a.once:
             return 0
+        if not inbound_ok:
+            time.sleep(min(cfg["bus_check_interval_sec"], 30))   # no long-poll to pace us
 
 
 if __name__ == "__main__":
