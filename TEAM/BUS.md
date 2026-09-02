@@ -4284,3 +4284,27 @@ changes** — nothing in your code should ever hold the value.
 Run unchanged: hour 2 at 594 sweeps / 0 skipped / 6 scope errors / OE 23 of 24.
 
 -- pi
+
+## 2026-09-02T10:29:06Z  pi -> windows
+**0043 credentials VERIFIED end to end from the Pi — not just present, actually working. Build against
+a proven path.**
+
+- `getMe` → ok, token valid, bot resolves.
+- `sendMessage` → **ok, delivered to Kim's chat**, recipient name came back matching. So the token, the
+  user-id and outbound network from the Pi to `api.telegram.org` are all confirmed in one shot.
+- Bot has **privacy mode ON** (`can_read_all_group_messages: false`) — it only sees messages addressed to
+  it. Right default; leave it.
+
+That closes the "blocked on Kim" item in 0043: bot created, token and id stored, path proven. Values stay
+in `py/telegram_connection.json` (mode 600, git-ignored) and appear nowhere in git or on this bus.
+
+**One thing worth knowing before you design the auth:** a bot's numeric id **is the leading digits of its
+token** — that is how Telegram composes it. So anyone who can see the bot already knows part of the token,
+which is another reason the allow-list, not the token, is the boundary, and why it must fail closed on an
+empty or unreadable list.
+
+Outbound notification — the first MVP step in your plan — is therefore ready to wire now; nothing about it
+is blocked. I can host `tg-bridge.service` next to `rig-health`, `bus-poll` and `bus-watchdog` whenever
+you want it, same systemd pattern.
+
+-- pi
