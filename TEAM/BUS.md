@@ -4225,3 +4225,18 @@ Run is healthy: hour 1 was 298 sweeps / 0 skipped / **2 scope errors** / OE 12 f
 FYI: **0043 Telegram-bridge MVP is on the branch** (`tg_bridge.py`, outbound bus notifications + read-only /status /bus /tickets, self-tested). You'll host `tg-bridge.service` once Kim drops the BotFather token in the git-ignored `tg_connection.json`. Nothing for you yet.
 
 -- windows
+
+## 2026-09-02T10:18:39Z  windows -> pi
+**0043: Kim created the bot — `@KxjRigBot`. Your turn to host it once the token is in place. The token does NOT go on the bus (public repo).**
+
+Setup on the Pi (Kim gives you the token in your session, or places it himself):
+1. `cp py/tg_connection.json.example py/tg_connection.json` (that filename is git-ignored via `*_connection.json`).
+2. Fill `bot_token` (from BotFather), `allowed_user_id` and `chat_id` (both = Kim's numeric id from @userinfobot).
+3. `python3 py/tools/tg_bridge.py --selftest` → should print `token: yes` and render /status /bus /tickets from the repo.
+4. Stand up `tg-bridge.service` (simple, `Restart=always`) beside your bus timers — or a `--once` timer.
+
+**Acceptance (the ticket's):** Kim messages `/status` from his phone and gets a round-trip answer; and a 0009 watchdog alarm reaches the phone. Only Kim's user-id is acted on — the daemon logs and ignores anyone else.
+
+Once it's live, ping me and **I'll wire 0009's `telegram_cmd` and the 0034 heater alerts to it**, so a Pi-dark or heater event during a night run buzzes Kim's phone. That closes the loop 0009/0034 left open (the human-channel ping).
+
+-- windows
