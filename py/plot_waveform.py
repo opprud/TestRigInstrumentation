@@ -28,9 +28,15 @@ def list_channels(h5file, sweep_id):
 def load_waveform(h5file, sweep_id, channel_alias):
     with h5py.File(h5file, "r") as f:
         grp = f[f"sweeps/{sweep_id}/{channel_alias}"]
-        t = grp["time"][:]
         v = grp["voltage"][:]
         attrs = dict(grp.attrs)
+        if "time" in grp:
+            t = grp["time"][:]
+        else:
+            # Files written with store.time_axis=false carry no time dataset — rebuild
+            # the ramp from the preamble attrs (bit-identical to what acquire computed).
+            t = ((np.arange(len(v)) - attrs.get("x_reference", 0.0))
+                 * attrs.get("x_increment", 1.0) + attrs.get("x_origin", 0.0))
     return t, v, attrs
 
 

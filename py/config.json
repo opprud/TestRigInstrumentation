@@ -87,6 +87,7 @@
  "store": {
   "output_file": "data/keratech22.hdf5",
   "timestamped": true,
+  "time_axis": false,
   "compress": "gzip",
   "compression_level": 4,
   "chunk": false,

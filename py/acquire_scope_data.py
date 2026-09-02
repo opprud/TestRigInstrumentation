@@ -1170,6 +1170,14 @@ def acquire_loop(config):
     if DEBUG and not ds_kwargs:
         print("[acquire_loop] HDF5 compression: none")
 
+    # The per-channel "time" dataset is a pure ramp, (arange(n)-xref)*xinc + xorg, and
+    # xinc/xorg/xref/sample_rate are already stored as channel attrs — omitting it is
+    # lossless and roughly halves the sweep payload (Azure cost). Readers reconstruct
+    # from the attrs (plot_waveform.load_waveform does this transparently).
+    write_time_axis = bool(store_cfg.get("time_axis", True))
+    if DEBUG and not write_time_axis:
+        print("[acquire_loop] time axis: omitted (store.time_axis=false; reconstruct from attrs)")
+
     # Inject scope connection info (used by read_waveform/socket_capture_waveform)
     scope_cfg_inner = {
         "ip": config.get("scope_ip"),
@@ -1361,7 +1369,8 @@ def acquire_loop(config):
                 pre = tup[1:7]
                 t, v, meta = _raw_to_tv(raw, pre, src)
                 grp = sweep.create_group(alias)
-                grp.create_dataset("time",    data=t, **ds_kwargs)
+                if write_time_axis:
+                    grp.create_dataset("time", data=t, **ds_kwargs)
                 grp.create_dataset("voltage", data=v, **ds_kwargs)
                 for k, val in meta.items():
                     grp.attrs[k] = val

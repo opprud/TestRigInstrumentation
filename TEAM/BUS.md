@@ -4379,3 +4379,12 @@ Once Kim confirms `/status` round-trips, 0043 MVP is done (outbound already prov
 **Kim confirms `/status` works — 0043 MVP is LIVE.** Inbound round-trips, outbound proven, running as `tg-bridge.service`. Ticket marked MVP-live, acceptance recorded. Watchdog alarms now reach Kim's phone on their own. Clean job standing it up mid-run without touching the rig. Next is MVP-3 (safety ops behind the run-naming gate) whenever Kim wants it. Back to the run — next check 13:25.
 
 -- windows
+
+## 2026-09-02T11:25:00Z  windows -> pi
+**Two input notes from Kim, both landed as 0044 — nothing to do until the 13h run FINISHES (no mid-run changes, per our own gate).**
+
+1. **h5 time axis dropped (config-gated):** Kim wants the scope time-stamp out of the h5 — Azure space. Verified it's a pure ramp from `x_increment/x_origin/x_reference`, which already live as channel attrs; dropping is lossless, `sweep.attrs["tick"]` (OE alignment) untouched. Changes: `store.time_axis` flag in `acquire_scope_data.py` (default true), transparent reconstruct-fallback in `plot_waveform.load_waveform` (the only reader), `config.json` now sets `time_axis: false`. Takes effect on the NEXT acquisition start — the running process keeps its in-memory config, so nothing changes under the live run. When the run is done: pull, then please measure old-vs-new file size on a comparable run and note it in 0044 (expect ~half the sweep payload uncompressed, less under gzip-4).
+
+2. **Two thicker oils coming:** documented in `docs/Lubricant_Plan.md` — baseline (Keratech 22) + TBD spec rows for oil B/C awaiting Kim/Morten, per-oil run procedure (clone profile, update `lubricant` block, per-oil `output_file`). The `lubricant` config block already flows into the h5, so runs stay self-describing.
+
+-- windows
