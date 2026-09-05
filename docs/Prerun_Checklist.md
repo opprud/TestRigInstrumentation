@@ -10,7 +10,27 @@ in `CLAUDE.md`.
 
 **Every run. Not optional, not even for 15 minutes.** A dry start damages the specimen.
 
-## 2. The drive — the two settings that lie
+## 2. Mechanical assembly — the bearing must not slip on the shaft
+
+**Especially after any teardown/reassembly, and spot-checked on long runs.** This is the check that
+was missing for months and cost a worn bushing plus months of suspect data: the retaining nut was
+never torqued to spec, slowly **self-loosened under rotation** (Junker vibration self-loosening), the
+bearing lost its axial clamp and **slipped on the shaft** — found 2026-09 with a **stroboscope**,
+bushing + lock nut then replaced. Full story in `docs/Maintenance_Log.md`.
+
+- [ ] **Retaining nut / lock rings torqued to spec** (`<torque — TBD>`), with the lock feature
+      **positively engaged**. A nut on a rotating shaft self-loosens if it relies on friction alone —
+      the lock ring / thread-locker / locking nut is what actually holds it. Record value + date in
+      the maintenance log.
+- [ ] **Strobe the shaft at running speed — nothing may creep.** Set a stroboscope to the shaft
+      frequency so the rotation freezes; a reference mark on the bearing collar / nut that **drifts**
+      under the strobe = the bearing slipping or the nut backing off. The cheap test that would have
+      caught it months ago. **After a rebuild this strobe pass is the gate to resume runs.**
+- [ ] **New running surface = a hard data boundary.** A replaced bushing/bearing changes the acoustic
+      signature; the first run after is a deliberate **re-baseline**, not a warm-up (`CLAUDE.md`,
+      `docs/Maintenance_Log.md`).
+
+## 3. The drive — the two settings that lie
 
 Both of these let a run look perfectly healthy while the shaft does something else.
 
@@ -42,7 +62,7 @@ high, the pot is summing in. If it reads zero while the drive claims to run, 02-
 > `cmd=0.0` while the shaft turned at 2985 rpm, and has shown a stale frequency in its own display
 > minutes after a run ended.
 
-## 3. Scope
+## 4. Scope
 
 - [ ] Reachable and answering SCPI:
 
@@ -57,7 +77,7 @@ at a stale IP and the PyVISA path we no longer use, so it fails even when the sc
 - [ ] Nothing else is holding the connection. The scope takes **one TCP connection at a time**;
       a second one gets `ConnectionRefused`. Never poll the scope while a run is going.
 
-## 4. OE BLE sensor (if `oe.enabled`)
+## 5. OE BLE sensor (if `oe.enabled`)
 
 - [ ] The sensor is **advertising** — it sleeps on its own and a sleeping device is invisible:
 
@@ -77,7 +97,7 @@ If it is silent, press the reset button on the unit (ticket 0019 — it cannot b
       cadence note in `CLAUDE.md` before changing it for a long one.
 - [ ] `oe.sample_rate_hz` is **80000**. The vendor's file says 100000 and is wrong.
 
-## 5. Sensors and firmware
+## 6. Sensors and firmware
 
 - [ ] `INFO` reports the firmware you think is running — the source file on disk is not evidence:
 
@@ -94,7 +114,7 @@ If it is silent, press the reset button on the unit (ticket 0019 — it cannot b
       **~5 VDC** before starting — nothing in software reads it back, so a wrong setting is invisible
       until the data is already useless.
 
-## 6. Housekeeping
+## 7. Housekeeping
 
 - [ ] Disk space for the run — roughly **2.7 GB/hour** at 1 M points and a 12 s sweep interval.
       A 13 h run needs ~35 GB. `df -h /home/aau`
