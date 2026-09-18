@@ -31,6 +31,9 @@ just the recent ones — so ring/clamp state is unknown for every run before thi
 - Retaining nut **torqued to spec** — `<torque value — TBD Kim>` — with the lock **positively
   engaged** (not friction alone).
 - As-built (record while apart): radial clearance `<TBD>`, preload `<TBD>`, ring seated: `yes`.
+- **Reassembly distances — RESTORE these on rebuild** (measured 2026-09-18, rig apart):
+  - Motor magnet ↔ axle magnet gap: **3 mm**
+  - Axle-disk end ↔ bearing-holder end gap: **31.5 mm**
 
 **Data impact.** 2026-09 is a hard boundary — **absolute levels void, re-baseline.**
 Rotation-correlated / impulsive readings in historical data carry an uncharacterised mechanical
