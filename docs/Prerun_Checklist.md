@@ -18,10 +18,10 @@ never torqued to spec, slowly **self-loosened under rotation** (Junker vibration
 bearing lost its axial clamp and **slipped on the shaft** — found 2026-09 with a **stroboscope**,
 bushing + lock nut then replaced. Full story in `docs/Maintenance_Log.md`.
 
-- [ ] **Retaining nut / lock rings torqued to spec** (`<torque — TBD>`), with the lock feature
-      **positively engaged**. A nut on a rotating shaft self-loosens if it relies on friction alone —
-      the lock ring / thread-locker / locking nut is what actually holds it. Record value + date in
-      the maintenance log.
+- [ ] **Bearing-on-bushing bolt: finger-tight, then +90° with the tool wrench**, and the **tab-washer
+      wings bent out** against the bolt head so it is positively locked. The tab washer is what stops
+      it self-loosening — a bolt on a rotating shaft backs off on friction alone. Record date in the
+      maintenance log.
 - [ ] **Strobe the shaft at running speed — nothing may creep.** Set a stroboscope to the shaft
       frequency so the rotation freezes; a reference mark on the bearing collar / nut that **drifts**
       under the strobe = the bearing slipping or the nut backing off. The cheap test that would have

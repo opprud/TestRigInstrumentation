@@ -28,8 +28,9 @@ just the recent ones — so ring/clamp state is unknown for every run before thi
 **Planned / in progress (rig down since 2026-09-02).**
 - New **bushing / bearing seat** — `<part no. — TBD Kim>`. The old one was worn by the slip.
 - New **lock rings** — `<part no. — TBD Kim>`.
-- Retaining nut **torqued to spec** — `<torque value — TBD Kim>` — with the lock **positively
-  engaged** (not friction alone).
+- Retaining bolt: **finger-tight, then +90° with the tool wrench.** Positive lock = **tab washer** —
+  bend its wings out against the bolt head so it cannot back off (this is the anti-self-loosening
+  feature that was missing; friction alone does not hold a bolt on a rotating shaft).
 - As-built (record while apart): radial clearance `<TBD>`, preload `<TBD>`, ring seated: `yes`.
 - **Reassembly distances — RESTORE these on rebuild** (measured 2026-09-18, rig apart):
   - Motor magnet ↔ axle magnet gap: **3 mm**
