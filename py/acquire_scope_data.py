@@ -846,26 +846,59 @@ def _apply_scope_acquisition_settings(ip: str, port: int, acq_cfg: dict,
     trigger_sweep = acq_cfg.get("trigger_sweep")
     acq_points    = acq_cfg.get("acq_points")
 
-    try:
-        if acq_type:
-            _scope_write(ip, port, f":ACQ:TYPE {str(acq_type).upper()}")
-        if trigger_sweep:
-            _scope_write(ip, port, f":TRIG:SWE {str(trigger_sweep).upper()}")
-        if acq_points:
-            # A number is clamped by the scope to its max valid depth for the
-            # active-channel count; "MAX" is accepted on some firmware. If the
-            # scope rejects the value it simply stays on auto (no crash).
-            _scope_write(ip, port, f":ACQ:POIN {str(acq_points).upper()}")
-        if DEBUG:
-            print(f"[scope_acq] Applied acq_type={acq_type}, trigger_sweep={trigger_sweep}, acq_points={acq_points}")
-    except Exception as e:
-        # Same reasoning, and worse: if :ACQ:POIN never lands, the run silently
-        # captures at whatever memory depth the scope happened to be left in.
+    # Retry the whole block, exactly as the per-channel path above does. That retry was
+    # added 2026-09-01 for the channel settings and NOT here, even though the comment below
+    # already said the consequence is worse -- and on 2026-09-23 the gap fired: a startup
+    # ConnectionRefused took out the acquisition settings on the first attempt with nothing
+    # to catch it, while the channel settings beside it recovered on attempt 2. The run then
+    # captures at whatever depth the scope was left in and the file looks entirely valid.
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            if acq_type:
+                _scope_write(ip, port, f":ACQ:TYPE {str(acq_type).upper()}")
+            if trigger_sweep:
+                _scope_write(ip, port, f":TRIG:SWE {str(trigger_sweep).upper()}")
+            if acq_points:
+                # A number is clamped by the scope to its max valid depth for the
+                # active-channel count; "MAX" is accepted on some firmware. If the
+                # scope rejects the value it simply stays on auto (no crash).
+                _scope_write(ip, port, f":ACQ:POIN {str(acq_points).upper()}")
+            last_err = None
+            break
+        except Exception as e:
+            last_err = e
+            if attempt < 3:
+                print(f"[scope_acq] attempt {attempt}/3 failed ({e!r}); retrying", flush=True)
+                time.sleep(1.0 * attempt)
+
+    if last_err is not None:
+        e = last_err
+        # Never silent: if :ACQ:POIN never lands, the run captures at whatever memory
+        # depth the scope happened to be left in -- and nothing downstream can tell.
         msg = f"[scope_acq] Error applying acquisition settings: {e!r}"
         print(msg, flush=True)
         _event_log(msg)
         if strict:
             raise RuntimeError(f"scope acquisition setup failed: {e}") from e
+        return
+
+    # Read the depth back. A write that is accepted and ignored looks identical to one that
+    # worked, and this drive has form for exactly that (see CLAUDE.md on the VFD registers).
+    # The number the scope reports is what the sweeps will actually be, so log THAT, not what
+    # we asked for -- the scope legitimately clamps the request to its per-channel maximum.
+    if acq_points:
+        try:
+            got = socket_query_line(ip, port, ":ACQ:POIN?")
+            msg = f"[scope_acq] acquisition depth requested={acq_points} scope reports={got}"
+            print(msg, flush=True)
+            _event_log(msg)
+        except Exception as e:
+            msg = f"[scope_acq] could not read back :ACQ:POIN? ({e!r}) -- depth UNVERIFIED"
+            print(msg, flush=True)
+            _event_log(msg)
+    if DEBUG:
+        print(f"[scope_acq] Applied acq_type={acq_type}, trigger_sweep={trigger_sweep}, acq_points={acq_points}")
 
 
 def _write_metadata(h5f, config: dict, scope_idn: str, ts_local: str, ts_utc: str,

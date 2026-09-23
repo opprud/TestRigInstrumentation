@@ -20,9 +20,9 @@
   "flash_point_c": 185,
   "quantity_applied_ml": "0.5",
   "application_method": "Manual application",
-  "application_date": "2026-03-16",
+  "application_date": "2026-09-23",
   "batch_number": "N/A",
-  "notes": "Initial test, new bearing"
+  "notes": "Re-lubricated by Kim 2026-09-23 before the first 13 h run after the 2026-09 rebuild. NOT a new bearing: it was cleaned and its bushing and lock rings replaced (see docs/Maintenance_Log.md, 2026-09-02). The previous note \"Initial test, new bearing\" dated from 2026-03-16 and no longer described the specimen. quantity_applied_ml carries the standing 0.5 ml figure and was not re-measured today."
  },
  "acquisition": {
   "points": 40000,
@@ -58,7 +58,7 @@
    "name": "SP",
    "source": "CHAN3",
    "enabled": true,
-   "notes": "Sl\u00e6bering"
+   "notes": "Slæbering"
   },
   {
    "name": "Temp",
