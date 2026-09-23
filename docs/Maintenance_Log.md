@@ -10,9 +10,9 @@ data, stamp it into `/metadata/ground_truth` on the run's HDF5 (Pi's stamper).
 
 ## 2026-09-02 → boundary: bearing bushing + lock rings replaced (root cause: self-loosening nut → bearing slip)
 
-**Status (2026-09-05): rig OPEN, work in progress.** It stays down until the new bushing + lock nut
-are fitted and a **stroboscope re-test at running speed shows no slip and no nut creep**. That strobe
-pass is the acceptance gate to close the rebuild and resume runs — no runs before it.
+**Status (2026-09-23): rig CLOSED — rebuild accepted.** The stroboscope re-test at running speed was
+run by Kim on 2026-09-23 and **passed: nothing crept.** That was the acceptance gate, so the rebuild is
+complete and runs have resumed. The bring-up that preceded it is the 2026-09-23 entry below.
 
 **Discovery.** With a **stroboscope** set to the shaft frequency (which freezes the rotation), the
 bearing was seen **slipping on the shaft** and the retaining **nut slowly loosening itself under
@@ -110,7 +110,8 @@ drive panel.
 **Firmware defect found during the tightening:** auto-gain never steps 128 → 64 under rising load and
 saturates at ~35 kg — **ticket 0045**. Worked around by pinning gain 64 by hand (RAM-only).
 
-### Outstanding before runs resume
-- [ ] **Strobe pass at running speed** — the acceptance gate from the 2026-09-02 entry.
+### Outstanding
+- [x] ~~Strobe pass at running speed~~ — **run by Kim 2026-09-23, passed, nothing crept.** Gate closed,
+      rebuild accepted, runs resumed.
 - [x] ~~Reflective mark refitted and the tach verified~~ — done 2026-09-23, table above.
 - [ ] Bolt torque + part numbers still `TBD` in the entry above.
