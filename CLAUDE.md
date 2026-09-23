@@ -415,13 +415,24 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   **The channel now needs `volt_range 16.0 / volt_offset 5.0`** (it spans 1.8–8.4 V; the old 8.0/0.0
   window clipped over half of it). Applied to all seven live profiles and to the scope.
 
-- **⚠️ The tachometer over-triggers after the 2026-08-29 re-assembly — `rpm_meas` is unusable.**
-  `TACHDIAG?` reports **303,253 glitches against 319,484 pulses (95 % rejected)**, and `SPEED?` returns
-  a fixed **7368 rpm at both 10 Hz and 20 Hz** because the firmware's 8 ms glitch floor pins the
-  period at 8.143 ms. The pulse count is frozen at standstill, so it is not electrical noise: the
-  OGT500 is seeing tens of transitions per revolution instead of the one reflective mark, and needs
-  **mechanical re-alignment**. Open-loop runs are unaffected (they ignore the tach) and the speed of
-  record stays `59.83 × vfd_cmd_hz`, but closed loop would chase a meaningless number.
+- **⚠️ The tachometer is SILENT after the 2026-09 rebuild — the reflective mark is missing from the
+  shaft (2026-09-23).** Measured across a 90 s spin at 10, 20 and 30 Hz: `SPEED?` returned **0.0 rpm at
+  every step** and `TACHDIAG?` reported **1 pulse, 0 glitches** — the pulse counter did not advance once
+  while the shaft was demonstrably turning (Kim watched it). Kim: *"Jeg mangler noget tape på akselen til
+  tacho"*. So this is not an alignment or filtering problem; there is nothing for the OGT500 to see.
+
+  **This replaces the 2026-08-29 over-triggering symptom** (303,253 glitches against 319,484 pulses,
+  `SPEED?` pinned at 7368 rpm), which belonged to the pre-rebuild assembly. The two are opposite
+  failures of the same sensor and should not be confused: that one was *too many* edges, this one is
+  *none*. Firmware is fine — at standstill it now correctly reads 0 instead of freezing a stale value.
+
+  **What it blocks is wider than closed loop.** Open-loop runs are unaffected (they ignore the tach) and
+  the speed of record stays `59.83 × vfd_cmd_hz`. But **`docs/Prerun_Checklist.md` §3 cannot be performed
+  at all**: the only way to catch drive parameter 02-03 in pot mode, or the pot summing onto the Modbus
+  reference, is to measure the tach against commanded Hz. Until the tape is back there is **no
+  independent check of actual shaft speed** — and on 2026-08-20 exactly that hid a constant +200 rpm
+  while the staircase tracked every step and the run looked healthy. Refit the mark before any run whose
+  speed matters.
 
 - **A run now switches its own scope channels on — it did not before (fixed 2026-08-29).**
   `:DIGITIZE` with no argument digitises only the channels the scope is **currently displaying**, and
@@ -519,13 +530,37 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 ## Load cell & firmware — auto gain scaling
 
-`firmware/src/main.cpp` is **v1.2.5, and it is the version actually flashed on the board**
-(flashed 2026-08-25 with the rig apart for load-cell calibration; `INFO` reports `fw=1.2.5`).
+`firmware/src/main.cpp` is **v1.2.6, and it is the version actually flashed on the board**
+(`INFO` reports `fw=1.2.6`, confirmed 2026-09-23). v1.2.6 added `raw=` and `gain=` to the `ERR 21` /
+`ERR 20` lines — a one-line change that earned itself immediately: it is the only reason the stuck-gain
+defect below was diagnosable at all, since without it a saturation reads simply as "load too high".
 `auto_scale(raw)` auto-switches the HX711 gain **128 ↔ 64 ↔ 32** (high gain/resolution for
 light loads, drops for heavy) with hysteresis, a 3-read stability gate, **per-gain slope**, an
 ADC-saturation guard (`ERR 21`), and it emits `OK AUTOGAIN gain=N` when it switches. v1.2.1 added
 the robust tach from ticket 0007 — 1.5 s timeout (rpm → 0 when the signal is lost, no more frozen
 value), 8 ms glitch floor, median filter and `TACHDIAG?`.
+
+> **⚠️ Auto-gain does NOT step 128 -> 64 under a rising load — the cell saturates at ~35 kg instead of
+> reading to 74 kg (found 2026-09-23, ticket 0045).** Setting the clamp load with `mode=auto`, `LOAD?`
+> returned `ERR 21 ADC_saturation raw=8075254 gain=128` at roughly 35 kg — **still in the 128 band**,
+> whose range is half of gain 64's. It never stepped down, and it had every chance to: it sat at a
+> stable `raw=4206391` for seconds on end. The step-down threshold appears to sit near 7.5 M counts
+> while the saturation guard fires at 8.0 M, so a tightening ramp crosses that 500 k window faster than
+> the 3-read stability gate can confirm.
+>
+> **The failure is silent in the worst way.** It does not return a wrong number — it returns `ERR 21`,
+> which reads as "the load is over range" when the load is actually half of what the cell can measure.
+> **Workaround: pin the band by hand** — `util_tool.py setgain --gain 64` — which restored a reading
+> instantly (35.53 kg against the last gain-128 value of 35.03 kg, agreeing within 1.4 %, so the
+> calibration is fine and only the switching is broken). **`SETGAIN` is RAM-only**, so a board reset
+> mid-run drops back to auto and the trap re-arms.
+
+> **Raw counts between the 8.0 M guard and the 0x7FFFFF rail are COMPRESSED — do not "recover" range by
+> raising the guard.** Measured 2026-09-23: after one clamp turn the raw sat at ~8.206 M (~76 kg by the
+> gain-64 slope) where turn-counting from the last measured anchor said ~89 kg; the next turn pushed it
+> to **8388607 = 0x7FFFFF**, the hard 24-bit rail, where it stayed dead flat. So values above the guard
+> understate the load, and the conservative 8.0 M guard is **correctly placed**. The rail also confirms
+> the honest ceiling: **nothing above ~78 kg is distinguishable from anything else above ~78 kg.**
 
 > **v1.2.0/v1.2.1 were unusable and never ran on the rig: the parser lost the CR strip.** Their
 > `loop()` dropped v1.1.0's `if (c == '\r') continue;`, so every host command — all tools send
@@ -613,6 +648,34 @@ improvement over what the flash left behind.
 
 **Tared in place 2026-08-25, mounted and unloaded** — `tare` 690680 (gain 128) / 346464 (gain 64),
 after which an unloaded rig reads **-5.6 g / -6.5 g**. The band ratio is 1.994, as it must be.
+
+**Re-tared in place 2026-09-23, after the rebuild** — the 2026-08-25 zero was taken on the pre-teardown
+assembly and had drifted **150 g** by the time the scale unit was refitted. With the clamp loose:
+`tare` **720481** (gain 128) / **361668** (gain 64), after which an unloaded rig reads **-0.7…+0.8 g**
+(128) and **-0.2…+0.6 g** (64). Band ratio **1.992** — the one free internal check, and it passes. Full
+trace in `py/data/loadcell_tightening_20260923.log` (1507 readings, loose to rail).
+
+### The clamp load of 2026-09-23 — anchor 71.14 kg at 4 turns, set to ~142 kg estimated
+
+Tightened turn by turn from zero with the cell logged at 2 Hz:
+
+| turn | load | increment |
+|---|---|---|
+| 1 | 16.80 kg | +16.8 |
+| 2 | 35.53 kg | +18.7 |
+| 3 | 55.6 kg | +20.1 |
+| 4 | **71.14 kg** | +15.5 |
+| 5-8 | over range — estimated ~89 / ~107 / ~124 / **~142 kg** | +17.8 assumed |
+
+**71.14 kg at 4 turns is the anchor** — the last real measurement on the way up, and the only number any
+later attempt to reproduce this load can aim at. Mean **17.8 kg per turn**, spread 15.5-20.1, i.e. **far
+more repeatable than 2026-08-25's +19.9 / +13.9 / +31.5** (factor 2.3 between neighbours). The rebuild
+appears to have made the tightening mechanism materially more predictable — worth re-checking against
+ticket 0036, which was written to fix exactly that non-repeatability.
+
+The final **~142 kg carries roughly ±20 kg** (four blind turns at the measured per-turn spread). Kim
+chose to go above the measurement ceiling knowing the bound, as on 2026-08-25. **Quote it as an estimate
+with its turn count, never as a measurement.**
 
 > **Mounted, the mechanics are ~50x quieter than the bench.** Reading spread with the unit in the
 > rig is **2.8 g**, against 150 g within a single bench measurement and 555 g between placements of

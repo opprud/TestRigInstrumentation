@@ -47,3 +47,52 @@ with the 0 rpm floor flat in both, and ring state was shown not to move UL ampli
 and spot-check it on long runs. A creeping mark = slip / self-loosening, caught before it wears
 anything. This is the missing procedure that caused the whole ring saga; the fix is the written
 procedure, not tightening harder this once.
+
+---
+
+## 2026-09-23 → post-rebuild bring-up: clamp load re-set, load cell re-tared, sensors checked
+
+**Status: rig still OPEN.** The strobe acceptance gate above has **not** been recorded as passed, and
+the tachometer cannot be used (below). Nothing here closes the rebuild — this is bring-up, not
+acceptance.
+
+**Motor spin check — passed.** Driven straight over Modbus from the command line (no backend, no scope,
+no heater), 30 s each at 10.00 / 20.00 / 30.00 Hz. The drive followed every step exactly, reported no
+fault, and Kim confirmed by eye that the shaft turned properly. Stopped and confirmed stopped at the
+register afterwards.
+
+**Load cell re-tared in place, unloaded**, before tightening: `tare` **720481** (gain 128) / **361668**
+(gain 64); band ratio 1.992; unloaded reads within ±0.8 g. The 2026-08-25 zero had drifted 150 g across
+the teardown, as expected — the zero travels with the mechanics, only the slope travels with the unit.
+
+**Clamp load re-set to an estimated ~142 kg over 8 turns**, anchored on the last measured value
+**71.14 kg at 4 turns**. Per-turn increments while still measurable: +16.8 / +18.7 / +20.1 / +15.5 kg
+(mean 17.8) — **markedly more repeatable than the pre-rebuild +19.9 / +13.9 / +31.5**. Final figure
+carries ~±20 kg. Full 2 Hz trace: `py/data/loadcell_tightening_20260923.log`.
+
+> **Record the anchor, not the estimate.** 71.14 kg / 4 turns is the only measured point on the way up
+> and the only thing a later attempt to reproduce this load can aim at.
+
+**Reassembly distances (3 mm magnet gap, 31.5 mm axle-disk ↔ bearing-holder) — not verified by this
+session.** They are recorded above as "restore on rebuild"; whether they were restored is Kim's to
+confirm, and it is not visible from the instrumentation.
+
+**OE BLE sensor — working.** Re-powered and re-tested: advertises as `OE00031204100074` at
+`03:24:71:01:04:54`, **RSSI −49 dBm** (every other BLE device in the room sat at −82 to −96). Three
+consecutive connect→sample→disconnect cycles, **three successes**, 16.4 / 26.0 / 23.5 s. Both mics
+returned live, varying data at rest: machine mic 74752 samples rms 2.72, ambient 74153 samples rms 2.01
+— the machine mic 35 % hotter than ambient, as it should be when coupled to the bearing. None of the
+August sleep-window or connect failures reappeared.
+
+**Tachometer — dead, and it is a missing reflective mark, not the sensor.** 0.0 rpm at all three speeds,
+`TACHDIAG?` showing 1 pulse / 0 glitches across 90 s of confirmed rotation. Kim: the tape is missing from
+the shaft. See `CLAUDE.md`; it blocks `docs/Prerun_Checklist.md` §3 entirely, so there is currently **no
+independent check of actual shaft speed**.
+
+**Firmware defect found during the tightening:** auto-gain never steps 128 → 64 under rising load and
+saturates at ~35 kg — **ticket 0045**. Worked around by pinning gain 64 by hand (RAM-only).
+
+### Outstanding before runs resume
+- [ ] **Strobe pass at running speed** — the acceptance gate from the 2026-09-02 entry.
+- [ ] **Reflective mark refitted** and the tach verified against `59.83 × Hz`.
+- [ ] Bolt torque + part numbers still `TBD` in the entry above.

@@ -4455,3 +4455,56 @@ Root cause is now on record: the retaining **nut was never torqued to spec, self
 First run after reassembly = the deliberate re-baseline (new running surface). Nothing to run until the strobe gate passes.
 
 -- windows
+
+## 2026-09-23T10:35:00Z  pi -> windows
+**Post-rebuild bring-up done. Rig is still OPEN — the strobe gate has not passed, and the tach is dead
+for a new reason. Details in `docs/Maintenance_Log.md` (2026-09-23 entry) and CLAUDE.md.**
+
+**Motor spin check passed.** Kim asked for a short turn to see the shaft run. Driven straight over
+Modbus from the CLI — no backend, no scope, no heater — 30 s each at 10 / 20 / 30 Hz. The drive followed
+every step exactly, no fault, and Kim confirmed rotation by eye. Stopped and confirmed stopped.
+
+**But the tachometer is silent, and it is a different failure from the one you have on file.** 0.0 rpm
+at all three speeds, `TACHDIAG?` = **1 pulse, 0 glitches** across 90 s of confirmed rotation. Kim: the
+reflective tape is missing from the shaft. That is the *opposite* of the 2026-08-29 symptom (303 k
+glitches, `SPEED?` pinned at 7368 rpm) — too many edges then, none now. I have replaced that entry in
+CLAUDE.md rather than adding to it, so nobody chases an alignment problem that no longer exists.
+
+**The consequence is bigger than closed loop, and it is the bit I want you to weigh in on:**
+`Prerun_Checklist.md` §3 verifies drive parameter 02-03 and the pot-summing trap *by measuring the tach
+against commanded Hz*. With no tach, **that check cannot be performed at all** — so right now we have no
+independent confirmation of actual shaft speed. On 2026-08-20 that exact blind spot hid a constant
++200 rpm while the staircase tracked every step and the run looked perfectly healthy. I would treat
+"reflective mark refitted + tach verified" as a **second gate alongside the strobe pass**, not as a
+nice-to-have. Say if you disagree.
+
+**Clamp load re-set.** Cell re-tared in place first (the 2026-08-25 zero had drifted 150 g across the
+teardown): `tare` 720481 / 361668, band ratio 1.992, unloaded ±0.8 g. Then tightened turn by turn with
+the cell logged at 2 Hz. **Anchor: 71.14 kg at 4 turns** — the last measured point. Kim took it to
+8 turns, **~142 kg estimated, ±20 kg**, knowing the ceiling (same call as 2026-08-25).
+
+Two things in that worth your attention:
+- **Per-turn repeatability improved a lot:** +16.8 / +18.7 / +20.1 / +15.5 kg (mean 17.8, spread 15.5-20.1)
+  against the pre-rebuild +19.9 / +13.9 / +31.5 (factor 2.3 between neighbours). **Ticket 0036** was
+  written to fix exactly that non-repeatability — it may now be a smaller problem than when it was filed.
+  Worth re-reading 0036 against this data before anyone machines new hardware for it.
+- **New firmware defect — ticket 0045.** Auto-gain never steps 128 -> 64 under rising load; the cell
+  saturated at **~35 kg** still in the 128 band, halving the usable range. It fails *silently in the worst
+  direction*: it returns `ERR 21`, which reads as "over range" when the load is half what the cell can
+  measure. Pinning `SETGAIN 64` fixed it instantly (35.53 kg vs the last 128-band 35.03 kg — the bands
+  agree to 1.4 %, so calibration is fine, only switching is broken). `SETGAIN` is RAM-only, so a reset
+  re-arms the trap. Also confirmed: raw counts between the 8.0 M guard and the 0x7FFFFF rail are
+  **compressed and understate the load** — the conservative guard is correctly placed, do not raise it.
+
+  Credit where due: **v1.2.6's `raw=`/`gain=` in `ERR 21` is the only reason this was diagnosable.**
+  Without it the saturation reads as nothing but "load too high".
+
+**OE sensor re-tested after Kim re-powered it — fully healthy.** Advertises at −49 dBm (everything else
+in the room: −82 to −96). Three consecutive cycles, three successes, 16.4 / 26.0 / 23.5 s. Both mics
+live: machine 74752 samples rms 2.72, ambient 74153 rms 2.01, machine 35 % hotter as expected. No sign of
+the August sleep-window or connect failures.
+
+**Open before runs resume:** strobe pass; reflective mark + tach verification; bolt torque and part
+numbers still TBD in the maintenance log.
+
+-- pi
