@@ -84,15 +84,33 @@ returned live, varying data at rest: machine mic 74752 samples rms 2.72, ambient
 — the machine mic 35 % hotter than ambient, as it should be when coupled to the bearing. None of the
 August sleep-window or connect failures reappeared.
 
-**Tachometer — dead, and it is a missing reflective mark, not the sensor.** 0.0 rpm at all three speeds,
-`TACHDIAG?` showing 1 pulse / 0 glitches across 90 s of confirmed rotation. Kim: the tape is missing from
-the shaft. See `CLAUDE.md`; it blocks `docs/Prerun_Checklist.md` §3 entirely, so there is currently **no
-independent check of actual shaft speed**.
+**Tachometer — was dead, now REFITTED AND VERIFIED (same day).** It first read 0.0 rpm at all three
+speeds with `TACHDIAG?` showing 1 pulse / 0 glitches across 90 s of confirmed rotation: the reflective
+mark was missing from the shaft after the rebuild. Kim refitted the tape and it was re-measured against
+commanded drive frequency, every setpoint verified before reading:
+
+| drive Hz | expected | measured | deviation |
+|---|---|---|---|
+| 5 | 287.5 | 280.6 | −2.4 % |
+| 10 | 586.6 | 560.9 | −4.4 % |
+| 15 | 885.8 | 876.3 | −1.1 % |
+| 20 | 1184.9 | **1176.1** | **−0.7 %** |
+
+One glitch in 724 pulses. `rpm_meas` is usable again and `Prerun_Checklist.md` §3 can be performed.
+**rpm/Hz runs consistently below the 2026-08-19 calibration** (56.1 vs 57.6 at 5 Hz; 58.8 vs 59.5 at
+20 Hz) — more slip, as the ~142 kg clamp load should produce. Re-measure the factor if absolute speed
+matters.
+
+**Drive fault found while doing it — writes degrade on a held connection.** Five writes of 30 Hz and
+five of 40 Hz all failed (`cmd=0.00` readback), then **six `stop()` calls failed on a shaft turning at
+1176 rpm**; a fresh connection stopped it first try. Reconnect rather than retry. Details in
+`CLAUDE.md`. Motor confirmed stopped by tach (rpm 0 + frozen pulse count) and by Kim reading 0 Hz on the
+drive panel.
 
 **Firmware defect found during the tightening:** auto-gain never steps 128 → 64 under rising load and
 saturates at ~35 kg — **ticket 0045**. Worked around by pinning gain 64 by hand (RAM-only).
 
 ### Outstanding before runs resume
 - [ ] **Strobe pass at running speed** — the acceptance gate from the 2026-09-02 entry.
-- [ ] **Reflective mark refitted** and the tach verified against `59.83 × Hz`.
+- [x] ~~Reflective mark refitted and the tach verified~~ — done 2026-09-23, table above.
 - [ ] Bolt torque + part numbers still `TBD` in the entry above.

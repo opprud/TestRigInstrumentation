@@ -415,24 +415,44 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   **The channel now needs `volt_range 16.0 / volt_offset 5.0`** (it spans 1.8–8.4 V; the old 8.0/0.0
   window clipped over half of it). Applied to all seven live profiles and to the scope.
 
-- **⚠️ The tachometer is SILENT after the 2026-09 rebuild — the reflective mark is missing from the
-  shaft (2026-09-23).** Measured across a 90 s spin at 10, 20 and 30 Hz: `SPEED?` returned **0.0 rpm at
-  every step** and `TACHDIAG?` reported **1 pulse, 0 glitches** — the pulse counter did not advance once
-  while the shaft was demonstrably turning (Kim watched it). Kim: *"Jeg mangler noget tape på akselen til
-  tacho"*. So this is not an alignment or filtering problem; there is nothing for the OGT500 to see.
+- **The tachometer works again — reflective mark refitted and verified 2026-09-23.** It was silent
+  earlier the same day (0.0 rpm at 10/20/30 Hz, `TACHDIAG?` showing 1 pulse across 90 s of confirmed
+  rotation) purely because the mark was missing from the shaft after the rebuild. With tape on, measured
+  against commanded drive frequency, every write verified before the reading was taken:
 
-  **This replaces the 2026-08-29 over-triggering symptom** (303,253 glitches against 319,484 pulses,
-  `SPEED?` pinned at 7368 rpm), which belonged to the pre-rebuild assembly. The two are opposite
-  failures of the same sensor and should not be confused: that one was *too many* edges, this one is
-  *none*. Firmware is fine — at standstill it now correctly reads 0 instead of freezing a stale value.
+  | drive Hz | expected | measured | deviation | rpm/Hz |
+  |---|---|---|---|---|
+  | 5 | 287.5 | 280.6 | −2.4 % | 56.1 |
+  | 10 | 586.6 | 560.9 | −4.4 % | 56.1 |
+  | 15 | 885.8 | 876.3 | −1.1 % | 58.4 |
+  | 20 | 1184.9 | **1176.1** | **−0.7 %** | 58.8 |
 
-  **What it blocks is wider than closed loop.** Open-loop runs are unaffected (they ignore the tach) and
-  the speed of record stays `59.83 × vfd_cmd_hz`. But **`docs/Prerun_Checklist.md` §3 cannot be performed
-  at all**: the only way to catch drive parameter 02-03 in pot mode, or the pot summing onto the Modbus
-  reference, is to measure the tach against commanded Hz. Until the tape is back there is **no
-  independent check of actual shaft speed** — and on 2026-08-20 exactly that hid a constant +200 rpm
-  while the staircase tracked every step and the run looked healthy. Refit the mark before any run whose
-  speed matters.
+  **One glitch in 724 pulses.** Slip falls with speed as an induction motor under light load should, and
+  `rpm_meas` is usable again. Note the rpm/Hz runs **consistently below the 2026-08-19 calibration**
+  (56.1 vs 57.6 at 5 Hz, 58.8 vs 59.5 at 20 Hz) — more slip, which is what the ~142 kg clamp load
+  should produce. Re-measure the factor if absolute speed matters; `59.83 × Hz − 11.7` now reads ~1 %
+  high at the top of this range.
+
+  > **The trap that nearly made this look like a broken tach.** A first pass reported the shaft pinned at
+  > ~565 rpm at 10, 20 *and* 30 Hz, which looks exactly like a mis-scaled sensor or a stalled motor. It
+  > was neither: **the 20 and 30 Hz frequency writes had silently failed** and the drive stayed at 10 Hz
+  > the whole time, so the tach was faithfully reporting one unchanged speed. The 2-4 rpm of "drift"
+  > across the three steps was the motor warming. **Verify the setpoint actually took before reading the
+  > tach** — and see the drive-write entry below for why retrying on the same connection does not help.
+
+- **⚠️ VFD writes degrade on a held connection — RECONNECT, do not retry (2026-09-23).** Sharper than
+  the "registers do not reflect reality" entry below, and with an actual remedy. Measured in one session:
+  after a working 20 Hz step on the same `RS510VFDController` connection, **five consecutive writes of
+  30 Hz and five of 40 Hz all failed**, every one reading back `cmd=0.00`; then **six `stop()` calls in a
+  row failed to stop a shaft that was demonstrably turning at 1176 rpm**. Dropping the connection and
+  opening a **fresh** one stopped the motor on the **first** attempt.
+
+  So the failure is a property of the *connection*, not of the drive or the bus: retry loops on a stale
+  handle burn attempts for nothing while the motor keeps running. **On any failed write or unconfirmed
+  stop, disconnect and reconnect before the next attempt.** And note what the six failed stops mean for
+  an unattended run: a `stop()` that reports success can leave the motor turning indefinitely — the only
+  proof of a stopped shaft is `rpm=0.00` **and** a frozen pulse count across two reads, exactly as
+  `docs/Prerun_Checklist.md` §3 asks.
 
 - **A run now switches its own scope channels on — it did not before (fixed 2026-08-29).**
   `:DIGITIZE` with no argument digitises only the channels the scope is **currently displaying**, and
