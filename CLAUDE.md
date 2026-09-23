@@ -493,31 +493,32 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   **The first run after reassembly is the most valuable measurement on the rig** — it defines the
   reference every later run is read against. Treat it as a baseline, not as a warm-up.
 
-- **⚠️ The scope is effectively 8-bit — `WORD` format does not buy resolution, and AE is currently
-  resolved into ~7 levels (measured 2026-09-23).** Every raw code comes back a multiple of 256, so the
-  16-bit `WORD` numbers carry the ADC's **~199 usable levels across the full vertical range**. The real
-  quantisation step is therefore `volt_range / 199`, and **vertical range is the only lever on data
-  quality** — a channel scaled 10x too wide loses a decade of resolution that no format or point count
-  recovers. Measured at 1176 rpm with the current ranges:
+- **The scope is effectively 8-bit — `WORD` format does not buy resolution.** Every raw code comes back
+  a multiple of 256, so the 16-bit `WORD` numbers carry the ADC's **~199 usable levels across the full
+  vertical range**. The real quantisation step is `volt_range / 199`, which makes vertical range the main
+  lever on data quality: a channel scaled 10x too wide loses a decade of resolution that no format or
+  point count recovers.
 
-  | channel | range | step | levels at rest | levels at 1176 rpm |
-  |---|---|---|---|---|
-  | UL | 12.0 V | 60.3 mV | 8 | **67** |
-  | AE | 5.0 V | 25.1 mV | 6 | **7** |
-  | SP | 8.0 V | 40.2 mV | 33 | 33 |
+  > **But measure it at the run's own sample rate, not with a quick hand-rolled capture.** On 2026-09-23
+  > a check with `points=40000` over a 200 ms window (~190 kHz) made AE look catastrophically
+  > over-ranged — 7 levels of 199 — and nearly caused a re-scale. A real run digitises the same window at
+  > **500 k points / 2.5 MHz**, and AE then uses **41-70 levels**. The accelerometer's energy sits high in
+  > frequency, so the low-rate capture had simply undersampled it away. `9ebabe9e`'s note that AE is
+  > *"nearly clipping, not over-ranged"* was right; the 7-level reading was an artefact of the test, not a
+  > property of the channel.
 
-  **AE using 7 of 199 levels contradicts the note that sized it** — `9ebabe9e` set the ranges from a
-  600-3000 rpm sweep and left AE at 5.0 V because it was *"nearly clipping, not over-ranged"*. Both
-  measurements can be right, and which one is decides something real:
-  - AE may simply climb very steeply with speed, making 1176 rpm a quiet point; or
-  - **the rebuild removed the source of the large AE signal.** Everything before 2026-09-02 ran with the
-    bearing slipping on the shaft and the retaining nut working loose — exactly what puts large impulses
-    into an accelerometer. If that is it, the collapse is **a result, not a scaling fault**: AE amplitude
-    was tracking the mechanical defect.
+  Measured on the 2026-09-23 smoke test (74 sweeps, 500 k points/channel, 0-3000 rpm):
 
-  **Do not re-scale AE on one speed point.** Measure AE across 600-3000 rpm on the post-rebuild
-  re-baseline run and decide from that. If AE stays small across the whole range, it is both a finding
-  and a reason to drop the range (1.0 V would give ~40 levels, 0.5 V ~80).
+  | channel | range | step | Vpp at rest | Vpp at 3000 rpm | levels used |
+  |---|---|---|---|---|---|
+  | UL | 12.0 V | 60.3 mV | 0.41 V | **7.00 V** | 116 |
+  | AE | 5.0 V | 25.1 mV | 0.21 V | 1.04 V | 41 (peak 70 at 600 rpm) |
+  | SP | 8.0 V | 40.2 mV | 5.19 V | 6.55 V | 163 |
+
+  **No channel clips:** across 37 M samples, SP touches a window edge on **316 samples (0.001 %)** and UL
+  on none. Isolated spikes grazing the rail are not clipping — the test for clipping is what *fraction*
+  of the signal sits pinned there, not whether the extreme value repeats between sweeps (it will, because
+  the rail is the same number every time).
 
 - **⚠️ ~20 stale profiles in `react/public/config/` carry `UL volt_range 0.8` and no SP channel.**
   `endurance-profile`, `first-oil`, `high-stress-profile`, `lub1_validation`, `test-profile` and every
