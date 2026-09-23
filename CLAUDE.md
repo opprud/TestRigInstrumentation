@@ -412,8 +412,13 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   it was drive EMI (“+43 % with the motor on, flat with speed”) — that is what a floating probe does
   near a running VFD, not a property of the slip ring.
 
-  **The channel now needs `volt_range 16.0 / volt_offset 5.0`** (it spans 1.8–8.4 V; the old 8.0/0.0
-  window clipped over half of it). Applied to all seven live profiles and to the scope.
+  **SP is now `volt_range 8.0 / volt_offset 4.5`** — a 0.5-8.5 V window. The first fix was 16.0/5.0,
+  but that was superseded twice once the channel could actually be measured: sized against a real
+  600-3000 rpm sweep to 6.0/5.0 (`9ebabe9e`), then settled at 8.0/4.5 (`f0714171`). **The live profiles
+  carry 8.0/4.5 — trust them over any range quoted in prose here.**
+
+  Re-verified post-rebuild 2026-09-23: **SP mean +4.999 V**, and its excursions still grow with rotation
+  (Vpp 0.32 V at rest -> 1.33 V at 1176 rpm) while the DC level stays put. Ground lead attached.
 
 - **The tachometer works again — reflective mark refitted and verified 2026-09-23.** It was silent
   earlier the same day (0.0 rpm at 10/20/30 Hz, `TACHDIAG?` showing 1 pulse across 90 s of confirmed
@@ -487,6 +492,41 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
   **The first run after reassembly is the most valuable measurement on the rig** — it defines the
   reference every later run is read against. Treat it as a baseline, not as a warm-up.
+
+- **⚠️ The scope is effectively 8-bit — `WORD` format does not buy resolution, and AE is currently
+  resolved into ~7 levels (measured 2026-09-23).** Every raw code comes back a multiple of 256, so the
+  16-bit `WORD` numbers carry the ADC's **~199 usable levels across the full vertical range**. The real
+  quantisation step is therefore `volt_range / 199`, and **vertical range is the only lever on data
+  quality** — a channel scaled 10x too wide loses a decade of resolution that no format or point count
+  recovers. Measured at 1176 rpm with the current ranges:
+
+  | channel | range | step | levels at rest | levels at 1176 rpm |
+  |---|---|---|---|---|
+  | UL | 12.0 V | 60.3 mV | 8 | **67** |
+  | AE | 5.0 V | 25.1 mV | 6 | **7** |
+  | SP | 8.0 V | 40.2 mV | 33 | 33 |
+
+  **AE using 7 of 199 levels contradicts the note that sized it** — `9ebabe9e` set the ranges from a
+  600-3000 rpm sweep and left AE at 5.0 V because it was *"nearly clipping, not over-ranged"*. Both
+  measurements can be right, and which one is decides something real:
+  - AE may simply climb very steeply with speed, making 1176 rpm a quiet point; or
+  - **the rebuild removed the source of the large AE signal.** Everything before 2026-09-02 ran with the
+    bearing slipping on the shaft and the retaining nut working loose — exactly what puts large impulses
+    into an accelerometer. If that is it, the collapse is **a result, not a scaling fault**: AE amplitude
+    was tracking the mechanical defect.
+
+  **Do not re-scale AE on one speed point.** Measure AE across 600-3000 rpm on the post-rebuild
+  re-baseline run and decide from that. If AE stays small across the whole range, it is both a finding
+  and a reason to drop the range (1.0 V would give ~40 levels, 0.5 V ~80).
+
+- **⚠️ ~20 stale profiles in `react/public/config/` carry `UL volt_range 0.8` and no SP channel.**
+  `endurance-profile`, `first-oil`, `high-stress-profile`, `lub1_validation`, `test-profile` and every
+  `inline_2026*` file date from March-June 2026 and predate the current scaling. UL now produces
+  **4.04 Vpp at 1176 rpm**, so an 0.8 V window would clip it **5x over** — and with no `SP` entry the
+  slip-ring channel would keep whatever the front panel last had. A run from one of these looks normal
+  and produces clipped UL. Same failure class as the `Keratech22` name collision (ticket 0027): the
+  danger is a plausible-looking file that is years out of date. Either delete them or rename them
+  `*_superseded_<date>.json` as was done for `KaretTest_Oil1`.
 
 - **Skipped sweeps leave gaps in the HDF5 sweep numbering.** Analysis must iterate the
   existing `sweep_###` groups, not assume contiguous indices.
