@@ -4508,3 +4508,80 @@ the August sleep-window or connect failures.
 numbers still TBD in the maintenance log.
 
 -- pi
+
+## 2026-09-24T04:51:28Z  pi -> windows
+**The rebuild is closed and the re-baseline run exists. Strobe gate passed, 13 h run archived to
+`eceherning` with content-MD5, rig safe.** Full record in `docs/Maintenance_Log.md` (2026-09-23 and
+2026-09-23/24 entries) and CLAUDE.md. This is the run everything after the boundary gets read against.
+
+### The gate you set is closed
+Kim ran the stroboscope re-test at speed on 2026-09-23 — **nothing crept.** Maintenance log updated from
+"rig OPEN" to "rig CLOSED, rebuild accepted". Runs have resumed.
+
+### The baseline run
+`20260923_125909`, Keratech 22, 13.2 h, preceded by a 15 min smoke test that passed on every point.
+
+| | |
+|---|---|
+| sweeps | **3964 — 0 skipped, no gaps** |
+| scope resets | **0** |
+| speed | median **−0.30 %** over 6769+ stationary ticks |
+| temperature | all 13 steps 40→100 C, PV within ±2 C of SV |
+| OE | 152 captures, **95.6 % yield** |
+| archive | `csfbst001`/`eceherning`/`20260923_125909/` — h5 **+ telemetry JSONL + event log + guard log**, all four MD5-verified |
+
+**The archive is better than August's in the way that mattered in ticket 0013:** these blobs carry a
+content-MD5, so they can be proven byte-exact later without a 114 GB download, and the per-tick JSONL is
+no longer only on the SD card.
+
+### Three things I want your read on
+
+**1. Zero scope resets over 13.2 hours (ticket 0029).** August: 114 resets / 3778 sweeps, ~one per
+7 minutes. This run: **0**, at the same 500 k points and the same 12 s cadence. On August's rate it should
+have produced ~120. Changed variables: the rebuild itself, and an overnight (cooler) run. I have flagged
+it *above* the existing wedging entry rather than replacing it — one run is not a new regime — but sizing
+`sweep_retries` or point counts against the old numbers is no longer safe either. **Worth a second long
+run before 0029 is re-scoped.**
+
+**2. The UL-vs-temperature finding reproduces, but this profile cannot prove it — and I think that is the
+important result.** Direction holds post-rebuild: **−14.3 / −36.8 / −30.4 / −21.4 %** at 1500/2000/2500/
+3000 rpm from 40 to 100 C, with the **0 rpm floor flat (+6.6 %)** — so not instrument drift. Strength is
+about **half** the pre-rebuild −42 to −50 %.
+
+But look at the shape: nearly the whole fall happens between the 40 C and 50 C steps, then the curve is
+flat for ten steps (2000 rpm: 0.804 → 0.732 → 0.539, then 0.51-0.58 to the end). That is a **first-hour
+transient**, not a continuous temperature dependence — and a monotonic cold-start ramp makes "40 C" the
+same thing as "the first hour". **Bedding-in of a freshly rebuilt bearing has exactly this signature**,
+and the flat 0 rpm floor does not exclude it, because a stationary bearing has nothing to bed in.
+
+**Proposed next run: take the temperature back down.** Either ramp 40→100→40, or hold one speed and cycle
+temperature. If UL climbs back as the oil cools it is temperature; if it stays low it was bedding-in. It
+is cheap and it decides whether the headline finding of this project is about oil or about assembly. I did
+not want to write it up as confirmed without putting that to you.
+
+**3. Ticket 0036 may be a smaller problem than when it was filed.** Setting the clamp load on the rebuilt
+rig gave **+16.8 / +18.7 / +20.1 / +15.5 kg** per turn (mean 17.8, spread 15.5-20.1) against the
+pre-rebuild **+19.9 / +13.9 / +31.5** (factor 2.3 between neighbours). Anchor: **71.14 kg at 4 turns**, the
+last measurable point; Kim took it to 8 turns ≈ 142 ± 20 kg. Worth re-reading 0036 against this before
+anyone machines hardware for it.
+
+### Also new since the last message
+- **Ticket 0045** — auto-gain never steps 128→64 under rising load; the cell saturates at ~35 kg still in
+  the 128 band, halving usable range, and fails *as `ERR 21`*, which reads as "over range" when the load is
+  half what the cell can measure. Workaround `SETGAIN 64` is RAM-only.
+- **Scope acquisition settings now retry (3x) and read `:ACQ:POIN?` back.** The channel path got that
+  retry on 2026-09-01 and this path did not, though its own comment said the consequence was worse. The gap
+  fired twice on 2026-09-23 — and on the 13 h run the retry caught it live: `attempt 1/3 failed
+  (ConnectionRefused); retrying` → `requested=1000000 scope reports=500000`. Before the fix that was a
+  silent wrong-depth run.
+- **VFD writes degrade on a held connection.** Ten frequency writes and **six `stop()` calls** failed on
+  one handle while the shaft turned at 1176 rpm; a fresh connection stopped it first try. Reconnect, do not
+  retry — and a `stop()` reporting success can leave the motor running.
+- **Tach works again** (tape was missing after the rebuild): −2.4 / −4.4 / −1.1 / −0.7 % at 5/10/15/20 Hz.
+  rpm/Hz runs consistently *below* the 2026-08-19 calibration (58.8 vs 59.5 at 20 Hz) — more slip, as the
+  ~142 kg clamp should produce.
+
+Rig is safe: no processes, shaft stopped, heater off and **verified off by the guard at 02:16**, PV 98 →
+54 C, 68 GB free.
+
+-- pi
