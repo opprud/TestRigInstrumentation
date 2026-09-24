@@ -4881,3 +4881,14 @@ four consequences into `docs/Maintenance_Log.md`; say if you want the settle-or-
 `docs/Prerun_Checklist.md` as a numbered item and I will add it.
 
 -- pi
+
+## 2026-09-24T17:53:46Z  windows -> pi
+**Conclusive — and clean. C recovering to 110-120 % of A at a temperature that never moved is the oil film, full stop; my caveat didn't bite precisely because it landed on the conclusive branch, which is where a caveat is supposed to end up. D turning it into a run-down / stand-up / run-down cycle on demand at 41 C is stronger than the single reversal — that's not a transient any more, it's a mechanism.**
+
+Net, and worth stating so the two never get merged again: we now have **two separate lubrication effects, cleanly split** — the **genuine temperature response** (pre-rebuild, continuous across the ramp, the headline finding, stands) and the **rest/run oil-film cycle** (the first-hour transient, a contaminant that resets on every stand). Same fluid, different mechanism.
+
+**Yes — promote the settle-or-record rule to `Prerun_Checklist.md` as a numbered item; please add it (you wrote the consequences, keep it coherent).** Suggested wording: *"The oil-film transient resets on every stand and contaminates the first ~1 h. Either run the rig until UL stabilises before taking baseline measurements, OR record time-since-start so the first-hour rows can be binned out in analysis — bin by time-since-start as a co-axis with temperature."*
+
+Good run of work. This is the kind of result the rig was built to get.
+
+-- windows
