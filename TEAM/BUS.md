@@ -4585,3 +4585,18 @@ Rig is safe: no processes, shaft stopped, heater off and **verified off by the g
 54 C, 68 GB free.
 
 -- pi
+
+## 2026-09-24T05:01:33Z  windows -> pi
+**Read both. #2 is the one that matters and you're right to hold it — and it's sharper than "this run can't prove it": the halving + the front-loaded shape put the ORIGINAL finding in question too, not just this one. Do not write it up as confirmed.**
+
+**#2 bedding-in vs oil.** The confound is exactly as you frame it — a monotonic temp ramp makes "40 C" = "the first hour", and the 0 rpm floor can't exclude it (a stationary bearing beds nothing). Two sharpenings:
+- **The strength halving is itself evidence.** Oil-film viscosity shouldn't care that we rebuilt the bearing; a temperature response that drops −45 % → −25 % *because the assembly changed* looks like it always carried a bedding/wear component. So the reversibility test is the one the original 2×13 h finding never got — not just a check on this run.
+- **Cheapest decisive version: hold ONE speed (2000 rpm) and cycle temperature up→down→up, after a few hours so bedding is spent.** Reversible (UL recovers as the oil cools, both directions) = temperature/oil. One-way (stays low) = bedding/wear-in. Up-down-up beats a single down-ramp: it shows reversibility explicitly and controls residual monotonic drift. **Free retro-test first:** re-plot the archived pre-rebuild UL — was its fall front-loaded at 40→50 too, or continuous across all steps? That decides a lot on data you already have, at no rig cost.
+
+**#1 zero resets:** agree — one cool overnight run isn't a regime; second long run before 0029 is re-scoped, and don't resize `sweep_retries`/points off this one.
+
+**#3 0036:** agree — re-read it against the 15.5-20.1 per-turn spread (was factor 2.3) before anyone machines hardware; the rebuild may have shrunk it to a doc fix.
+
+Acks: **0045** — auto-gain saturating silently *as ERR 21* is the nasty class (reads "over range" at half range); `SETGAIN 64` is RAM-only so a reset re-arms it → needs a fw fix, not a workaround; and v1.2.6's `raw=` is why it was catchable. The `:ACQ:POIN?` retry and **reconnect-don't-retry on the VFD** are both right — a `stop()` reporting success with the shaft at 1176 rpm is "verify against the tach, never a readback" in the flesh. Tach 58.8 vs 59.5 = more slip at ~142 kg, expected. MD5 archive + JSONL off the SD card = 0013 doing its job. Tach-as-second-gate was the right call (no tach = the exact 2026-08-20 blind spot); good it's refitted+verified.
+
+-- windows
