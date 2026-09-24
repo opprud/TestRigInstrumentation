@@ -160,10 +160,66 @@ a correctly seated retaining ring**, at roughly half the strength.
 > Almost the whole fall happens between the 40 C and 50 C steps and the curve is flat from 50 C to 100 C
 > — at 2000 rpm, 0.804 → 0.732 → 0.539, then 0.51-0.58 for the remaining ten steps. That is the shape of a
 > **first-hour transient**, not of a continuous temperature dependence; and since the profile ramps
-> monotonically from a cold start, "40 C" is also "the first hour". Bedding-in of a freshly rebuilt
-> bearing would look exactly like this. The flat 0 rpm floor does not rule it out, because a stationary
-> bearing has nothing to bed in.
+> monotonically from a cold start, "40 C" is also "the first hour". The flat 0 rpm floor does not rule a
+> transient out, because a stationary bearing has nothing to run in.
 >
-> **The experiment that separates them:** take the temperature back *down* again, or hold one speed and
-> cycle temperature up and down. If UL climbs back as the oil cools it is temperature; if it stays low it
-> was bedding-in. Cheap, and it is the next run worth doing.
+> **What the transient could be — and it is NOT virgin-bearing wear-in.** The bearing is the *same old*
+> one, cleaned and re-lubricated; only the **bushing (its seat) and the lock nut/rings are new** (Kim, via
+> windows, 2026-09-24). An already-bedded bearing does not re-bed, so do not go looking for break-in wear.
+> The candidates are all still monotonic-with-time and therefore confounded with the ramp in exactly the
+> same way:
+> - the old bearing **re-seating on the new bushing surface**,
+> - **fresh oil redistributing** and establishing its film over the first hour,
+> - the new **~142 kg clamp settling**.
+>
+> Note the second one is a *lubricant* effect but a **time**-conditioning one, not a
+> viscosity-versus-temperature one — so even an answer of "it's the oil" still needs the cycle to separate
+> film conditioning from temperature response.
+>
+> **The experiment that separates them:** cycle the temperature **up → down → up** at held speed. If UL
+> climbs back as the oil cools, and does so in both directions, it is temperature; if it stays low, it was
+> a one-way seating/film/clamp transient. Up-down-up beats a single down-ramp: it shows reversibility
+> explicitly and controls for residual monotonic drift. Run `UL_TempCycle_6h`
+> (`react/public/config/UL_TempCycle_6h.json`), first executed as `20260924_065556`.
+>
+> **windows sharpened this further, and it matters: the halving is itself evidence.** An oil-film
+> viscosity response should not care that the bushing and lock rings were replaced. A temperature response
+> that drops from −45 % to −25 % *because the assembly changed* looks like it always carried a
+> seating/wear component — so the reversibility test is not merely a check on this run, it is the test the
+> original two 13 h runs never got. **Do not write the original finding up as confirmed either.**
+>
+### Retro-test on pre-rebuild data (done 2026-09-24) — the shapes differ, and that matters
+
+**It cost nothing: the pre-rebuild h5 is still on the Pi.** Only the three *August* 13 h runs were deleted
+(2026-08-27); `20260829_145507` (38.8 GB, full 40→100 C sweep, UL refitted, SP ground fixed) and
+`20260901_112732` are local. No Azure download was needed.
+
+UL rms at 2000 rpm, expressed as **how much of the total fall has happened by each step**:
+
+| SV C | pre-rebuild `20260829_145507` | post-rebuild `20260923_125909` |
+|---|---|---|
+| 45 | 10 % | 24 % |
+| **50** | **40 %** | **90 %** |
+| 55 | 65 % | 94 % |
+| 70 | 47 % | 96 % |
+| 80 | 91 % | 92 % |
+| 100 | 100 % | 100 % |
+
+**Pre-rebuild the fall is spread across the whole ramp; post-rebuild it is over by 50 C.** The
+pre-rebuild curve also has a clear non-monotonic excursion around 65-75 C where UL rises again before
+resuming its decline. Magnitudes pre-rebuild: **−41.3 / −50.4 / −46.2 / −47.5 %** at 1500/2000/2500/
+3000 rpm, i.e. the documented −42 to −50 %.
+
+**So the answer to windows' question is: the original fall was NOT front-loaded.** A decline that
+accumulates continuously across 60 C of ramp is what a real temperature response looks like; a drop that
+completes in the first 10 C and then sits flat for ten steps is what a transient looks like. The two runs
+do **not** share one signature — which weakens the "it was always a seating/wear artefact" reading, and
+points instead at the post-rebuild rig having a much weaker genuine temperature response with an early
+transient on top of it. The `UL_TempCycle_6h` run still has to decide that; this only says the two runs
+are not the same phenomenon.
+
+> **Correction to an earlier claim: the 0 rpm floor was NOT flat pre-rebuild.** It rose **+43.4 %**
+> (0.0385 → 0.0553 V) across the ramp, nearly all of it between 40 and 45 C. In absolute terms that is
+> +0.017 V against a 0.49 V fall at 2000 rpm — 3.5 % of the movement, and in the *opposite* direction, so
+> it still does not explain the fall. But "the 0 rpm floor was flat in both" overstates it and should not
+> be repeated.
