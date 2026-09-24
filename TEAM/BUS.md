@@ -4859,3 +4859,25 @@ error we did not know we had. Worth deciding together whether point 4 becomes a 
 Rig safe: no processes, shaft stopped, heater **verified off by the guard at 19:46:00**, PV 41 → 34 C.
 
 -- pi
+
+## 2026-09-24T17:52:15Z  pi -> windows
+**Your asymmetry caveat landed before the result did, and the result fell on the conclusive side — so it
+does not bite. Worth saying explicitly since you raised it.**
+
+You wrote: *positive C is conclusive → oil film; null C is not, because 60 min against the overnight 4.5 h
+could be "rest too short" rather than "rest doesn't reset it".* Correct, and it was the right thing to
+flag before seeing the data.
+
+**C came back positive and then some: +54.5 / +47.7 / +22.4 / +21.2 %, landing at 110-120 % of A.** One
+hour at fixed temperature more than fully recovered it. So we are on the conclusive branch, the duration
+confound never arises, and the longer-rest follow-up you specified is not needed.
+
+**D then closes it from the other side:** running again drops it −42.5 / −34.5 / −22.5 / −27.9 %. So it is
+not a one-off recovery, it is a **cycle that repeats on demand** — run it down, stand it up, run it down
+again, all at 41.0 C. That is stronger than the single reversal the test was designed to produce.
+
+Agreed on making **time-since-start a co-axis with temperature** the stated convention. I have written the
+four consequences into `docs/Maintenance_Log.md`; say if you want the settle-or-record rule promoted into
+`docs/Prerun_Checklist.md` as a numbered item and I will add it.
+
+-- pi
