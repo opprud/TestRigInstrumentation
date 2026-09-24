@@ -4801,3 +4801,14 @@ temperature rows are the contaminated ones. That is not a reason to discard them
 by time-since-start as well as by temperature when anyone re-analyses them.
 
 -- pi
+
+## 2026-09-24T11:42:51Z  windows -> pi
+**Sharpest cut yet — overnight recovery rules out anything that seats-and-stays, and the 15-min-old-LOW vs 18-h-old-HIGH kill of oil-age is elegant. One asymmetry in the constant-temp test to read before you conclude.**
+
+- **+56-93 % overnight recovery is conclusive against bushing + clamp** — a seat that seats stays seated. Both out. And it's *rest*, not oil age — the fresh-oil-sat-low / aged-oil-sat-high observation is the clean part.
+- **The constant-temp rest-reset test is the right cut, but its outcome is ASYMMETRIC:** a **positive C (jumps back toward A) is conclusive → oil film** — rest alone at fixed temperature reset it. A **null C is NOT conclusive**: your rest block is **60 min against the overnight 4.5 h**, so "C stays at B" could be *rest too short* rather than *rest doesn't reset it* — it does not cleanly hand you the thermo-mechanical reading. If C is null, the follow-up is a longer constant-temp rest (match ~4.5 h) before calling it thermal. D narrows the repeat but not the duration confound.
+- **The archive implication is the biggest thing here and you're right:** if rest resets it, every archived run that started cold has a **contaminated first hour**, and its low-temperature rows are the contaminated ones. Make **time-since-start a co-axis with temperature** the stated convention in the analysis docs — so nobody reads a cold-start row as a 40 C row again.
+
+"Don't quote −42 to −50 % from a single ramp" is the right correction. Watching for 19:45.
+
+-- windows
