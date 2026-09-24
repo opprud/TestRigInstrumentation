@@ -276,3 +276,51 @@ is exactly why a monotonic ramp overstates the temperature response.
   way `20260923_125909` was.
 - **For future profiles: put a temperature down-leg in, or discard the first block.** A cold-start ramp
   alone cannot separate the two, and now we know both are present and comparable in size.
+
+---
+
+## 2026-09-24 → `RestReset_ConstTemp_6h`: REST ALONE resets the transient. It is the oil film.
+
+`20260924_133945`, 13:39 → 19:45 (6 h). 1824 sweeps, **0 skipped, 0 scope resets**, 68 OE captures.
+1.99 GB, archived to `eceherning`. **SV held at 40 C from the first second to the last — and all four
+blocks measured at 41.0 C.** No thermal variable existed in this experiment at all.
+
+| block | 1500 | 2000 | 2500 | 3000 | **0 rpm** |
+|---|---|---|---|---|---|
+| **A** at start | 0.896 | 1.198 | 1.260 | 1.374 | 0.0576 |
+| **B** after 2 h running | 0.698 | 0.931 | 1.138 | 1.263 | 0.0503 |
+| **C** after **1 h STOPPED** | 1.078 | 1.376 | 1.393 | 1.531 | 0.0504 |
+| **D** after 1 h running again | 0.621 | 0.901 | 1.079 | 1.103 | 0.0507 |
+
+**The cycle is complete and it repeats:**
+- running A → B: **−22.1 / −22.2 / −9.7 / −8.1 %**
+- **one hour standing still, same temperature, B → C: +54.5 / +47.7 / +22.4 / +21.2 %**
+- C reaches **110-120 % of A** — more than fully recovered
+- running again C → D: **−42.5 / −34.5 / −22.5 / −27.9 %**
+
+**This kills the thermo-mechanical explanation.** Nothing thermal changed — setpoint fixed, every block
+at 41.0 C. The only thing that happened in that hour is that the shaft stopped turning. What resets on
+standing and re-establishes under rotation, independent of temperature, is the **oil film**.
+
+> **The control is as clean as the result: the 0 rpm floor does not move.** 0.0503 → 0.0504 → 0.0507
+> across B, C and D — within 1 %. The instrument is stable; only the rotating-contact signal cycles. A
+> gain, probe or coupling artefact would have moved the floor with it.
+
+### What this does to every measurement on this rig
+
+**UL depends on how long the rig has been running since it last stood still, by 20-50 %.** That is
+comparable to, or larger than, the temperature effect (16-36 %, `20260924_065556`), and **no profile we
+have ever run records it**. It fully explains the overnight recovery between `20260923_125909` and
+`20260924_065556` (+56 to +93 % at identical 41 C), and it explains why every monotonic cold-start ramp
+shows a front-loaded fall in its first hour.
+
+**Consequences, in order of how much they matter:**
+1. **Any comparison between two runs must control for time-since-start**, or it is comparing oil-film
+   state rather than the intended variable.
+2. **The first hour of every archived run is not a steady-state measurement.** Its lowest-temperature
+   rows are the contaminated ones, because a cold-start ramp puts them there. Re-analysis should bin by
+   time-since-start as well as by temperature.
+3. **The published temperature response should come from a cycled profile**, not a single ramp. The
+   honest figure is −16 to −36 %.
+4. **New profiles should either start with a settling period long enough for the film to reach steady
+   state (>2 h), or record and report time-since-start alongside temperature.**
