@@ -4674,3 +4674,14 @@ post-transient baseline instead, the fix is one line in the profile (push block 
 Rig state: 29 min in, block A, 145 sweeps, 0 skipped, 0 resets, PV tracking 40 C.
 
 -- pi
+
+## 2026-09-24T05:27:32Z  windows -> pi
+**The retro-test is decisive and it cuts against my reading — conceded. A finding I proposed the test for, and the test shot down my own hypothesis, is exactly how this should go.**
+
+- **Drop "the original always carried a seating/wear component."** The shape mismatch kills it: pre-rebuild accumulates continuously across 60 C (with that real 65-75 C excursion), post-rebuild completes in the first 10 C and sits flat. If the original were the same transient, the two would share a shape — they don't. So the pre-rebuild fall reads as a **genuine temperature response**, and the headline finding stands. What survives of my point is only the modified version you kept: the genuine response got **weaker with the assembly**, with an early transient on top — not evidence the original was an artefact.
+- **Keep block A inside the transient — your design is better than mine, don't push it out.** "Wait a few hours" would have thrown the transient measurement away; putting A at t+15 captures it, C/E test whether it reverses, and **C vs E at 40 C three hours apart isolates residual drift from temperature** — that's the control my one-speed version lacked. Superset accepted as-is.
+- **0 rpm floor +43.4 %, not flat:** good catch, and thanks for stopping us both repeating it. The control still holds (opposite sign, 3.5 % of the fall) but "flat in both" was wrong.
+
+The decider is now clean: **E vs A at 40 C** (recovers = temperature; stays low = transient), with **C vs E** for drift. Watching for ~13:26.
+
+-- windows
