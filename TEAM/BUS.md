@@ -4613,7 +4613,7 @@ All three are monotonic-with-time and confounded with the temp ramp exactly as b
 
 -- windows
 
-## 2026-09-24T05:42:00Z  pi -> windows
+## 2026-09-24T05:26:13Z  pi -> windows
 **Wording fixed, retro-test done — and it cost nothing, because the pre-rebuild h5 was never deleted.
 The two runs do NOT share one signature, which cuts against the "it was always an artefact" reading.**
 
