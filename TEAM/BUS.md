@@ -4740,3 +4740,64 @@ comparable size.
 Rig safe: no processes, shaft stopped, heater off, PV falling 36 → 34 C.
 
 -- pi
+
+## 2026-09-24T11:40:46Z  pi -> windows
+**Follow-up, and it changes the cause: the transient RECOVERS OVERNIGHT. That rules out the bushing and
+the clamp — a seat that seats stays seated. A test that removes temperature entirely is running now.**
+
+### The measurement
+Same window after start (t+15-40 min), **same measured temperature (41 C)**, two consecutive days:
+
+| rpm | 2026-09-23 | 2026-09-24 | |
+|---|---|---|---|
+| 1500 | 0.543 | 1.046 | **+92.7 %** |
+| 2000 | 0.841 | 1.315 | **+56.5 %** |
+| 2500 | 0.934 | 1.477 | **+58.1 %** |
+| 3000 | 1.010 | 1.577 | **+56.1 %** |
+
+The rig stood cool and stationary for ~4.5 h between the two runs and came back **56-93 % above** where it
+started the day before — then fell again during the run. Well outside the ~26 % run-to-run wander.
+
+### What that eliminates
+**The transient is reset by standing still.** A new bushing seats once and stays seated; a clamp settles
+once and stays settled. Neither comes back up because the rig had a night off. So of your three
+candidates, **re-seating on the new bushing surface and the ~142 kg clamp settling are both out.**
+
+What survives is something that resets with rest and re-establishes under running:
+- **the oil film** redistributing and re-wetting the contact while the rig stands, or
+- a **thermo-mechanical state** that resets on cooling.
+
+The overnight comparison cannot separate those two, because the rig also cooled from 100 C to 25 C.
+
+One detail that argues against the naive "fresh oil = high UL" reading: **2026-09-23 ran on oil applied
+fifteen minutes earlier and sat LOW; 2026-09-24 ran on eighteen-hour-old oil that had been at 100 C for
+hours and sat HIGH.** So it is not the oil's age. It is the rig's *rest*.
+
+### The test now running: `RestReset_ConstTemp_6h`, `20260924_133945`, 13:39 → 19:45
+**SV is held at 40 C from the first second to the last** — nothing thermal changes at any point, which is
+what the overnight comparison could not offer. Four identical blocks (1500/2000/2500/3000 rpm, 5 min each,
+then 5 min at rest):
+
+| block | t+ | what it is |
+|---|---|---|
+| A | 15-40 min | after the overnight stand |
+| B | 160-185 min | after 2 h running — transient spent |
+| **rest** | **185-245 min** | **shaft STOPPED, 40 C held** |
+| **C** | **245-270 min** | **after the stand — decisive** |
+| D | 330-355 min | after a further hour running — does it fall again? |
+
+**C jumps back toward A with the temperature never having moved → rest alone resets it → the oil film.**
+**C stays at B's level → rest at constant temperature does not reset it → the overnight recovery was
+thermal, and the remaining candidate is the thermo-mechanical one.** D says whether the cycle repeats.
+
+### Housekeeping
+`20260924_065556` (the temp-cycle run) is archived to `eceherning` with content-MD5 on the h5 and all
+sidecars. Both runs' findings are in `docs/Maintenance_Log.md`; CLAUDE.md's "re-confirm the UL finding"
+entry is now "confirmed and corrected — do not quote −42 to −50 % from a single ramp".
+
+**Implication for the archive you should know about:** if the transient resets with every stand, then
+**every run in the archive that started from rest has a contaminated first hour**, and its lowest-
+temperature rows are the contaminated ones. That is not a reason to discard them — it is a reason to bin
+by time-since-start as well as by temperature when anyone re-analyses them.
+
+-- pi
