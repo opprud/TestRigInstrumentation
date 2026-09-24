@@ -115,3 +115,55 @@ saturates at ~35 kg — **ticket 0045**. Worked around by pinning gain 64 by han
       rebuild accepted, runs resumed.
 - [x] ~~Reflective mark refitted and the tach verified~~ — done 2026-09-23, table above.
 - [ ] Bolt torque + part numbers still `TBD` in the entry above.
+
+---
+
+## 2026-09-23/24 → first 13 h run after the rebuild — the post-rebuild BASELINE
+
+`20260923_125909`, Keratech 22 profile, 12:59:09 → 02:12:24 (13.2 h). **This is the re-baseline run** the
+2026-09-02 entry called for: every absolute level recorded after the rebuild is read against this one.
+
+**Preceded by a 15 min smoke test** (`20260923_124133`, `NoiseFloor_SmokeTest_15min`) which passed on
+every point: 74 sweeps, 0 skipped, 500 k points/channel, all three scope channels valid and
+speed-responsive, SP mean +4.996 V (probe ground attached), OE 3/3 cycles.
+
+| | |
+|---|---|
+| sweeps | **3964 — 0 skipped, 0 gaps in numbering** |
+| scope resets | **0** (August's run: 114 over 3778 sweeps) |
+| points | 500 000 per channel × 3 (1 M requested, scope clamps to 500 k with 3 channels) |
+| speed tracking | 6769+ stationary ticks, median **−0.30 %**, none beyond −3.4 % |
+| temperature | all 13 steps 40 → 100 C; PV within ±2 C of SV throughout |
+| OE | **152 captures**, 7 lost windows, 4 reconnects — **95.6 % yield** (documented norm 94 %) |
+| file | 4.26 GB, md5 `0c41ef4b3a2e65c41cf8135d25281817` |
+| archive | `csfbst001` / **`eceherning`** / `20260923_125909/` — h5 **plus** the telemetry JSONL, the event log and the heater-guard log, all four MD5-verified on upload |
+| heater | switched off and **VERIFIED OFF by the guard at 02:16:00**; PV 98 → 54 C over 17 min |
+
+> **These blobs carry a content-MD5, unlike the three 13 h runs of August** — they can be proven
+> byte-exact later without re-downloading. The sidecars are archived too, so the per-tick record no
+> longer exists only on the SD card.
+
+**Rig state during the run:** clamp load ~142 kg estimated (anchor 71.14 kg at 4 turns, 2026-09-23), so
+`LOAD?` returns `ERR 21` throughout and `mass_g` is null in every telemetry tick — expected, not a fault.
+Lubricant metadata corrected before the run to Keratech 22 applied 2026-09-23 on the rebuilt bearing.
+
+### Finding: UL vs oil temperature — direction reproduces, magnitude halved, and one confound
+
+UL RMS at fixed speed, 40 C → 100 C: **−14.3 %** (1500 rpm), **−36.8 %** (2000), **−30.4 %** (2500),
+**−21.4 %** (3000). The **0 rpm floor stayed flat (+6.6 %)**, which is the control that matters: had the
+probe or its gain drifted over 13 hours, the floor would have moved with the rest.
+
+Pre-rebuild the same finding measured −42 to −50 %. So it **reproduces in direction on a rebuilt rig with
+a correctly seated retaining ring**, at roughly half the strength.
+
+> **But the profile cannot separate temperature from time-since-start, and the shape says that matters.**
+> Almost the whole fall happens between the 40 C and 50 C steps and the curve is flat from 50 C to 100 C
+> — at 2000 rpm, 0.804 → 0.732 → 0.539, then 0.51-0.58 for the remaining ten steps. That is the shape of a
+> **first-hour transient**, not of a continuous temperature dependence; and since the profile ramps
+> monotonically from a cold start, "40 C" is also "the first hour". Bedding-in of a freshly rebuilt
+> bearing would look exactly like this. The flat 0 rpm floor does not rule it out, because a stationary
+> bearing has nothing to bed in.
+>
+> **The experiment that separates them:** take the temperature back *down* again, or hold one speed and
+> cycle temperature up and down. If UL climbs back as the oil cools it is temperature; if it stays low it
+> was bedding-in. Cheap, and it is the next run worth doing.

@@ -292,6 +292,15 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   temperature across the speed staircase). The `config.json` and profile notes were already cleared.
 
 
+- **⚠️ The post-rebuild 13 h run had ZERO scope resets — the wedging may be gone, and that matters for
+  how much of the entry below still applies.** Run `20260923_125909` (2026-09-23/24, the first 13 h after
+  the rebuild): **3964 sweeps, 0 skipped, 0 resets, 0 recovery cycles** across 13.2 hours at the same
+  500 k points/channel and the same 12 s cadence as the August run. On August's rate (114 resets per
+  3778 sweeps) that run should have produced ~120. The only things that changed are the rebuild itself
+  and a cooler ambient (an overnight run). Do not delete the entry below on one run — but do not size
+  `sweep_retries` or point counts against its numbers either until a second long run confirms which
+  regime the rig is now in. Ticket 0029.
+
 - **The scope wedges intermittently at high resolution — frequently, not occasionally.** Quantified on the 13 h run `20260820_125647` (`acquire_scope.log`): **114 reset/recovery cycles (~one every 7 minutes), 468 error lines, dominated by `ConnectionRefused` (280) and `TimeoutError` (149)**. The resilience machinery absorbs nearly all of it — **1 sweep lost of 3778 (0.026 %)** — but it is masked, not eliminated: the run is one un-recovered retry from a real gap. `ConnectionRefused` dominating points at the scope's own LXI socket server dropping/capping connections, not just network latency. Lower the point count or raise `sweep_retries` for zero-loss runs; root cause tracked in **ticket 0029**.
 
 - **The tachometer is accurate — verified 2026-08-19.** It was long suspected of over-reading;
