@@ -223,3 +223,56 @@ are not the same phenomenon.
 > +0.017 V against a 0.49 V fall at 2000 rpm — 3.5 % of the movement, and in the *opposite* direction, so
 > it still does not explain the fall. But "the 0 rpm floor was flat in both" overstates it and should not
 > be repeated.
+
+---
+
+## 2026-09-24 → `UL_TempCycle_6h` decides it: BOTH effects are real, and they are now separated
+
+`20260924_065556`, 06:55 → 13:26 (6.5 h). 1949 sweeps, **0 skipped, 0 scope resets, 78 OE captures with
+0 failures**. 2.07 GB, archived to `eceherning`. Every block landed on its intended temperature: A 41 C,
+B 100 C, C 41 C, D 100 C, E 41 C.
+
+UL rms per block (measured temperature in brackets):
+
+| block | 1500 | 2000 | 2500 | 3000 | 0 rpm |
+|---|---|---|---|---|---|
+| **A** (41 C) | 1.046 | 1.315 | 1.477 | 1.577 | 0.056 |
+| **B** (100 C) | 0.447 | 0.620 | 0.588 | 0.767 | 0.057 |
+| **C** (41 C) | 0.488 | 0.717 | 0.918 | 1.114 | 0.047 |
+| **D** (100 C) | 0.409 | 0.491 | 0.633 | 0.716 | 0.073 |
+| **E** (41 C) | 0.586 | 0.762 | 0.951 | 1.003 | 0.054 |
+
+**1. A one-way transient exists.** C against A, *at the same 41 C*: **−53.3 / −45.5 / −37.9 / −29.4 %**
+(1500/2000/2500/3000 rpm). UL did **not** return to A's level when the oil was cooled back down. It fell
+once and stayed down. This is the seating / oil-film / clamp run-in, and it is what contaminated the
+40 C row of every monotonic cold-start profile we have ever run.
+
+**2. The transient is spent by block C.** E against C — same temperature, three hours later — is
+**+20.0 / +6.4 / +3.6 / −9.9 %**, scattered both ways around zero. No continued drift.
+
+**3. A genuine, fully reversible temperature effect also exists.** The second cycle is the clean
+measurement because the transient is gone from it:
+- heating C → D (41 → 100 C): **−16.3 / −31.5 / −31.1 / −35.7 %**
+- cooling D → E (100 → 41 C): **+43 / +55 / +50 / +40 %**
+- **the loop closes:** E lands within 6 % of C at 2000 rpm.
+
+Cooling B → C recovers too (+9 / +16 / +56 / +45 %). **UL rises on every cooling leg, at every speed.**
+The first cycle's A → B of −51 to −60 % is the transient and the temperature effect added together, which
+is exactly why a monotonic ramp overstates the temperature response.
+
+> **The strongest single control: the 0 rpm floor moves the OTHER WAY.** It *rises* with temperature
+> (C → D **+53.9 %**) while the running signal falls. A global gain, probe or coupling drift would take
+> the floor down with the rest. It does not, so the speed-dependent fall is a property of the rotating
+> contact, not of the instrument.
+
+### What this does to the older results
+- **The headline finding survives, at reduced strength.** UL really does fall with oil temperature, and
+  really does come back on cooling. The honest post-rebuild number is the **second cycle: −16 to −36 %**,
+  not the −51 to −60 % a single cold-start ramp reports.
+- **Every monotonic profile overstates it**, because its 40 C row is measured during the transient. That
+  applies to `Keratech22` and to the two 13 h runs the original finding rests on.
+- It does **not** retract the pre-rebuild finding. The pre-rebuild fall was *continuous across the whole
+  ramp* (40 % of it by 50 C) rather than front-loaded, so that run was not dominated by a transient the
+  way `20260923_125909` was.
+- **For future profiles: put a temperature down-leg in, or discard the first block.** A cold-start ramp
+  alone cannot separate the two, and now we know both are present and comparable in size.

@@ -493,10 +493,13 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
   What that does and does not undermine:
   - **Amplitude comparisons across the boundary: void.** Re-baseline everything after the rebuild.
-  - **The UL-falls-with-oil-temperature finding: still standing, but re-confirm it.** It reproduced across
-    two 13 h runs (−42 to −50 % from 40 to 100 C at 1500-3000 rpm) with the 0 rpm floor flat in both, and
-    ring state was shown not to move UL amplitude above the ~26 % run-to-run wander. A post-rebuild run is
-    the clean test.
+  - **The UL-falls-with-oil-temperature finding: CONFIRMED and corrected (2026-09-24).** It is real and
+    reversible — but a monotonic cold-start ramp **overstates it**, because a one-way run-in transient of
+    comparable size sits on top of it and lands squarely in the 40 C row. Measured by cycling the
+    temperature 41 → 100 → 41 → 100 → 41 C at held speeds (`UL_TempCycle_6h`, run `20260924_065556`):
+    the reversible temperature effect is **−16 to −36 %** and recovers **+40 to +55 %** on cooling, while
+    a separate **−29 to −53 %** drop happens once and never comes back. See `docs/Maintenance_Log.md`,
+    2026-09-24. **Do not quote the −42 to −50 % from a single ramp as the temperature response.**
   - **Any pre-run-check baseline: must be re-measured.** Numbers from before are gone.
 
   **The first run after reassembly is the most valuable measurement on the rig** — it defines the

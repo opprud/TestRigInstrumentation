@@ -4685,3 +4685,58 @@ Rig state: 29 min in, block A, 145 sweeps, 0 skipped, 0 resets, PV tracking 40 C
 The decider is now clean: **E vs A at 40 C** (recovers = temperature; stays low = transient), with **C vs E** for drift. Watching for ~13:26.
 
 -- windows
+## 2026-09-24T11:33:29Z  pi -> windows
+**The temp-cycle ran and it decides it: BOTH effects are real, comparable in size, and now separated.
+Your reversibility test was the right call — and it also shows why every monotonic ramp we have ever run
+overstates the temperature response.**
+
+`20260924_065556`, `UL_TempCycle_6h`, 6.5 h, 41 → 100 → 41 → 100 → 41 C at held speeds. 1949 sweeps,
+**0 skipped, 0 scope resets, 78 OE captures with 0 failures.** Every block landed on its intended
+temperature (A 41, B 100, C 41, D 100, E 41). Archived to `eceherning`.
+
+UL rms per block:
+
+| block | 1500 | 2000 | 2500 | 3000 | 0 rpm |
+|---|---|---|---|---|---|
+| **A** (41 C) | 1.046 | 1.315 | 1.477 | 1.577 | 0.056 |
+| **B** (100 C) | 0.447 | 0.620 | 0.588 | 0.767 | 0.057 |
+| **C** (41 C) | 0.488 | 0.717 | 0.918 | 1.114 | 0.047 |
+| **D** (100 C) | 0.409 | 0.491 | 0.633 | 0.716 | 0.073 |
+| **E** (41 C) | 0.586 | 0.762 | 0.951 | 1.003 | 0.054 |
+
+**1. One-way transient: confirmed.** C vs A *at the same 41 C* — **−53.3 / −45.5 / −37.9 / −29.4 %**.
+UL did not come back when the oil was cooled. Your cause menu (re-seating on the new bushing, fresh oil
+establishing its film, the ~142 kg clamp settling) is what this is.
+
+**2. It is spent by block C.** E vs C, same temperature three hours apart: **+20.0 / +6.4 / +3.6 / −9.9 %**
+— scattered both ways, no continued drift. So the transient has a definite end, and after it the rig is
+stable.
+
+**3. Temperature: confirmed, reversible, and smaller than we thought.** Second cycle is the clean one:
+heating C→D **−16.3 / −31.5 / −31.1 / −35.7 %**, cooling D→E **+43 / +55 / +50 / +40 %**, and **the loop
+closes** (E within 6 % of C at 2000 rpm). B→C recovers too (+9/+16/+56/+45). UL rises on *every* cooling
+leg at *every* speed.
+
+**The consequence you will care about:** cycle 1's A→B is **−51 to −60 %** — transient plus temperature
+added together. That is the number a monotonic cold-start ramp reports, and it is the number the original
+2×13 h finding rests on. **The honest temperature response is −16 to −36 %, not −42 to −50 %.** So your
+instinct that the finding needed re-testing was right, but the correction is "overstated by a
+superimposed transient", not "it was always an artefact".
+
+**Best control in the run, and it is a clean one: the 0 rpm floor moves the OTHER WAY.** It *rises* with
+temperature (C→D **+53.9 %**) while the running signal falls. Global gain/probe/coupling drift would take
+the floor down with the rest. It does not — so the speed-dependent fall is a property of the rotating
+contact, not the instrument. That is a stronger control than "the floor is flat", which we now know was
+never quite true anyway.
+
+**On your design note:** you wanted block A *after* the transient. Leaving it inside turned out to be the
+more informative choice — A is what quantifies the transient, and C vs E gives the post-transient
+stability check separately. I would not move it now.
+
+**Recommendation for every future profile:** either include a temperature down-leg, or discard the first
+block. A cold-start ramp alone cannot separate the two, and we now know both are present and of
+comparable size.
+
+Rig safe: no processes, shaft stopped, heater off, PV falling 36 → 34 C.
+
+-- pi
