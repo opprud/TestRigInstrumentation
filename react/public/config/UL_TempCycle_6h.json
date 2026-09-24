@@ -1,0 +1,339 @@
+{
+ "name": "UL temperature cycle 6.5 h",
+ "description": "Decides whether the UL-falls-with-oil-temperature result is about TEMPERATURE or about BEDDING-IN. The 13 h staircase profiles cannot tell them apart: they ramp monotonically from a cold start, so their '40 C' rows are also their 'first hour' rows, and on 20260923_125909 nearly the whole UL fall happened between the 40 C and 50 C steps and then went flat for ten steps -- the shape of a first-hour transient, not of a continuous temperature dependence. A freshly rebuilt bearing bedding in looks exactly like that, and the flat 0 rpm floor does not exclude it because a stationary bearing has nothing to bed in. This profile breaks the confound by taking the temperature back DOWN, twice. Speed is held to the same four points throughout (1500/2000/2500/3000 rpm, 5 min each, then 5 min at rest) so speed is not a variable, and that block is measured five times: A at 40 C, B at 100 C, C back at 40 C, D at 100 C again, E at 40 C again. READ IT LIKE THIS: if UL at block C returns to block A's level, the effect is REVERSIBLE and it is temperature. If A is high and C and E are both low and equal, the drop was a one-way bedding-in transient that happened during A and never came back. B vs D cross-checks the hot end the same way. Bin the analysis on the MEASURED omron_pv_c, not on the setpoint: the heater and the passive cooling will lag the 40/100 C steps and it does not matter, because every sweep carries its own temperature. The 60 min ramps are generous for that reason. The motor holds 2000 rpm through the ramps rather than stopping, so the bearing is in the same state during transitions as during measurement -- it makes cooling slower and the comparison cleaner. Same acquisition and scope_channels as Keratech22, so the blocks are directly comparable with the 20260923_125909 baseline.",
+ "duration_minutes": 390,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true
+ },
+ "setpoints": {
+  "rpm": [
+   {
+    "time_sec": 0,
+    "value": 0
+   },
+   {
+    "time_sec": 899,
+    "value": 0
+   },
+   {
+    "time_sec": 900,
+    "value": 1500
+   },
+   {
+    "time_sec": 1199,
+    "value": 1500
+   },
+   {
+    "time_sec": 1200,
+    "value": 2000
+   },
+   {
+    "time_sec": 1499,
+    "value": 2000
+   },
+   {
+    "time_sec": 1500,
+    "value": 2500
+   },
+   {
+    "time_sec": 1799,
+    "value": 2500
+   },
+   {
+    "time_sec": 1800,
+    "value": 3000
+   },
+   {
+    "time_sec": 2099,
+    "value": 3000
+   },
+   {
+    "time_sec": 2100,
+    "value": 0
+   },
+   {
+    "time_sec": 2399,
+    "value": 0
+   },
+   {
+    "time_sec": 2400,
+    "value": 2000
+   },
+   {
+    "time_sec": 5999,
+    "value": 2000
+   },
+   {
+    "time_sec": 6000,
+    "value": 1500
+   },
+   {
+    "time_sec": 6299,
+    "value": 1500
+   },
+   {
+    "time_sec": 6300,
+    "value": 2000
+   },
+   {
+    "time_sec": 6599,
+    "value": 2000
+   },
+   {
+    "time_sec": 6600,
+    "value": 2500
+   },
+   {
+    "time_sec": 6899,
+    "value": 2500
+   },
+   {
+    "time_sec": 6900,
+    "value": 3000
+   },
+   {
+    "time_sec": 7199,
+    "value": 3000
+   },
+   {
+    "time_sec": 7200,
+    "value": 0
+   },
+   {
+    "time_sec": 7499,
+    "value": 0
+   },
+   {
+    "time_sec": 7500,
+    "value": 2000
+   },
+   {
+    "time_sec": 11099,
+    "value": 2000
+   },
+   {
+    "time_sec": 11100,
+    "value": 1500
+   },
+   {
+    "time_sec": 11399,
+    "value": 1500
+   },
+   {
+    "time_sec": 11400,
+    "value": 2000
+   },
+   {
+    "time_sec": 11699,
+    "value": 2000
+   },
+   {
+    "time_sec": 11700,
+    "value": 2500
+   },
+   {
+    "time_sec": 11999,
+    "value": 2500
+   },
+   {
+    "time_sec": 12000,
+    "value": 3000
+   },
+   {
+    "time_sec": 12299,
+    "value": 3000
+   },
+   {
+    "time_sec": 12300,
+    "value": 0
+   },
+   {
+    "time_sec": 12599,
+    "value": 0
+   },
+   {
+    "time_sec": 12600,
+    "value": 2000
+   },
+   {
+    "time_sec": 16199,
+    "value": 2000
+   },
+   {
+    "time_sec": 16200,
+    "value": 1500
+   },
+   {
+    "time_sec": 16499,
+    "value": 1500
+   },
+   {
+    "time_sec": 16500,
+    "value": 2000
+   },
+   {
+    "time_sec": 16799,
+    "value": 2000
+   },
+   {
+    "time_sec": 16800,
+    "value": 2500
+   },
+   {
+    "time_sec": 17099,
+    "value": 2500
+   },
+   {
+    "time_sec": 17100,
+    "value": 3000
+   },
+   {
+    "time_sec": 17399,
+    "value": 3000
+   },
+   {
+    "time_sec": 17400,
+    "value": 0
+   },
+   {
+    "time_sec": 17699,
+    "value": 0
+   },
+   {
+    "time_sec": 17700,
+    "value": 2000
+   },
+   {
+    "time_sec": 21299,
+    "value": 2000
+   },
+   {
+    "time_sec": 21300,
+    "value": 1500
+   },
+   {
+    "time_sec": 21599,
+    "value": 1500
+   },
+   {
+    "time_sec": 21600,
+    "value": 2000
+   },
+   {
+    "time_sec": 21899,
+    "value": 2000
+   },
+   {
+    "time_sec": 21900,
+    "value": 2500
+   },
+   {
+    "time_sec": 22199,
+    "value": 2500
+   },
+   {
+    "time_sec": 22200,
+    "value": 3000
+   },
+   {
+    "time_sec": 22499,
+    "value": 3000
+   },
+   {
+    "time_sec": 22500,
+    "value": 0
+   },
+   {
+    "time_sec": 22799,
+    "value": 0
+   },
+   {
+    "time_sec": 22800,
+    "value": 0
+   },
+   {
+    "time_sec": 23399,
+    "value": 0
+   }
+  ],
+  "temperature": [
+   {
+    "time_sec": 0,
+    "value": 40
+   },
+   {
+    "time_sec": 2399,
+    "value": 40
+   },
+   {
+    "time_sec": 2400,
+    "value": 100
+   },
+   {
+    "time_sec": 7499,
+    "value": 100
+   },
+   {
+    "time_sec": 7500,
+    "value": 40
+   },
+   {
+    "time_sec": 12599,
+    "value": 40
+   },
+   {
+    "time_sec": 12600,
+    "value": 100
+   },
+   {
+    "time_sec": 17699,
+    "value": 100
+   },
+   {
+    "time_sec": 17700,
+    "value": 40
+   },
+   {
+    "time_sec": 22799,
+    "value": 40
+   },
+   {
+    "time_sec": 22800,
+    "value": 25
+   },
+   {
+    "time_sec": 23399,
+    "value": 25
+   }
+  ]
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}
