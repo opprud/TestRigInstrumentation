@@ -155,6 +155,15 @@ motor, no heat, ~5 min per cell):
    the heater relay** (ch0) at fixed everything-else. Any step in the sensor channels on the toggle = the
    heater-relay coupling path (the second coupling 0035 flagged), isolated from the drive.
 
+> **DATA NOTE (telem-stamp scan, Pi 2026-09-30):** the block 0 (`20260930_093141`) and 2A
+> (`20260930_102402`) h5s carry **no `telem_*` per-sweep stamps** — they predate the `_telemetry_store`
+> race fix and the dead-VFD Modbus timeouts lost the race. **Immaterial for 0046:** these are
+> stationary / dead-drive / no-heat blocks with no operating point to record, and the waveform +
+> `/metadata` + scaling attributes are complete — which is all the RMS/spectrum attribution uses. The
+> config (PSU / sinus / motor) lives in the run notes, not in `telem_*`. Post-fix blocks (2B onward) are
+> fully stamped. The full archive scan (only the five 2026-09-30 VFD-off runs affected; all four
+> findings-critical runs fully stamped, no JSONL repair needed anywhere) is recorded in CLAUDE.md.
+
 ## Analysis
 Per channel (UL / AE / SP, and OE if run): **RMS + spectrum** for every block. The deltas that matter:
 - **0→1→2:** the switch-mode-vs-linear PSU contribution.
