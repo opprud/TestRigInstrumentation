@@ -42,6 +42,31 @@ decoupled sweep. Every block:
    normal run. This is "sensors sitting quiet" — the floor every later block is read against.
    **Read the floor from a run whose settings applied:** the scope refuses its first connection after idle on ~4/5 cold starts (deterministic, recovers on attempt 2 — Pi), so the two `ConnectionRefused` lines at the top of every block log are EXPECTED, not a noise finding; check the `acquisition depth requested=… scope reports=…` line before trusting block 0.
 
+> **BLOCK 0 MUST ALSO RECORD WHAT ELSE IN THE ROOM IS POWERED (Kim, 2026-09-30).** Learned the hard
+> way during the first attempts: an **external device that is not part of the bench but sits close to
+> the sensor cabling** was the *dominant* source of the 1060.7 kHz line, and switching it off dropped
+> that line to **28 %** and **SP's total AC RMS by 10.6 %**. It was caught only because Kim happened to
+> switch it off mid-run, which produced an accidental in-run A/B. Before that, the line had been
+> attributed to one of the two PSUs on the reasoning that the drive was fully dead — so **block 2 would
+> have shown the linear supply "fixing" something the switch-mode supply never caused**, with the false
+> attribution baked into the reference floor that every later delta is measured against.
+>
+> The block-0 spec already said *"no extra bench gear powered near the sensor cabling"*. That is not
+> enough on its own, because it is a negative instruction nobody can verify after the fact. **Record the
+> room's state positively, in the run notes, as part of block 0's configuration:**
+>
+> ```
+> ROOM INVENTORY (block 0 only — the floor every delta is read against)
+>   device / instrument ............ state (ON / OFF / unplugged) ... approx. distance to sensor cabling
+>   ...
+>   anything switched OFF specifically for this block, and why
+> ```
+>
+> Block 0 only. The later blocks are read as *deltas against* block 0, so as long as the room does not
+> change between them the inventory does not have to be repeated — but **if anything in the room is
+> switched on or off mid-ladder, that block is void** and must be re-run, exactly as the split attempt
+> `20260930_085938_SPLIT_device_off_at_t20` was.
+
 **1. (folded into block 0.)** The switch-mode PSU is already ON in the floor, so there is no separate
    "turn the PSU on" step — the switch-mode-vs-linear contribution is the **block 0 → block 2** delta.
 
