@@ -28,15 +28,19 @@ decoupled sweep. Every block:
 
 ## Blocks
 
-**0. Bare floor.** Scope + sensors only, everything else off (VFD off, motor off, no heat), ~30 min
-   stationary. This is the pure acquisition/sensor noise floor — the reference every other block is read
-   against.
+**0. Bare floor — the reference.** Sensors powered at their operating point (**24 VDC switch-mode PSU
+   + slip-ring ~5 VDC PSU both ON**, Kim 2026-09-30), but **nothing driving them: VFD fully powered down
+   (mains off, not merely un-commanded — an idle VFD's DC bus + switching is still live), motor off,
+   heater relay open (Shelly ch0 off — the unit stays powered, it's toggled in block 6).** No extra bench
+   gear powered near the sensor cabling. ~30 min stationary acquire, same scope channels/settings as a
+   normal run. This is "sensors sitting quiet" — the floor every later block is read against.
 
-**1. + switch-mode PSU on** (sensors powered from today's supply), otherwise as block 0. Delta vs 0 = how
-   much the switch-mode supply injects.
+**1. (folded into block 0.)** The switch-mode PSU is already ON in the floor, so there is no separate
+   "turn the PSU on" step — the switch-mode-vs-linear contribution is the **block 0 → block 2** delta.
 
-**2. Swap to the linear 24 VDC lab supply** (same as 1 otherwise). Delta vs 1 = the PSU's own contribution,
-   isolated. If the noise drops here, the switch-mode supply is a culprit.
+**2. Swap the sensor supply to the linear 24 VDC lab supply** (everything else as block 0). **Delta vs
+   block 0** = the switch-mode PSU's own contribution, isolated. If the noise drops here, the switch-mode
+   supply is a culprit.
 
 **3. + VFD energized, motor slow (manual mode), sinus filter OFF.** Delta vs 2 = drive EMI at the sensor
    channels with no output filtering.
