@@ -1259,9 +1259,22 @@ def acquire_loop(config):
         if DEBUG:
             print(f"[acquire_loop] Could not query scope settings: {e}")
 
-    # Shared telemetry dict — updated by test_runner via acq_cfg["_telemetry_store"]
-    # acquire_loop reads latest value per sweep
-    telemetry_store: dict = acq_cfg.get("_telemetry_store") or {}
+    # Shared telemetry dict — updated by test_runner via acq_cfg["_telemetry_store"];
+    # acquire_loop reads the latest value per sweep and stamps it onto the sweep.
+    #
+    # This MUST keep the caller's object. It used to read `... or {}`, and an empty dict
+    # is falsy: if the runner had not pushed its first tick by the time this line ran, the
+    # shared reference was silently replaced by a fresh private dict, every later update
+    # went to the *other* dict, and no sweep ever got a telem_* attribute again. The file
+    # still looks completely valid — the waveforms are all there, the metadata is all there,
+    # and only the per-sweep operating point is missing.
+    #
+    # It is a race, so it bit at random until ticket 0046 made the runner slow to start:
+    # with the VFD powered down every Modbus connect times out at 3 s with retries, so the
+    # first telemetry callback landed well after this line. Found 2026-09-30 by Kim asking
+    # whether the block runs logged everything a normal run does. They did not.
+    _ts = acq_cfg.get("_telemetry_store")
+    telemetry_store: dict = _ts if _ts is not None else {}
     # OE BLE captures arrive on this queue from the sampler task (ticket 0001).
     oe_queue = acq_cfg.get("_oe_queue")
     # One origin for both streams (ticket 0025). Manual mode has no runner, so it simply starts

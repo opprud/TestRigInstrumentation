@@ -569,6 +569,24 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   danger is a plausible-looking file that is years out of date. Either delete them or rename them
   `*_superseded_<date>.json` as was done for `KaretTest_Oil1`.
 
+- **⚠️ Sweeps silently lost their `telem_*` stamps when the runner was slow to start — a falsy-empty-dict
+  race, fixed 2026-09-30.** `acquire_loop` took the shared telemetry dict as
+  `acq_cfg.get("_telemetry_store") or {}`. **An empty dict is falsy**, so if the runner had not pushed its
+  first tick by the time that line ran, the shared reference was replaced by a fresh private dict, every
+  later update from the runner went to the *other* dict, and **no sweep ever got a `telem_*` attribute
+  again**. The file still looks completely valid: all the waveforms, all the metadata, only the per-sweep
+  operating point missing — so a run records perfect signals with no record of the rpm, drive Hz or
+  temperature they were taken at.
+
+  It is a **race**, so it bit at random for as long as it existed. Ticket 0046 made it reproducible: with
+  the VFD powered down every Modbus connect times out at 3 s with retries, so the runner's first callback
+  lands well after `acquire_loop` has taken its copy. **Found because Kim asked whether the block runs
+  logged everything a normal run does.** They did not.
+
+  Fixed to keep the caller's object (`_ts if _ts is not None else {}`) and verified on hardware — a 2 min
+  run now stamps six fields per sweep again. **When reading older files, check for `telem_*` on a sweep
+  before trusting that a run had no telemetry: its absence may be this bug, not a stationary rig.**
+
 - **Skipped sweeps leave gaps in the HDF5 sweep numbering.** Analysis must iterate the
   existing `sweep_###` groups, not assume contiguous indices.
 
