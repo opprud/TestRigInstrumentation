@@ -25,6 +25,12 @@ decoupled sweep. Every block:
 - same scope channels + acquisition settings as a normal run, so blocks compare without rescaling,
 - **log which configuration each block is** (PSU type, sinus on/off, motor state) in the run notes /
   `/metadata` so a plot can never be mis-attributed later.
+- **Hold the ambient electrical environment CONSTANT across ALL blocks** (other powered devices in the
+  room on/off the same) and **record block 0's room state**. 2026-09-30: an *unrelated* device near the
+  cabling was 1.06 MHz-coupling into SP at ~10 % (SP total −10.6 % when Kim switched it off). The ambient
+  is a hidden variable: a delta is only clean if the intended variable is the *only* thing that changed,
+  so a device switched on during block 4 would look like the sinus filter. If something must stay on,
+  record it per block so it can be subtracted.
 
 ## Blocks
 
