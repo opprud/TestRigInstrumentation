@@ -70,9 +70,19 @@ decoupled sweep. Every block:
 **1. (folded into block 0.)** The switch-mode PSU is already ON in the floor, so there is no separate
    "turn the PSU on" step — the switch-mode-vs-linear contribution is the **block 0 → block 2** delta.
 
-**2. Swap the sensor supply to the linear 24 VDC lab supply** (everything else as block 0). **Delta vs
-   block 0** = the switch-mode PSU's own contribution, isolated. If the noise drops here, the switch-mode
-   supply is a culprit.
+**2A. Swap the sensor supply to the linear 24 VDC lab supply** (everything else as block 0). **Delta vs
+   block 0** = the 24 V switch-mode PSU's own contribution, isolated. With the 5 V slip-ring/OE supply
+   linear and the VFD dead, the 24 V switch-mode is the *only* switching supply left on the bench, so
+   residual 1060.7 kHz **vanishing** here = it's the switch-mode PSU; **surviving** = the source is not a
+   bench supply (Pi's supply / scope / room).
+
+**2B. Switch off the heater/temperature control box** (Kim, 2026-09-30 — a black box on its own 220 VAC,
+   cannot be opened, so treat it as a whole), everything else as 2A. The heater element is off throughout,
+   so anything that changes is the **box's own electronics/PSU**, cleanly separate from block 6's relay
+   toggle. **Because the box can't be inspected, the result tells us what it feeds:** a channel going
+   **DEAD** (flat/zero) = the box was powering that sensor's supply → a confound, flip it back on and note
+   it; a channel merely getting **quieter** = the box's conducted EMI, which is what we want. Watch the
+   live view as Kim flips it; one change at a time; log the off timestamp for a clean in-run A/B.
 
 **3. + VFD energized, motor slow (manual mode), sinus filter OFF.** Delta vs 2 = drive EMI at the sensor
    channels with no output filtering.

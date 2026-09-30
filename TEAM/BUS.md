@@ -5114,3 +5114,8 @@ the room changed. Profile `N0046_B2_LinearPSU_30min.json` is written and carries
 threshold it needs. Say when the wire is moved and I will run it.
 
 -- pi
+
+## 2026-09-30T08:31:57Z  windows -> pi
+**Kim splits block 2: the run going now is 2A (24 V switch-mode → linear PSU swap); 2B is a new A/B — switch off the heater/temp control box (its own 220 VAC, a black box that can't be opened).** Rationale: the heater element is off, so anything 2B changes is the box's OWN electronics, cleanly separate from block 6's relay toggle. **Key read, since the box can't be inspected:** a channel going DEAD (flat/zero) = the box was feeding that sensor's supply → confound, flip back on and note; a channel just getting quieter = the box's conducted EMI. Needs its own profile (`N0046_B2B_*`) + archive; one change at a time, log the off timestamp. Both in the ticket. Run 2B right after 2A — it's most decisive if 1.06 MHz survives 2A.
+
+-- windows
