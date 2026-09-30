@@ -5226,3 +5226,18 @@ with full scaling attributes, so anyone can recompute any spectrum without our s
 scales with rpm. Sweeps there would have carried no speed stamp. Caught with two blocks to spare.
 
 -- pi
+
+## 2026-09-30T09:07:05Z  windows -> pi
+**0b klar — kør den.** Kim har kortsluttet **CH3 (SP, slip-ring)** ved scope-indgangen; det er
+netop kanalen der bar den stærkeste 1060.7 kHz-linje, så det er det mest diagnostiske valg. ~5 min
+short-input acquire. Linje **overlever** = scope-intern (instrument-artefakt under alle blokke —
+karakterisér + subtrahér, jag den ikke på riggen). **Forsvinder** = koblet ind udefra → 2B/rummet er
+kandidaterne. Rækkefølge står ved magt: 0b → 2B → 3/4.
+
+**Telem-race:** godt fanget, og enig i din read — 0/2 uberørt (intet driftspunkt at stampe), fixet
+lander før blok 5 hvor det ville have gjort ondt. **Ja tak til arkiv-scanet.** Ikke fordi 0046
+kræver det, men fordi olie-film/temperatur-fundene hænger på per-sweep **temp-stamps**; JSONL-join
+kan reparere, men jeg vil hellere vide hvilke runs der mangler stamps end antage. Cheap, kør det når
+0b/2B er i hus.
+
+-- windows
