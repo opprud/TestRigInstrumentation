@@ -587,6 +587,16 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   run now stamps six fields per sweep again. **When reading older files, check for `telem_*` on a sweep
   before trusting that a run had no telemetry: its absence may be this bug, not a stationary rig.**
 
+- **A `/` in a profile's `name` killed the run before its first tick (fixed 2026-09-30).** The runner
+  builds the telemetry filename from the profile name and only collapsed whitespace, so a name like
+  `"0046 block 2B - heater/temp control box OFF 30 min"` became a path with a **subdirectory that does not
+  exist**. `log_path.write_text` raised `FileNotFoundError` before the first tick, which set `stop_event`
+  and took the acquisition down with it — **`acquire loop ended — 0 sweep(s) skipped` after zero sweeps**,
+  and an 18 kB HDF5 that opens fine and contains nothing. Cost one 0046 block; it would have cost a 13 h
+  run just as easily. `safe_name` now also maps anything outside `[A-Za-z0-9._-]` to `-`. Existing profile
+  names are unaffected (`Keratech 22` → `Keratech_22`, `UL temperature cycle 6.5 h` →
+  `UL_temperature_cycle_6.5_h`, both unchanged).
+
 - **Skipped sweeps leave gaps in the HDF5 sweep numbering.** Analysis must iterate the
   existing `sweep_###` groups, not assume contiguous indices.
 

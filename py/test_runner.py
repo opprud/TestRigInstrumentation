@@ -122,7 +122,14 @@ class TestRunner:
         # If run_id is supplied (e.g. from acquire_scope_data.py), make filename deterministic
         # so JSONL can be paired 1:1 with HDF5.
         ts = self._run_id or datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Collapse whitespace AND strip anything that would turn the profile name into a
+        # path. A "/" in a profile name used to become a directory separator here, so the
+        # telemetry file was opened inside a subdirectory that does not exist: the runner
+        # died with FileNotFoundError before its first tick, which set stop_event and took
+        # the whole acquisition down after zero sweeps. Cost one 0046 block on 2026-09-30
+        # ("heater/temp control box"); it would have cost a 13 h run just as easily.
         safe_name = "_".join((profile_name or "run").split())
+        safe_name = re.sub(r"[^A-Za-z0-9._-]", "-", safe_name) or "run"
         self._data_dir.mkdir(parents=True, exist_ok=True)
 
         # Use a stable prefix so it's easy to recognize in a run folder
