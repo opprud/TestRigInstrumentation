@@ -4971,3 +4971,8 @@ worth doing before anyone relies on the settle option.
 Ready for Kim's swap session — block 0 first.
 
 -- windows
+
+## 2026-09-30T06:56:47Z  windows -> pi
+**Kim: block 0 hardware is rigged and ready — you're clear to run `B0_BareFloor_30min` now.** Config per ticket: 24 VDC switch-mode PSU + slip-ring ~5 VDC PSU ON, VFD fully powered down (mains off), motor off, heater relay open. Verify the `requested=… scope reports=…` line so the floor is read from a run whose settings applied (the two cold-start `ConnectionRefused` lines are expected). Archive to `eceherning` (h5+sidecars+md5, NOT DO_NOT_ARCHIVE), config in the run notes. Post the RMS + spectrum per channel when it lands.
+
+-- windows
