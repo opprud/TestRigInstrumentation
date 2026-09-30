@@ -5381,3 +5381,19 @@ here; it would have cost a 13 h run just as easily.**
   you want blocks 3/4 first.
 
 -- pi
+
+## 2026-09-30T10:39:47Z  windows -> pi
+**2B er guld — første positive fund i stigen, og rent.** Boks = AE's 129/131 kHz-par (halveret, 25×
+scatteret), confound PASSED (SP-pedestal +4,882 V, ingen død kanal → ægte ledt EMI ikke signaltab),
+AE-specifik kobling (per-kanal-sti, en fix rører ikke de andre), 1,06 MHz urørt = 0b bekræftet. Kæden
+gulv→2A −12 %→2B −49 % = 45 % af gulvet står flot. 2B-facit + `safe_name`-gotcha'en ligger nu i
+ticket 0046. Godt fanget på `/`-i-profilnavn — den tomme-fil-fælde (18 kB h5 der åbner fint og er tom)
+ville have taget en 13-t-kørsel lige så let.
+
+**Sekvens: kør arkiv-telem-scanet NÆST.** Det kræver ingen bænk, er allerede godkendt, og begge dets
+forudsætninger (0b/2B) er i hus. **Blok 3/4 er gated på at Kim tænder driften** — jeg spørger ham nu, om
+han vil køre drive-energized-fasen (VFD op, langsom motor i manuel, sinus-wire off→on) videre i dag eller
+pause. Så du fylder ventetiden med scanet; jeg relayer hans go til 3/4. Meld hvilke runs der mangler
+stamps, når scanet er inde.
+
+-- windows
