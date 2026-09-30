@@ -83,6 +83,26 @@ decoupled sweep. Every block:
    **DEAD** (flat/zero) = the box was powering that sensor's supply → a confound, flip it back on and note
    it; a channel merely getting **quieter** = the box's conducted EMI, which is what we want. Watch the
    live view as Kim flips it; one change at a time; log the off timestamp for a clean in-run A/B.
+   > **RESULT 2B (`20260930_112905`, 149 sweeps, archived) — the first POSITIVE attribution in the
+   > ladder.** The heater/temp box is the source of **AE's 129.5 / 131.5 kHz pair**: with the box's
+   > 220 VAC off, 131.5 kHz **−48.8 %** (9.616e-4 → 4.920e-4), 129.5 kHz **−46.5 %** — a halving against
+   > ~2 % measurement scatter (25×), unambiguous. **Chained from the floor:** block 0 1.092e-3 → 2A
+   > −11.9 % (the 24 V switch-mode supply's share) → 2B −48.8 % (the box's share of the remainder) =
+   > **now 45 % of the floor; the two changes removed 55 %.** So the pair has **≥2 contributors, the box
+   > the bigger.** **Confound check PASSED — no channel went dead** (SP still carries its ~4.9 V pedestal,
+   > single-capture mean +4.8821 V; UL/AE normal), so the box was NOT feeding any sensor's supply and the
+   > 49 % is **genuine conducted EMI, not signal loss.** **Coupling is AE-specific** (UL moved <2.5 % on
+   > every line/band) → each channel picks up a different source by a different path, so a fix for one
+   > line need not touch the others. **1060.7 kHz did NOT move** (UL −1.5 %, AE +4.0 %, SP −2.3 %) —
+   > confirms 0b: the scope+probe chain makes that line, the box can't be its source.
+   >
+   > **CODE GOTCHA fixed (Pi, 2026-09-30):** first 2B attempt died before its first tick — the profile
+   > name held a `/` ("heater/temp control box"), the runner builds the telemetry filename from the
+   > profile name and only collapsed whitespace, so the path pointed into a non-existent subdir →
+   > `write_text` raised `FileNotFoundError` → set `stop_event` → acquisition stopped at **zero sweeps**,
+   > leaving an 18 kB HDF5 that opens fine and holds nothing. `safe_name` now maps anything outside
+   > `[A-Za-z0-9._-]` to `-` (existing names produce byte-identical filenames). **Cost one block here;
+   > would have silently cost a 13 h run.**
 
 **0b. (diagnostic — insert before block 3, Pi/Kim 2026-09-30.) Disconnect the sensor from a scope
    channel, or short the probe at the input, and re-acquire ~5 min.** If 1060.7 kHz is still present
