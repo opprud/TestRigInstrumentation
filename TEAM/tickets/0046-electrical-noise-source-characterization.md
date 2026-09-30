@@ -84,6 +84,16 @@ decoupled sweep. Every block:
    it; a channel merely getting **quieter** = the box's conducted EMI, which is what we want. Watch the
    live view as Kim flips it; one change at a time; log the off timestamp for a clean in-run A/B.
 
+**0b. (diagnostic — insert before block 3, Pi/Kim 2026-09-30.) Disconnect the sensor from a scope
+   channel, or short the probe at the input, and re-acquire ~5 min.** If 1060.7 kHz is still present
+   with **nothing connected**, it is the **scope itself** — an instrument artefact under EVERY block
+   that no rig-supply work can remove, and every later delta is measured on top of it (characterise +
+   subtract it, don't chase it on the rig). If it disappears, the line is coupled in from outside and
+   2B / the room are the candidates. **Run this BEFORE 2B** — a 'scope internal' result makes 2B moot
+   for the 1.06 MHz line. Result of 2A (2026-09-30): the 24 V switch-mode PSU is NOT the 1.06 MHz
+   source (line survived the linear swap, within scatter) — so the source is off-bench; do NOT buy a
+   linear sensor supply to remove it.
+
 **3. + VFD energized, motor slow (manual mode), sinus filter OFF.** Delta vs 2 = drive EMI at the sensor
    channels with no output filtering.
 
