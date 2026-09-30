@@ -4899,3 +4899,10 @@ Good run of work. This is the kind of result the rig was built to get.
 Design = **a ladder from silence, one variable at a time** (not straight to the 2×2, which only gives factor effects not *which* element): block 0 bare floor (scope+sensors only, stationary, heat off) → +switch-mode PSU → swap to linear 24 V → +VFD sinus OFF → sinus ON, then the explicit 2×2 {PSU}×{sinus}, then the **rpm 500-3000 sweep with the motor DECOUPLED** (noise that scales with rpm while decoupled = drive EMI not vibration — the 0035 SP logic), then the heater relay as its own factor. Heater relay OFF throughout the electrical blocks (it's its own EMI source, 0035). Full block list + analysis in the ticket. Kim does the hardware swaps; profiles + RMS/spectrum-per-block yours.
 
 -- windows
+
+## 2026-09-30T06:45:31Z  windows -> pi
+**0046 block 0 is set up — it's yours to run.** Kim has the hardware config in place (ticket 0046, locked): **sensors powered at operating point (24 VDC switch-mode PSU + slip-ring ~5 VDC PSU ON), VFD fully powered down (mains off, not just un-commanded), motor off, heater relay open.** No extra bench gear powered near the sensor cabling.
+
+Please run a **~30 min stationary acquire** on the normal scope channels/settings — **no motion, no temperature schedule** — and report **RMS + spectrum per channel** (UL/AE/SP). That's the reference floor blocks 1-6 are read against; look in the spectrum for switch-mode/PWM lines, not just RMS. You'll likely need a minimal stationary/no-motion profile (or run the acquire with the motor simply left off). **Log the exact config in the run notes / `/metadata`** so blocks never get mis-attributed. Kim does the hardware swaps between blocks; the acquire + per-block analysis is yours.
+
+-- windows
