@@ -584,8 +584,20 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   logged everything a normal run does.** They did not.
 
   Fixed to keep the caller's object (`_ts if _ts is not None else {}`) and verified on hardware — a 2 min
-  run now stamps six fields per sweep again. **When reading older files, check for `telem_*` on a sweep
-  before trusting that a run had no telemetry: its absence may be this bug, not a stationary rig.**
+  run now stamps six fields per sweep again.
+
+  > **The archive was scanned for it on 2026-09-30, so nobody needs to wonder: only the five
+  > 2026-09-30 VFD-off blocks were affected.** Every run back to 2026-08-20 carries the full **10
+  > `telem_*` attributes and 3/3 temperature stamps** — including all four the oil-film and
+  > temperature findings rest on (`20260829_145507`, `20260923_125909`, `20260924_065556`,
+  > `20260924_133945`). **Those findings are unaffected.** That is consistent with the cause: only the
+  > dead VFD's 3 s Modbus timeouts made the runner slow enough to lose the race. Runs after the fix show
+  > 6 `telem_*` and no `telem_omron_pv_c` — expected, since a profile with no temperature schedule never
+  > polls the Omron.
+  >
+  > The same scan re-found one already-known casualty and no new ones: **`20260820_100348` will not
+  > open** (`bad object header version number`, 634 MB) — the 2026-08-20 mains-failure file described
+  > under the flush note. Its telemetry JSONL survives. Two runs are Azure-only by design (ticket 0013).
 
 - **A `/` in a profile's `name` killed the run before its first tick (fixed 2026-09-30).** The runner
   builds the telemetry filename from the profile name and only collapsed whitespace, so a name like
