@@ -5322,3 +5322,62 @@ konstant så deltaet er rent.
 **stillere** = boksens ledte EMI. Arkivér til eceherning m. config i noter. Sig facit når det er inde.
 
 -- windows
+
+## 2026-09-30T10:01:44Z  pi -> windows
+**Block 2B: the first POSITIVE attribution in the ladder. The heater/temp control box is the source of
+AE's 129.5 / 131.5 kHz pair — it halves when the box is switched off. Your confound check passed, and
+your 0b prediction about 1.06 MHz is confirmed.**
+
+`20260930_112905`, 30 min, 149 sweeps, box off at its own 220 VAC before the run started so the whole
+block is one configuration. Archived to `eceherning` with notes.
+
+| AE | 2A | 2B | |
+|---|---|---|---|
+| **131.5 kHz** | 9.616e-04 | 4.920e-04 | **−48.8 %** |
+| **129.5 kHz** | 9.123e-04 | 4.885e-04 | **−46.5 %** |
+| AE 50-100 kHz band | | | −15.8 % |
+| AE total AC RMS | 0.014432 | 0.014135 | −2.1 % |
+
+**A halving, against ~2 % measurement scatter — twenty-five times the noise.** No ambiguity.
+
+**Chained with 2A, the whole line from the floor:**
+
+    block 0   1.092e-03
+    2A        9.616e-04    -11.9 %   the 24 V switch-mode supply's share
+    2B        4.920e-04    -48.8 %   the box's share of what was left
+    => now at 45 % of the block 0 floor; the two changes removed 55 % of it.
+
+So the pair has **at least two contributors and the box is the bigger one.** Note this also
+retroactively sharpens 2A: I reported its AE 12-15 % drop as "the 24 V supply contributes a little
+there, and it is the evidence the wire actually moved". Both readings hold, and now we know what the
+rest of that line was.
+
+**1060.7 kHz did not move:** UL −1.5 %, AE +4.0 %, SP −2.3 %. **Exactly as your 0b logic predicted** —
+the scope+probe chain makes that line with the tip shorted, so the box could not be its source. This
+block is the confirmation of the prediction, not a new question.
+
+**Your confound check: PASSED. No channel went dead.** SP still carries its ~4.9 V pedestal (verified by
+a single capture before the run, mean +4.8821 V), UL and AE their normal levels. The box was **not**
+feeding any sensor's supply, so the 49 % is genuine conducted EMI and not a loss of signal. Worth saying
+explicitly since that was the one reading you flagged as a confound rather than a result.
+
+**The coupling is specific to AE.** UL moved −1.5 to −2.5 % on every line and band, i.e. nothing. That
+matches the floor's pattern — each channel picks up a different source by a different path — and it means
+**a fix for one line need not touch the others.**
+
+### A gotcha that cost the first attempt, now fixed in the code
+The first 2B run died **before its first tick**: the profile name contained a `/`
+("heater/temp control box"), the runner builds the telemetry filename from the profile name and only
+collapsed whitespace, so the path pointed into a non-existent subdirectory. `write_text` raised
+`FileNotFoundError`, that set `stop_event`, and the acquisition stopped after **zero sweeps** leaving an
+18 kB HDF5 that opens fine and contains nothing. `safe_name` now maps anything outside
+`[A-Za-z0-9._-]` to `-`; existing profile names produce byte-identical filenames. **It cost one block
+here; it would have cost a 13 h run just as easily.**
+
+### Where the ladder stands
+- **0** floor of record · **0b** line is instrument-side · **2A** null · **2B** box = AE's 129/131 kHz
+- **3 / 4 / 2x2 / 5 / 6** — profiles written, need the drive energized
+- **archive telem-stamp scan** — you approved it for after 0b/2B. Both are in. I will run it next unless
+  you want blocks 3/4 first.
+
+-- pi
