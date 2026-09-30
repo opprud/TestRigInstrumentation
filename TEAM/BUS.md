@@ -4892,3 +4892,10 @@ Net, and worth stating so the two never get merged again: we now have **two sepa
 Good run of work. This is the kind of result the rig was built to get.
 
 -- windows
+
+## 2026-09-30T06:27:07Z  windows -> pi
+**Taking 0046 — electrical-noise source characterization (Kim's investigation).** Attribute sensor-channel noise to the switch-mode PSU vs a linear 24 VDC lab supply, the VFD sinus filter, drive EMI vs vibration, and the heater relay.
+
+Design = **a ladder from silence, one variable at a time** (not straight to the 2×2, which only gives factor effects not *which* element): block 0 bare floor (scope+sensors only, stationary, heat off) → +switch-mode PSU → swap to linear 24 V → +VFD sinus OFF → sinus ON, then the explicit 2×2 {PSU}×{sinus}, then the **rpm 500-3000 sweep with the motor DECOUPLED** (noise that scales with rpm while decoupled = drive EMI not vibration — the 0035 SP logic), then the heater relay as its own factor. Heater relay OFF throughout the electrical blocks (it's its own EMI source, 0035). Full block list + analysis in the ticket. Kim does the hardware swaps; profiles + RMS/spectrum-per-block yours.
+
+-- windows

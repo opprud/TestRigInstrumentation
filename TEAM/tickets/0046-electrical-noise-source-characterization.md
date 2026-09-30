@@ -1,0 +1,77 @@
+---
+id: 0046
+title: Electrical-noise source characterization — attribute sensor-channel noise to PSU / VFD sinus filter / drive EMI, one source at a time
+area: acquisition / characterization
+role: test
+status: backlog
+depends_on: 0035, 0038
+branch:
+pr:
+---
+
+## Purpose
+Find **where the electrical noise in the sensor channels comes from** and how much each source
+contributes — the switch-mode PSU we use today vs a clean linear 24 VDC lab supply, the VFD's sinus
+(output) filter on vs off, drive EMI vs mechanical vibration, and the heater relay. Kim's investigation,
+2026-09-30.
+
+## Method — a ladder from silence, ONE variable at a time
+The whole point is attribution: a 2×2 alone gives you the two factors' *effects* but not *which* element
+is responsible. So start from a quiet floor and **add one source at a time**, then do the 2×2, then the
+decoupled sweep. Every block:
+- **stationary and heater relay HELP OFF** (the heater relay is itself an EMI source — 0035 saw a
+  heater-relay → SP coupling — so it must be off for a clean electrical read; it comes back as its own
+  factor at the end),
+- same scope channels + acquisition settings as a normal run, so blocks compare without rescaling,
+- **log which configuration each block is** (PSU type, sinus on/off, motor state) in the run notes /
+  `/metadata` so a plot can never be mis-attributed later.
+
+## Blocks
+
+**0. Bare floor.** Scope + sensors only, everything else off (VFD off, motor off, no heat), ~30 min
+   stationary. This is the pure acquisition/sensor noise floor — the reference every other block is read
+   against.
+
+**1. + switch-mode PSU on** (sensors powered from today's supply), otherwise as block 0. Delta vs 0 = how
+   much the switch-mode supply injects.
+
+**2. Swap to the linear 24 VDC lab supply** (same as 1 otherwise). Delta vs 1 = the PSU's own contribution,
+   isolated. If the noise drops here, the switch-mode supply is a culprit.
+
+**3. + VFD energized, motor slow (manual mode), sinus filter OFF.** Delta vs 2 = drive EMI at the sensor
+   channels with no output filtering.
+
+**4. Same as 3 but sinus filter ON.** Delta vs 3 = how much the sinus filter cleans the drive EMI.
+
+### The 2×2 (the "4 combinations")
+Blocks 1–4 already contain it, but run it explicitly as a clean 2×2 at one condition (manual mode, slow
+motor, no heat, ~5 min per cell):
+
+| | switch-mode PSU | linear 24 VDC |
+|---|---|---|
+| **sinus OFF** | | |
+| **sinus ON**  | | |
+
+**5. RPM sweep 500 → 3000 rpm, sinus ON and OFF — with the MOTOR MECHANICALLY DECOUPLED from the rig.**
+   Decoupling is the key control: it removes bearing/rig vibration, so any noise that **scales with rpm
+   while decoupled is electrical (drive PWM/EMI), not mechanical.** Same logic that settled SP in the 0035
+   smoke test (SP jumped +43 % *flat* with speed = drive EMI, not vibration). Speed of record is
+   `59.83 × vfd_cmd_hz` if the tach mark ends up on the rig side of the coupling (see 0035).
+
+**6. (optional, last) heater relay as its own factor.** Repeat block 0's stationary floor but **toggle only
+   the heater relay** (ch0) at fixed everything-else. Any step in the sensor channels on the toggle = the
+   heater-relay coupling path (the second coupling 0035 flagged), isolated from the drive.
+
+## Analysis
+Per channel (UL / AE / SP, and OE if run): **RMS + spectrum** for every block. The deltas that matter:
+- **0→1→2:** the switch-mode-vs-linear PSU contribution.
+- **3→4 and the sinus row of the 2×2:** what the sinus filter buys.
+- **block 5:** does noise track rpm *while decoupled* → EMI vs vibration split, per channel.
+- **block 6:** heater-relay coupling, isolated.
+Look in the spectrum for switch-mode / PWM switching frequencies and their harmonics, not just RMS.
+
+## Owner / test
+- **Kim / hardware:** swap PSU (switch-mode ↔ linear 24 VDC), sinus filter in/out, decouple the motor,
+  run manual mode. Record which configuration each block is.
+- **Pi / dev:** the block profiles (or manual-mode drive + a stationary acquire), the RMS/spectrum
+  analysis per channel per block, and the deltas above.
