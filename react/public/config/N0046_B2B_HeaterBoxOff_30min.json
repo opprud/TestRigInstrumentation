@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 2B - heater/temp control box OFF 30 min",
+ "description": "BLOCK 2B — THE HEATER / TEMPERATURE CONTROL BOX AS ITS OWN FACTOR (Kim's split of block 2, 2026-09-30). Block 2A was the 24 V switch-mode -> linear PSU swap and came back NULL. 2B switches off the heater/temp control box at its own 220 VAC. WHY IT IS CLEANLY SEPARATE FROM BLOCK 6: the heater ELEMENT is already off in every electrical block (relay open), so anything 2B changes is the box's OWN ELECTRONICS — not the relay coupling, which block 6 isolates later by toggling the relay alone. READS, AND THE FIRST ONE IS A CONFOUND NOT A RESULT (windows, 2026-09-30) — the box cannot be opened, so infer from behaviour: a channel that goes DEAD, flat or zero, means the box was FEEDING THAT SENSOR'S SUPPLY. That is a confound, not a noise reduction: switch the box back on, note it, and do not report the delta as EMI. A channel that merely gets QUIETER while still carrying its normal signal is the box's conducted EMI, and that is the measurement. Baseline to read against is block 2A (20260930_102402) since that is the immediately preceding configuration, and block 0 (20260930_093141) for the full picture. Everything else unchanged: 24 V sensor supply LINEAR as left after 2A, slip-ring/OE supply linear, VFD dead at the mains, motor off, heater relay open, external tachometer off, room otherwise unchanged. LOG THE OFF TIMESTAMP in the run notes so the step can be located if the box is switched mid-run.",
+ "duration_minutes": 30,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}

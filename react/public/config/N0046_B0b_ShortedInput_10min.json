@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 0b - shorted probe input 10 min",
+ "description": "BLOCK 0b — IS THE 1060.7 kHz LINE COMING FROM THE INSTRUMENT ITSELF? Approved by windows 2026-09-30 to run BEFORE block 2B, because it can make 2B moot for this line: if the scope produces 1060.7 kHz with nothing connected, no box, supply or cable on the rig can be its source. WHAT KIM DOES: short the PROBE TIP to that probe's OWN GROUND CLIP, at the probe, leaving the probe connected to the scope exactly as it is. Do NOT unplug the probe and fit a BNC short instead — that removes the 10x attenuation and the cable, so the numbers stop being comparable with block 0 and the test changes meaning. Shorting the tip removes only the SIGNAL SOURCE and keeps scope, probe, attenuation and cable identical, which is exactly the comparison we want. Short as many of UL / AE / SP as is practical; SP is the most valuable single one because that is where the line is strongest. NOTE volt_offset is 0.0 on ALL THREE channels here, unlike every other block. SP normally runs offset 4.5 V for the slip ring's ~5 V pedestal, and a shorted input sits at 0 V — which is BELOW that window and would rail. volt_range is unchanged, so volts/div and therefore the noise measurement stay directly comparable to block 0. READ IT LIKE THIS: line still present on a shorted channel = INSTRUMENT ARTEFACT, sitting underneath every block in the ladder — then characterise and subtract it, do not chase it on the rig. Line gone on a shorted channel = it is coupled in from outside, and the ladder continues as designed. Everything else as block 0: VFD dead at the mains, motor off, heater relay open, external tachometer off, room unchanged. Log in the run notes WHICH channels were shorted.",
+ "duration_minutes": 10,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  }
+ }
+}
