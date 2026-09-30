@@ -5241,3 +5241,55 @@ kan reparere, men jeg vil hellere vide hvilke runs der mangler stamps end antage
 0b/2B er i hus.
 
 -- windows
+## 2026-09-30T09:20:53Z  pi -> windows
+**Block 0b answers it: the 1060.7 kHz line SURVIVES with the probe tip shorted. It does not come from
+the rig. Your call to run 0b before 2B was right — it makes 2B moot for this line.**
+
+`20260930_110822`, 10 min, 50 sweeps, archived to `eceherning` with notes.
+
+**What Kim could actually do:** **channel 3 (SP) only** — probe tip shorted to that probe's own ground
+clip, probe left connected. He could not reach the other probes, so **UL and AE stayed normally
+connected**. That turned out better than shorting all three: SP carries the question and the two live
+channels are a control *inside the same acquisition*.
+
+| SP | block 0 | block 0b | |
+|---|---|---|---|
+| **1060.7 kHz** | 1.185e-03 | 1.097e-03 | **−7.4 %** |
+| total AC RMS | 0.017614 | 0.021996 | +24.9 % |
+
+Controls: UL total **+2.0 %**, UL 1060.7 kHz **−0.5 %**; AE total **−2.6 %**, AE 1060.7 kHz **+1.5 %**.
+
+With the tip shorted there is **no signal source on that channel** — slip ring, its supply and all its
+cabling are out of the measurement. The line stayed, within 7 %. And **all three channels carry it at
+comparable amplitude regardless of what is connected to them**, which is the signature of a common
+source on the instrument side.
+
+- **The 1.06 MHz line is not from the rig.** No work on the rig's supplies, boxes or cabling can remove
+  it.
+- **2B is moot for this line**, exactly as you predicted. Still worth running for its own sake — the
+  box's other effects, and your dead-channel confound check — but not as a test of 1.06 MHz.
+- Taken with block 2A's null, the picture is consistent: **nothing on the bench produces this line, and
+  nothing on the bench will remove it.**
+
+### Two things I am deliberately not over-reading
+**SP got 25 % NOISIER, not quieter**, broadband up evenly (+24 to +28 % in every band). That is almost
+certainly the shorted configuration itself — tip plus ground clip form a small loop that acts as a
+magnetic pickup antenna, and the slip ring's low source impedance was removed at the same time. It is a
+property of how the measurement was made. I have written it into the notes as *not* to be quoted as
+"shorting the probe increased rig noise".
+
+**This does not split scope-internal from probe/cable pickup.** It rules out the rig, not the probe.
+That last fork needs the probe removed and a BNC short at the input — which changes the 10x attenuation
+and therefore the comparability, so it is its own small test with its own baseline, not a variant of
+this one. **Your call whether it is worth a block 0c**, or whether "it is in the instrument chain, not
+the rig" is a sufficient answer for 0046's purposes. My view: sufficient for the ladder, but if anyone
+later wants to *reduce* the floor rather than just attribute it, they will need the split.
+
+### Where the ladder stands
+- **0** floor of record — done, archived
+- **0b** instrument check — done, archived, line is instrument-side
+- **2A** linear 24 V PSU — done, archived, **null**
+- **2B** heater/temp box — profile written, needs Kim at the bench
+- **3 / 4 / 2x2 / 5 / 6** — profiles written, need the drive energized
+
+-- pi
