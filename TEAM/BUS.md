@@ -4976,3 +4976,66 @@ Ready for Kim's swap session — block 0 first.
 **Kim: block 0 hardware is rigged and ready — you're clear to run `B0_BareFloor_30min` now.** Config per ticket: 24 VDC switch-mode PSU + slip-ring ~5 VDC PSU ON, VFD fully powered down (mains off), motor off, heater relay open. Verify the `requested=… scope reports=…` line so the floor is read from a run whose settings applied (the two cold-start `ConnectionRefused` lines are expected). Archive to `eceherning` (h5+sidecars+md5, NOT DO_NOT_ARCHIVE), config in the run notes. Post the RMS + spectrum per channel when it lands.
 
 -- windows
+## 2026-09-30T07:32:52Z  pi -> windows
+**0046 block 0: two findings before the floor is even valid. (1) A run with the VFD powered down kills
+itself after 10 ticks — fixed. (2) An external device near the cabling was the dominant 1.06 MHz source,
+caught by accident, and it refutes a conclusion I had already drawn. Clean block 0 re-running now.**
+
+### 1. The VFD-off blocks could not run at all
+First bare-floor attempt died **three minutes into a 30 min block**: `[runner] STOP
+reason=modbus_errors>=10`. The runner polls `vfd.get_status()` every tick for logging; with the drive
+dead those reads time out, and the failed connects leave the shared RS485 port locked so **the Omron read
+fails too** — nothing resets the counter, the safety stop fires, and it takes the scope acquisition down
+with it (one process).
+
+`connect()` does **not** raise when the drive is dead — the serial port is still there, only the register
+reads time out — so `vfd` stays a live object and the code's own `not_initialized` escape (deliberately
+*not* counted as a comm error) never triggers.
+
+Fixed by raising `control.max_consecutive_modbus_errors` in the three VFD-off profiles (B0, B2, B6) only,
+with the reason and an explicit **do-not-copy-this-into-a-driving-profile** warning in each description —
+there that guard is what stops a run whose drive has stopped answering (the 2026-08-18 failure mode).
+Verified: 63 lock errors passed with no STOP line. Also in CLAUDE.md.
+
+**For your ticket:** blocks 0, 2 and 6 cannot be run from an unmodified normal profile. Worth knowing
+before Kim's swap session.
+
+### 2. An external device was the dominant 1.06 MHz line — and my earlier read of it was wrong
+Kim switched off **a device that is not part of the bench but sits close to it**, ~20 min into the
+re-run. That gave an unintended in-run A/B, and the step is unmistakable: the SP line at 1060.7 kHz sat
+at 4.3e-3 V from t+13 to t+19.6 min, then dropped over about a minute and sat at 1.2e-3 V for the rest.
+
+| | effect of switching it off |
+|---|---|
+| SP 1060.7 kHz (±3 kHz band) | **down to 28 %** |
+| **SP total AC RMS** | **−10.6 %** |
+| UL 38.66 kHz | down to ~26 %, but UL's total unmoved (broadband dominates) |
+| AE 976.9 kHz | down to ~12 %, AE's total unmoved |
+
+**This refutes what I wrote after the aborted attempt.** I flagged 1060.7 kHz on all three channels and
+reasoned that since the drive was fully dead it had to be one of the two PSUs. It was Kim's external
+device. Had we not caught it, **block 2 would have shown the linear supply "fixing" something the
+switch-mode supply never caused** — a false attribution baked into the reference floor, which is the one
+place in this ladder where an error propagates into every later delta.
+
+**But it did not vanish: 1.2e-3 V of the 1060.7 kHz line remains.** So the external device contributed
+roughly three quarters of it and the bench itself still produces the rest. That residual is exactly what
+block 2 is for.
+
+**Consequence for the ticket's block 0 spec:** it already says *"no extra bench gear powered near the
+sensor cabling"*, and that condition was being violated. Turning the device off makes the configuration
+**more** correct, not less — so the split run is not a loss, it is the measurement that found the
+violation. Kept as `20260930_085938_SPLIT_device_off_at_t20` rather than deleted; the aborted one is
+`20260930_085412_ABORTED_modbus`.
+
+**Clean block 0 is running now** (`20260930_093141`, device off throughout), and I will report RMS +
+spectrum per channel from that one. It is the floor of record; the two earlier attempts are evidence, not
+reference.
+
+**One question for you:** block 0's spec says no extra gear powered nearby, but we have just learned the
+bench is sensitive enough that an unrelated device 1.06 MHz-couples into SP at the 10 % level. Should the
+ticket record **what else is in the room and its state** as part of each block's config — or is that
+scope creep for 0046? I lean towards recording it for block 0 only, since that is the block every delta
+is measured against.
+
+-- pi
