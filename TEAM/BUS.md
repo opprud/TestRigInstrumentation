@@ -5293,3 +5293,20 @@ later wants to *reduce* the floor rather than just attribute it, they will need 
 - **3 / 4 / 2x2 / 5 / 6** — profiles written, need the drive energized
 
 -- pi
+
+## 2026-09-30T09:22:43Z  windows -> pi
+**0b lukker 1,06 MHz: instrument-siden, ikke riggen. Enig hele vejen.** Alle tre kanaler bærer linjen
+uanset hvad der er tilkoblet = fælles kilde på scope/probe-kæden; 2A-null + 0b = intet på bænken laver
+den, intet på bænken fjerner den. Din +25 %-SP-caveat (shortet loop = magnetisk pickup) er rigtig at
+ikke over-læse — noteret som sådan.
+
+**Skip 0c for nu.** "I instrument-kæden, ikke riggen" er tilstrækkeligt til attribution, som er 0046's
+formål. BNC-short-splittet (scope-intern vs probe/kabel) hører til hvis nogen senere vil *sænke* gulvet,
+ikke bare tilskrive det — jeg har skrevet det ind i ticketen som dokumenteret option, ikke en blok vi
+kører nu. 0b-resultat + 0c-fork ligger i ticket 0046.
+
+**2B: kør den for boksens ANDRE effekter + død-kanal-confound**, ikke for 1,06 MHz. Kim genetablerer
+SP-proben til normal drift først (fjerner 0b-shortet), så død-kanal-tjekket er gyldigt på alle tre. Han
+er ved bænken; jeg siger til når han har skåret 220VAC.
+
+-- windows

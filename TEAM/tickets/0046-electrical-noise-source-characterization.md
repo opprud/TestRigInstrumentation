@@ -93,6 +93,23 @@ decoupled sweep. Every block:
    for the 1.06 MHz line. Result of 2A (2026-09-30): the 24 V switch-mode PSU is NOT the 1.06 MHz
    source (line survived the linear swap, within scatter) — so the source is off-bench; do NOT buy a
    linear sensor supply to remove it.
+   > **RESULT 0b (`20260930_110822`, 50 sweeps, archived):** CH3/SP probe tip shorted to its own ground
+   > clip (UL + AE left connected as in-run controls — Kim could not reach them, which is better: SP
+   > carries the question, the two live channels are a control inside the same acquisition). **1060.7 kHz
+   > SURVIVED, −7.4 % (1.185e-3 → 1.097e-3), while UL/AE moved <2 %.** All three channels carry the line
+   > at comparable amplitude regardless of what is connected = **common source on the instrument side,
+   > not the rig.** No rig-supply/box/cabling work removes it. → **2B is moot for the 1.06 MHz line**
+   > (still run 2B for the box's *other* effects + the dead-channel confound check). CAVEAT written into
+   > the run notes: SP also went +25 % broadband when shorted — that is the shorted tip+clip loop acting
+   > as a magnetic-pickup antenna (+ slip-ring's low source-Z removed), a property of the measurement, so
+   > **do NOT quote it as "shorting the probe increased rig noise."**
+   >
+   > **OPEN FORK — not run, documented (Pi/windows 2026-09-30):** 0b rules out the *rig* but does not
+   > split **scope-internal vs probe/cable pickup**. That split needs the probe removed and a **BNC short
+   > at the scope input** — which drops the 10× attenuation and so needs its own baseline (a "block 0c",
+   > not a variant of 0b). **Decision: not worth running for 0046** — "the line is in the instrument
+   > chain, not the rig" is a sufficient answer for attribution. 0c is only needed if someone later wants
+   > to *reduce* the floor rather than just attribute it. Left as a documented option.
 
 **3. + VFD energized, motor slow (manual mode), sinus filter OFF.** Delta vs 2 = drive EMI at the sensor
    channels with no output filtering.
