@@ -1,0 +1,106 @@
+{
+ "name": "0046 block 5 - decoupled rpm sweep, sinus OFF",
+ "description": "BLOCK 5, sinus filter OFF. MOTOR MUST BE MECHANICALLY DECOUPLED from the rig -- that is the control: it removes bearing and rig vibration, so any noise that scales with rpm while decoupled is ELECTRICAL (drive PWM/EMI), not mechanical. Same logic that settled SP in the 0035 smoke test. With the coupling out the tach mark sits on the rig side and rpm_meas reads 0, so the speed of record is 59.83 x vfd_cmd_hz. 500-3000 rpm in 500 rpm steps, 4 min each, with 4 min at rest before and after as the floor. Ticket 0046 electrical-noise characterization. Same acquisition and scope_channels as a normal run, so blocks compare without rescaling. Heater relay must be OFF for every electrical block (it is its own EMI source, ticket 0035) -- it only comes back as its own factor in block 6.",
+ "duration_minutes": 32,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true
+ },
+ "setpoints": {
+  "rpm": [
+   {
+    "time_sec": 0,
+    "value": 0
+   },
+   {
+    "time_sec": 239,
+    "value": 0
+   },
+   {
+    "time_sec": 240,
+    "value": 500
+   },
+   {
+    "time_sec": 479,
+    "value": 500
+   },
+   {
+    "time_sec": 480,
+    "value": 1000
+   },
+   {
+    "time_sec": 719,
+    "value": 1000
+   },
+   {
+    "time_sec": 720,
+    "value": 1500
+   },
+   {
+    "time_sec": 959,
+    "value": 1500
+   },
+   {
+    "time_sec": 960,
+    "value": 2000
+   },
+   {
+    "time_sec": 1199,
+    "value": 2000
+   },
+   {
+    "time_sec": 1200,
+    "value": 2500
+   },
+   {
+    "time_sec": 1439,
+    "value": 2500
+   },
+   {
+    "time_sec": 1440,
+    "value": 3000
+   },
+   {
+    "time_sec": 1679,
+    "value": 3000
+   },
+   {
+    "time_sec": 1680,
+    "value": 0
+   },
+   {
+    "time_sec": 1919,
+    "value": 0
+   }
+  ],
+  "temperature": []
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}

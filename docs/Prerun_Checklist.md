@@ -10,6 +10,9 @@ in `CLAUDE.md`.
 
 **Every run. Not optional, not even for 15 minutes.** A dry start damages the specimen.
 
+> The oil also has a **measurement** consequence, not just a mechanical one — see §8. The film's state
+> resets every time the rig stands still, and it moves UL by 20-50 %.
+
 ## 2. Mechanical assembly — the bearing must not slip on the shaft
 
 **Especially after any teardown/reassembly, and spot-checked on long runs.** This is the check that
@@ -124,6 +127,33 @@ If it is silent, press the reset button on the unit (ticket 0019 — it cannot b
       currently reports `???` for all channels (ticket 0006), so the guard is armed but blind to
       the relay's real state.
 - [ ] Bearing lubricated. Yes, again. It is the one on this list that cannot be undone.
+
+---
+
+## 8. The oil-film transient — settle, or record time-since-start
+
+**The oil-film transient resets on every stand and contaminates the first ~1 h.** Either run the rig
+until UL stabilises before taking baseline measurements, **or** record time-since-start so the
+first-hour rows can be binned out in analysis — **bin by time-since-start as a co-axis with
+temperature.**
+
+- [ ] Decide which of the two you are doing, **before** the run, and write it in the run notes.
+- [ ] If the run is a baseline or is meant to be compared against another run, **settle first**:
+      allow **>2 h** of running before the first measurement that counts.
+- [ ] If you cannot settle (a 13 h protocol with its own schedule), accept that **the first hour is not
+      steady state** and that a cold-start ramp puts its **lowest-temperature rows** exactly there.
+
+**Why this is a checklist item and not a footnote.** Measured 2026-09-24 on `20260924_133945` at a
+temperature held fixed at 41.0 C throughout: running dropped UL **−8 to −22 %**, one hour with the shaft
+stopped recovered it **+21 to +55 %** (to 110-120 % of the starting block), and running again dropped it
+**−23 to −43 %**. The cycle repeats on demand. The 0 rpm floor moved less than 1 %, so it is the rotating
+contact, not the instrument. That is **as large as the genuine temperature response** (−16 to −36 %,
+`20260924_065556`) — and it is the reason two runs of the same profile can differ by **+56 to +93 %** at
+identical temperature purely because one of them had the night off. Full record in
+`docs/Maintenance_Log.md`, 2026-09-24.
+
+> **Consequence for comparing runs:** without controlling for time-since-start you are comparing
+> oil-film state, not the variable you think you are measuring.
 
 ---
 

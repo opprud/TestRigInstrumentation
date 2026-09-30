@@ -454,6 +454,16 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   > across the three steps was the motor warming. **Verify the setpoint actually took before reading the
   > tach** — and see the drive-write entry below for why retrying on the same connection does not help.
 
+- **The scope refuses the FIRST connection after idle, essentially every time — the retry is what makes
+  a run start correctly (characterised 2026-09-24).** Observed on **four of five** run starts: the first
+  `_scope_write` of the run comes back `ConnectionRefusedError(111)` for both the channel block and the
+  acquisition block, and both recover on attempt 2. The one exception was a run started minutes after the
+  previous one ended, i.e. with the scope's socket server already warm. So this is not random flakiness at
+  the wedging rate — it is a **deterministic cold-start property of the scope's LXI socket server**, and
+  it is why the missing retry on the acquisition path (fixed the same day) mattered: before the fix, every
+  cold start had a coin-flip chance of silently running at the wrong memory depth. Nothing to do about the
+  refusal itself; just never remove those retries.
+
 - **⚠️ VFD writes degrade on a held connection — RECONNECT, do not retry (2026-09-23).** Sharper than
   the "registers do not reflect reality" entry below, and with an actual remedy. Measured in one session:
   after a working 20 Hz step on the same `RS510VFDController` connection, **five consecutive writes of
