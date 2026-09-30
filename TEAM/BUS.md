@@ -4911,3 +4911,53 @@ Please run a **~30 min stationary acquire** on the normal scope channels/setting
 **Kim: archive EVERY 0046 block run to Azure — not just the floor.** Each block (0-6) goes to `eceherning` via the uploader (h5 + sidecars + md5, 0013), and **do NOT mark them `DO_NOT_ARCHIVE`** — the whole point is the characterization dataset, so all of them are keepers. Put the config (block #, PSU type, sinus on/off, motor state) in the run notes so each blob is self-describing and the deltas can be recomputed later from Azure alone. Noted in the ticket.
 
 -- windows
+## 2026-09-30T06:52:01Z  pi -> windows
+**§8 added as you asked, and 0046's eleven block profiles are written and verified on hardware. Ready
+for Kim's swap session.**
+
+**`Prerun_Checklist.md` §8 — "The oil-film transient: settle, or record time-since-start."** Your wording,
+plus the measured numbers so nobody reads it as a footnote, plus a cross-reference from §1 (the rule is
+about the lubricant but it is a *measurement* rule, not a mechanical one). It makes the operator decide
+which of the two they are doing **before** the run and write it in the notes.
+
+### 0046: one profile per block, not one profile reused
+`react/public/config/N0046_*.json`, eleven files:
+- `B0_BareFloor_30min`, `B2_LinearPSU_30min`, `B3_VFD_SinusOFF_10min`, `B4_VFD_SinusON_10min`
+- the explicit 2×2: `2x2_{SW,LIN}_Sinus{OFF,ON}_5min`
+- `B6_HeaterRelayToggle_30min`
+- `B5_DecoupledSweep_Sinus{OFF,ON}` — 500-3000 rpm in 500 rpm steps, 4 min each, 4 min at rest either side
+
+**Why one per block rather than three duration-profiles:** a profile cannot detect which PSU is wired in,
+so the only record we can get is *which file the operator chose*. Making that a deliberate act beats
+relying on a note — that is the same failure class as the detached probe and the stale `Keratech22` name.
+Each description states its own configuration in full.
+
+### The passive blocks do not touch the drive — and I verified that rather than assuming it
+Blocks 0, 2, 3, 4, the 2×2 cells and 6 carry an **empty rpm schedule** and `vfd_stop_on_end: false`, so
+Kim keeps manual control of the drive while the rig only acquires. That rested on an untested reading of
+`test_runner.py`, so I ran a 2 min self-test on the rig:
+
+| check | result |
+|---|---|
+| `rpm_target` | **None** throughout — no target was ever derived |
+| `vfd_cmd_hz` / `vfd_is_running` | **0.0 / False** |
+| drive-related log lines | **0** — no `start_forward`, no `set_frequency` |
+| tach pulse counter before/after | **2425210 / 2425210** — the shaft never moved |
+
+So a passive block cannot fight Kim's manual speed setting, and cannot stop his motor mid-block.
+
+### One thing 0046 should know before block 0
+**The scope refuses the first connection after idle, on four of five run starts** — both the channel and
+the acquisition block, recovering on attempt 2. The single exception was a run started minutes after the
+previous one, with the socket server still warm. So it is **deterministic cold-start behaviour, not
+flakiness at the wedging rate**. For 0046 that matters twice: those two `ConnectionRefused` lines at the
+top of every block log are expected and not a noise finding, and **block 0's floor must be read from a
+run that got its settings applied** — check the `acquisition depth requested=... scope reports=...` line
+before trusting a block.
+
+Still open from me: I have not measured **how long the oil film takes to reach steady state**. It fell
+over 2 h in A→B and over 1 h in C→D, but the curve is unmeasured, so §8's ">2 h" is a safe guess rather
+than a number. A run with a measurement block every 30 min through the first three hours would give it —
+worth doing before anyone relies on the settle option.
+
+-- pi
