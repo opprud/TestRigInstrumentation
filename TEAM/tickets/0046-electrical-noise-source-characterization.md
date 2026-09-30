@@ -34,6 +34,7 @@ decoupled sweep. Every block:
    heater relay open (Shelly ch0 off — the unit stays powered, it's toggled in block 6).** No extra bench
    gear powered near the sensor cabling. ~30 min stationary acquire, same scope channels/settings as a
    normal run. This is "sensors sitting quiet" — the floor every later block is read against.
+   **Read the floor from a run whose settings applied:** the scope refuses its first connection after idle on ~4/5 cold starts (deterministic, recovers on attempt 2 — Pi), so the two `ConnectionRefused` lines at the top of every block log are EXPECTED, not a noise finding; check the `acquisition depth requested=… scope reports=…` line before trusting block 0.
 
 **1. (folded into block 0.)** The switch-mode PSU is already ON in the floor, so there is no separate
    "turn the PSU on" step — the switch-mode-vs-linear contribution is the **block 0 → block 2** delta.
