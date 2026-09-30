@@ -464,6 +464,24 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   cold start had a coin-flip chance of silently running at the wrong memory depth. Nothing to do about the
   refusal itself; just never remove those retries.
 
+- **⚠️ A run with the VFD POWERED DOWN kills itself after 10 ticks — raise
+  `max_consecutive_modbus_errors` for any block that needs the drive dead (found 2026-09-30).** The
+  runner polls `vfd.get_status()` every tick purely for logging. With the drive unpowered those reads
+  time out, and the failed connects leave the shared RS485 port locked so the **Omron read fails too** —
+  so nothing resets the counter, and the safety stop fires: `[runner] STOP reason=modbus_errors>=10`.
+  It killed ticket 0046's first bare-floor attempt **three minutes into a 30 minute block**, and it takes
+  the scope acquisition down with it (the run is one process).
+
+  Note `connect()` does **not** raise when the drive is dead — the serial port is still there, only the
+  register reads time out — so `vfd` stays a live object and the code's own "not_initialized" escape
+  (which is deliberately *not* counted as a comm error) never triggers.
+
+  **Fix: set `control.max_consecutive_modbus_errors` high in that profile only.** It is a supported knob.
+  Do **not** carry it into a profile that drives the motor: there it is exactly the guard that stops a run
+  whose drive has stopped answering, which is the 2026-08-18 failure mode. Expect the log to fill with
+  `Could not exclusively lock port /dev/ttyUSB0` (63 lines in the first minute) and `omron_pv_c` to be
+  null — both are expected when the bus has nothing to talk to.
+
 - **⚠️ VFD writes degrade on a held connection — RECONNECT, do not retry (2026-09-23).** Sharper than
   the "registers do not reflect reality" entry below, and with an actual remedy. Measured in one session:
   after a working 20 Hz step on the same `RS510VFDController` connection, **five consecutive writes of
