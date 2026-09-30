@@ -71,7 +71,7 @@ Per channel (UL / AE / SP, and OE if run): **RMS + spectrum** for every block. T
 Look in the spectrum for switch-mode / PWM switching frequencies and their harmonics, not just RMS.
 
 ## Owner / test
-- **Kim / hardware:** swap PSU (switch-mode ↔ linear 24 VDC), sinus filter in/out, decouple the motor,
+- **Kim / hardware:** swap PSU (switch-mode ↔ linear 24 VDC), sinus filter in/out (**a quick wire-move**, confirmed Kim 2026-09-30 — so the {PSU}×{sinus} 2×2 is two fast swaps), decouple the motor,
   run manual mode. Record which configuration each block is.
 - **Pi / dev:** the block profiles (or manual-mode drive + a stationary acquire), the RMS/spectrum
   analysis per channel per block, and the deltas above.
