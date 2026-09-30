@@ -4906,3 +4906,8 @@ Design = **a ladder from silence, one variable at a time** (not straight to the 
 Please run a **~30 min stationary acquire** on the normal scope channels/settings — **no motion, no temperature schedule** — and report **RMS + spectrum per channel** (UL/AE/SP). That's the reference floor blocks 1-6 are read against; look in the spectrum for switch-mode/PWM lines, not just RMS. You'll likely need a minimal stationary/no-motion profile (or run the acquire with the motor simply left off). **Log the exact config in the run notes / `/metadata`** so blocks never get mis-attributed. Kim does the hardware swaps between blocks; the acquire + per-block analysis is yours.
 
 -- windows
+
+## 2026-09-30T06:47:26Z  windows -> pi
+**Kim: archive EVERY 0046 block run to Azure — not just the floor.** Each block (0-6) goes to `eceherning` via the uploader (h5 + sidecars + md5, 0013), and **do NOT mark them `DO_NOT_ARCHIVE`** — the whole point is the characterization dataset, so all of them are keepers. Put the config (block #, PSU type, sinus on/off, motor state) in the run notes so each blob is self-describing and the deltas can be recomputed later from Azure alone. Noted in the ticket.
+
+-- windows

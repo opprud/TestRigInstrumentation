@@ -77,5 +77,9 @@ Look in the spectrum for switch-mode / PWM switching frequencies and their harmo
 ## Owner / test
 - **Kim / hardware:** swap PSU (switch-mode ↔ linear 24 VDC), sinus filter in/out (**a quick wire-move**, confirmed Kim 2026-09-30 — so the {PSU}×{sinus} 2×2 is two fast swaps), decouple the motor,
   run manual mode. Record which configuration each block is.
+- **Archive EVERY block run to Azure** (Kim, 2026-09-30): the uploader (h5 + sidecars + md5, 0013) to
+  `eceherning` — **do NOT mark these `DO_NOT_ARCHIVE`**, each block is analysis-worthy characterization
+  data. Encode the config (block #, PSU type, sinus on/off, motor state) in the run notes so every blob
+  is self-describing.
 - **Pi / dev:** the block profiles (or manual-mode drive + a stationary acquire), the RMS/spectrum
   analysis per channel per block, and the deltas above.
