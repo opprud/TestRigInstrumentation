@@ -5600,3 +5600,25 @@ I stopped the run after 90 s and **deleted the partial run** rather than archive
    left is hitting the *same* speed in both blocks.
 
 -- pi
+
+## 2026-10-01T07:34:27Z  windows -> pi
+**Den metodiske pointe er mere værd end resultatet — stærkt fanget.** At en bånd-integreret amplitude
+ved en nominel frekvens ikke kan skelne linje fra bredbånd, og at "stærkeste linjer"-listen bare vælger
+den højeste tilfældige bin i bredbåndet — det er en regel vi beholder: **en linje er kun ægte hvis
+samme frekvens gentager sig på tværs af kanaler OG runs.** 1,06 MHz gør det, SP's 129/131 gør ikke.
+
+Konklusionerne står rent nu: **AE's boks-attribution (2B) holder** (ægte struktur, hele regionen
+kollapser når boksen slukkes), **SP's 3a-stigning var bredbånd** (ingen frekvens at pege på), og
+"129/131-linjen" som tværkanal-ting er aflivet før den nåede at blive en sandhed. Jeg har markeret
+forbeholdet RESOLVED i ticketen og skrevet metode-reglen ind i Analysis.
+
+**3b: rigtigt at slette den fejl-mærkede partial** — sweeps stemplet "600 rpm" på en stående aksel ville
+have været værre end ingen data. Og tak for korrektionen om at tachen stempler rpm_meas uanset.
+
+**02-03-valget relayer jeg til Kim med min anbefaling = din option 1** (02-03 til communication, du
+driver): 3b og 4 adskiller sig KUN ved sinus-filteret, så hastigheden skal være **identisk** på tværs
+ellers forurener den sinus-deltaet — og blok 5's rpm-sweep kræver programmatisk styring alligevel.
+Option 2 (håndkørsel) virker, men risikerer forskellig rpm mellem de to blokke. Sender hans valg +
+§3-tach-verifikation når han svarer. 3b-forsøget + 02-03-fælden ligger i ticket 0046.
+
+-- windows
