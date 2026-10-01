@@ -261,6 +261,18 @@ motor, no heat, ~5 min per cell):
    > ~0.0140 floor — **and the filter can stay** (what we want for bearing currents); if the ground is
    > irrelevant, filter+ground resembles the filter-without-ground series, the filter itself is the
    > problem, and the fix is shielding / cable routing.
+   > **RESULT 5h-5j, filter ON + ground RESTORED (decoupled — `20261001_133652` / `134851` at 0 / 500 rpm,
+   > archived): the prediction FAILED, in the OPPOSITE direction — restoring the ground made it markedly
+   > WORSE.** At 500 rpm vs 5b (filter ON, ground MISSING): **AE +127.2 %, SP +75.1 %**, UL +1.4 %. AE
+   > ordering against its 0.0140 floor: no filter 0.0140 (+0 %) < filter/no-ground 0.0240 (+71 %) <
+   > **filter+ground 0.0544 (+288 %, worst).** Null control passes again (0 rpm all three agree). **Likely
+   > a CLOSED GROUND LOOP:** the filter is already grounded elsewhere, so the restored strap closes a loop
+   > — a textbook antenna / entry path for common-mode current from the drive into the sensors (partial
+   > ground = half an antenna +71 %; closed loop tripled it, +288 %). **So the fix is NOT "restore the
+   > missing ground."** The grounding **topology** is wrong and needs a deliberate single-point scheme, not
+   > straps added or removed one at a time — the removed ground may well have been removed for a reason.
+   > (1500 rpm + filter+ground unmeasured — the drive refused stop/new-freq while running; confirmation not
+   > discovery, since 5a-5c already showed noise flat with speed. See ticket 0047.)
 
 **6. (optional, last) heater relay as its own factor.** Repeat block 0's stationary floor but **toggle only
    the heater relay** (ch0) at fixed everything-else. Any step in the sensor channels on the toggle = the
@@ -317,6 +329,30 @@ Look in the spectrum for switch-mode / PWM switching frequencies and their harmo
 > subtract it as a constant floor under every block. The only open sub-question is scope-internal vs
 > probe/cable pickup (a BNC-short "block 0c"), which matters **only if someone later wants to lower the
 > floor**, not to attribute it.
+
+## Conclusion (2026-10-01)
+Every major question in the ladder is answered, each pinned to one source by one controlled step:
+- **24 V switch-mode PSU:** null (2A) — not the 1.06 MHz line, not a measurable contributor.
+- **Heater/temp box:** real structure on AE near 129/131 kHz, halves when it is off (2B).
+- **1060.7 kHz:** instrument-side (scope+probe chain), three independent confirmations — characterise and
+  subtract, not a rig fault (0b, 2A, 3a).
+- **Drive EMI:** a **step** present whenever the output stage is active, **independent of rpm** (block 5,
+  decoupled, 500 ≈ 1500 rpm) — 0035's inference turned into a measurement.
+- **Sinus filter:** at speed it is the **largest** sensor-noise contributor and on AE the *entire* "drive
+  EMI"; and the dominant term is its **installation**, not the component — a grounding **topology** fault
+  (closed loop) that *amplifies* common-mode injection (+288 % AE with the strap closed).
+
+**The finding that outranks the numbers:** the **sensor-cleanest** configuration (no filter) and the
+**specimen-safest** configuration (filter, for bearing-current suppression) are currently **opposites**.
+Running without the filter puts AE at its floor but risks dv/dt-driven **bearing-current erosion of the
+specimen under test** — slow, invisible, indistinguishable from real mechanical degradation. This is **not
+a measurement problem to optimise away; it is an EMC installation / grounding design question.** Do not let
+anyone silently pick the quiet configuration. **Proposed follow-up: a single-point grounding redesign of
+the filter / VFD / sensor system — its own ticket (EMC, not characterisation).**
+
+**Remaining ladder items are optional confirmations, not open questions:** 4b (heater box back on with the
+drive energized — reversibility of 2B), 6 (heater-relay toggle), and the explicit {PSU}×{sinus} 2×2, which
+2A and block 5 already answer in substance.
 
 ## Owner / test
 - **Kim / hardware:** swap PSU (switch-mode ↔ linear 24 VDC), sinus filter in/out (**a quick wire-move**, confirmed Kim 2026-09-30 — so the {PSU}×{sinus} 2×2 is two fast swaps), decouple the motor,

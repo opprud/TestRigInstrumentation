@@ -54,6 +54,19 @@ All three are marked NOT ESTABLISHED in the 2026-10-01 run notes.
    to the Omron poll (270 `Could not exclusively lock port` errors). Until then, **pre-start the drive
    from a short script + passive profile** is the standing workaround.
 
+## Update 2026-10-01 (second decoupled session) — both recommendations now twice-earned
+- **The source-select mode does NOT survive a power cycle.** After Kim re-powered the VFD to refit the
+  sinus filter, **seven consecutive start commands were refused** (display 0.00) while plain register reads
+  worked fine; re-setting the source mode and the next command succeeded first try. **`Prerun_Checklist`
+  §3 says "check 02-03 before a run" — it must say re-check (and re-set) the source after *every power
+  cycle*, because it falls back.** (This is the `00-05` Main Frequency Source / `00-02` Main Run Source
+  parameter — the docs miscall it "02-03"; see 0046.)
+- **Readback lied again, the other direction:** `stop()` and a new frequency were both refused while the
+  motor demonstrably ran at 8.40 Hz, the register reporting `STOP cmd=0.00 ud=0.00` the whole time.
+- Net: **the command is unreliable in both directions and must be retried until a human confirms it** — and
+  decoupled, only a human reading the display can confirm it. Both recommendations below are now
+  **twice-earned in a single day**; treat them as do-before-the-next-decoupled-run, not "proposed."
+
 ## Owner / test
 - **Pi / dev:** the command-model investigation, the runner actuation fix.
 - **Kim / hardware:** the tach-mark move (+ re-cal), and reading the display during any decoupled run
