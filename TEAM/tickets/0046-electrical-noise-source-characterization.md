@@ -191,6 +191,21 @@ decoupled sweep. Every block:
    Delta vs the box-off drive block confirms the 2B attribution **reverses**: if the box is the source of
    AE's 129/131 kHz pair, that pair must return when the box comes back on. Guards 2B against a one-way /
    drift reading.
+   > **RESULT 4b (`20261001_142438`, 0 rpm, drive energized idle, box ON — baseline 5a, archived): the box
+   > attribution is CONFIRMED IN BOTH DIRECTIONS.** AE's 126–135 kHz structure returned **×2.27** (129.5 kHz
+   > 1.994e-4 → 4.519e-4; 131.5 kHz 2.000e-4 → 4.540e-4), mirroring 2B's **×0.51** when the box went off —
+   > made and unmade within precision. **Baseline is 5a, not 2B**, deliberately: an idle energized VFD
+   > alone costs SP +54.5 % (3a) and 2B was taken drive-mains-off, so only 5a (drive energized idle, box
+   > off) is comparable here.
+   > **NEW, not concluded — a possible box×drive COMBINATION on SP.** 4b also raised **SP +11.9 %** overall
+   > (127–133 kHz bins ×1.06–1.65), where 2B left SP's 131.5 kHz essentially untouched (−4.8 %). The one
+   > difference between the two is the drive's mains state → the box's coupling **into SP may require an
+   > energized drive.** → block 2C.
+
+**2C. (proposed control for 4b's SP rise.) Box ON vs OFF with the drive at MAINS OFF.** If SP does **not**
+   rise with the box toggled while the drive is mains-off, the box→SP path is a **combination effect** that
+   needs the energized drive, not the box alone (AE's attribution is unaffected either way). Cheap and
+   Kim-light: drive mains off, toggle the box. Closes the one loose end 4b opened.
 
 ### The 2×2 (the "4 combinations")
 Blocks 1–4 already contain it, but run it explicitly as a clean 2×2 at one condition (manual mode, slow
@@ -341,7 +356,8 @@ Look in the spectrum for switch-mode / PWM switching frequencies and their harmo
 ## Conclusion (2026-10-01)
 Every major question in the ladder is answered, each pinned to one source by one controlled step:
 - **24 V switch-mode PSU:** null (2A) — not the 1.06 MHz line, not a measurable contributor.
-- **Heater/temp box:** real structure on AE near 129/131 kHz, halves when it is off (2B).
+- **Heater/temp box:** real structure on AE near 129/131 kHz — **bidirectionally confirmed** (2B ×0.51
+  off, 4b ×2.27 on); a possible box×drive **combination** on SP is the one open thread (block 2C).
 - **1060.7 kHz:** instrument-side (scope+probe chain), three independent confirmations — characterise and
   subtract, not a rig fault (0b, 2A, 3a).
 - **Drive EMI:** a **step** present whenever the output stage is active, **independent of rpm** (block 5,
@@ -369,5 +385,12 @@ drive energized — reversibility of 2B), 6 (heater-relay toggle), and the expli
   `eceherning` — **do NOT mark these `DO_NOT_ARCHIVE`**, each block is analysis-worthy characterization
   data. Encode the config (block #, PSU type, sinus on/off, motor state) in the run notes so every blob
   is self-describing.
+  > **A run that fails as a *block* can still be the *evidence* a finding rests on.** Archive audit
+  > 2026-10-01 (Kim-prompted): all 20 local runs now in `eceherning`. Two nearly left behind for their
+  > names — `20260930_085938_SPLIT_device_off_at_t20` is the in-run A/B that identified the external
+  > tachometer (the 1.06 MHz conclusion rests on it + 0b, and it cannot be reproduced from Azure alone),
+  > and `20260930_085412_ABORTED_modbus` is the tachometer-ON floor and the evidence for the abort gotcha.
+  > Archive the evidence, not just the clean blocks; annotate a multi-config run so it is never used as a
+  > floor.
 - **Pi / dev:** the block profiles (or manual-mode drive + a stationary acquire), the RMS/spectrum
   analysis per channel per block, and the deltas above.
