@@ -167,8 +167,25 @@ decoupled sweep. Every block:
    > and block 5's rpm sweep needs programmatic control anyway; or (2) Kim **hand-drives** and Pi uses the
    > passive profiles — the tach stamps `rpm_meas` on every sweep either way, so speed is still recorded,
    > but the two blocks may not sit at the same rpm. Verify actuation against the tach after (§3).
+   > **RESULT 3b (`20261001_103916`, 589 rpm verified three ways — Pi's command, the drive display 10.08 Hz
+   > read by Kim, and the tach):** with the motor **coupled**, "motor running" measures the **bearing, not
+   > the drive.** UL total **+868.8 %** (0.0300 → 0.2905), its 1–10 kHz band **+9429 %** — that is the
+   > Kistler probe's bearing acoustic emission, i.e. **signal, not noise.** AE +84.0 % (50–100 kHz +367 %
+   > = the accelerometer responding to rotation). SP +71.0 %, **uniform across every band** — some may be
+   > electrical but it cannot be separated from vibration here. **So UL and AE cannot be used as noise
+   > measurements at all with the coupling in, and SP's rise is confounded.** 3b stays archived as a clean
+   > operating-point record but is **NOT a rung in the noise ladder** → block 5 (decoupled) is the only
+   > block that can answer the drive-EMI question once the shaft turns.
+   > **Oil-film aside (uncontrolled, Pi):** UL at ~600 rpm was 0.125 V in the 2026-09-23 baseline and
+   > 0.29 V here = **2.3×**, after ~6 days idle — the direction the rest-reset finding predicts. Configs
+   > differ (box off, linear 24 V, different day) so it is **an observation, not a controlled result**;
+   > noted because it is an independent hint from a measurement built to look for something else.
 
-**4. Same as 3b but sinus filter ON.** Delta vs 3b = what the sinus filter cleans (a quick wire-move).
+**4. (SUPERSEDED as a noise rung, 2026-10-01 — fold into block 5.)** Originally "same as 3b but sinus ON,
+   delta = what the sinus filter cleans." 3b proved a **coupled** motor block is bearing-dominated, so a
+   sinus-filter delta would be buried under the bearing signal on UL/AE and confounded on SP. **The sinus
+   on/off comparison moves into block 5 (decoupled), which already runs both** — a coupled block 4 adds
+   nothing the decoupled sweep won't give cleanly. (Architect call; Pi/Kim to confirm.)
 
 **4b. (reversibility test — profile added 2026-10-01.) Heater box back ON with the drive energized.**
    Delta vs the box-off drive block confirms the 2B attribution **reverses**: if the box is the source of
@@ -189,6 +206,13 @@ motor, no heat, ~5 min per cell):
    while decoupled is electrical (drive PWM/EMI), not mechanical.** Same logic that settled SP in the 0035
    smoke test (SP jumped +43 % *flat* with speed = drive EMI, not vibration). Speed of record is
    `59.83 × vfd_cmd_hz` if the tach mark ends up on the rig side of the coupling (see 0035).
+   > **ELEVATED 2026-10-01: this is now THE pivotal block, not "optional, last."** 3b showed every
+   > motor-turning block with the coupling IN measures the bearing (UL +869 %), so decoupling is the
+   > **only** way to read drive EMI at all once the shaft turns — and it also **absorbs the sinus-filter
+   > comparison** (blocks 3b/4 coupled cannot give it cleanly). Run the sweep at **sinus OFF and ON** so
+   > this one block answers both *"does noise scale with rpm while decoupled"* (EMI vs vibration) **and**
+   > *"what does the sinus filter buy."* **Kim's bench action: decouple the motor from the rig** — now the
+   > critical path, ahead of block 4b.
 
 **6. (optional, last) heater relay as its own factor.** Repeat block 0's stationary floor but **toggle only
    the heater relay** (ch0) at fixed everything-else. Any step in the sensor channels on the toggle = the
@@ -202,6 +226,17 @@ motor, no heat, ~5 min per cell):
 > config (PSU / sinus / motor) lives in the run notes, not in `telem_*`. Post-fix blocks (2B onward) are
 > fully stamped. The full archive scan (only the five 2026-09-30 VFD-off runs affected; all four
 > findings-critical runs fully stamped, no JSONL repair needed anywhere) is recorded in CLAUDE.md.
+
+> **ACTUATION NOTE (Pi, 2026-10-01) — the runner cannot drive the VFD during a run; pre-start it.** One
+> serial port, two consumers: the runner polls the Omron on `/dev/ttyUSB0` while a drive command needs the
+> same port, and the write loses (270 `Could not exclusively lock port` errors in 3 min, shaft never
+> moved). Worse, the runner sends RUN **once**, sets `vfd_started=True`, then writes frequency only — a
+> frequency with no run command does nothing and it never retries (the rig's standing lesson: verify
+> actuation against the tach, not a readback). **Workaround that worked for 3b:** start the drive from a
+> short script **before** the run, then use a **passive** profile — the drive holds speed unprompted,
+> nothing contends, and `telem_rpm_meas` still stamps the real speed every sweep. Stop + confirm (rpm 0
+> **and** a frozen pulse count) after. Needs `02-03`/`00-05` on **communication** (5), not a pot. Deserves
+> a line in CLAUDE.md.
 
 ## Analysis
 Per channel (UL / AE / SP, and OE if run): **RMS + spectrum** for every block. The deltas that matter:
