@@ -1,0 +1,42 @@
+{
+ "name": "0046 block 4b - heater-temp box back ON 10 min",
+ "description": "BLOCK 4b — THE HEATER / TEMP CONTROL BOX SWITCHED BACK ON, with the drive energized. Kim's choice (2026-10-01): rather than switch the box back on at the same time as energizing the drive, insert a separate block for it, so no block ever changes two things at once. WHAT KIM DOES: switch the heater/temp control box back ON at its own 220 VAC. Everything else exactly as block 4 — VFD energized, motor turning slowly under MANUAL/LOCAL drive control, sinus filter ON, 24 V sensor supply linear, slip-ring/OE supply linear, heater RELAY still open, external tachometer off. Log the ON timestamp. WHY THIS IS WORTH ITS OWN BLOCK, AND NOT JUST HOUSEKEEPING: block 2B measured the box's effect with the drive OFF and found it HALVES AE's 129.5/131.5 kHz pair (-48.8 % / -46.5 %). This block measures the same box with the drive ON. The two together say more than either alone:    they AGREE   -> the box's contribution is independent of the drive, and the attribution is                    confirmed in BOTH directions. A change that can be made and unmade is far stronger                    evidence than a single one-way measurement -- the same logic that made the                    oil-film result solid (see docs/Maintenance_Log.md, 2026-09-24).    they DIFFER  -> the box and the drive INTERACT, and that is a finding in its own right. READ IT AS: delta against block 4 (20260930_... TBD) isolates the box with the drive live. Expect AE's 129.5/131.5 kHz pair to roughly DOUBLE back if the 2B attribution is right. CONFOUND CHECK, same as 2B but inverted: if a channel that was dead comes back to life when the box is switched on, the box WAS feeding that sensor's supply. 2B showed no channel went dead, so this is not expected -- but it is the cheap confirmation of that, so check it. max_consecutive_modbus_errors is left at its normal default: the VFD is energized, so get_status() answers and the runner's safety stop is doing its proper job.",
+ "duration_minutes": 10,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}
