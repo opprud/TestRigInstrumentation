@@ -1,0 +1,66 @@
+{
+ "name": "0046 block 4d - VFD driven 600 rpm, sinus ON, 10 min",
+ "description": "BLOCK 4d — VFD DRIVEN FROM THE PI, sinus output filter ON. Replaces the hand-driven variant at Kim's suggestion (2026-10-01), and the reason is that it turns 'slowly' into a NUMBER: the commanded speed goes into the telemetry and is stamped onto EVERY SWEEP (telem_rpm_target / telem_vfd_cmd_hz), so blocks 3d and 4d are measured at exactly the same speed instead of 'slowly' twice. The sinus-filter delta is the whole point of this pair, so that matters. SCHEDULE: 1 min at rest, 8 min at 600 rpm, 1 min at rest. 600 rpm = 10.084 Hz, which is the best-characterised point on this rig (measured 591 rpm against the calibration's 591.6, 0.6 %). The rest minutes at either end give an in-block floor, so drive EMI can be read as a step rather than only as a delta against another run. BASELINE: block 3d. Heater/temp control box stays OFF (2B left it off; block 4b switches it back on later as its own test). Everything else as block 2B: 24 V sensor supply linear, slip-ring/OE linear, heater relay open, external tachometer off. CAVEAT TO KNOW, NOT TO FEAR: driving the VFD adds Modbus WRITES on the shared RS485 bus on top of the status reads the runner already does every tick. That is traffic during a noise measurement. It is small — the bus is active in every block including the floor, where the writes merely failed against a dead drive — and it is IDENTICAL in 3d and 4d, so it cancels in the sinus delta. Do not compare these two blocks' absolute floors against block 0 without remembering it. max_consecutive_modbus_errors is left at its normal default: the drive is energized and answering, so the runner's safety stop is doing its proper job and must not be raised.",
+ "duration_minutes": 10,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true
+ },
+ "setpoints": {
+  "rpm": [
+   {
+    "time_sec": 0,
+    "value": 0
+   },
+   {
+    "time_sec": 59,
+    "value": 0
+   },
+   {
+    "time_sec": 60,
+    "value": 600
+   },
+   {
+    "time_sec": 539,
+    "value": 600
+   },
+   {
+    "time_sec": 540,
+    "value": 0
+   },
+   {
+    "time_sec": 599,
+    "value": 0
+   }
+  ],
+  "temperature": []
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}

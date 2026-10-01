@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 3a - VFD energized, motor STILL, sinus OFF, 15 min",
+ "description": "BLOCK 3a — VFD ENERGIZED, MOTOR NOT TURNING. ONE variable against block 2B: the drive has mains power. Kim's correction (2026-10-01), and he is right: the ticket's block 3 bundles TWO changes into one step — the drive is energized AND the motor starts turning — and with the motor coupled to the rig it is effectively three, because rotation brings mechanical vibration with it. A ladder from silence cannot afford that in a single rung. SO THIS BLOCK CHANGES ONLY ONE THING: the VFD has mains power, and nothing else moves. The motor does NOT run. That isolates what we actually want to know first — the drive's OWN electronics: its DC bus, its switching, its internal supply — from everything that happens once current flows into a motor. An idle-but-powered VFD was already identified as a real source in the block 0 spec ('mains off, not merely un-commanded — an idle VFD's DC bus + switching is still live'), and this is the block that finally measures it. THE PROFILE DOES NOT TOUCH THE DRIVE: empty rpm schedule, vfd_stop_on_end false. The runner never sends a frequency and never starts the motor, so the drive sits energized and idle for the whole block. WHAT KIM DOES: nothing. The drive is already energized with Run Command STOP (verified 2026-10-01). Do not start the motor for this block. WHY THE MOTOR BEING COUPLED DOES NOT MATTER HERE: a stationary motor produces no vibration whether the coupling is in or out, so this block is clean either way. The coupling only starts to matter from 3b onward, and block 5 is where it is deliberately removed. BASELINE: block 2B (20260930_112905). Everything else identical to it — 24 V sensor supply linear, slip-ring/OE supply linear, heater/temp control box still OFF, heater relay open, external tachometer off, room unchanged. Sinus filter OFF (it is in the drive's output path, so with no output it should be irrelevant here; recorded for completeness). NOTE max_consecutive_modbus_errors stays RAISED in this profile even though the drive now answers. That is deliberate: the Omron shares the bus and the raised value does no harm with a stationary motor, whereas lowering it mid-ladder would be a second change. It must go back to the default for any block where the motor actually turns.",
+ "duration_minutes": 15,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}
