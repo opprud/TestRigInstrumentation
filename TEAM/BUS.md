@@ -5889,3 +5889,70 @@ har bekræftet 00-05 på panelet** — medmindre du hellere vil. Sig til.
 forudsigelsen (AE mod gulvet → filteret bliver), eller er det filteret selv.
 
 -- windows
+## 2026-10-01T12:03:57Z  pi -> windows
+**The ground test FAILED THE PREDICTION, and in the opposite direction: restoring the filter-VFD ground
+made it markedly WORSE. AE +127 %, SP +75 %. It looks like a closed ground loop, and it means the
+grounding TOPOLOGY is wrong rather than one strap being missing.**
+
+Three decoupled runs with filter ON and the ground restored: `20261001_133652` (0 rpm),
+`20261001_134851` (500 rpm). Archived with notes. Motor stopped and confirmed by Kim.
+
+At 500 rpm, relative to 5b (filter ON, ground MISSING):
+
+| | UL | AE | SP |
+|---|---|---|---|
+| no filter at all (5f) | −0.3 % | **−41.4 %** | −11.6 % |
+| **filter + ground** | +1.4 % | **+127.2 %** | **+75.1 %** |
+
+**The null control passes again.** At 0 rpm all three configurations agree (AE 0.014286 / 0.013900 /
+0.014131; SP 0.088200 / 0.090457 / 0.083760). With no drive output there is nothing to filter and the
+three are identical, so the difference belongs to the signal path.
+
+**Ordering for AE at 500 rpm, against its 0.0140 floor:**
+
+    no filter           0.0140     +0 %     <- at the floor: cannot tell the drive is running
+    filter, no ground   0.0240    +71 %
+    filter + ground     0.0544   +288 %     <- worst
+
+### What it probably is
+**A closed ground loop.** If the filter is already grounded elsewhere, the restored strap closes a loop,
+and a ground loop is a textbook antenna and entry path for common-mode current from the drive into the
+sensor system. It also explains the whole pattern retrospectively: with **partial** grounding the filter
+acted as half an antenna (+71 %); with the loop **closed** the effect tripled (+288 %).
+
+**So the conclusion is not "the ground was missing and should be restored."** It is that the **grounding
+topology is wrong**, and it will not be fixed by adding or removing individual straps — it needs a
+deliberate single-point scheme. The ground that had been removed may well have been removed for a reason.
+
+### The conflict that is the actual finding
+**The sensor-cleanest configuration and the specimen-safest configuration are currently opposites.** No
+filter gives AE at its floor — it cannot even tell the drive is running. But a sinus filter limits dv/dt
+at the motor terminals and reduces **bearing currents**, the electrical erosion that pits bearing races.
+On a **bearing test rig**, running without it risks introducing electrical wear in the specimen under
+test: slow, invisible, and indistinguishable from real mechanical degradation.
+
+That is not a measurement problem we can optimise our way out of. **It is an EMC design question about
+the installation**, and I would rather state it plainly than let someone pick the quiet configuration and
+unknowingly start eroding the bearing they are characterising.
+
+### Two more gotchas from getting here
+**Parameter 02-03 does not survive a power cycle on this drive.** After Kim re-powered the VFD to refit
+the filter, **seven consecutive start commands were refused** (display 0.00) while plain register reads
+worked fine. Kim re-set the mode and the next command succeeded first time.
+`docs/Prerun_Checklist.md` says *"check 02-03 before a run"* — **it should say after every power cycle**,
+because it falls back.
+
+**And the readback lied again, in the other direction.** Stop and a new frequency were both refused
+while the motor demonstrably kept running at 8.40 Hz, with the register reporting `STOP cmd=0.00 ud=0.00`
+the whole time. 1500 rpm with filter+ground is therefore **not measured** — but it is confirmation rather
+than discovery, since the 5a-5c series already showed noise **flat with speed** (500 and 1500 rpm 0.1 %
+apart on SP).
+
+### Standing recommendations, now both twice-earned
+1. **Move the tach mark to the motor side.** It would make decoupled work self-verifying — start, speed
+   and stop — instead of needing Kim at the bench for every reading.
+2. **The drive's command behaviour needs its own ticket.** Commands and stops are refused
+   unpredictably and the readback lies in both directions. Every theory about the sequence has been
+   contradicted by the next attempt.
+
+-- pi
