@@ -131,10 +131,40 @@ decoupled sweep. Every block:
    > chain, not the rig" is a sufficient answer for attribution. 0c is only needed if someone later wants
    > to *reduce* the floor rather than just attribute it. Left as a documented option.
 
-**3. + VFD energized, motor slow (manual mode), sinus filter OFF.** Delta vs 2 = drive EMI at the sensor
-   channels with no output filtering.
+> **LADDER CORRECTION (Kim, 2026-10-01 — "igen en ting af gangen").** The original block 3 (*"+ VFD
+> energized, motor slow, sinus OFF"*, delta = "drive EMI") bundled **two** changes — the drive gets mains
+> power *and* the motor starts turning — and with the motor **coupled to the rig** it is effectively
+> **three**, because rotation brings mechanical vibration. A ladder from silence cannot move two rungs at
+> once, so "drive EMI" would not have been what that delta measured. Split into 3a / 3b / 4, with **block
+> 5 (decoupled) as the only rung that can separate drive EMI from vibration.** Baseline for all drive
+> blocks is **2B** (linear PSU, heater box off); the box stays off through 3a–4 and comes back only in
+> the 4b reversibility test.
 
-**4. Same as 3 but sinus filter ON.** Delta vs 3 = how much the sinus filter cleans the drive EMI.
+**3a. + VFD energized at the MAINS, motor STILL (not commanded), sinus OFF.** Delta vs 2B = the idle
+   drive's electrical contribution **alone** — DC bus charged and switching live, nothing rotating.
+   Needs nothing from Kim if the drive is already energized and idle; motor coupling is irrelevant here
+   (a stationary motor makes no vibration).
+   > **RESULT 3a (`20261001_084527`, 74 sweeps, archived):** an idle energized VFD costs **SP +54.5 %
+   > total** (0.016962 → 0.026213), broadband +43–80 % in every band, SP 131.5 kHz **+93.9 %**, 129.5 kHz
+   > **+94.1 %**, 38.67 kHz +68.3 %. **UL +3.4–5.1 %, AE +0.6 % (untouched), 1060.7 kHz +2.4 %.** SP is
+   > hit hardest because the slip ring sits on the shaft near the motor and is galvanically tied through
+   > the rig — again each channel has its own path.
+   > **This measures block 0's spec:** the drive was required off at the *mains*, not merely
+   > un-commanded, because an idle VFD's DC bus + switching is still live — now quantified at **55 % of
+   > SP's total noise before the motor turns at all.** A floor taken with the drive merely *stopped* is
+   > **not a floor** — state it plainly for any future baseline.
+
+**3b. + motor turning ~600 rpm (manual mode), sinus OFF.** Delta vs 3a = adds rotation. **CAVEAT: with
+   the motor COUPLED to the rig (Kim's current setup) this delta carries drive-load EMI *and* mechanical
+   vibration together — it is NOT pure drive EMI.** Only block 5 (decoupled) splits them. Kim's bench
+   action: start the motor slow in manual.
+
+**4. Same as 3b but sinus filter ON.** Delta vs 3b = what the sinus filter cleans (a quick wire-move).
+
+**4b. (reversibility test — profile added 2026-10-01.) Heater box back ON with the drive energized.**
+   Delta vs the box-off drive block confirms the 2B attribution **reverses**: if the box is the source of
+   AE's 129/131 kHz pair, that pair must return when the box comes back on. Guards 2B against a one-way /
+   drift reading.
 
 ### The 2×2 (the "4 combinations")
 Blocks 1–4 already contain it, but run it explicitly as a clean 2×2 at one condition (manual mode, slow
@@ -166,11 +196,30 @@ motor, no heat, ~5 min per cell):
 
 ## Analysis
 Per channel (UL / AE / SP, and OE if run): **RMS + spectrum** for every block. The deltas that matter:
-- **0→1→2:** the switch-mode-vs-linear PSU contribution.
-- **3→4 and the sinus row of the 2×2:** what the sinus filter buys.
-- **block 5:** does noise track rpm *while decoupled* → EMI vs vibration split, per channel.
+- **0→2A:** the switch-mode-vs-linear 24 V PSU contribution (result: null for the 1.06 MHz line).
+- **2A→2B:** the heater/temp box's conducted EMI (result: halves AE's 129/131 kHz pair).
+- **2B→3a:** the idle energized drive's electrical contribution (result: +55 % SP, before rotation).
+- **3a→3b:** rotation — but **coupled, so drive-load EMI + vibration together, not separable here.**
+- **3b→4 and the sinus row of the 2×2:** what the sinus filter buys.
+- **block 5 (decoupled):** does noise track rpm *while decoupled* → **the one clean EMI-vs-vibration
+  split**, per channel.
 - **block 6:** heater-relay coupling, isolated.
 Look in the spectrum for switch-mode / PWM switching frequencies and their harmonics, not just RMS.
+
+> **CAVEAT — do NOT treat "the 129/131 kHz line" as one thing yet (Pi, 2026-10-01).** The 129.5/131.5 kHz
+> pair **halved on AE** when the heater box went off (2B) **and grew +94 % on SP** when the drive was
+> energized (3a) — different channels, opposite directions, same nominal frequencies. Either it is a
+> switching family **shared by several devices** (box PSU *and* VFD), or the ±1.5 kHz analysis band is
+> catching a broader feature than a single line. **Resolve with a narrow 129–132 kHz look at the already
+> archived data (no rig time) before anyone attributes "the 129/131 line" to a single source.** Until
+> then, 2B's AE attribution and 3a's SP rise are *per-channel* facts, not one shared line.
+
+> **1060.7 kHz — CLOSED as instrument-side (0b + three confirmations).** The line survived the linear-PSU
+> swap (2A), a shorted SP probe tip (0b), and the drive being energized (3a: +2.4 %). It is made in the
+> scope+probe chain, not on the rig, and **no rig-supply/box/drive work removes it** — characterise and
+> subtract it as a constant floor under every block. The only open sub-question is scope-internal vs
+> probe/cable pickup (a BNC-short "block 0c"), which matters **only if someone later wants to lower the
+> floor**, not to attribute it.
 
 ## Owner / test
 - **Kim / hardware:** swap PSU (switch-mode ↔ linear 24 VDC), sinus filter in/out (**a quick wire-move**, confirmed Kim 2026-09-30 — so the {PSU}×{sinus} 2×2 is two fast swaps), decouple the motor,
