@@ -213,6 +213,25 @@ motor, no heat, ~5 min per cell):
    > this one block answers both *"does noise scale with rpm while decoupled"* (EMI vs vibration) **and**
    > *"what does the sinus filter buy."* **Kim's bench action: decouple the motor from the rig** — now the
    > critical path, ahead of block 4b.
+   > **RESULT 5, sinus ON (decoupled — `20261001_113117` / `114015` / `114854` at 0 / 500 / 1500 rpm,
+   > archived): the ticket's central question, ANSWERED.** Relative to the 0 rpm floor: 500 rpm → UL
+   > +3.3 %, AE +67.6 %, SP +54.8 %; 1500 rpm → UL +1.9 %, AE +65.4 %, SP +54.7 %. **A STEP, NOT A RAMP**
+   > — 500 and 1500 rpm are 0.1 % apart on SP. PWM noise proportional to output frequency would put 1500
+   > well above 500; it does not. **So the drive's contribution is its output stage being ACTIVE, not the
+   > frequency it runs at.** Decoupled, so vibration is excluded by construction — this turns 0035's
+   > *coupled* inference (*"SP +43 % flat with speed"*, vibration argued away) into a **measurement**
+   > (+55 % flat, decoupled, no vibration possible). Internal check: Kim read **8.40 Hz and 25.21 Hz** on
+   > the drive display, so the two speeds were genuinely different yet produced the same noise. **UL
+   > unaffected (+2–3 %)** — it does not pick up drive EMI; each channel its own path again.
+   > **VERIFICATION CAVEAT (decoupled):** the tach mark is on the RIG side, so decoupled it reads 0 with a
+   > frozen counter — a human reading the drive display is the ONLY valid speed verification, and the
+   > Modbus readback **lies both directions** (reported `cmd=0.00 run=STOP` while the motor ran at
+   > 25.21 Hz, as CLAUDE.md already records from 2026-08-19). Every 5-series note carries Kim's reading +
+   > time. The drive's command/readback behaviour is split out to **ticket 0047**; moving the tach mark to
+   > the **motor** side (to make decoupled runs self-verifying) is proposed there too.
+   > **NEXT — the sinus-OFF twins:** same three speeds, filter OFF, deltas vs 5a/5b/5c give the sinus
+   > filter's effect **decoupled** (the ticket's other main question). One wire move from Kim. Working
+   > command sequence: 0 rpm needs no command, 8.40 Hz from stopped, then stop → 25.21 Hz.
 
 **6. (optional, last) heater relay as its own factor.** Repeat block 0's stationary floor but **toggle only
    the heater relay** (ch0) at fixed everything-else. Any step in the sensor channels on the toggle = the
