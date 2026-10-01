@@ -232,6 +232,35 @@ motor, no heat, ~5 min per cell):
    > **NEXT — the sinus-OFF twins:** same three speeds, filter OFF, deltas vs 5a/5b/5c give the sinus
    > filter's effect **decoupled** (the ticket's other main question). One wire move from Kim. Working
    > command sequence: 0 rpm needs no command, 8.40 Hz from stopped, then stop → 25.21 Hz.
+   > **RESULT 5, sinus OFF (decoupled — `20261001_125027` / `125757` / `130453` at 0 / 500 / 1500 rpm,
+   > archived): the sinus filter MAKES THE SENSOR NOISE WORSE, and on AE it is the WHOLE "drive EMI."**
+   > Removing the filter cut **AE −41 %** (500 rpm 0.02395 → 0.01403; 1500 rpm 0.02362 → 0.01407) and
+   > **SP −12 %** (0.1365 → 0.1206); UL ±0.5 %. AE without the filter reads 0.0140 running = **exactly its
+   > floor** (0.0139–0.0143) — so the entire +68 % "drive EMI" on AE (RESULT 5 sinus ON) was **created by
+   > the sinus filter**; without it AE cannot tell the drive is running. On SP the filter is about half
+   > (+55 % over floor with it, +33 % without). **NULL CONTROL PASSES:** at 0 rpm (no drive output,
+   > nothing to filter) the two configs agree to 2.7 % vs ~2 % scatter — so the at-speed differences are
+   > the filter acting on the output, not its mere presence in the enclosure. That free control is why the
+   > result is trustable, and the ticket's single coupled sinus block would never have produced it.
+   > **⛔ DO NOT REMOVE THE SINUS FILTER TO CLEAN UP THE SENSORS.** It is not there for the sensors: it
+   > limits dv/dt at the motor terminals and suppresses **bearing currents** — the electrical erosion that
+   > pits bearing races. On a *bearing test rig* removing it would introduce electrical wear in the
+   > specimen under test, contaminating the experiment slowly, invisibly and indistinguishably from real
+   > mechanical degradation. A filter that *amplifies* noise points at its **installation**, not the
+   > principle. (Deserves a hard line in CLAUDE.md.)
+   > **5h-5j — filter ON, ground RESTORED (next; Kim found a missing ground between the sinus filter and
+   > the VFD).** Against 5a-5c (filter ON, ground MISSING) that changes exactly one variable, giving a
+   > three-way split of the filter's **principle** from its **installation**:
+   >
+   >     5a-5c   filter ON,  ground MISSING   (done)
+   >     5e-5g   filter OFF                   (done)
+   >     5h-5j   filter ON,  ground RESTORED  (next, profiles written)
+   >
+   > **Pre-registered prediction (written into the 5h-5j profiles before measuring):** if the ground was
+   > the cause, filter+ground lands at or below the no-filter level — AE falls from ~0.0239 toward its
+   > ~0.0140 floor — **and the filter can stay** (what we want for bearing currents); if the ground is
+   > irrelevant, filter+ground resembles the filter-without-ground series, the filter itself is the
+   > problem, and the fix is shielding / cable routing.
 
 **6. (optional, last) heater relay as its own factor.** Repeat block 0's stationary floor but **toggle only
    the heater relay** (ch0) at fixed everything-else. Any step in the sensor channels on the toggle = the
