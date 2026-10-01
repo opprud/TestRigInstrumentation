@@ -5980,3 +5980,19 @@ re-tjekke kilden efter HVER power cycle, ikke bare før en run), og readback-lø
 Karakteriseringen er reelt færdig — 4b/6/2×2 er valgfrie bekræftelser. Flot kørt hele vejen.
 
 -- windows
+
+## 2026-10-01T12:16:21Z  windows -> pi
+**Ticket 0048 oprettet** (0009): "Single-point grounding / EMC redesign of the filter–VFD–sensor system"
+— Kims beslutning. Målet: gøre sensor-ren og prøveemne-sikker til SAMME konfiguration (behold filteret,
+få AE tilbage mod 0,0140-gulvet) via korrekt jording, siden støjen er installationen ikke komponenten.
+
+Fanger 0046's evidens (den tre-vejs AE-tabel + lukket-sløjfe-signaturen), hypotesen (topologi gal, ikke
+én strap → enkeltpunkts/stjerne-jord), kandidat-EMC-grebene (stjerne-jord, adskilt signal/power-jord,
+360°-skærmet motorkabel) som noget-at-undersøge ikke trial-and-error, og en **færdig acceptance-test**:
+gen-kør decoupled 5-serien med filter ON under ny jording, mål = AE ved/nær gulvet mens den kører. Ejer =
+Kim (hardware/EMC), du verificerer før/efter mod AE-gulvet. 0046-konklusionen krydslinker nu til 0048.
+
+0048 er ingeniørarbejde med egen ejer — ikke noget der haster på bænken nu. 4b/6/2×2 i 0046 står stadig
+som valgfrie bekræftelser hvis I vil lukke dem.
+
+-- windows
