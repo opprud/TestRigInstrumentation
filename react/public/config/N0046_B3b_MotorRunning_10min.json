@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 3b - motor running 600 rpm, sinus OFF, 10 min",
+ "description": "BLOCK 3b — MOTOR TURNING ~600 rpm, sinus filter OFF. ONE variable against block 3a: the motor is now running. Baseline is 3a (20261001_084527), which is this exact configuration with the motor STILL, so the delta is motor current + rotation. NOTE THE MOTOR IS COUPLED TO THE RIG, so that delta carries MECHANICAL VIBRATION as well as drive EMI, and the two cannot be separated here. Do not call it 'drive EMI'. Block 5 decouples the motor and is the only block that can split them. HOW THE SPEED IS SET, AND WHY: the motor was started to 10.084 Hz (600 rpm) by a SEPARATE short script BEFORE this run began, and verified against the tach at 589.15 rpm (expected 591, 0.4 % off). This profile is PASSIVE — empty rpm schedule, vfd_stop_on_end false — so the runner never touches the drive and the motor simply holds the speed the drive was left at. That indirection exists because ONE SERIAL PORT HAS TWO CONSUMERS: the runner polls the Omron on /dev/ttyUSB0 while something must command the VFD on the same port, and the write loses. An attempt to let the runner drive it produced 270 'Could not exclusively lock port' errors in three minutes and the shaft never moved — the runner sends the RUN command only once, sets vfd_started=True, and thereafter writes frequency only; a frequency with no run command does nothing. Starting the drive outside the run avoids the contention entirely, and the drive holds its speed without being re-commanded. THE SPEED IS STILL RECORDED: telem_rpm_meas comes from the tach and is stamped on every sweep, so each sweep carries the actual shaft speed regardless of who set it. max_consecutive_modbus_errors is raised here, unlike a normal driving profile. Justification: this profile never commands the drive, so the runner's safety stop cannot stop a motor it did not start — it protects nothing here and would only kill the acquisition. The operator is responsible for stopping the motor afterwards, and did (verify with rpm=0 AND a frozen pulse count, never a readback).",
+ "duration_minutes": 10,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}
