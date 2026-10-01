@@ -273,6 +273,14 @@ motor, no heat, ~5 min per cell):
    > straps added or removed one at a time — the removed ground may well have been removed for a reason.
    > (1500 rpm + filter+ground unmeasured — the drive refused stop/new-freq while running; confirmation not
    > discovery, since 5a-5c already showed noise flat with speed. See ticket 0047.)
+   > **RESULT 5k — reversibility (ground REMOVED again, decoupled 500 rpm, filter ON, `20261001_141121`,
+   > archived): the ground attribution is CONFIRMED IN BOTH DIRECTIONS.** AE made and unmade: no-ground
+   > 0.0240 → +ground 0.0544 (×2.27) → ground-removed-again **0.0267, within 11.5 % of the original.** So
+   > the +288 % was NOT an artefact of the power-cycle / mode-reset that happened alongside 5h-5j — those
+   > were not undone, and the effect **followed the ground.** Honest residual: AE +11.5 % (inside the
+   > ~26 % run-to-run wander), SP +20.2 % (larger — plausibly cable positions shifted while working the
+   > strap, which matters precisely because the coupling is common-mode, not signal-borne). Conclusion
+   > unchanged and now bidirectionally earned → ticket 0048.
 
 **6. (optional, last) heater relay as its own factor.** Repeat block 0's stationary floor but **toggle only
    the heater relay** (ch0) at fixed everything-else. Any step in the sensor channels on the toggle = the

@@ -66,6 +66,13 @@ All three are marked NOT ESTABLISHED in the 2026-10-01 run notes.
 - Net: **the command is unreliable in both directions and must be retried until a human confirms it** — and
   decoupled, only a human reading the display can confirm it. Both recommendations below are now
   **twice-earned in a single day**; treat them as do-before-the-next-decoupled-run, not "proposed."
+- **The drive degraded over the day:** by the last stop (2026-10-01 afternoon) it took **eighteen commands
+  across two attempts** before it stopped, the register reporting `STOP` the whole time while the motor
+  ran. Both recommendations are now **thrice-earned**.
+- **⛔ SAFETY / OPERATIONAL CONSTRAINT:** until the command path is understood, **no unattended driven
+  runs.** The drive cannot be trusted to start *or* stop on command, and only a human reading the display
+  can confirm actuation — a person must be present to confirm **both** start and stop, with the physical
+  E-stop as the real stop. This blocks any long / 13 h *driven* run until this ticket is resolved.
 
 ## Owner / test
 - **Pi / dev:** the command-model investigation, the runner actuation fix.
