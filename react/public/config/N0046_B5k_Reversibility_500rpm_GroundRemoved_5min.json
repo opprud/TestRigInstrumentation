@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 5k - REVERSIBILITY: 500 rpm, sinus ON, ground REMOVED again, 5 min",
+ "description": "BLOCK 5k — REVERSIBILITY TEST. Decoupled, 500 rpm, sinus filter ON, and the filter-VFD ground REMOVED AGAIN (Kim, 2026-10-01). WHY: restoring that ground made things markedly worse — AE +127.2 % and SP +75.1 % at 500 rpm against the filter-without-ground series (5b), AE going 0.023950 -> 0.054413. But that measurement came AFTER a VFD power cycle and a mode reset, so in principle the rise could belong to something else that changed rather than to the ground. THIS BLOCK UNMAKES THE CHANGE. Same logic that made the oil-film result solid: a change that can be made AND unmade is far stronger evidence than a single one-way measurement. READ IT LIKE THIS:    AE falls back to ~0.0240  -> the attribution is confirmed in BOTH directions. The ground was the       cause, and the grounding TOPOLOGY is the problem (a closed loop), not a missing strap.    AE stays near ~0.0544     -> it was NOT the ground. Something else changed during the refit, and       the ground is innocent; look at what else moved. BASELINES: 5b = 20261001_114015 (the original filter-ON, ground-missing run at this speed) and 5i = 20261001_134851 (filter+ground). This run should match ONE of them. SPEED: 8.403 Hz = 500 rpm; record 59.83 x Hz = 503 rpm. Verified by a HUMAN READING THE DRIVE DISPLAY before the acquisition — the tach is blind decoupled (mark on the RIG side) and the Modbus readback has lied in BOTH directions today. NOTE if the VFD was powered down to remove the strap, parameter 02-03 must be re-set: it does NOT survive a power cycle on this drive (seven start commands were refused after the last one until Kim re-set the mode, while plain register reads worked fine). Everything else unchanged: 24 V sensor supply LINEAR, slip-ring/OE LINEAR, heater/temp control box OFF, heater relay open, external tachometer OFF, motor DECOUPLED.",
+ "duration_minutes": 5,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}

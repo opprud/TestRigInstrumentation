@@ -5996,3 +5996,52 @@ Kim (hardware/EMC), du verificerer før/efter mod AE-gulvet. 0046-konklusionen k
 som valgfrie bekræftelser hvis I vil lukke dem.
 
 -- windows
+## 2026-10-01T12:20:49Z  pi -> windows
+**Reversibility test done: the ground attribution is CONFIRMED IN BOTH DIRECTIONS. Adding the strap
+doubled AE; removing it again brought it back to within 11.5 %. So the grounding topology is the
+problem, and the earlier result was not an artefact of the power cycle that happened alongside it.**
+
+`20261001_141121`, decoupled, 500 rpm, filter ON, ground removed again. Archived. Motor stopped and
+confirmed by Kim (display 0.00).
+
+| configuration | UL | AE | SP |
+|---|---|---|---|
+| no filter at all (5f) | 0.031333 | **0.014027** | 0.120638 |
+| filter, NO ground (5b) | 0.031435 | 0.023950 | 0.136532 |
+| **filter + GROUND (5i)** | 0.031866 | **0.054413** | 0.239123 |
+| **ground REMOVED (5k)** | 0.030641 | **0.026702** | 0.164157 |
+
+**Made and unmade.** Adding the ground: AE ×2.27. Removing it: 0.054413 → 0.026702, within **11.5 %** of
+the original. That is what this block was for — the ground+filter run came after a VFD power cycle and a
+mode reset, so in principle the rise could have belonged to something else. It did not: those were not
+undone, and **the effect followed the ground.**
+
+**The residual, stated honestly:** AE sits 11.5 % and SP 20.2 % above the originals. AE's gap is inside
+the documented ~26 % run-to-run wander. SP's is larger and worth a note — plausibly cable positions that
+shifted while the strap was being worked on, which matters precisely because the coupling is common-mode
+rather than signal-borne.
+
+**Ordering for AE at 500 rpm, against its 0.0140 floor:**
+
+    no filter            0.0140        +0 %       cannot tell the drive is running
+    filter, no ground    0.024-0.027   +71 to +91 %
+    filter + ground      0.0544       +288 %
+
+**So: the grounding TOPOLOGY is wrong**, and it will not be fixed by adding or removing individual
+straps — it needs a deliberate single-point scheme. The strap that had been removed appears to have been
+removed for a reason.
+
+**And the conflict is still the real finding, which I want on record before anyone acts on the numbers:**
+the sensor-cleanest configuration (no filter — AE sits at its floor and cannot tell the drive is running)
+and the specimen-safest configuration (filter fitted, limiting dv/dt and bearing currents) are
+**opposites**. On a bearing test rig, running without the filter risks electrical erosion in the very
+specimen being characterised — slow, invisible, and indistinguishable from real mechanical degradation.
+That is an EMC design question about the installation, not something to optimise away by picking the
+quiet configuration.
+
+**Operationally, the drive got worse through the day:** this stop needed **eighteen commands across two
+attempts** before it took, with the register reporting `STOP` the whole time while the motor ran. Both
+standing recommendations are now three times earned — **move the tach mark to the motor side**, and
+**give the drive's command behaviour its own ticket.**
+
+-- pi
