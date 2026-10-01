@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 4b - heater-temp box BACK ON, 0 rpm, 10 min",
+ "description": "BLOCK 4b — THE HEATER/TEMP CONTROL BOX SWITCHED BACK ON. REVERSIBILITY TEST for the 2B finding. BASELINE IS 5a = 20261001_113117, NOT 2B. That matters: in 2B the VFD was MAINS OFF, and an idle energized VFD alone costs SP +54.5 % (block 3a). 5a has exactly the present configuration — VFD energized and idle, sinus filter ON, filter-VFD ground removed, motor DECOUPLED, 24 V sensor supply LINEAR, slip-ring/OE LINEAR, heater relay open, external tachometer OFF, 0 rpm — except that the box was OFF. So against 5a this block changes exactly ONE thing: the box. WHAT 2B FOUND: switching the box off halved AE's structure at 126-135 kHz (131.5 kHz -48.8 %, 129.5 kHz -46.5 %) and a narrow 500 Hz-bin look confirmed the whole region collapsed from a structured 2-6e-04 to a flat ~2.0e-04. That was a single one-way measurement. WHY REVERSIBILITY MATTERS HERE: twice today a one-way result turned out to be something else. The 1060.7 kHz line was attributed to a bench PSU and turned out to be an external tachometer, then the instrument chain. And the ground result only became trustworthy once it was made AND unmade. A change that can be undone is far stronger evidence. READ IT LIKE THIS: AE's 126-135 kHz structure returns -> the box attribution is confirmed in both directions. It does NOT return -> something else changed in between (the VFD has been power-cycled, the filter refitted, the ground added and removed since 2B), and the 2B attribution must be re-opened. MOTOR COUPLING IS IRRELEVANT HERE: a stationary motor produces no vibration whether coupled or not, so the fact that the motor is now decoupled (it was coupled in 2B) does not affect this comparison. That is the same argument that made block 3a clean. 10 min rather than 5: the effect is spectral structure in a narrow band, and more sweeps average the broadband floor down without touching the lines. NOTHING IS REQUIRED OF THE OPERATOR: the motor stays stopped and the profile never touches the drive.",
+ "duration_minutes": 10,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}
