@@ -300,6 +300,10 @@ motor, no heat, ~5 min per cell):
 **6. (optional, last) heater relay as its own factor.** Repeat block 0's stationary floor but **toggle only
    the heater relay** (ch0) at fixed everything-else. Any step in the sensor channels on the toggle = the
    heater-relay coupling path (the second coupling 0035 flagged), isolated from the drive.
+   > **PLAN 2026-10-01 (Pi, near-unattended):** the relay is Shelly ch0 driven from the Pi, so Pi runs it
+   > with **two toggles in one run** (made-and-unmade — the discipline that caught two of today's
+   > retractions). Thermally safe: Kim approved energizing the element, and **Omron SV 25 °C < PV 26 °C**,
+   > so the controller never calls for heat and the bearing does not warm.
 
 > **DATA NOTE (telem-stamp scan, Pi 2026-09-30):** the block 0 (`20260930_093141`) and 2A
 > (`20260930_102402`) h5s carry **no `telem_*` per-sweep stamps** — they predate the `_telemetry_store`
@@ -374,9 +378,18 @@ a measurement problem to optimise away; it is an EMC installation / grounding de
 anyone silently pick the quiet configuration. **Follow-up: a single-point grounding redesign of the
 filter / VFD / sensor system — ticket 0048 (EMC, not characterisation).**
 
-**Remaining ladder items are optional confirmations, not open questions:** 4b (heater box back on with the
-drive energized — reversibility of 2B), 6 (heater-relay toggle), and the explicit {PSU}×{sinus} 2×2, which
-2A and block 5 already answer in substance.
+**Remaining ladder items are optional confirmations, not open questions:** 4b (done — box bidirectional),
+2C (the box×drive SP combination control), 6 (heater-relay toggle, two-toggle plan above), and the
+explicit {PSU}×{sinus} 2×2, which 2A and block 5 already answer in substance.
+
+**Interactive spectra report:** `py/tools/0046_spectra.html` (also `eceherning/0046_REPORT/`, artifact
+`18f492b3`) — seven configurations × three channels, 100 Hz–1.25 MHz log-log, 40-sweep averaged
+periodograms, DC removed, log-binned. **Open it before trusting any scalar band figure:** a scalar cannot
+show a line nobody looked for, which is exactly how the "SP 129/131 kHz line" error happened. **Three
+conclusions were retracted in the making** — 1.06 MHz as a bench PSU (→ external tachometer → instrument
+chain), AE "over-ranged into 7 levels" (an undersampled-test-capture artefact; real rate uses 41–70
+levels), and the "SP 129/131 kHz line" (flat broadband). The method that caught all three: **made-and-
+unmade reversal, and reading shape not amplitude.**
 
 ## Owner / test
 - **Kim / hardware:** swap PSU (switch-mode ↔ linear 24 VDC), sinus filter in/out (**a quick wire-move**, confirmed Kim 2026-09-30 — so the {PSU}×{sinus} 2×2 is two fast swaps), decouple the motor,

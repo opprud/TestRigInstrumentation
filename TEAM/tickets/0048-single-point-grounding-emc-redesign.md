@@ -25,6 +25,18 @@ indistinguishable from real mechanical degradation. **Removing the filter to qui
 prohibited** — it would silently contaminate every bearing-life measurement the rig exists to make. (This
 belongs as a hard line in CLAUDE.md too.)
 
+## ⛔ SAFETY GATE: is that strap protective earth, or a functional ground?
+**Not established — and it must be before the "ground removed" state is left in place.** 0046 found that
+removing the filter–VFD ground *reduces* sensor noise (closed-loop signature), so the quiet configuration
+has the strap OFF. **But if that strap is protective earth (PE), removing it for noise is an electrical-
+safety violation, not an optimisation** — it defeats the fault path that keeps exposed metal from going
+live. Whether it is PE or a functional / screen ground has not been determined from the wiring.
+- **Someone who can see what it physically connects must identify it** before the strap is left off.
+- **If it is PE it stays on, full stop** — the noise is then solved elsewhere (single-point topology,
+  shielding, cable routing), never by defeating protective earth.
+- Until identified, the rig's present "ground removed" state is a **temporary test condition to be
+  restored**, not a configuration to run in.
+
 ## What 0046 established (the evidence to design against)
 Decoupled, motor at 500 rpm, AE floor ≈ 0.0140 (AE is the most affected channel):
 
