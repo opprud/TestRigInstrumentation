@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 5h - decoupled 0 rpm, sinus ON + FILTER-VFD GROUND RESTORED, 5 min",
+ "description": "BLOCK 5h — DECOUPLED, 0 rpm, SINUS FILTER BACK ON **AND THE MISSING GROUND BETWEEN THE FILTER AND THE VFD RESTORED** (Kim, 2026-10-01). BASELINE IS 20261001_113117 — the SAME speed with the filter ON and that ground MISSING. So this block changes exactly ONE thing against it: the ground. The filter was already fitted in that series. WHY THIS TEST EXISTS: the sinus-filter comparison (5a-5c vs 5e-5g) found that REMOVING the filter REDUCED noise — AE by 41 % at both speeds, SP by 12 % — and on AE the filter accounted for ALL of the drive-running increase (without it AE sat exactly at its floor). A filter that AMPLIFIES rather than attenuates behaves like an antenna, which points at its INSTALLATION rather than the principle, and grounding is the first suspect. Kim then identified that a ground between the filter and the VFD had been removed. This block tests it. PREDICTION, WRITTEN BEFORE THE MEASUREMENT:    if the missing ground was the cause -> filter+ground lands AT OR BELOW the no-filter level; AE       should fall from ~0.0239 toward its ~0.0140 floor, and THE FILTER CAN STAY.    if the ground is irrelevant -> filter+ground resembles the old filter-without-ground series, and       the filter itself is the problem; then the fix is shielding or cable routing, not grounding. WHY IT MATTERS THAT THE FILTER CAN STAY: a sinus filter is not there for the sensors. It limits dv/dt at the motor terminals and reduces BEARING CURRENTS — the electrical erosion that pits bearing races. On a BEARING TEST RIG, removing it to clean up the sensor channels risks introducing electrical wear in the specimen under test, contaminating the experiment slowly, invisibly, and indistinguishably from real mechanical degradation. So a grounding fix is far preferable to removal. THREE-WAY COMPARISON this completes: 5a-5c filter+no ground / 5h-5j filter+ground / 5e-5g no filter. That separates the filter's PRINCIPLE from its INSTALLATION. SPEED: 0 rpm = 0.000 Hz; speed of record 59.83 x Hz. Everything else unchanged: 24 V sensor supply LINEAR, slip-ring/OE LINEAR, heater/temp box OFF, heater relay open, external tachometer OFF, motor DECOUPLED. VERIFICATION: a HUMAN READING THE DRIVE DISPLAY, recorded in RUN_NOTES.txt with its time. The tach is blind decoupled (mark on the RIG side) and the Modbus readback has lied in both directions. The command is simply unreliable and must be RETRIED until a human confirms — three theories about its sequence were each contradicted by the next attempt and are all NOT ESTABLISHED.",
+ "duration_minutes": 5,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}

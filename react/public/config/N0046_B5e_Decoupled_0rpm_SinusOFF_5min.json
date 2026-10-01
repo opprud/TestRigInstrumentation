@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 5e - decoupled 0 rpm, sinus OFF, 5 min",
+ "description": "BLOCK 5e — DECOUPLED, 0 rpm, SINUS FILTER REMOVED (motor wired DIRECTLY to the VFD, Kim 2026-10-01). The sinus-OFF twin of the 5a/5b/5c series. BASELINE: 20261001_113117 — the SAME speed with the filter IN. The delta between them is THE SINUS FILTER'S EFFECT, measured decoupled so no mechanical vibration can mask it. That is the ticket's second main question, and this pair is the cleanest form of it: one variable, three speeds. ONE THING CHANGED from the 5a-5c series: the filter is out. Nothing else — 24 V sensor supply LINEAR, slip-ring/OE supply LINEAR, heater/temp control box OFF, heater relay open, external tachometer OFF, motor DECOUPLED, same acquisition and scope_channels. SPEED: 0 rpm = 0.000 Hz commanded; speed of record 59.83 x Hz. VERIFICATION IS A HUMAN READING THE DRIVE DISPLAY, recorded in RUN_NOTES.txt with its time. The tach is blind (its mark is on the RIG side of the coupling, so it reads 0 with a frozen counter — the sensor is fine, nothing turns in front of it) and the drive's Modbus readback has lied in BOTH directions today, reporting STOP and 0.00 while the motor was demonstrably running at 25.21 Hz. Do not gate anything on the readback. COMMAND SEQUENCE: the speed is set BEFORE the acquisition starts and not touched during it — the drive cannot be commanded while a run holds /dev/ttyUSB0. The sequence that worked every time it was used: start_forward() alone from a STOPPED drive, and stop() then start_forward() to change speed. 50.42 Hz broke even that, so treat it as a pattern and not a rule.",
+ "duration_minutes": 5,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}
