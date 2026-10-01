@@ -347,8 +347,8 @@ Every major question in the ladder is answered, each pinned to one source by one
 Running without the filter puts AE at its floor but risks dv/dt-driven **bearing-current erosion of the
 specimen under test** — slow, invisible, indistinguishable from real mechanical degradation. This is **not
 a measurement problem to optimise away; it is an EMC installation / grounding design question.** Do not let
-anyone silently pick the quiet configuration. **Proposed follow-up: a single-point grounding redesign of
-the filter / VFD / sensor system — its own ticket (EMC, not characterisation).**
+anyone silently pick the quiet configuration. **Follow-up: a single-point grounding redesign of the
+filter / VFD / sensor system — ticket 0048 (EMC, not characterisation).**
 
 **Remaining ladder items are optional confirmations, not open questions:** 4b (heater box back on with the
 drive energized — reversibility of 2B), 6 (heater-relay toggle), and the explicit {PSU}×{sinus} 2×2, which
