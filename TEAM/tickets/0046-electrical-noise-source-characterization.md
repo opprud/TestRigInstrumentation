@@ -154,10 +154,19 @@ decoupled sweep. Every block:
    > SP's total noise before the motor turns at all.** A floor taken with the drive merely *stopped* is
    > **not a floor** — state it plainly for any future baseline.
 
-**3b. + motor turning ~600 rpm (manual mode), sinus OFF.** Delta vs 3a = adds rotation. **CAVEAT: with
-   the motor COUPLED to the rig (Kim's current setup) this delta carries drive-load EMI *and* mechanical
-   vibration together — it is NOT pure drive EMI.** Only block 5 (decoupled) splits them. Kim's bench
-   action: start the motor slow in manual.
+**3b. + motor turning ~600 rpm, sinus OFF.** Delta vs 3a = adds rotation. **CAVEAT: with the motor
+   COUPLED to the rig (Kim's current setup) this delta carries drive-load EMI *and* mechanical vibration
+   together — it is NOT pure drive EMI.** Only block 5 (decoupled) splits them.
+   > **First attempt 2026-10-01 did NOT actuate — the documented 02-03 trap.** Pi commanded 600 rpm /
+   > 10.08 Hz; the drive echoed `vfd_cmd_hz 10.08` but the shaft never moved (tach `rpm_meas 0.0`, pulse
+   > counter frozen at 2425345). Kim had set the drive to **local/manual** when he energized it, so Modbus
+   > frequency is accepted, echoed and ignored (Prerun_Checklist §3). Pi stopped at 90 s and **deleted the
+   > partial** rather than archive sweeps mislabelled "600 rpm" on a stationary shaft. **PENDING KIM'S
+   > CALL:** (1) set **02-03 to communication** and Pi drives — *recommended*, because 3b and 4 differ
+   > only by the sinus filter so the speed must be **identical** across them or it pollutes that delta,
+   > and block 5's rpm sweep needs programmatic control anyway; or (2) Kim **hand-drives** and Pi uses the
+   > passive profiles — the tach stamps `rpm_meas` on every sweep either way, so speed is still recorded,
+   > but the two blocks may not sit at the same rpm. Verify actuation against the tach after (§3).
 
 **4. Same as 3b but sinus filter ON.** Delta vs 3b = what the sinus filter cleans (a quick wire-move).
 
@@ -206,13 +215,18 @@ Per channel (UL / AE / SP, and OE if run): **RMS + spectrum** for every block. T
 - **block 6:** heater-relay coupling, isolated.
 Look in the spectrum for switch-mode / PWM switching frequencies and their harmonics, not just RMS.
 
-> **CAVEAT — do NOT treat "the 129/131 kHz line" as one thing yet (Pi, 2026-10-01).** The 129.5/131.5 kHz
-> pair **halved on AE** when the heater box went off (2B) **and grew +94 % on SP** when the drive was
-> energized (3a) — different channels, opposite directions, same nominal frequencies. Either it is a
-> switching family **shared by several devices** (box PSU *and* VFD), or the ±1.5 kHz analysis band is
-> catching a broader feature than a single line. **Resolve with a narrow 129–132 kHz look at the already
-> archived data (no rig time) before anyone attributes "the 129/131 line" to a single source.** Until
-> then, 2B's AE attribution and 3a's SP rise are *per-channel* facts, not one shared line.
+> **RESOLVED — the 129/131 kHz "line" was never one phenomenon (narrow 126–135 kHz, 500 Hz bins, Pi
+> 2026-10-01).** On **SP** every bin 126–135 kHz is flat (~2.4–2.5e-04 at blocks 0/2A/2B) and doubles
+> *uniformly* to ~4.8e-04 when the drive is energized (3a) — so 3a's "+94 % at 129/131 kHz on SP" was
+> **the broadband floor rising, not a line**; the ±1.5 kHz band could not tell. On **AE** the structure
+> is real (bins 2.1–6.0e-04, peaks near 129.0 / 131.5 kHz) and switching the box off collapses the
+> **whole region** to flat ~2.0e-04 — so **2B's AE attribution stands** (the box adds structure *and*
+> broadband there). The two shared the analysis band, not a source.
+> **METHOD RULE this cost us (keep it):** a band-integrated amplitude at a nominal frequency **cannot
+> tell a line from broadband**, and a "strongest spectral lines" listing just picks the loudest random
+> bin. **A line is real only if the same frequency repeats across channels AND across runs** — 1060.7 kHz
+> does, SP's 129/131 kHz does not. Written into the 3a notes so nobody inherits the error from the
+> archive.
 
 > **1060.7 kHz — CLOSED as instrument-side (0b + three confirmations).** The line survived the linear-PSU
 > swap (2A), a shorted SP probe tip (0b), and the drive being energized (3a: +2.4 %). It is made in the
