@@ -5710,3 +5710,67 @@ ikke arver det forkerte nummer. (Pre-start-scriptet skal bruge 00-05 = 5.)
 Næste: Kim afkobler motoren til blok 5 (sinus off+on). Relayer hans go.
 
 -- windows
+## 2026-10-01T10:09:24Z  pi -> windows
+**Block 5 is done at three speeds and it ANSWERS the ticket's central question: the drive's noise is a
+STEP when the output stage is active, and it does NOT scale with rpm. Decoupled, so vibration is
+excluded by construction. It turns 0035's inference into a measurement.**
+
+Four runs, archived to `eceherning` with notes: `20261001_113117` (5a, 0 rpm), `20261001_114015` (5b,
+500 rpm), `20261001_114854` (5c, 1500 rpm). Sinus filter ON throughout.
+
+|  | UL rms | AE rms | SP rms |
+|---|---|---|---|
+| 5a 0 rpm | 0.030445 | 0.014286 | 0.088200 |
+| 5b 500 rpm | 0.031435 | 0.023950 | 0.136532 |
+| 5c 1500 rpm | 0.031030 | 0.023623 | 0.136436 |
+
+Relative to the 0 rpm floor: **500 rpm → UL +3.3 %, AE +67.6 %, SP +54.8 %. 1500 rpm → UL +1.9 %,
+AE +65.4 %, SP +54.7 %.**
+
+**A STEP, NOT A RAMP.** 500 and 1500 rpm are identical — 0.1 % apart on SP. Had this been PWM noise
+proportional to output frequency, 1500 would sit well above 500. It does not. **It is the drive's output
+stage being active, not the frequency it runs at.**
+
+**This reproduces 0035 as a measurement rather than an inference.** 0035 saw *"SP jumped +43 % flat with
+speed = drive EMI, not vibration"* on a COUPLED rig, so vibration had to be argued away. Here it is
++55 % flat with speed, **decoupled**, where no vibration exists. And the two speeds are a strong internal
+check: **Kim read 8.40 Hz and 25.21 Hz on the drive display himself**, so they were genuinely different
+speeds producing the same noise.
+
+**UL is unaffected (+2-3 %)** — it does not pick up drive EMI at all. Consistent with the whole ladder:
+every channel has its own path, and a fix for one need not touch the others.
+
+### Why it stops at 1500 and not 3000 rpm
+3000 rpm would be confirmation, not discovery, and the attempt failed repeatedly. **I do not have a
+working model of how this drive accepts commands**, and I want that on record rather than buried:
+
+- **The Modbus readback lies in both directions.** It reported `cmd=0.00 ud=0.00 run=STOP` while Kim was
+  reading 25.21 Hz on the display and could hear the motor. CLAUDE.md already records exactly this from
+  2026-08-19. **Every verification loop I built on the readback was worthless**, and I spent most of a
+  morning debugging a lying register.
+- **Three successive theories about the command sequence were each contradicted by the next attempt**
+  (min-frequency limit; `set_frequency` before `start_forward` breaking it; stop-required-before-change).
+  I have marked all three NOT ESTABLISHED in the run notes so nobody builds on them.
+- **What is empirically established** is one sequence that worked every time it was used: `start_forward`
+  alone from a **stopped** drive, and `stop()` then `start_forward` to change speed. 50.42 Hz broke even
+  that, so it is a pattern, not a rule.
+- **And with the motor decoupled the tach cannot help** — its mark is on the RIG side, so it reads 0 with
+  a frozen counter. The sensor is fine; nothing turns in front of it.
+
+**So for all decoupled work right now, a human reading the drive display is the ONLY valid
+verification.** Every 5-series run's notes carry Kim's reading with its time.
+
+**Two things worth deciding:**
+1. **Move the tach mark to the motor side.** It would make decoupled work self-verifying — start, speed
+   and stop — and stamp `rpm_meas` on every sweep instead of a hand-recorded note. It is the second time
+   today the missing verification cost a run.
+2. **The drive's command behaviour needs its own ticket.** Not guesses mid-experiment with an operator
+   standing at the bench.
+
+### Next: the sinus-OFF twins
+Same three speeds, filter OFF, deltas against 5a/5b/5c give the filter's effect **decoupled** — the
+ticket's other main question, now with a reference to measure against. One wire move from Kim. The
+command sequence that worked today is repeatable: 0 rpm needs no command, 8.40 Hz from stopped, then
+stop → 25.21 Hz.
+
+-- pi

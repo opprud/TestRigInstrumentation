@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 5 - decoupled rpm sweep, sinus ON, 32 min",
+ "description": "BLOCK 5 — DECOUPLED RPM SWEEP, sinus filter ON. THE control block of the whole ticket: with the motor mechanically DECOUPLED from the rig there is no bearing or rig vibration, so any noise that scales with rpm is ELECTRICAL (drive PWM/EMI), not mechanical. Same logic that settled SP in the 0035 smoke test. SPEED IS NOT IN THE TELEMETRY AND HERE IS WHY. The tach's reflective mark is on the RIG side of the coupling, so with the coupling out the tach reads 0 and its pulse counter stays frozen — the sensor is fine, there is simply nothing turning in front of it. And this profile is PASSIVE (empty rpm schedule), because the runner cannot drive the VFD during a run on this rig: one serial port, two consumers, and the frequency write loses (270 lock errors in 3 min, shaft never moved, see block 3b notes). SO THE SPEED RECORD IS AN EXTERNAL STEP LOG: a driver script commands each step and writes STEP_LOG.txt into this run folder with a UTC timestamp per step. Every sweep carries timestamp_utc, so sweeps and steps are joined on time. STEP_LOG.txt is archived with the h5, so the join can be reproduced from Azure alone. Speed of record is 59.83 x the commanded Hz. AND THE DRIVE CANNOT SELF-VERIFY: its own readback reported cmd=0.00 ud=0.00 while 10.084 Hz was commanded and the motor was demonstrably running (Kim read 10.08 Hz on the display). So actuation is confirmed by KIM READING THE DRIVE'S DISPLAY at the first speed step and once mid-sweep, and those readings are written into STEP_LOG.txt with their timestamps. Without them this file would be 32 minutes of unverified labels. SCHEDULE: 4 min rest, then 500 / 1000 / 1500 / 2000 / 2500 / 3000 rpm for 4 min each, then 4 min rest. The rest periods at both ends are an in-block floor, so rpm scaling can be read as a trend against a local zero rather than only against another run. NOTE TWO THINGS CHANGED SINCE BLOCK 3b: the coupling came out AND the sinus filter went on. They cannot be attributed separately. That costs nothing, because decoupling is a CONTROL (it removes vibration), not a noise variable — and from here it is one change at a time: the sinus-OFF twin of this block differs from it by the filter alone.",
+ "duration_minutes": 32,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}

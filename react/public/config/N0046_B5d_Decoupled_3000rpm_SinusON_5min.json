@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 5d - decoupled 3000 rpm, sinus ON, 5 min",
+ "description": "BLOCK 5d — DECOUPLED, 3000 rpm, sinus filter ON. One of FOUR separate fixed-speed runs that together replace the ticket's single rpm sweep: 5a 0 rpm (floor), 5b 500, 5c 1500, 5d 3000. WHY FOUR RUNS INSTEAD OF ONE SWEEP, AND IT IS A HARD CONSTRAINT ON THIS RIG: the drive CANNOT be commanded while an acquisition is running. The runner polls the Omron on /dev/ttyUSB0, a VFD write on the same port loses the lock, and the RS510 controller DOES NOT RAISE when that happens — it logs and returns normally, so the caller believes the command landed. An in-run sweep driver therefore logged every step as 'commanded' while the drive sat at STOP and the display read 0.00 (2026-10-01, run discarded). What DOES work, proven twice: command the speed with NO acquisition running, verify it, then start a PASSIVE acquisition and let the drive hold the speed unprompted. So one speed per run. SPEED: 3000 rpm = 50.420 Hz commanded. Speed of record is 59.83 x commanded Hz. VERIFICATION: the tach mark is on the RIG side of the coupling, so with the motor decoupled the tach reads 0 and its counter stays frozen — the sensor is fine, nothing turns in front of it. The drive's own readback has been wrong in BOTH directions today (it reported cmd=0.00 while the motor ran at 589 rpm, and it correctly reported 0.00 when a command had failed), so it is not trusted either. Actuation is confirmed by KIM READING THE DRIVE'S DISPLAY before this run starts, and that reading is recorded in RUN_NOTES.txt with its time. Without it the file would carry an unverified speed label. DECOUPLED IS THE CONTROL: no bearing or rig vibration, so any noise that scales with rpm across 5a-5d is ELECTRICAL (drive PWM/EMI), not mechanical. That is the question the whole ticket is for. Everything else as block 3b: 24 V sensor supply linear, slip-ring/OE linear, heater/temp control box OFF, heater relay open, external tachometer off. Sinus filter ON throughout these four; the sinus-OFF twins come after, and differ by the filter alone.",
+ "duration_minutes": 5,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}
