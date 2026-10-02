@@ -282,11 +282,13 @@ motor, no heat, ~5 min per cell):
    > ~0.0140 floor — **and the filter can stay** (what we want for bearing currents); if the ground is
    > irrelevant, filter+ground resembles the filter-without-ground series, the filter itself is the
    > problem, and the fix is shielding / cable routing.
-   > **⛔ RETRACTED 2026-10-02 (see Conclusion revision).** The "+288 % / closed ground loop" below rests
-   > on **5i**, where Kim read **0.00 on the display — the motor was not running**, so it is not comparable
-   > to the running blocks. The clean *stationary* test (5a vs 5h) shows **no ground effect (0.95–0.99×)**;
-   > the grounding question is **UNRESOLVED**. The original (wrong) reading is kept below for the audit
-   > trail — do not cite it.
+   > **⚠ CAVEAT 2026-10-02 (revised twice): direction holds, magnitude needs a verified-rpm repeat.** 5i is
+   > the block Kim read as 0.00, so its rpm is unverified. But the effect is **reversible** across 5b→5i→5k
+   > (ground off/on/off = +71 %/+288 %/+91 %) and the doubt is **conservative** — less rotation cannot
+   > create more noise, and ground-ON *stationary* (5h) is only 0.0141, so 5i's 0.0544 required the output
+   > stage active. So ground-ON **is** worse once the drive output switches; only the exact factor is
+   > uncertain pending one clean repeat at verified rpm. **Not retracted** — read the magnitude with that
+   > caveat. (An earlier banner here over-retracted it to "no effect"; corrected.)
    > **RESULT 5h-5j, filter ON + ground RESTORED (decoupled — `20261001_133652` / `134851` at 0 / 500 rpm,
    > archived): the prediction FAILED, in the OPPOSITE direction — restoring the ground made it markedly
    > WORSE.** At 500 rpm vs 5b (filter ON, ground MISSING): **AE +127.2 %, SP +75.1 %**, UL +1.4 %. AE
@@ -419,8 +421,14 @@ live in 0048.
 
 **All blocks are run** (2C/2D done — box couples to SP on its own; 4b box bidirectional; 6 heater relay;
 the {PSU}×{sinus} 2×2 answered in substance by 2A and block 5). The characterization is complete. The open
-threads are the **grounding** question (unresolved — needs one clean *running* ground on/off pair, 0048)
-and the **drive command behaviour** (0047).
+threads are the **grounding magnitude** (needs one clean *running* ground on/off pair at **verified rpm**,
+0048) and the **drive command behaviour** (0047).
+
+**One reference block is worth adding after restore (Pi's proposal, 2026-10-02):** a 15-min **0 rpm**
+acquire in the **actual operating configuration — coupled, drive live, heater box on** — which no single
+block has (0/2 are coupled/box-on/drive-dead; 3a/3b coupled/drive-live/box-off). The box effect is
+drive-independent, so the background *can* be composed from parts, but one block in the real config is the
+cleanest single background reference for a 13 h run. **Goes last on the `0046_RIG_RESTORE.md` list.**
 
 **Rig left abnormal after this series** (motor decoupled, 24 V on a lab supply, filter–VFD ground removed)
 — **restore per `docs/0046_RIG_RESTORE.md` before any bearing run**; several of these would silently
@@ -450,11 +458,16 @@ contaminated comparisons:
   the scope's quantization floor** (effectively 8-bit, step = range/199). Much of the "broadband" noise in
   AE and SP **is the digitisation** — electrical cleanup has a hard ceiling, and the real lever is **more
   ADC bits or a smaller voltage range, not more shielding.**
-- **RETRACTED — the filter–VFD ground "closes a loop / +288 %" (blocks 5h–5k).** It rested on **5i**,
-  which Kim read as **0.00 on the display — the motor was not running**, so it was never comparable to the
-  running blocks. Measured cleanly **stationary** (5a vs 5h, sinus ON, ground off vs on) the effect is
-  **0.95–0.99× = none.** The grounding question is **UNRESOLVED**, not "ground makes it worse" — there is
-  no clean *running* ground comparison because 5i was dead-motor. **0048 reframed accordingly.**
+- **Filter–VFD ground — the finding STANDS when running, magnitude pending a verified-rpm repeat (revised
+  twice, 2026-10-02).** *Stationary* the ground does nothing (5a vs 5h = 0.95–0.99×). *Running* the
+  ground-ON makes AE much worse, and it is **reversible**: ground-off 5b +71 % → ground-on 5i +288 % →
+  ground-off 5k +91 %. 5i is the block Kim read as 0.00, so its rpm is unverified — **but that doubt is
+  conservative**: less rotation cannot create *more* noise, and ground-ON *stationary* (5h) is only
+  0.0141, so 5i's 0.0544 required the output stage active. **So ground-ON is worse once the drive output
+  switches; only the exact factor is uncertain.** It needs **one clean repeat at verified rpm** before any
+  grounding scheme is designed on it. The interim (filter ON / ground OFF) is supported. (My first
+  reconciliation over-retracted this to "no effect / unresolved"; corrected here — the stationary nulls do
+  not generalise to the running case.)
 - **RETRACTED — "coupling is irrelevant at 0 rpm."** Decoupling the motor alone raises SP **1.45×**
   (B2B 0.0169 → B2D 0.0246) with everything else off — a real path, not a non-effect.
 - **2C answered (`20261002_092610` + 2D):** the heater box couples into SP **on its own**, not only with

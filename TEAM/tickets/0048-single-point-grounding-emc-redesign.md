@@ -9,15 +9,17 @@ branch:
 pr:
 ---
 
-> **⛔ PREMISE LARGELY RETRACTED 2026-10-02.** This ticket was opened on the "+288 % closed ground loop"
-> result, which rested on a **dead-motor block (5i, Kim read 0.00 on the display)** and does not survive
-> 0046's uniform re-measurement: the clean *stationary* ground comparison (5a vs 5h) shows **no effect
-> (0.95–0.99×)**. So the grounding **topology is not demonstrated to be wrong**, and there is **no clean
-> running ground comparison** yet. What actually changed: (1) the ground question is **UNRESOLVED** —
-> it needs one clean *running* ground-on/off pair, not a redesign; (2) 0046's reference shows the floor is
-> only **1.5–2× over the scope's quantization limit**, so the highest-value lever for a quieter floor is
-> **ADC resolution / voltage range, not grounding or shielding.** Do not action a single-point redesign on
-> the retracted evidence. Reframed below.
+> **⚠ PREMISE SUPPORTED BUT NEEDS ONE VERIFIED-RPM REPEAT (revised twice, 2026-10-02).** This ticket was
+> opened on the "ground-ON is worse when running" result (ground off/on/off = +71 %/+288 %/+91 %,
+> reversible across 5b→5i→5k). An earlier banner here retracted it entirely because **5i** is the block
+> Kim read as 0.00 (rpm unverified) — **that over-retracted it.** The doubt is *conservative* (less
+> rotation cannot create more noise; ground-ON *stationary*, 5h, is only 0.0141, so 5i's 0.0544 required
+> the output stage active). So the direction holds: **ground-ON is worse once the drive output switches**;
+> only the magnitude is uncertain. **Do one clean running ground-on/off pair at a verified rpm before
+> designing any single-point scheme** — that is the gating measurement, not a redesign. Also from 0046:
+> the floor is only **1.5–2× over the scope's quantization limit**, so if a quieter *floor* is the goal
+> (vs removing the ground's running penalty), the lever is **ADC resolution / voltage range**, not
+> shielding.
 
 ## Why this ticket exists
 0046 characterised the sensor-channel noise and ended on a conflict it cannot resolve by measurement: the
@@ -42,23 +44,19 @@ has identified it: it is a FUNCTIONAL / screen ground, not PE.** So leaving it o
 engineering choice, not a hazard, and **no safety constraint forces the configuration either way.**
 `docs/0046_RIG_RESTORE.md` updated accordingly. What remains is the engineering trade-off below.
 
-## Interim operating configuration (corrected 2026-10-02)
-The earlier "+288 %" / "filter+ground worst" row is **retracted** (dead-motor 5i). The only clean ground
-comparison we have is **stationary** (5a vs 5h, sinus ON): ground off vs on = **0.95–0.99×, i.e. no
-difference**. There is no clean *running* comparison either way.
+## Interim operating configuration (re-corrected 2026-10-02)
+The running numbers are **reversible** and support leaving the ground off: ground-off +71 %/+91 % (5b/5k)
+vs ground-on +288 % (5i); stationary the two are equal. (A mid-day note here briefly swung this to "ground
+RESTORED" after an over-retraction of the +288 % block — that swing is itself reverted; see the premise
+banner.)
 
-**Decision (architect, 2026-10-02, corrected): run bearing tests with the filter ON and the functional
-ground RESTORED** — the normal, conservative configuration. The filter stays because on a bearing test rig
-**specimen integrity outranks sensor cleanliness** (it limits dv/dt and bearing currents; elevated sensor
-noise is a known, subtractable offset, whereas bearing-current erosion silently destroys the specimen).
-The ground goes back because, once 5i is discarded, removing it **bought nothing measurable**. **Never run
-"no filter" to clean the sensors.** If a quieter floor is genuinely wanted, the evidence points at **ADC
-resolution / a smaller voltage range** (the floor is only 1.5–2× over the quantization limit), not at
-regrounding — and any grounding change must first be judged on a **clean running ground-on/off pair**,
-which does not yet exist.
-
-> This supersedes the earlier interim note that recommended *ground OFF*; that was based on the retracted
-> +288 % block. Net correction: **ground back ON, filter ON.**
+**Decision (architect, 2026-10-02): run bearing tests with the filter ON and the functional ground OFF**
+— it is the quieter *running* configuration, and leaving a **functional** (non-PE) ground off is a
+legitimate choice. The filter stays because on a bearing test rig **specimen integrity outranks sensor
+cleanliness** (dv/dt / bearing currents; elevated sensor noise is a known, subtractable offset). **Never
+run "no filter" to clean the sensors.** Hold this as **provisional until the verified-rpm ground repeat**
+confirms the magnitude. Separately, the floor itself is quantization-limited (1.5–2×), so the deepest
+"quieter floor" lever is **ADC resolution**, independent of the ground's running penalty.
 
 ## What 0046 established (the evidence to design against)
 Decoupled, motor at 500 rpm, AE floor ≈ 0.0140 (AE is the most affected channel):
