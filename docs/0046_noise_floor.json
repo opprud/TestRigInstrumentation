@@ -1,0 +1,1541 @@
+[
+ {
+  "run": "20260930_084844",
+  "profile_name": "0046 passive-profile SELVTEST 2 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04505,
+    "ac_rms_V": 0.0288863,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.003921,
+     "10-50k": 0.006462,
+     "50-100k": 0.007103,
+     "100-126k": 0.005094,
+     "126-135k": 0.003013,
+     "135-500k": 0.01908,
+     "500k-1M": 0.02227,
+     "1055-1066k": 0.003335,
+     "1M-1.25M": 0.01573
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.66
+   },
+   "AE": {
+    "dc_mean_V": 0.00961,
+    "ac_rms_V": 0.0143033,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002182,
+     "10-50k": 0.003118,
+     "50-100k": 0.003736,
+     "100-126k": 0.002486,
+     "126-135k": 0.002655,
+     "135-500k": 0.01008,
+     "500k-1M": 0.01044,
+     "1055-1066k": 0.001578,
+     "1M-1.25M": 0.007369
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 1.97
+   },
+   "SP": {
+    "dc_mean_V": 4.98653,
+    "ac_rms_V": 0.0186235,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.002537,
+     "10-50k": 0.004112,
+     "50-100k": 0.004577,
+     "100-126k": 0.003285,
+     "126-135k": 0.001915,
+     "135-500k": 0.0122,
+     "500k-1M": 0.01414,
+     "1055-1066k": 0.00408,
+     "1M-1.25M": 0.01058
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 1.6
+   }
+  },
+  "sweeps": 9,
+  "t_start": "2026-09-30T08:49:08.579426+02:00",
+  "block": "SELVTEST"
+ },
+ {
+  "run": "20260930_085412_ABORTED_modbus",
+  "profile_name": "0046 block 0 - bare floor 30 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04396,
+    "ac_rms_V": 0.0291613,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.003998,
+     "10-50k": 0.006544,
+     "50-100k": 0.007171,
+     "100-126k": 0.005161,
+     "126-135k": 0.003023,
+     "135-500k": 0.01924,
+     "500k-1M": 0.02247,
+     "1055-1066k": 0.00337,
+     "1M-1.25M": 0.0159
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.68
+   },
+   "AE": {
+    "dc_mean_V": 0.01014,
+    "ac_rms_V": 0.0145263,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002251,
+     "10-50k": 0.003139,
+     "50-100k": 0.003805,
+     "100-126k": 0.002538,
+     "126-135k": 0.002765,
+     "135-500k": 0.01028,
+     "500k-1M": 0.01056,
+     "1055-1066k": 0.001667,
+     "1M-1.25M": 0.007474
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 2.0
+   },
+   "SP": {
+    "dc_mean_V": 4.98632,
+    "ac_rms_V": 0.0197745,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.002621,
+     "10-50k": 0.004286,
+     "50-100k": 0.004696,
+     "100-126k": 0.003372,
+     "126-135k": 0.001977,
+     "135-500k": 0.01248,
+     "500k-1M": 0.01444,
+     "1055-1066k": 0.007414,
+     "1M-1.25M": 0.01258
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 1.7
+   }
+  },
+  "description": "BLOCK 0, THE REFERENCE FLOOR. Sensors powered at their operating point (24 VDC switch-mode PSU AND slip-ring ~5 VDC PSU both ON) but nothing driving them: VFD fully powered down at the MAINS (not merely un-commanded -- an idle VFD's DC bus and switching are still live), motor off, heater relay open. No extra bench gear powered near the sensor cabling. Every later block is read as a delta against this. THIS PROFILE DOES NOT TOUCH THE DRIVE. The rpm schedule is deliberately empty and vfd_stop_on_end is false, so the runner never sends a frequency, never starts and never stops the motor -- the operator is in control of the drive by hand. It only acquires, for the stated duration, and logs telemetry. Ticket 0046 electrical-noise characterization. Same acquisition and scope_channels as a normal run, so blocks compare without rescaling. Heater relay must be OFF for every electrical block (it is its own EMI source, ticket 0035) -- it only comes back as its own factor in block 6. RUNNER NOTE \u2014 WHY max_consecutive_modbus_errors IS DISABLED HERE: this block requires the VFD powered down at the mains, and the runner polls vfd.get_status() every tick for logging. With the drive dead those reads time out, the failed connects leave the shared RS485 port locked so the Omron read fails too, and the runner's safety stop fires at 10 consecutive errors \u2014 it killed the first attempt at this block 3 minutes in (stop_reason=modbus_errors>=10, 2026-09-30). That safety stop exists so a run does not continue blind after comms die, which is right for a real run and meaningless here: the motor is off, we never command it, and this block needs nothing but the scope. So it is raised for THIS profile only. DO NOT copy this setting into a profile that drives the motor \u2014 there it is the thing that stops a run whose drive has stopped answering. Expect the log to fill with 'Could not exclusively lock port /dev/ttyUSB0' and omron_pv_c to be null; both are expected here.",
+  "sweeps": 14,
+  "t_start": "2026-09-30T08:54:35.964779+02:00",
+  "block": "B0"
+ },
+ {
+  "run": "20260930_085938_SPLIT_device_off_at_t20",
+  "profile_name": "0046 block 0 - bare floor 30 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04674,
+    "ac_rms_V": 0.0284726,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.003894,
+     "10-50k": 0.006376,
+     "50-100k": 0.007,
+     "100-126k": 0.005039,
+     "126-135k": 0.002951,
+     "135-500k": 0.01878,
+     "500k-1M": 0.02196,
+     "1055-1066k": 0.003294,
+     "1M-1.25M": 0.01552
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.64
+   },
+   "AE": {
+    "dc_mean_V": 0.01061,
+    "ac_rms_V": 0.0146558,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.00222,
+     "10-50k": 0.003177,
+     "50-100k": 0.003836,
+     "100-126k": 0.002551,
+     "126-135k": 0.002764,
+     "135-500k": 0.01037,
+     "500k-1M": 0.01066,
+     "1055-1066k": 0.001673,
+     "1M-1.25M": 0.007551
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 2.02
+   },
+   "SP": {
+    "dc_mean_V": 4.98631,
+    "ac_rms_V": 0.0192274,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.002558,
+     "10-50k": 0.004217,
+     "50-100k": 0.00461,
+     "100-126k": 0.003314,
+     "126-135k": 0.001954,
+     "135-500k": 0.01228,
+     "500k-1M": 0.01423,
+     "1055-1066k": 0.006563,
+     "1M-1.25M": 0.01191
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 1.66
+   }
+  },
+  "description": "BLOCK 0, THE REFERENCE FLOOR. Sensors powered at their operating point (24 VDC switch-mode PSU AND slip-ring ~5 VDC PSU both ON) but nothing driving them: VFD fully powered down at the MAINS (not merely un-commanded -- an idle VFD's DC bus and switching are still live), motor off, heater relay open. No extra bench gear powered near the sensor cabling. Every later block is read as a delta against this. THIS PROFILE DOES NOT TOUCH THE DRIVE. The rpm schedule is deliberately empty and vfd_stop_on_end is false, so the runner never sends a frequency, never starts and never stops the motor -- the operator is in control of the drive by hand. It only acquires, for the stated duration, and logs telemetry. Ticket 0046 electrical-noise characterization. Same acquisition and scope_channels as a normal run, so blocks compare without rescaling. Heater relay must be OFF for every electrical block (it is its own EMI source, ticket 0035) -- it only comes back as its own factor in block 6. RUNNER NOTE \u2014 WHY max_consecutive_modbus_errors IS DISABLED HERE: this block requires the VFD powered down at the mains, and the runner polls vfd.get_status() every tick for logging. With the drive dead those reads time out, the failed connects leave the shared RS485 port locked so the Omron read fails too, and the runner's safety stop fires at 10 consecutive errors \u2014 it killed the first attempt at this block 3 minutes in (stop_reason=modbus_errors>=10, 2026-09-30). That safety stop exists so a run does not continue blind after comms die, which is right for a real run and meaningless here: the motor is off, we never command it, and this block needs nothing but the scope. So it is raised for THIS profile only. DO NOT copy this setting into a profile that drives the motor \u2014 there it is the thing that stops a run whose drive has stopped answering. Expect the log to fill with 'Could not exclusively lock port /dev/ttyUSB0' and omron_pv_c to be null; both are expected here.",
+  "sweeps": 149,
+  "t_start": "2026-09-30T09:00:03.047206+02:00",
+  "block": "B0"
+ },
+ {
+  "run": "20260930_093141",
+  "profile_name": "0046 block 0 - bare floor 30 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04631,
+    "ac_rms_V": 0.0285587,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.003919,
+     "10-50k": 0.006392,
+     "50-100k": 0.007032,
+     "100-126k": 0.005045,
+     "126-135k": 0.002964,
+     "135-500k": 0.01885,
+     "500k-1M": 0.02201,
+     "1055-1066k": 0.003306,
+     "1M-1.25M": 0.01555
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.64
+   },
+   "AE": {
+    "dc_mean_V": 0.01179,
+    "ac_rms_V": 0.0150026,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002279,
+     "10-50k": 0.003248,
+     "50-100k": 0.003905,
+     "100-126k": 0.002606,
+     "126-135k": 0.0028,
+     "135-500k": 0.0106,
+     "500k-1M": 0.01095,
+     "1055-1066k": 0.001702,
+     "1M-1.25M": 0.007736
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 2.07
+   },
+   "SP": {
+    "dc_mean_V": 4.98326,
+    "ac_rms_V": 0.0175829,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.002428,
+     "10-50k": 0.00398,
+     "50-100k": 0.004365,
+     "100-126k": 0.003143,
+     "126-135k": 0.001846,
+     "135-500k": 0.01162,
+     "500k-1M": 0.01351,
+     "1055-1066k": 0.002392,
+     "1M-1.25M": 0.009551
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 1.52
+   }
+  },
+  "description": "BLOCK 0, THE REFERENCE FLOOR. Sensors powered at their operating point (24 VDC switch-mode PSU AND slip-ring ~5 VDC PSU both ON) but nothing driving them: VFD fully powered down at the MAINS (not merely un-commanded -- an idle VFD's DC bus and switching are still live), motor off, heater relay open. No extra bench gear powered near the sensor cabling. Every later block is read as a delta against this. THIS PROFILE DOES NOT TOUCH THE DRIVE. The rpm schedule is deliberately empty and vfd_stop_on_end is false, so the runner never sends a frequency, never starts and never stops the motor -- the operator is in control of the drive by hand. It only acquires, for the stated duration, and logs telemetry. Ticket 0046 electrical-noise characterization. Same acquisition and scope_channels as a normal run, so blocks compare without rescaling. Heater relay must be OFF for every electrical block (it is its own EMI source, ticket 0035) -- it only comes back as its own factor in block 6. RUNNER NOTE \u2014 WHY max_consecutive_modbus_errors IS DISABLED HERE: this block requires the VFD powered down at the mains, and the runner polls vfd.get_status() every tick for logging. With the drive dead those reads time out, the failed connects leave the shared RS485 port locked so the Omron read fails too, and the runner's safety stop fires at 10 consecutive errors \u2014 it killed the first attempt at this block 3 minutes in (stop_reason=modbus_errors>=10, 2026-09-30). That safety stop exists so a run does not continue blind after comms die, which is right for a real run and meaningless here: the motor is off, we never command it, and this block needs nothing but the scope. So it is raised for THIS profile only. DO NOT copy this setting into a profile that drives the motor \u2014 there it is the thing that stops a run whose drive has stopped answering. Expect the log to fill with 'Could not exclusively lock port /dev/ttyUSB0' and omron_pv_c to be null; both are expected here.",
+  "sweeps": 149,
+  "t_start": "2026-09-30T09:32:05.627191+02:00",
+  "block": "B0"
+ },
+ {
+  "run": "20260930_102402",
+  "profile_name": "0046 block 2 - linear 24 V PSU 30 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04294,
+    "ac_rms_V": 0.0294026,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.004114,
+     "10-50k": 0.00658,
+     "50-100k": 0.007264,
+     "100-126k": 0.005205,
+     "126-135k": 0.003053,
+     "135-500k": 0.01945,
+     "500k-1M": 0.02262,
+     "1055-1066k": 0.003365,
+     "1M-1.25M": 0.01601
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.69
+   },
+   "AE": {
+    "dc_mean_V": 0.0107,
+    "ac_rms_V": 0.0145908,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.00258,
+     "10-50k": 0.003144,
+     "50-100k": 0.004421,
+     "100-126k": 0.002775,
+     "126-135k": 0.002542,
+     "135-500k": 0.009969,
+     "500k-1M": 0.01064,
+     "1055-1066k": 0.001712,
+     "1M-1.25M": 0.007535
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 2.01
+   },
+   "SP": {
+    "dc_mean_V": 4.98472,
+    "ac_rms_V": 0.017657,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.00245,
+     "10-50k": 0.003992,
+     "50-100k": 0.004392,
+     "100-126k": 0.003157,
+     "126-135k": 0.001856,
+     "135-500k": 0.01167,
+     "500k-1M": 0.01345,
+     "1055-1066k": 0.002364,
+     "1M-1.25M": 0.009767
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 1.52
+   }
+  },
+  "description": "BLOCK 2. Identical to block 0 except the sensor supply is the LINEAR 24 VDC lab supply instead of the switch-mode one. The delta against block 0 IS the switch-mode PSU's own contribution, isolated. If noise drops here, the switch-mode supply is a culprit. THIS PROFILE DOES NOT TOUCH THE DRIVE. The rpm schedule is deliberately empty and vfd_stop_on_end is false, so the runner never sends a frequency, never starts and never stops the motor -- the operator is in control of the drive by hand. It only acquires, for the stated duration, and logs telemetry. Ticket 0046 electrical-noise characterization. Same acquisition and scope_channels as a normal run, so blocks compare without rescaling. Heater relay must be OFF for every electrical block (it is its own EMI source, ticket 0035) -- it only comes back as its own factor in block 6. RUNNER NOTE \u2014 WHY max_consecutive_modbus_errors IS DISABLED HERE: this block requires the VFD powered down at the mains, and the runner polls vfd.get_status() every tick for logging. With the drive dead those reads time out, the failed connects leave the shared RS485 port locked so the Omron read fails too, and the runner's safety stop fires at 10 consecutive errors \u2014 it killed the first attempt at this block 3 minutes in (stop_reason=modbus_errors>=10, 2026-09-30). That safety stop exists so a run does not continue blind after comms die, which is right for a real run and meaningless here: the motor is off, we never command it, and this block needs nothing but the scope. So it is raised for THIS profile only. DO NOT copy this setting into a profile that drives the motor \u2014 there it is the thing that stops a run whose drive has stopped answering. Expect the log to fill with 'Could not exclusively lock port /dev/ttyUSB0' and omron_pv_c to be null; both are expected here.",
+  "sweeps": 149,
+  "t_start": "2026-09-30T10:24:27.318175+02:00",
+  "block": "B2"
+ },
+ {
+  "run": "20260930_110005_TELEMFIX_selftest",
+  "profile_name": "0046 telem-stempel SELVTEST 2 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04421,
+    "ac_rms_V": 0.0291693,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.004101,
+     "10-50k": 0.006536,
+     "50-100k": 0.007193,
+     "100-126k": 0.005191,
+     "126-135k": 0.003038,
+     "135-500k": 0.0193,
+     "500k-1M": 0.02242,
+     "1055-1066k": 0.003321,
+     "1M-1.25M": 0.01586
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.68
+   },
+   "AE": {
+    "dc_mean_V": 0.01175,
+    "ac_rms_V": 0.0149269,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002626,
+     "10-50k": 0.003221,
+     "50-100k": 0.004565,
+     "100-126k": 0.002835,
+     "126-135k": 0.002553,
+     "135-500k": 0.01017,
+     "500k-1M": 0.0109,
+     "1055-1066k": 0.00175,
+     "1M-1.25M": 0.007733
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 2.06
+   },
+   "SP": {
+    "dc_mean_V": 4.98589,
+    "ac_rms_V": 0.017804,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.002469,
+     "10-50k": 0.004021,
+     "50-100k": 0.004445,
+     "100-126k": 0.003175,
+     "126-135k": 0.00187,
+     "135-500k": 0.01177,
+     "500k-1M": 0.01355,
+     "1055-1066k": 0.002414,
+     "1M-1.25M": 0.00986
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 1.53
+   }
+  },
+  "sweeps": 9,
+  "t_start": "2026-09-30T11:00:30.285414+02:00",
+  "block": "SELVTEST"
+ },
+ {
+  "run": "20260930_110822",
+  "profile_name": "0046 block 0b - shorted probe input 10 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04414,
+    "ac_rms_V": 0.0291766,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.004074,
+     "10-50k": 0.006575,
+     "50-100k": 0.007214,
+     "100-126k": 0.005199,
+     "126-135k": 0.003059,
+     "135-500k": 0.01928,
+     "500k-1M": 0.02247,
+     "1055-1066k": 0.003325,
+     "1M-1.25M": 0.01587
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.68
+   },
+   "AE": {
+    "dc_mean_V": 0.01053,
+    "ac_rms_V": 0.0145353,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002529,
+     "10-50k": 0.003136,
+     "50-100k": 0.004381,
+     "100-126k": 0.002806,
+     "126-135k": 0.002517,
+     "135-500k": 0.009925,
+     "500k-1M": 0.01061,
+     "1055-1066k": 0.001698,
+     "1M-1.25M": 0.007517
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 2.0
+   },
+   "SP": {
+    "dc_mean_V": -0.02295,
+    "ac_rms_V": 0.0220245,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.003221,
+     "10-50k": 0.004983,
+     "50-100k": 0.005444,
+     "100-126k": 0.003907,
+     "126-135k": 0.002279,
+     "135-500k": 0.01453,
+     "500k-1M": 0.01694,
+     "1055-1066k": 0.002555,
+     "1M-1.25M": 0.01198
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 1.9
+   }
+  },
+  "description": "BLOCK 0b \u2014 IS THE 1060.7 kHz LINE COMING FROM THE INSTRUMENT ITSELF? Approved by windows 2026-09-30 to run BEFORE block 2B, because it can make 2B moot for this line: if the scope produces 1060.7 kHz with nothing connected, no box, supply or cable on the rig can be its source. WHAT KIM DOES: short the PROBE TIP to that probe's OWN GROUND CLIP, at the probe, leaving the probe connected to the scope exactly as it is. Do NOT unplug the probe and fit a BNC short instead \u2014 that removes the 10x attenuation and the cable, so the numbers stop being comparable with block 0 and the test changes meaning. Shorting the tip removes only the SIGNAL SOURCE and keeps scope, probe, attenuation and cable identical, which is exactly the comparison we want. Short as many of UL / AE / SP as is practical; SP is the most valuable single one because that is where the line is strongest. NOTE volt_offset is 0.0 on ALL THREE channels here, unlike every other block. SP normally runs offset 4.5 V for the slip ring's ~5 V pedestal, and a shorted input sits at 0 V \u2014 which is BELOW that window and would rail. volt_range is unchanged, so volts/div and therefore the noise measurement stay directly comparable to block 0. READ IT LIKE THIS: line still present on a shorted channel = INSTRUMENT ARTEFACT, sitting underneath every block in the ladder \u2014 then characterise and subtract it, do not chase it on the rig. Line gone on a shorted channel = it is coupled in from outside, and the ladder continues as designed. Everything else as block 0: VFD dead at the mains, motor off, heater relay open, external tachometer off, room unchanged. Log in the run notes WHICH channels were shorted.",
+  "sweeps": 50,
+  "t_start": "2026-09-30T11:08:46.626104+02:00",
+  "block": "B0b"
+ },
+ {
+  "run": "20260930_112905",
+  "profile_name": "0046 block 2B - heater-temp control box OFF 30 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04505,
+    "ac_rms_V": 0.028881,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.003915,
+     "10-50k": 0.006465,
+     "50-100k": 0.007125,
+     "100-126k": 0.005107,
+     "126-135k": 0.002981,
+     "135-500k": 0.01908,
+     "500k-1M": 0.02227,
+     "1055-1066k": 0.003301,
+     "1M-1.25M": 0.01573
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.66
+   },
+   "AE": {
+    "dc_mean_V": 0.01125,
+    "ac_rms_V": 0.0142479,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002157,
+     "10-50k": 0.003216,
+     "50-100k": 0.003695,
+     "100-126k": 0.002539,
+     "126-135k": 0.001536,
+     "135-500k": 0.009386,
+     "500k-1M": 0.01091,
+     "1055-1066k": 0.001772,
+     "1M-1.25M": 0.007732
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 1.96
+   },
+   "SP": {
+    "dc_mean_V": 4.98424,
+    "ac_rms_V": 0.0169445,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.002336,
+     "10-50k": 0.003795,
+     "50-100k": 0.004183,
+     "100-126k": 0.002999,
+     "126-135k": 0.001757,
+     "135-500k": 0.01116,
+     "500k-1M": 0.01303,
+     "1055-1066k": 0.002305,
+     "1M-1.25M": 0.009296
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 1.46
+   }
+  },
+  "description": "BLOCK 2B \u2014 THE HEATER / TEMPERATURE CONTROL BOX AS ITS OWN FACTOR (Kim's split of block 2, 2026-09-30). Block 2A was the 24 V switch-mode -> linear PSU swap and came back NULL. 2B switches off the heater/temp control box at its own 220 VAC. WHY IT IS CLEANLY SEPARATE FROM BLOCK 6: the heater ELEMENT is already off in every electrical block (relay open), so anything 2B changes is the box's OWN ELECTRONICS \u2014 not the relay coupling, which block 6 isolates later by toggling the relay alone. READS, AND THE FIRST ONE IS A CONFOUND NOT A RESULT (windows, 2026-09-30) \u2014 the box cannot be opened, so infer from behaviour: a channel that goes DEAD, flat or zero, means the box was FEEDING THAT SENSOR'S SUPPLY. That is a confound, not a noise reduction: switch the box back on, note it, and do not report the delta as EMI. A channel that merely gets QUIETER while still carrying its normal signal is the box's conducted EMI, and that is the measurement. Baseline to read against is block 2A (20260930_102402) since that is the immediately preceding configuration, and block 0 (20260930_093141) for the full picture. Everything else unchanged: 24 V sensor supply LINEAR as left after 2A, slip-ring/OE supply linear, VFD dead at the mains, motor off, heater relay open, external tachometer off, room otherwise unchanged. LOG THE OFF TIMESTAMP in the run notes so the step can be located if the box is switched mid-run.",
+  "sweeps": 149,
+  "t_start": "2026-09-30T11:29:29.454884+02:00",
+  "block": "B2B"
+ },
+ {
+  "run": "20261001_084527",
+  "profile_name": "0046 block 3a - VFD energized, motor STILL, sinus OFF, 15 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04251,
+    "ac_rms_V": 0.0301499,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.004079,
+     "10-50k": 0.00679,
+     "50-100k": 0.007476,
+     "100-126k": 0.00537,
+     "126-135k": 0.00317,
+     "135-500k": 0.02012,
+     "500k-1M": 0.02322,
+     "1055-1066k": 0.003376,
+     "1M-1.25M": 0.01617
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.73
+   },
+   "AE": {
+    "dc_mean_V": 0.01041,
+    "ac_rms_V": 0.0143187,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002156,
+     "10-50k": 0.003222,
+     "50-100k": 0.003696,
+     "100-126k": 0.002611,
+     "126-135k": 0.001918,
+     "135-500k": 0.009549,
+     "500k-1M": 0.01088,
+     "1055-1066k": 0.001637,
+     "1M-1.25M": 0.007662
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 1.97
+   },
+   "SP": {
+    "dc_mean_V": 4.98522,
+    "ac_rms_V": 0.0262515,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.003783,
+     "10-50k": 0.006536,
+     "50-100k": 0.007508,
+     "100-126k": 0.005252,
+     "126-135k": 0.003308,
+     "135-500k": 0.01889,
+     "500k-1M": 0.01923,
+     "1055-1066k": 0.00261,
+     "1M-1.25M": 0.01243
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 2.26
+   }
+  },
+  "description": "BLOCK 3a \u2014 VFD ENERGIZED, MOTOR NOT TURNING. ONE variable against block 2B: the drive has mains power. Kim's correction (2026-10-01), and he is right: the ticket's block 3 bundles TWO changes into one step \u2014 the drive is energized AND the motor starts turning \u2014 and with the motor coupled to the rig it is effectively three, because rotation brings mechanical vibration with it. A ladder from silence cannot afford that in a single rung. SO THIS BLOCK CHANGES ONLY ONE THING: the VFD has mains power, and nothing else moves. The motor does NOT run. That isolates what we actually want to know first \u2014 the drive's OWN electronics: its DC bus, its switching, its internal supply \u2014 from everything that happens once current flows into a motor. An idle-but-powered VFD was already identified as a real source in the block 0 spec ('mains off, not merely un-commanded \u2014 an idle VFD's DC bus + switching is still live'), and this is the block that finally measures it. THE PROFILE DOES NOT TOUCH THE DRIVE: empty rpm schedule, vfd_stop_on_end false. The runner never sends a frequency and never starts the motor, so the drive sits energized and idle for the whole block. WHAT KIM DOES: nothing. The drive is already energized with Run Command STOP (verified 2026-10-01). Do not start the motor for this block. WHY THE MOTOR BEING COUPLED DOES NOT MATTER HERE: a stationary motor produces no vibration whether the coupling is in or out, so this block is clean either way. The coupling only starts to matter from 3b onward, and block 5 is where it is deliberately removed. BASELINE: block 2B (20260930_112905). Everything else identical to it \u2014 24 V sensor supply linear, slip-ring/OE supply linear, heater/temp control box still OFF, heater relay open, external tachometer off, room unchanged. Sinus filter OFF (it is in the drive's output path, so with no output it should be irrelevant here; recorded for completeness). NOTE max_consecutive_modbus_errors stays RAISED in this profile even though the drive now answers. That is deliberate: the Omron shares the bus and the raised value does no harm with a stationary motor, whereas lowering it mid-ladder would be a second change. It must go back to the default for any block where the motor actually turns.",
+  "sweeps": 74,
+  "t_start": "2026-10-01T08:45:51.334476+02:00",
+  "block": "B3a"
+ },
+ {
+  "run": "20261001_103916",
+  "profile_name": "0046 block 3b - motor running 600 rpm, sinus OFF, 10 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.06502,
+    "ac_rms_V": 0.283973,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.3361,
+     "10-50k": 0.02783,
+     "50-100k": 0.008095,
+     "100-126k": 0.005712,
+     "126-135k": 0.003328,
+     "135-500k": 0.0211,
+     "500k-1M": 0.02408,
+     "1055-1066k": 0.003487,
+     "1M-1.25M": 0.01657
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 16.31
+   },
+   "AE": {
+    "dc_mean_V": 0.0126,
+    "ac_rms_V": 0.0258065,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002474,
+     "10-50k": 0.009535,
+     "50-100k": 0.01711,
+     "100-126k": 0.01551,
+     "126-135k": 0.004544,
+     "135-500k": 0.01249,
+     "500k-1M": 0.01107,
+     "1055-1066k": 0.001636,
+     "1M-1.25M": 0.00773
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 3.56
+   },
+   "SP": {
+    "dc_mean_V": 4.98557,
+    "ac_rms_V": 0.0454663,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.005866,
+     "10-50k": 0.01255,
+     "50-100k": 0.01317,
+     "100-126k": 0.00962,
+     "126-135k": 0.005196,
+     "135-500k": 0.03228,
+     "500k-1M": 0.03421,
+     "1055-1066k": 0.004432,
+     "1M-1.25M": 0.02053
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 3.92
+   }
+  },
+  "description": "BLOCK 3b \u2014 MOTOR TURNING ~600 rpm, sinus filter OFF. ONE variable against block 3a: the motor is now running. Baseline is 3a (20261001_084527), which is this exact configuration with the motor STILL, so the delta is motor current + rotation. NOTE THE MOTOR IS COUPLED TO THE RIG, so that delta carries MECHANICAL VIBRATION as well as drive EMI, and the two cannot be separated here. Do not call it 'drive EMI'. Block 5 decouples the motor and is the only block that can split them. HOW THE SPEED IS SET, AND WHY: the motor was started to 10.084 Hz (600 rpm) by a SEPARATE short script BEFORE this run began, and verified against the tach at 589.15 rpm (expected 591, 0.4 % off). This profile is PASSIVE \u2014 empty rpm schedule, vfd_stop_on_end false \u2014 so the runner never touches the drive and the motor simply holds the speed the drive was left at. That indirection exists because ONE SERIAL PORT HAS TWO CONSUMERS: the runner polls the Omron on /dev/ttyUSB0 while something must command the VFD on the same port, and the write loses. An attempt to let the runner drive it produced 270 'Could not exclusively lock port' errors in three minutes and the shaft never moved \u2014 the runner sends the RUN command only once, sets vfd_started=True, and thereafter writes frequency only; a frequency with no run command does nothing. Starting the drive outside the run avoids the contention entirely, and the drive holds its speed without being re-commanded. THE SPEED IS STILL RECORDED: telem_rpm_meas comes from the tach and is stamped on every sweep, so each sweep carries the actual shaft speed regardless of who set it. max_consecutive_modbus_errors is raised here, unlike a normal driving profile. Justification: this profile never commands the drive, so the runner's safety stop cannot stop a motor it did not start \u2014 it protects nothing here and would only kill the acquisition. The operator is responsible for stopping the motor afterwards, and did (verify with rpm=0 AND a frozen pulse count, never a readback).",
+  "sweeps": 49,
+  "t_start": "2026-10-01T10:39:41.119844+02:00",
+  "block": "B3b"
+ },
+ {
+  "run": "20261001_113117",
+  "profile_name": "0046 block 5a - decoupled 0 rpm, sinus ON, 5 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04262,
+    "ac_rms_V": 0.0304289,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.004161,
+     "10-50k": 0.006938,
+     "50-100k": 0.007612,
+     "100-126k": 0.005498,
+     "126-135k": 0.003197,
+     "135-500k": 0.02038,
+     "500k-1M": 0.02338,
+     "1055-1066k": 0.003399,
+     "1M-1.25M": 0.01616
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.75
+   },
+   "AE": {
+    "dc_mean_V": 0.01085,
+    "ac_rms_V": 0.0142785,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002127,
+     "10-50k": 0.003199,
+     "50-100k": 0.00383,
+     "100-126k": 0.002569,
+     "126-135k": 0.001739,
+     "135-500k": 0.009431,
+     "500k-1M": 0.01087,
+     "1055-1066k": 0.001742,
+     "1M-1.25M": 0.007701
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 1.97
+   },
+   "SP": {
+    "dc_mean_V": 4.98672,
+    "ac_rms_V": 0.0883229,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.0117,
+     "10-50k": 0.02419,
+     "50-100k": 0.0264,
+     "100-126k": 0.01933,
+     "126-135k": 0.01108,
+     "135-500k": 0.06684,
+     "500k-1M": 0.06052,
+     "1055-1066k": 0.01721,
+     "1M-1.25M": 0.04061
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 7.61
+   }
+  },
+  "description": "BLOCK 5a \u2014 DECOUPLED, 0 rpm, sinus filter ON. One of FOUR separate fixed-speed runs that together replace the ticket's single rpm sweep: 5a 0 rpm (floor), 5b 500, 5c 1500, 5d 3000. WHY FOUR RUNS INSTEAD OF ONE SWEEP, AND IT IS A HARD CONSTRAINT ON THIS RIG: the drive CANNOT be commanded while an acquisition is running. The runner polls the Omron on /dev/ttyUSB0, a VFD write on the same port loses the lock, and the RS510 controller DOES NOT RAISE when that happens \u2014 it logs and returns normally, so the caller believes the command landed. An in-run sweep driver therefore logged every step as 'commanded' while the drive sat at STOP and the display read 0.00 (2026-10-01, run discarded). What DOES work, proven twice: command the speed with NO acquisition running, verify it, then start a PASSIVE acquisition and let the drive hold the speed unprompted. So one speed per run. SPEED: 0 rpm = 0.000 Hz commanded. Speed of record is 59.83 x commanded Hz. VERIFICATION: the tach mark is on the RIG side of the coupling, so with the motor decoupled the tach reads 0 and its counter stays frozen \u2014 the sensor is fine, nothing turns in front of it. The drive's own readback has been wrong in BOTH directions today (it reported cmd=0.00 while the motor ran at 589 rpm, and it correctly reported 0.00 when a command had failed), so it is not trusted either. Actuation is confirmed by KIM READING THE DRIVE'S DISPLAY before this run starts, and that reading is recorded in RUN_NOTES.txt with its time. Without it the file would carry an unverified speed label. DECOUPLED IS THE CONTROL: no bearing or rig vibration, so any noise that scales with rpm across 5a-5d is ELECTRICAL (drive PWM/EMI), not mechanical. That is the question the whole ticket is for. Everything else as block 3b: 24 V sensor supply linear, slip-ring/OE linear, heater/temp control box OFF, heater relay open, external tachometer off. Sinus filter ON throughout these four; the sinus-OFF twins come after, and differ by the filter alone.",
+  "sweeps": 24,
+  "t_start": "2026-10-01T11:31:41.678609+02:00",
+  "block": "B5a"
+ },
+ {
+  "run": "20261001_114015",
+  "profile_name": "0046 block 5b - decoupled 500 rpm, sinus ON, 5 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04189,
+    "ac_rms_V": 0.0314515,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.008352,
+     "10-50k": 0.006998,
+     "50-100k": 0.007712,
+     "100-126k": 0.005557,
+     "126-135k": 0.003221,
+     "135-500k": 0.02062,
+     "500k-1M": 0.02381,
+     "1055-1066k": 0.003501,
+     "1M-1.25M": 0.01647
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.81
+   },
+   "AE": {
+    "dc_mean_V": 0.01179,
+    "ac_rms_V": 0.0239773,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002429,
+     "10-50k": 0.008974,
+     "50-100k": 0.01707,
+     "100-126k": 0.01183,
+     "126-135k": 0.005288,
+     "135-500k": 0.01178,
+     "500k-1M": 0.01094,
+     "1055-1066k": 0.001721,
+     "1M-1.25M": 0.007682
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 3.31
+   },
+   "SP": {
+    "dc_mean_V": 4.98876,
+    "ac_rms_V": 0.136294,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.01576,
+     "10-50k": 0.04385,
+     "50-100k": 0.05821,
+     "100-126k": 0.03404,
+     "126-135k": 0.01658,
+     "135-500k": 0.08503,
+     "500k-1M": 0.09389,
+     "1055-1066k": 0.02095,
+     "1M-1.25M": 0.06965
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 11.74
+   }
+  },
+  "description": "BLOCK 5b \u2014 DECOUPLED, 500 rpm, sinus filter ON. One of FOUR separate fixed-speed runs that together replace the ticket's single rpm sweep: 5a 0 rpm (floor), 5b 500, 5c 1500, 5d 3000. WHY FOUR RUNS INSTEAD OF ONE SWEEP, AND IT IS A HARD CONSTRAINT ON THIS RIG: the drive CANNOT be commanded while an acquisition is running. The runner polls the Omron on /dev/ttyUSB0, a VFD write on the same port loses the lock, and the RS510 controller DOES NOT RAISE when that happens \u2014 it logs and returns normally, so the caller believes the command landed. An in-run sweep driver therefore logged every step as 'commanded' while the drive sat at STOP and the display read 0.00 (2026-10-01, run discarded). What DOES work, proven twice: command the speed with NO acquisition running, verify it, then start a PASSIVE acquisition and let the drive hold the speed unprompted. So one speed per run. SPEED: 500 rpm = 8.403 Hz commanded. Speed of record is 59.83 x commanded Hz. VERIFICATION: the tach mark is on the RIG side of the coupling, so with the motor decoupled the tach reads 0 and its counter stays frozen \u2014 the sensor is fine, nothing turns in front of it. The drive's own readback has been wrong in BOTH directions today (it reported cmd=0.00 while the motor ran at 589 rpm, and it correctly reported 0.00 when a command had failed), so it is not trusted either. Actuation is confirmed by KIM READING THE DRIVE'S DISPLAY before this run starts, and that reading is recorded in RUN_NOTES.txt with its time. Without it the file would carry an unverified speed label. DECOUPLED IS THE CONTROL: no bearing or rig vibration, so any noise that scales with rpm across 5a-5d is ELECTRICAL (drive PWM/EMI), not mechanical. That is the question the whole ticket is for. Everything else as block 3b: 24 V sensor supply linear, slip-ring/OE linear, heater/temp control box OFF, heater relay open, external tachometer off. Sinus filter ON throughout these four; the sinus-OFF twins come after, and differ by the filter alone.",
+  "sweeps": 25,
+  "t_start": "2026-10-01T11:40:40.257541+02:00",
+  "block": "B5b"
+ },
+ {
+  "run": "20261001_114854",
+  "profile_name": "0046 block 5c - decoupled 1500 rpm, sinus ON, 5 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04349,
+    "ac_rms_V": 0.0310527,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.006487,
+     "10-50k": 0.006953,
+     "50-100k": 0.007707,
+     "100-126k": 0.005526,
+     "126-135k": 0.003256,
+     "135-500k": 0.02053,
+     "500k-1M": 0.02371,
+     "1055-1066k": 0.003466,
+     "1M-1.25M": 0.01641
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.78
+   },
+   "AE": {
+    "dc_mean_V": 0.01243,
+    "ac_rms_V": 0.0236212,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002148,
+     "10-50k": 0.00774,
+     "50-100k": 0.01667,
+     "100-126k": 0.01233,
+     "126-135k": 0.005032,
+     "135-500k": 0.01174,
+     "500k-1M": 0.01095,
+     "1055-1066k": 0.001728,
+     "1M-1.25M": 0.007683
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 3.26
+   },
+   "SP": {
+    "dc_mean_V": 4.98723,
+    "ac_rms_V": 0.136461,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.01611,
+     "10-50k": 0.04028,
+     "50-100k": 0.05849,
+     "100-126k": 0.03393,
+     "126-135k": 0.01652,
+     "135-500k": 0.08511,
+     "500k-1M": 0.09471,
+     "1055-1066k": 0.02091,
+     "1M-1.25M": 0.07029
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 11.76
+   }
+  },
+  "description": "BLOCK 5c \u2014 DECOUPLED, 1500 rpm, sinus filter ON. One of FOUR separate fixed-speed runs that together replace the ticket's single rpm sweep: 5a 0 rpm (floor), 5b 500, 5c 1500, 5d 3000. WHY FOUR RUNS INSTEAD OF ONE SWEEP, AND IT IS A HARD CONSTRAINT ON THIS RIG: the drive CANNOT be commanded while an acquisition is running. The runner polls the Omron on /dev/ttyUSB0, a VFD write on the same port loses the lock, and the RS510 controller DOES NOT RAISE when that happens \u2014 it logs and returns normally, so the caller believes the command landed. An in-run sweep driver therefore logged every step as 'commanded' while the drive sat at STOP and the display read 0.00 (2026-10-01, run discarded). What DOES work, proven twice: command the speed with NO acquisition running, verify it, then start a PASSIVE acquisition and let the drive hold the speed unprompted. So one speed per run. SPEED: 1500 rpm = 25.210 Hz commanded. Speed of record is 59.83 x commanded Hz. VERIFICATION: the tach mark is on the RIG side of the coupling, so with the motor decoupled the tach reads 0 and its counter stays frozen \u2014 the sensor is fine, nothing turns in front of it. The drive's own readback has been wrong in BOTH directions today (it reported cmd=0.00 while the motor ran at 589 rpm, and it correctly reported 0.00 when a command had failed), so it is not trusted either. Actuation is confirmed by KIM READING THE DRIVE'S DISPLAY before this run starts, and that reading is recorded in RUN_NOTES.txt with its time. Without it the file would carry an unverified speed label. DECOUPLED IS THE CONTROL: no bearing or rig vibration, so any noise that scales with rpm across 5a-5d is ELECTRICAL (drive PWM/EMI), not mechanical. That is the question the whole ticket is for. Everything else as block 3b: 24 V sensor supply linear, slip-ring/OE linear, heater/temp control box OFF, heater relay open, external tachometer off. Sinus filter ON throughout these four; the sinus-OFF twins come after, and differ by the filter alone.",
+  "sweeps": 23,
+  "t_start": "2026-10-01T11:49:19.014737+02:00",
+  "block": "B5c"
+ },
+ {
+  "run": "20261001_125027",
+  "profile_name": "0046 block 5e - decoupled 0 rpm, sinus OFF, 5 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.0419,
+    "ac_rms_V": 0.0306659,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.004149,
+     "10-50k": 0.006899,
+     "50-100k": 0.007593,
+     "100-126k": 0.005434,
+     "126-135k": 0.00321,
+     "135-500k": 0.02034,
+     "500k-1M": 0.02356,
+     "1055-1066k": 0.003482,
+     "1M-1.25M": 0.01668
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.76
+   },
+   "AE": {
+    "dc_mean_V": 0.00957,
+    "ac_rms_V": 0.013993,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.003523,
+     "10-50k": 0.003097,
+     "50-100k": 0.003444,
+     "100-126k": 0.002456,
+     "126-135k": 0.001446,
+     "135-500k": 0.009132,
+     "500k-1M": 0.01061,
+     "1055-1066k": 0.001661,
+     "1M-1.25M": 0.00755
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 1.93
+   },
+   "SP": {
+    "dc_mean_V": 4.98893,
+    "ac_rms_V": 0.0904296,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.01166,
+     "10-50k": 0.02372,
+     "50-100k": 0.02658,
+     "100-126k": 0.0186,
+     "126-135k": 0.01085,
+     "135-500k": 0.06621,
+     "500k-1M": 0.06465,
+     "1055-1066k": 0.01426,
+     "1M-1.25M": 0.04274
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 7.79
+   }
+  },
+  "description": "BLOCK 5e \u2014 DECOUPLED, 0 rpm, SINUS FILTER REMOVED (motor wired DIRECTLY to the VFD, Kim 2026-10-01). The sinus-OFF twin of the 5a/5b/5c series. BASELINE: 20261001_113117 \u2014 the SAME speed with the filter IN. The delta between them is THE SINUS FILTER'S EFFECT, measured decoupled so no mechanical vibration can mask it. That is the ticket's second main question, and this pair is the cleanest form of it: one variable, three speeds. ONE THING CHANGED from the 5a-5c series: the filter is out. Nothing else \u2014 24 V sensor supply LINEAR, slip-ring/OE supply LINEAR, heater/temp control box OFF, heater relay open, external tachometer OFF, motor DECOUPLED, same acquisition and scope_channels. SPEED: 0 rpm = 0.000 Hz commanded; speed of record 59.83 x Hz. VERIFICATION IS A HUMAN READING THE DRIVE DISPLAY, recorded in RUN_NOTES.txt with its time. The tach is blind (its mark is on the RIG side of the coupling, so it reads 0 with a frozen counter \u2014 the sensor is fine, nothing turns in front of it) and the drive's Modbus readback has lied in BOTH directions today, reporting STOP and 0.00 while the motor was demonstrably running at 25.21 Hz. Do not gate anything on the readback. COMMAND SEQUENCE: the speed is set BEFORE the acquisition starts and not touched during it \u2014 the drive cannot be commanded while a run holds /dev/ttyUSB0. The sequence that worked every time it was used: start_forward() alone from a STOPPED drive, and stop() then start_forward() to change speed. 50.42 Hz broke even that, so treat it as a pattern and not a rule.",
+  "sweeps": 23,
+  "t_start": "2026-10-01T12:50:51.476622+02:00",
+  "block": "B5e"
+ },
+ {
+  "run": "20261001_125757",
+  "profile_name": "0046 block 5f - decoupled 500 rpm, sinus OFF, 5 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04295,
+    "ac_rms_V": 0.0312829,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.008605,
+     "10-50k": 0.006927,
+     "50-100k": 0.007578,
+     "100-126k": 0.005475,
+     "126-135k": 0.003174,
+     "135-500k": 0.02035,
+     "500k-1M": 0.02362,
+     "1055-1066k": 0.003499,
+     "1M-1.25M": 0.01657
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.8
+   },
+   "AE": {
+    "dc_mean_V": 0.00939,
+    "ac_rms_V": 0.0140172,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.003546,
+     "10-50k": 0.003091,
+     "50-100k": 0.00344,
+     "100-126k": 0.002476,
+     "126-135k": 0.00145,
+     "135-500k": 0.009143,
+     "500k-1M": 0.01064,
+     "1055-1066k": 0.00166,
+     "1M-1.25M": 0.007557
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 1.93
+   },
+   "SP": {
+    "dc_mean_V": 4.98797,
+    "ac_rms_V": 0.120572,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.01316,
+     "10-50k": 0.02854,
+     "50-100k": 0.03066,
+     "100-126k": 0.02252,
+     "126-135k": 0.01198,
+     "135-500k": 0.0823,
+     "500k-1M": 0.09543,
+     "1055-1066k": 0.01809,
+     "1M-1.25M": 0.05797
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 10.39
+   }
+  },
+  "description": "BLOCK 5f \u2014 DECOUPLED, 500 rpm, SINUS FILTER REMOVED (motor wired DIRECTLY to the VFD, Kim 2026-10-01). The sinus-OFF twin of the 5a/5b/5c series. BASELINE: 20261001_114015 \u2014 the SAME speed with the filter IN. The delta between them is THE SINUS FILTER'S EFFECT, measured decoupled so no mechanical vibration can mask it. That is the ticket's second main question, and this pair is the cleanest form of it: one variable, three speeds. ONE THING CHANGED from the 5a-5c series: the filter is out. Nothing else \u2014 24 V sensor supply LINEAR, slip-ring/OE supply LINEAR, heater/temp control box OFF, heater relay open, external tachometer OFF, motor DECOUPLED, same acquisition and scope_channels. SPEED: 500 rpm = 8.403 Hz commanded; speed of record 59.83 x Hz. VERIFICATION IS A HUMAN READING THE DRIVE DISPLAY, recorded in RUN_NOTES.txt with its time. The tach is blind (its mark is on the RIG side of the coupling, so it reads 0 with a frozen counter \u2014 the sensor is fine, nothing turns in front of it) and the drive's Modbus readback has lied in BOTH directions today, reporting STOP and 0.00 while the motor was demonstrably running at 25.21 Hz. Do not gate anything on the readback. COMMAND SEQUENCE: the speed is set BEFORE the acquisition starts and not touched during it \u2014 the drive cannot be commanded while a run holds /dev/ttyUSB0. The sequence that worked every time it was used: start_forward() alone from a STOPPED drive, and stop() then start_forward() to change speed. 50.42 Hz broke even that, so treat it as a pattern and not a rule.",
+  "sweeps": 24,
+  "t_start": "2026-10-01T12:58:21.190923+02:00",
+  "block": "B5f"
+ },
+ {
+  "run": "20261001_130453",
+  "profile_name": "0046 block 5g - decoupled 1500 rpm, sinus OFF, 5 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04283,
+    "ac_rms_V": 0.0312095,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.007971,
+     "10-50k": 0.006903,
+     "50-100k": 0.007612,
+     "100-126k": 0.00548,
+     "126-135k": 0.003204,
+     "135-500k": 0.02035,
+     "500k-1M": 0.02369,
+     "1055-1066k": 0.003545,
+     "1M-1.25M": 0.01661
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.79
+   },
+   "AE": {
+    "dc_mean_V": 0.00946,
+    "ac_rms_V": 0.0140319,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.003516,
+     "10-50k": 0.003102,
+     "50-100k": 0.003442,
+     "100-126k": 0.002464,
+     "126-135k": 0.001453,
+     "135-500k": 0.009168,
+     "500k-1M": 0.01065,
+     "1055-1066k": 0.00165,
+     "1M-1.25M": 0.007572
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 1.93
+   },
+   "SP": {
+    "dc_mean_V": 4.987,
+    "ac_rms_V": 0.1196,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.01428,
+     "10-50k": 0.02758,
+     "50-100k": 0.03094,
+     "100-126k": 0.02244,
+     "126-135k": 0.01281,
+     "135-500k": 0.08145,
+     "500k-1M": 0.09451,
+     "1055-1066k": 0.01818,
+     "1M-1.25M": 0.05749
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 10.31
+   }
+  },
+  "description": "BLOCK 5g \u2014 DECOUPLED, 1500 rpm, SINUS FILTER REMOVED (motor wired DIRECTLY to the VFD, Kim 2026-10-01). The sinus-OFF twin of the 5a/5b/5c series. BASELINE: 20261001_114854 \u2014 the SAME speed with the filter IN. The delta between them is THE SINUS FILTER'S EFFECT, measured decoupled so no mechanical vibration can mask it. That is the ticket's second main question, and this pair is the cleanest form of it: one variable, three speeds. ONE THING CHANGED from the 5a-5c series: the filter is out. Nothing else \u2014 24 V sensor supply LINEAR, slip-ring/OE supply LINEAR, heater/temp control box OFF, heater relay open, external tachometer OFF, motor DECOUPLED, same acquisition and scope_channels. SPEED: 1500 rpm = 25.210 Hz commanded; speed of record 59.83 x Hz. VERIFICATION IS A HUMAN READING THE DRIVE DISPLAY, recorded in RUN_NOTES.txt with its time. The tach is blind (its mark is on the RIG side of the coupling, so it reads 0 with a frozen counter \u2014 the sensor is fine, nothing turns in front of it) and the drive's Modbus readback has lied in BOTH directions today, reporting STOP and 0.00 while the motor was demonstrably running at 25.21 Hz. Do not gate anything on the readback. COMMAND SEQUENCE: the speed is set BEFORE the acquisition starts and not touched during it \u2014 the drive cannot be commanded while a run holds /dev/ttyUSB0. The sequence that worked every time it was used: start_forward() alone from a STOPPED drive, and stop() then start_forward() to change speed. 50.42 Hz broke even that, so treat it as a pattern and not a rule.",
+  "sweeps": 24,
+  "t_start": "2026-10-01T13:05:17.020487+02:00",
+  "block": "B5g"
+ },
+ {
+  "run": "20261001_133652",
+  "profile_name": "0046 block 5h - decoupled 0 rpm, sinus ON + FILTER-VFD GROUND RESTORED, 5 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04353,
+    "ac_rms_V": 0.030228,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.00407,
+     "10-50k": 0.006844,
+     "50-100k": 0.007531,
+     "100-126k": 0.005396,
+     "126-135k": 0.00316,
+     "135-500k": 0.0201,
+     "500k-1M": 0.02315,
+     "1055-1066k": 0.003454,
+     "1M-1.25M": 0.01643
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.74
+   },
+   "AE": {
+    "dc_mean_V": 0.00891,
+    "ac_rms_V": 0.0141175,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002052,
+     "10-50k": 0.003017,
+     "50-100k": 0.003995,
+     "100-126k": 0.00248,
+     "126-135k": 0.002132,
+     "135-500k": 0.009781,
+     "500k-1M": 0.01047,
+     "1055-1066k": 0.001609,
+     "1M-1.25M": 0.007345
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 1.95
+   },
+   "SP": {
+    "dc_mean_V": 4.98594,
+    "ac_rms_V": 0.0838204,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.01134,
+     "10-50k": 0.02362,
+     "50-100k": 0.02653,
+     "100-126k": 0.01857,
+     "126-135k": 0.01094,
+     "135-500k": 0.06519,
+     "500k-1M": 0.0546,
+     "1055-1066k": 0.0151,
+     "1M-1.25M": 0.03836
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 7.22
+   }
+  },
+  "description": "BLOCK 5h \u2014 DECOUPLED, 0 rpm, SINUS FILTER BACK ON **AND THE MISSING GROUND BETWEEN THE FILTER AND THE VFD RESTORED** (Kim, 2026-10-01). BASELINE IS 20261001_113117 \u2014 the SAME speed with the filter ON and that ground MISSING. So this block changes exactly ONE thing against it: the ground. The filter was already fitted in that series. WHY THIS TEST EXISTS: the sinus-filter comparison (5a-5c vs 5e-5g) found that REMOVING the filter REDUCED noise \u2014 AE by 41 % at both speeds, SP by 12 % \u2014 and on AE the filter accounted for ALL of the drive-running increase (without it AE sat exactly at its floor). A filter that AMPLIFIES rather than attenuates behaves like an antenna, which points at its INSTALLATION rather than the principle, and grounding is the first suspect. Kim then identified that a ground between the filter and the VFD had been removed. This block tests it. PREDICTION, WRITTEN BEFORE THE MEASUREMENT:    if the missing ground was the cause -> filter+ground lands AT OR BELOW the no-filter level; AE       should fall from ~0.0239 toward its ~0.0140 floor, and THE FILTER CAN STAY.    if the ground is irrelevant -> filter+ground resembles the old filter-without-ground series, and       the filter itself is the problem; then the fix is shielding or cable routing, not grounding. WHY IT MATTERS THAT THE FILTER CAN STAY: a sinus filter is not there for the sensors. It limits dv/dt at the motor terminals and reduces BEARING CURRENTS \u2014 the electrical erosion that pits bearing races. On a BEARING TEST RIG, removing it to clean up the sensor channels risks introducing electrical wear in the specimen under test, contaminating the experiment slowly, invisibly, and indistinguishably from real mechanical degradation. So a grounding fix is far preferable to removal. THREE-WAY COMPARISON this completes: 5a-5c filter+no ground / 5h-5j filter+ground / 5e-5g no filter. That separates the filter's PRINCIPLE from its INSTALLATION. SPEED: 0 rpm = 0.000 Hz; speed of record 59.83 x Hz. Everything else unchanged: 24 V sensor supply LINEAR, slip-ring/OE LINEAR, heater/temp box OFF, heater relay open, external tachometer OFF, motor DECOUPLED. VERIFICATION: a HUMAN READING THE DRIVE DISPLAY, recorded in RUN_NOTES.txt with its time. The tach is blind decoupled (mark on the RIG side) and the Modbus readback has lied in both directions. The command is simply unreliable and must be RETRIED until a human confirms \u2014 three theories about its sequence were each contradicted by the next attempt and are all NOT ESTABLISHED.",
+  "sweeps": 24,
+  "t_start": "2026-10-01T13:37:16.202630+02:00",
+  "block": "B5h"
+ },
+ {
+  "run": "20261001_134851",
+  "profile_name": "0046 block 5i - decoupled 500 rpm, sinus ON + FILTER-VFD GROUND RESTORED, 5 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04468,
+    "ac_rms_V": 0.0318246,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.007821,
+     "10-50k": 0.006873,
+     "50-100k": 0.007618,
+     "100-126k": 0.005447,
+     "126-135k": 0.003164,
+     "135-500k": 0.02034,
+     "500k-1M": 0.0244,
+     "1055-1066k": 0.003675,
+     "1M-1.25M": 0.01742
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.83
+   },
+   "AE": {
+    "dc_mean_V": 0.01041,
+    "ac_rms_V": 0.0543985,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002258,
+     "10-50k": 0.008464,
+     "50-100k": 0.04119,
+     "100-126k": 0.02429,
+     "126-135k": 0.01406,
+     "135-500k": 0.03727,
+     "500k-1M": 0.02044,
+     "1055-1066k": 0.001904,
+     "1M-1.25M": 0.008656
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 7.5
+   },
+   "SP": {
+    "dc_mean_V": 4.98806,
+    "ac_rms_V": 0.238985,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.02017,
+     "10-50k": 0.04718,
+     "50-100k": 0.1237,
+     "100-126k": 0.06892,
+     "126-135k": 0.03936,
+     "135-500k": 0.1324,
+     "500k-1M": 0.1545,
+     "1055-1066k": 0.03162,
+     "1M-1.25M": 0.1418
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 20.59
+   }
+  },
+  "description": "BLOCK 5i \u2014 DECOUPLED, 500 rpm, SINUS FILTER BACK ON **AND THE MISSING GROUND BETWEEN THE FILTER AND THE VFD RESTORED** (Kim, 2026-10-01). BASELINE IS 20261001_114015 \u2014 the SAME speed with the filter ON and that ground MISSING. So this block changes exactly ONE thing against it: the ground. The filter was already fitted in that series. WHY THIS TEST EXISTS: the sinus-filter comparison (5a-5c vs 5e-5g) found that REMOVING the filter REDUCED noise \u2014 AE by 41 % at both speeds, SP by 12 % \u2014 and on AE the filter accounted for ALL of the drive-running increase (without it AE sat exactly at its floor). A filter that AMPLIFIES rather than attenuates behaves like an antenna, which points at its INSTALLATION rather than the principle, and grounding is the first suspect. Kim then identified that a ground between the filter and the VFD had been removed. This block tests it. PREDICTION, WRITTEN BEFORE THE MEASUREMENT:    if the missing ground was the cause -> filter+ground lands AT OR BELOW the no-filter level; AE       should fall from ~0.0239 toward its ~0.0140 floor, and THE FILTER CAN STAY.    if the ground is irrelevant -> filter+ground resembles the old filter-without-ground series, and       the filter itself is the problem; then the fix is shielding or cable routing, not grounding. WHY IT MATTERS THAT THE FILTER CAN STAY: a sinus filter is not there for the sensors. It limits dv/dt at the motor terminals and reduces BEARING CURRENTS \u2014 the electrical erosion that pits bearing races. On a BEARING TEST RIG, removing it to clean up the sensor channels risks introducing electrical wear in the specimen under test, contaminating the experiment slowly, invisibly, and indistinguishably from real mechanical degradation. So a grounding fix is far preferable to removal. THREE-WAY COMPARISON this completes: 5a-5c filter+no ground / 5h-5j filter+ground / 5e-5g no filter. That separates the filter's PRINCIPLE from its INSTALLATION. SPEED: 500 rpm = 8.403 Hz; speed of record 59.83 x Hz. Everything else unchanged: 24 V sensor supply LINEAR, slip-ring/OE LINEAR, heater/temp box OFF, heater relay open, external tachometer OFF, motor DECOUPLED. VERIFICATION: a HUMAN READING THE DRIVE DISPLAY, recorded in RUN_NOTES.txt with its time. The tach is blind decoupled (mark on the RIG side) and the Modbus readback has lied in both directions. The command is simply unreliable and must be RETRIED until a human confirms \u2014 three theories about its sequence were each contradicted by the next attempt and are all NOT ESTABLISHED.",
+  "sweeps": 23,
+  "t_start": "2026-10-01T13:49:15.405606+02:00",
+  "block": "B5i"
+ },
+ {
+  "run": "20261001_141121",
+  "profile_name": "0046 block 5k - REVERSIBILITY: 500 rpm, sinus ON, ground REMOVED again, 5 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04487,
+    "ac_rms_V": 0.0305473,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.007595,
+     "10-50k": 0.006787,
+     "50-100k": 0.007491,
+     "100-126k": 0.005391,
+     "126-135k": 0.003151,
+     "135-500k": 0.01999,
+     "500k-1M": 0.02323,
+     "1055-1066k": 0.003406,
+     "1M-1.25M": 0.01614
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.75
+   },
+   "AE": {
+    "dc_mean_V": 0.00967,
+    "ac_rms_V": 0.0266786,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002293,
+     "10-50k": 0.01005,
+     "50-100k": 0.02065,
+     "100-126k": 0.01335,
+     "126-135k": 0.00597,
+     "135-500k": 0.01224,
+     "500k-1M": 0.01073,
+     "1055-1066k": 0.001632,
+     "1M-1.25M": 0.007452
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 3.68
+   },
+   "SP": {
+    "dc_mean_V": 4.98856,
+    "ac_rms_V": 0.163957,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.0176,
+     "10-50k": 0.04785,
+     "50-100k": 0.06613,
+     "100-126k": 0.04058,
+     "126-135k": 0.01942,
+     "135-500k": 0.09292,
+     "500k-1M": 0.1206,
+     "1055-1066k": 0.02389,
+     "1M-1.25M": 0.09018
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 14.13
+   }
+  },
+  "description": "BLOCK 5k \u2014 REVERSIBILITY TEST. Decoupled, 500 rpm, sinus filter ON, and the filter-VFD ground REMOVED AGAIN (Kim, 2026-10-01). WHY: restoring that ground made things markedly worse \u2014 AE +127.2 % and SP +75.1 % at 500 rpm against the filter-without-ground series (5b), AE going 0.023950 -> 0.054413. But that measurement came AFTER a VFD power cycle and a mode reset, so in principle the rise could belong to something else that changed rather than to the ground. THIS BLOCK UNMAKES THE CHANGE. Same logic that made the oil-film result solid: a change that can be made AND unmade is far stronger evidence than a single one-way measurement. READ IT LIKE THIS:    AE falls back to ~0.0240  -> the attribution is confirmed in BOTH directions. The ground was the       cause, and the grounding TOPOLOGY is the problem (a closed loop), not a missing strap.    AE stays near ~0.0544     -> it was NOT the ground. Something else changed during the refit, and       the ground is innocent; look at what else moved. BASELINES: 5b = 20261001_114015 (the original filter-ON, ground-missing run at this speed) and 5i = 20261001_134851 (filter+ground). This run should match ONE of them. SPEED: 8.403 Hz = 500 rpm; record 59.83 x Hz = 503 rpm. Verified by a HUMAN READING THE DRIVE DISPLAY before the acquisition \u2014 the tach is blind decoupled (mark on the RIG side) and the Modbus readback has lied in BOTH directions today. NOTE if the VFD was powered down to remove the strap, parameter 02-03 must be re-set: it does NOT survive a power cycle on this drive (seven start commands were refused after the last one until Kim re-set the mode, while plain register reads worked fine). Everything else unchanged: 24 V sensor supply LINEAR, slip-ring/OE LINEAR, heater/temp control box OFF, heater relay open, external tachometer OFF, motor DECOUPLED.",
+  "sweeps": 24,
+  "t_start": "2026-10-01T14:11:45.171021+02:00",
+  "block": "B5k"
+ },
+ {
+  "run": "20261001_142438",
+  "profile_name": "0046 block 4b - heater-temp box BACK ON, 0 rpm, 10 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.03975,
+    "ac_rms_V": 0.0303878,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.004288,
+     "10-50k": 0.006867,
+     "50-100k": 0.007537,
+     "100-126k": 0.005433,
+     "126-135k": 0.003188,
+     "135-500k": 0.02003,
+     "500k-1M": 0.02328,
+     "1055-1066k": 0.003514,
+     "1M-1.25M": 0.01667
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.75
+   },
+   "AE": {
+    "dc_mean_V": 0.00853,
+    "ac_rms_V": 0.0139136,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002403,
+     "10-50k": 0.003018,
+     "50-100k": 0.003774,
+     "100-126k": 0.002464,
+     "126-135k": 0.002567,
+     "135-500k": 0.009526,
+     "500k-1M": 0.01025,
+     "1055-1066k": 0.001609,
+     "1M-1.25M": 0.007275
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 1.92
+   },
+   "SP": {
+    "dc_mean_V": 4.98657,
+    "ac_rms_V": 0.0988539,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.01125,
+     "10-50k": 0.02304,
+     "50-100k": 0.02873,
+     "100-126k": 0.019,
+     "126-135k": 0.01509,
+     "135-500k": 0.06745,
+     "500k-1M": 0.06977,
+     "1055-1066k": 0.01858,
+     "1M-1.25M": 0.05621
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 8.52
+   }
+  },
+  "description": "BLOCK 4b \u2014 THE HEATER/TEMP CONTROL BOX SWITCHED BACK ON. REVERSIBILITY TEST for the 2B finding. BASELINE IS 5a = 20261001_113117, NOT 2B. That matters: in 2B the VFD was MAINS OFF, and an idle energized VFD alone costs SP +54.5 % (block 3a). 5a has exactly the present configuration \u2014 VFD energized and idle, sinus filter ON, filter-VFD ground removed, motor DECOUPLED, 24 V sensor supply LINEAR, slip-ring/OE LINEAR, heater relay open, external tachometer OFF, 0 rpm \u2014 except that the box was OFF. So against 5a this block changes exactly ONE thing: the box. WHAT 2B FOUND: switching the box off halved AE's structure at 126-135 kHz (131.5 kHz -48.8 %, 129.5 kHz -46.5 %) and a narrow 500 Hz-bin look confirmed the whole region collapsed from a structured 2-6e-04 to a flat ~2.0e-04. That was a single one-way measurement. WHY REVERSIBILITY MATTERS HERE: twice today a one-way result turned out to be something else. The 1060.7 kHz line was attributed to a bench PSU and turned out to be an external tachometer, then the instrument chain. And the ground result only became trustworthy once it was made AND unmade. A change that can be undone is far stronger evidence. READ IT LIKE THIS: AE's 126-135 kHz structure returns -> the box attribution is confirmed in both directions. It does NOT return -> something else changed in between (the VFD has been power-cycled, the filter refitted, the ground added and removed since 2B), and the 2B attribution must be re-opened. MOTOR COUPLING IS IRRELEVANT HERE: a stationary motor produces no vibration whether coupled or not, so the fact that the motor is now decoupled (it was coupled in 2B) does not affect this comparison. That is the same argument that made block 3a clean. 10 min rather than 5: the effect is spectral structure in a narrow band, and more sweeps average the broadband floor down without touching the lines. NOTHING IS REQUIRED OF THE OPERATOR: the motor stays stopped and the profile never touches the drive.",
+  "sweeps": 49,
+  "t_start": "2026-10-01T14:25:02.662380+02:00",
+  "block": "B4b"
+ },
+ {
+  "run": "20261001_145326",
+  "profile_name": "0046 block 6 - heater relay toggled twice, 0 rpm, 15 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04274,
+    "ac_rms_V": 0.0299907,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.00419,
+     "10-50k": 0.006848,
+     "50-100k": 0.007506,
+     "100-126k": 0.005364,
+     "126-135k": 0.003151,
+     "135-500k": 0.01988,
+     "500k-1M": 0.02294,
+     "1055-1066k": 0.003457,
+     "1M-1.25M": 0.01634
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.72
+   },
+   "AE": {
+    "dc_mean_V": 0.00967,
+    "ac_rms_V": 0.014327,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002259,
+     "10-50k": 0.003104,
+     "50-100k": 0.004472,
+     "100-126k": 0.002604,
+     "126-135k": 0.002447,
+     "135-500k": 0.009676,
+     "500k-1M": 0.01052,
+     "1055-1066k": 0.001682,
+     "1M-1.25M": 0.007487
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 1.97
+   },
+   "SP": {
+    "dc_mean_V": 4.98807,
+    "ac_rms_V": 0.111863,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.01293,
+     "10-50k": 0.02635,
+     "50-100k": 0.04028,
+     "100-126k": 0.02198,
+     "126-135k": 0.01874,
+     "135-500k": 0.07448,
+     "500k-1M": 0.07633,
+     "1055-1066k": 0.02223,
+     "1M-1.25M": 0.06609
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 9.64
+   }
+  },
+  "description": "BLOCK 6 \u2014 THE HEATER RELAY AS ITS OWN FACTOR, toggled TWICE inside one run. The relay is Shelly channel 0, driven from the Pi over MQTT \u2014 NOT the RS485 port \u2014 so toggling it cannot contend with the acquisition. A separate driver script switches it and writes RELAY_LOG.txt into this run folder with a UTC timestamp per change; sweeps carry timestamp_utc, so the two join on time and the log is archived with the h5. SCHEDULE: 0-5 min relay OFF, 5-10 min relay ON, 10-15 min relay OFF. TWO TOGGLES RATHER THAN THE TICKET'S ONE, deliberately: it makes the relay's effect MADE AND UNMADE inside a single run, with nothing else in the world changing between the segments. That discipline caught two wrong conclusions today \u2014 the 1060.7 kHz line (attributed to a bench PSU, actually an external tachometer, finally the instrument chain) and the filter-VFD ground (only trustworthy once it was added AND removed). A single one-way toggle would have been the weaker measurement. WHY IT IS SEPARATE FROM BLOCK 2B/4b: those switched the heater/temp control BOX, i.e. its own electronics. This switches only the RELAY, with the box left powered \u2014 it isolates the relay's own coupling path, the second coupling 0035 flagged. SAFETY, CHECKED BEFORE RUNNING: the heater ELEMENT gets mains during the ON segment, but OMRON SV IS 25 C AGAINST PV 26 C, so the controller will not call for heat and the bearing does not warm. Verified by reading both registers immediately before the run. Kim approved energizing the element. CONFIGURATION: VFD energized and idle, motor STOPPED and DECOUPLED (irrelevant at 0 rpm \u2014 a stationary motor produces no vibration either way), sinus filter ON, filter-VFD ground REMOVED, 24 V sensor supply LINEAR, slip-ring/OE LINEAR, heater/temp control box ON, external tachometer OFF. The run's own heater guard will also switch the relay off at run_end, which is the desired end state.",
+  "sweeps": 74,
+  "t_start": "2026-10-01T14:53:50.303813+02:00",
+  "block": "B6"
+ },
+ {
+  "run": "20261002_092610",
+  "profile_name": "0046 block 2C - VFD mains OFF, heater box ON, 0 rpm, 15 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04281,
+    "ac_rms_V": 0.0294952,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.004134,
+     "10-50k": 0.006657,
+     "50-100k": 0.007298,
+     "100-126k": 0.00525,
+     "126-135k": 0.003066,
+     "135-500k": 0.01949,
+     "500k-1M": 0.02268,
+     "1055-1066k": 0.00345,
+     "1M-1.25M": 0.0161
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.69
+   },
+   "AE": {
+    "dc_mean_V": 0.01205,
+    "ac_rms_V": 0.0148696,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.00249,
+     "10-50k": 0.003253,
+     "50-100k": 0.003976,
+     "100-126k": 0.002666,
+     "126-135k": 0.002369,
+     "135-500k": 0.01016,
+     "500k-1M": 0.01101,
+     "1055-1066k": 0.002014,
+     "1M-1.25M": 0.007863
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 2.05
+   },
+   "SP": {
+    "dc_mean_V": 4.98777,
+    "ac_rms_V": 0.0424121,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.004114,
+     "10-50k": 0.006797,
+     "50-100k": 0.01274,
+     "100-126k": 0.007001,
+     "126-135k": 0.009233,
+     "135-500k": 0.02585,
+     "500k-1M": 0.02194,
+     "1055-1066k": 0.02601,
+     "1M-1.25M": 0.03455
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 3.65
+   }
+  },
+  "description": "BLOCK 2C \u2014 DOES THE HEATER BOX'S COUPLING INTO SP NEED AN ENERGIZED DRIVE? windows created this block after 4b raised the question (2026-10-01); Kim approved it. BASELINE IS 2B = 20260930_112905 \u2014 VFD MAINS OFF, box OFF. This run is the same with the BOX ON, so against 2B it changes exactly ONE thing: the box. THE QUESTION. 2B (drive mains off) found the box barely touched SP: 131.5 kHz moved only -4.8 %. 4b (drive energized, idle) found the box raised SP +11.9 % overall, 127-133 kHz bins up x1.06-1.65. The one difference was THE DRIVE'S STATE, so the hypothesis is that the box's coupling into SP needs an energized drive as its path \u2014 a COMBINATION effect rather than the box alone. DECIDED BY COMPARING TWO DELTAS, NOT TWO RUNS:    drive DEAD       2B (box off) vs 2C (box on)   <- this run supplies the second half    drive ENERGIZED  5a (box off) vs 4b (box on)   <- already measured Box shows on SP with the drive energized but NOT with it dead -> combination, drive is the path. Shows in both -> the box reaches SP on its own and 2B's small number was something else. AE IS EXPECTED TO RESPOND EITHER WAY: 2B and 4b already agree on AE (x0.51 off, x2.27 on), so AE's 126-135 kHz structure is the box reaching AE directly. SP is the open question, not AE. CONFIGURATION, otherwise identical to 2B: 24 V sensor supply LINEAR, slip-ring/OE LINEAR, sinus filter FITTED with the filter-VFD ground REMOVED (a FUNCTIONAL ground, per Kim 2026-10-02), heater relay OPEN, external tachometer OFF. The motor is DECOUPLED now and was COUPLED in 2B \u2014 irrelevant at 0 rpm, since a stationary motor produces no vibration either way. Same argument that made block 3a clean. max_consecutive_modbus_errors stays RAISED: with the VFD dead the runner's status polls time out and the failed connects lock the shared RS485 port so the Omron read fails too, firing the safety stop after 10 ticks and taking the acquisition down with it. That killed the first bare-floor attempt three minutes into a 30 minute block. DO NOT copy this setting into a profile that drives the motor. NOTHING IS REQUIRED OF THE OPERATOR once the VFD mains is off.",
+  "sweeps": 74,
+  "t_start": "2026-10-02T09:26:35.264896+02:00",
+  "block": "B2C"
+ },
+ {
+  "run": "20261002_100026",
+  "profile_name": "0046 block 2D - VFD mains OFF, box OFF, motor DECOUPLED, 0 rpm, 15 min",
+  "channels": {
+   "UL": {
+    "dc_mean_V": 0.04148,
+    "ac_rms_V": 0.0296595,
+    "lsb_V": 0.0002356,
+    "eff_step_V": 0.0603,
+    "bands_rms_V": {
+     "0-10k": 0.004055,
+     "10-50k": 0.006643,
+     "50-100k": 0.007294,
+     "100-126k": 0.005254,
+     "126-135k": 0.003083,
+     "135-500k": 0.01958,
+     "500k-1M": 0.02287,
+     "1055-1066k": 0.003453,
+     "1M-1.25M": 0.01618
+    },
+    "quant_floor_V": 0.01741,
+    "margin_over_quant": 1.7
+   },
+   "AE": {
+    "dc_mean_V": 0.01124,
+    "ac_rms_V": 0.0142671,
+    "lsb_V": 9.815e-05,
+    "eff_step_V": 0.02513,
+    "bands_rms_V": {
+     "0-10k": 0.002094,
+     "10-50k": 0.003212,
+     "50-100k": 0.003713,
+     "100-126k": 0.002547,
+     "126-135k": 0.001546,
+     "135-500k": 0.009385,
+     "500k-1M": 0.01092,
+     "1055-1066k": 0.001822,
+     "1M-1.25M": 0.007758
+    },
+    "quant_floor_V": 0.007254,
+    "margin_over_quant": 1.97
+   },
+   "SP": {
+    "dc_mean_V": 4.98861,
+    "ac_rms_V": 0.0246196,
+    "lsb_V": 0.000157,
+    "eff_step_V": 0.0402,
+    "bands_rms_V": {
+     "0-10k": 0.002731,
+     "10-50k": 0.004272,
+     "50-100k": 0.005684,
+     "100-126k": 0.003366,
+     "126-135k": 0.002242,
+     "135-500k": 0.01252,
+     "500k-1M": 0.01461,
+     "1055-1066k": 0.01901,
+     "1M-1.25M": 0.02165
+    },
+    "quant_floor_V": 0.0116,
+    "margin_over_quant": 2.12
+   }
+  },
+  "description": "BLOCK 2D \u2014 THE MISSING COUNTERPART TO 2C. VFD mains OFF, heater box OFF, motor DECOUPLED, 0 rpm. WHY IT EXISTS: a confound in my own comparison, found 2026-10-02. 2C (drive dead, box ON) was meant to be read against 2B (drive dead, box OFF) with the box as the single variable. But 2B was run on 2026-09-30 with the motor COUPLED and 2C today with it DECOUPLED, so that delta carried TWO changes. I had justified ignoring the coupling with 'a stationary motor produces no vibration either way'. THAT ARGUMENT IS TRUE FOR VIBRATION AND WRONG FOR SP, because the coupling is also an ELECTRICAL BOND: the slip ring sits on the shaft, and the coupling ties the motor shaft to the rig shaft. Measured at 0 rpm with nothing turning:     drive idle   motor COUPLED   SP 0.026188     motor DECOUPLED  SP 0.088294   (x3.4)     drive dead   motor COUPLED   SP 0.016947     motor DECOUPLED  SP 0.042378   (x2.5) UL and AE are untouched across the same change (UL 0.0288-0.0307, AE 0.0140-0.0149), so it is SP alone \u2014 consistent with the coupling being part of SP's ground path and not a vibration effect. SO THIS RUN IS 2C WITH THE BOX OFF AND NOTHING ELSE CHANGED, giving the box a clean single-variable delta on SP at last. 2D -> 2C answers: does the heater box reach SP when the drive is DEAD? Compare that against the already-clean energized pair 5a -> 4b (both decoupled). AE DOES NOT NEED THIS RUN: AE is coupling-independent, so 2B->2C already answered it cleanly \u2014 the box gives AE x1.67 with the drive dead and x1.59 with it energized, i.e. the box reaches AE directly and the drive is not its path. SP was always the open question. CONFIGURATION: VFD MAINS OFF (verified: 13 Modbus timeouts while the Omron answered on the same bus), heater/temp control box OFF (Kim, 2026-10-02), motor DECOUPLED and stopped, sinus filter FITTED with the filter-VFD ground REMOVED (a FUNCTIONAL ground, per Kim), 24 V sensor supply LINEAR, slip-ring/OE LINEAR, heater relay OPEN, external tachometer OFF. max_consecutive_modbus_errors stays RAISED \u2014 the VFD is dead, so the runner's polls time out and would otherwise fire the safety stop after 10 ticks and take the acquisition with it.",
+  "sweeps": 74,
+  "t_start": "2026-10-02T10:00:50.416972+02:00",
+  "block": "B2D"
+ }
+]

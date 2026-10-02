@@ -1,0 +1,350 @@
+<title>Rigens Støjgulv</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+ --bg:#F1F4F3; --surface:#FFFFFF; --surface2:#E8EDEC; --line:#D2DAD8;
+ --ink:#141D1C; --muted:#5A6B68; --faint:#869592;
+ --accent:#0E6B68; --accent-soft:#D6E8E6;
+ --ok:#2F6B3A; --warn:#A8561C; --crit:#92292B;
+ --shadow:0 1px 2px rgba(20,29,28,.06),0 8px 24px rgba(20,29,28,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --bg:#0E1312; --surface:#161D1C; --surface2:#1E2625; --line:#2C3634;
+ --ink:#E5EDEB; --muted:#95A5A2; --faint:#6D7D7A;
+ --accent:#4FBDB6; --accent-soft:#17302E;
+ --ok:#6FBF7F; --warn:#D9914E; --crit:#D97074;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+ --bg:#0E1312; --surface:#161D1C; --surface2:#1E2625; --line:#2C3634;
+ --ink:#E5EDEB; --muted:#95A5A2; --faint:#6D7D7A;
+ --accent:#4FBDB6; --accent-soft:#17302E;
+ --ok:#6FBF7F; --warn:#D9914E; --crit:#D97074;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);
+ font-family:"Source Serif 4",Georgia,serif;font-size:17px;line-height:1.62;margin:0;
+ -webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 clamp(16px,4vw,40px) 96px}
+h1,h2,h3,.ui{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+h1{font-size:clamp(30px,5vw,46px);line-height:1.08;font-weight:700;letter-spacing:-.02em;
+ text-wrap:balance;margin:0 0 14px}
+h2{font-size:clamp(20px,2.6vw,27px);font-weight:600;letter-spacing:-.01em;margin:0 0 8px;text-wrap:balance}
+h3{font-size:17px;font-weight:600;margin:0 0 6px}
+p{margin:0 0 14px;max-width:68ch}
+.lede{font-size:clamp(18px,2.1vw,21px);color:var(--muted);max-width:62ch;margin-bottom:0}
+header{padding:clamp(40px,7vw,76px) 0 28px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:Archivo,sans-serif;font-size:11.5px;font-weight:600;letter-spacing:.14em;
+ text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+.meta{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--faint);margin-top:22px}
+section{padding:clamp(34px,5vw,54px) 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+.sechead{display:flex;gap:14px;align-items:baseline;margin-bottom:20px;flex-wrap:wrap}
+.secnum{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--accent);
+ padding-top:5px;flex:none}
+mono,.mono,td.n,th.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:22px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:18px 20px;
+ box-shadow:var(--shadow)}
+.card .ch{font-family:Archivo,sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;
+ text-transform:uppercase;color:var(--accent)}
+.card .sensor{font-size:14px;color:var(--muted);margin-bottom:12px}
+.big{font-family:"IBM Plex Mono",monospace;font-size:27px;font-weight:500;letter-spacing:-.02em;
+ font-variant-numeric:tabular-nums;display:block;line-height:1.15}
+.unit{font-size:14px;color:var(--faint)}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;
+ border-top:1px solid var(--line);padding:6px 0;color:var(--muted)}
+.kv b{font-family:"IBM Plex Mono",monospace;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-family:Archivo,sans-serif;font-size:11px;font-weight:600;
+ letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:2px;
+ background:var(--accent-soft);color:var(--accent)}
+.pill.w{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+.pill.c{background:color-mix(in srgb,var(--crit) 16%,transparent);color:var(--crit)}
+.pill.o{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.callout{background:var(--surface);border-left:3px solid var(--accent);padding:16px 20px;
+ margin:20px 0;border-radius:0 3px 3px 0;box-shadow:var(--shadow)}
+.callout.w{border-left-color:var(--warn)}
+.callout.c{border-left-color:var(--crit)}
+.callout p:last-child{margin-bottom:0}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface);
+ box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{font-family:Archivo,sans-serif;font-size:11px;font-weight:600;letter-spacing:.07em;
+ text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 11px;
+ border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface2);
+ position:sticky;top:0;z-index:2}
+th.srt{cursor:pointer;user-select:none}
+th.srt:hover{color:var(--accent)}
+td{padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:hover{background:var(--surface2)}
+td.n{text-align:right;white-space:nowrap}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 16px}
+button{font-family:Archivo,sans-serif;font-size:12.5px;font-weight:500;padding:6px 13px;
+ border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:2px;
+ cursor:pointer;transition:.12s}
+button:hover{color:var(--ink);border-color:var(--accent)}
+button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:600}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bandmap{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:26px 24px 16px;
+ box-shadow:var(--shadow);margin:22px 0;overflow-x:auto}
+.axis{position:relative;height:22px;border-bottom:1px solid var(--line);min-width:620px}
+.tick{position:absolute;bottom:0;transform:translateX(-50%);font-family:"IBM Plex Mono",monospace;
+ font-size:11px;color:var(--faint);white-space:nowrap}
+.tick:before{content:"";position:absolute;left:50%;bottom:-5px;width:1px;height:5px;background:var(--line)}
+.srcrow{position:relative;height:34px;min-width:620px;margin-top:7px}
+.span{position:absolute;top:4px;height:22px;border-radius:2px;display:flex;align-items:center;
+ padding:0 8px;font-family:Archivo,sans-serif;font-size:11.5px;font-weight:600;white-space:nowrap;
+ color:var(--bg);overflow:hidden}
+.srclab{font-family:Archivo,sans-serif;font-size:12.5px;font-weight:600;margin-top:2px}
+.srcsub{font-size:13px;color:var(--muted);margin-bottom:2px}
+ul{max-width:68ch;padding-left:20px}li{margin-bottom:7px}
+code{font-family:"IBM Plex Mono",monospace;font-size:.9em;background:var(--surface2);
+ padding:1px 5px;border-radius:2px}
+a{color:var(--accent)}
+.foot{font-size:13.5px;color:var(--faint);padding-top:26px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Ticket 0046 · Testrig ForeverBearing</p>
+  <h1>Rigens støjgulv, blok for blok</h1>
+  <p class="lede">Treogtyve målinger af, hvad riggen udsender når ingen bearing drejer — så den, der
+  senere analyserer en 13-timers kørsel, kan se hvilke niveauer der er baggrund og hvilke der er signal.</p>
+  <p class="meta">23 blokke · 63 kanalmålinger · 2,5 MS/s, 500 k punkter pr. sweep · målt 30. sep – 2. okt 2026</p>
+</header>
+
+<section>
+  <div class="sechead"><span class="secnum">01</span><div>
+    <h2>Den korte besked</h2></div></div>
+  <div class="callout o">
+    <p><b>UL — den akustiske probe, altså hovedsensoren — er elektrisk ren.</b> Hen over alle 23 blokke
+    ligger UL mellem 0,0286 og 0,0304 V rms: et udsving på ±3 %, uanset om varmeboksen er tændt,
+    drevet spændingssat, sinusfilteret inde eller relæet klikker. Intet af det, vi har tændt og slukket,
+    kan måles på UL. Når bøjlen så drejer ved 600 rpm, står UL på 0,284 V — <b>næsten ti gange sit eget
+    gulv.</b> UL-data kan læses uden at tage hensyn til noget på denne side.</p>
+  </div>
+  <div class="callout w">
+    <p><b>AE og SP er en anden sag.</b> Ved 600 rpm ligger AE kun 1,8× og SP 2,7× over deres gulv, og
+    begge flytter sig målbart når udstyr i rummet tændes. For dem er baggrunden en reel del af signalet
+    ved lave hastigheder, og tallene nedenfor skal trækkes fra — eller i det mindste kendes.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="secnum">02</span><div>
+    <h2>Gulvet</h2>
+    <p>Blok 2B: drev afbrudt på nettet, varmeboks slukket, motor <b>koblet på</b> riggen, bøjlen i ro.
+    Det er den stilleste tilstand, der stadig svarer til en rigtig kørsels mekanik.</p></div></div>
+  <div class="cards" id="floorcards"></div>
+  <div class="callout">
+    <p><b>Læs gulvet mod kvantiseringen, ikke mod nul.</b> Scopet er reelt 8-bit: rå koder kommer i spring
+    af 256, så det mindste trin er <code>volt_range / 199</code> — 0,030 V for UL, 0,013 V for AE, 0,040 V
+    for SP. Et jævnt fordelt kvantiseringsstøjgulv er trin/√12. Alle tre kanaler ligger <b>1,5–2,0× over
+    deres eget kvantiseringsgulv</b>, altså tæt på digitaliseringsgrænsen. Det betyder to ting: en stor del
+    af den «brede» støj i SP og AE <i>er</i> selve digitaliseringen, og der er ikke meget at hente ved at
+    gøre riggen elektrisk stillere — gevinsten ligger i flere bit eller et mindre spændingsområde.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="secnum">03</span><div>
+    <h2>Fire kilder i fire bånd</h2>
+    <p>De overlapper ikke. En løsning på én af dem rører ikke de andre.</p></div></div>
+  <div class="bandmap">
+    <div class="axis" id="axis"></div>
+    <div id="spans"></div>
+  </div>
+  <div class="scroll"><table>
+    <thead><tr><th>Kilde</th><th>Bånd</th><th>Rammer</th><th class="n">Faktor</th><th>Bevis</th></tr></thead>
+    <tbody>
+      <tr><td><b>Instrumentkæden</b><br><span class="srcsub">linje ved 1060,7 kHz</span></td>
+        <td class="n">1055–1066 kHz</td><td>alle tre</td><td class="n">—</td>
+        <td>Står uændret med proben <b>kortsluttet</b> (0b) og uændret efter skift til lineær
+        24 V-forsyning (0→2). Den er inde i måleudstyret, ikke i riggen.</td></tr>
+      <tr><td><b>Varme/temp-boksen</b></td><td class="n">126–135 kHz</td><td>SP stærkt, AE svagt</td>
+        <td class="n">SP 4,1×<br>AE 1,5×</td>
+        <td>Boks af→på ved dødt drev (2D→2C) og ved kørende drev (5a→4b) giver samme faktor i båndet —
+        1,64 og 1,59 for AE. Virkningen er uafhængig af drevet.</td></tr>
+      <tr><td><b>Varmerelæet</b></td><td class="n">50–100 kHz</td><td>SP</td><td class="n">SP 2,2×</td>
+        <td>Blok 6 slog relæet til og fra med Kim som vidne på klikket, så begge tilstande er
+        menneskeverificerede i samme fil.</td></tr>
+      <tr><td><b>Drevets udgangstrin</b></td><td class="n">bredbåndet</td><td>SP</td><td class="n">op til 5×</td>
+        <td>SP stiger fra 0,017 V (drev dødt) til 0,12–0,14 V med motoren i gang. Det er den
+        største enkeltkilde i riggen, og den findes kun når der køres.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="sechead"><span class="secnum">04</span><div>
+    <h2>Hvad der ikke betød noget</h2>
+    <p>Nulresultater er lige så brugbare som fund: de fortæller, hvor man ikke skal lede.</p></div></div>
+  <div class="scroll"><table>
+    <thead><tr><th>Ændring</th><th>Blokke</th><th class="n">UL</th><th class="n">AE</th><th class="n">SP</th><th>Læsning</th></tr></thead>
+    <tbody>
+      <tr><td>Switchmode → lineær 24 V-forsyning</td><td class="mono">0 → 2</td>
+        <td class="n">1,03×</td><td class="n">0,97×</td><td class="n">1,00×</td>
+        <td>Intet. Også 1060,7 kHz-linjen rører sig ikke (0,00331 → 0,00336 V).</td></tr>
+      <tr><td>Sinusfilter ind, bøjlen i ro</td><td class="mono">5e → 5a</td>
+        <td class="n">0,99×</td><td class="n">1,02×</td><td class="n">0,98×</td>
+        <td>Filteret udsender ikke selv noget. Det former kun, hvad drevet sender.</td></tr>
+      <tr><td>Filter–VFD-jord sat på, bøjlen i ro</td><td class="mono">5a → 5h</td>
+        <td class="n">0,99×</td><td class="n">0,99×</td><td class="n">0,95×</td>
+        <td><b>Retter en tidligere konklusion</b> — se afsnit 6.</td></tr>
+      <tr><td>Drevet spændingssat, motor stille</td><td class="mono">2D → 3a</td>
+        <td class="n">1,02×</td><td class="n">1,00×</td><td class="n">1,07×</td>
+        <td>Et spændingssat drev uden udgang koster næsten ingenting. Støjen følger udgangstrinnet.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="sechead"><span class="secnum">05</span><div>
+    <h2>Alle 23 blokke</h2>
+    <p>Båndværdierne er rms inden for båndet i volt. Slå om til «× gulv» for at se hver måling som
+    forhold til blok 2B på samme kanal.</p></div></div>
+  <div class="ctl">
+    <button id="bAbs" aria-pressed="true">volt rms</button>
+    <button id="bRel" aria-pressed="false">× gulv (2B)</button>
+    <span style="width:14px"></span>
+    <button class="fch" data-ch="" aria-pressed="true">alle kanaler</button>
+    <button class="fch" data-ch="UL" aria-pressed="false">UL</button>
+    <button class="fch" data-ch="AE" aria-pressed="false">AE</button>
+    <button class="fch" data-ch="SP" aria-pressed="false">SP</button>
+  </div>
+  <div class="scroll"><table id="big"><thead id="bigh"></thead><tbody id="bigb"></tbody></table></div>
+  <p class="foot">Kolonnerne kan sorteres. <span class="mono">dc</span> er kanalens middelværdi:
+  for SP skal den stå omkring <b>+4,99 V</b> — slæberingens egen 5 V-forsyning. Står den ved 0 V, var
+  probens jord ikke på, og målingen er ugyldig (det gælder blok 0b, hvor den var kortsluttet med vilje).</p>
+</section>
+
+<section>
+  <div class="sechead"><span class="secnum">06</span><div>
+    <h2>Hvad tallene ikke viser</h2></div></div>
+  <div class="callout c">
+    <p><b>Jordsløjfe-konklusionen trækkes tilbage.</b> Jeg meldte tidligere, at det gjorde støjen værre at
+    sætte filter–VFD-jorden på igen. Det hvilede på 5i mod 5k ved 500 rpm — og 5i er netop den blok,
+    hvor Kim læste <b>0.00 på displayet: motoren kørte ikke.</b> De to blokke havde altså ikke samme
+    drevtilstand, og sammenligningen var ugyldig. Målt rent ved bøjlen i ro (5a → 5h) er virkningen
+    0,95–0,99×, altså ingen. <b>Jordforbindelsens virkning på sensorstøj er uafklaret</b>, ikke negativ.</p>
+  </div>
+  <div class="callout w">
+    <p><b>Koblingen er en jordvej for SP.</b> Med alt andet slukket hæver det at koble motoren fra SP med
+    1,45× (0,0169 → 0,0246 V). Derfor er gulvet i afsnit 2 taget på en <b>koblet</b> rig: en rigtig kørsel
+    er koblet, og de afkoblede blokke (hele 5-serien, 4b, 6, 2C, 2D) ligger systematisk højere på SP.
+    Sammenlign aldrig SP-niveauer på tværs af koblingstilstand.</p>
+  </div>
+  <div class="callout w">
+    <p><b>Hastighederne i 5-serien er kommanderede, ikke instrumentverificerede.</b> Motoren var afkoblet,
+    og tacho sidder på bøjleakslen — den læser derfor 0 rpm uanset hvad motoren gør, og kan ikke bruges
+    som vidne. Drevet er desuden dokumenteret upålideligt at kommandere. Hvor der står «SP-vidne» i
+    tabellen, er det SP's eget niveauskift der viser, at udgangstrinnet var live. <b>500 og 1500 rpm kan
+    ikke skelnes</b> i nogen af serierne, så enten er støjen hastighedsuafhængig i det interval, eller den
+    anden kommando satte sig ikke. Begge læsninger står åbne.</p>
+  </div>
+  <div class="callout">
+    <p><b>Bøjlen drejer kun i blok 3b.</b> Alle andre blokke er elektriske baggrundsmålinger med en
+    stillestående bearing. 3b er derfor det eneste tal her, der viser hvad et <i>signal</i> ser ud som —
+    og kun ved 600 rpm, kun ved stuetemperatur, kun med tør mekanik.</p>
+    <p><b>Og 2. september 2026 er en hård grænse.</b> Bænken blev skilt og bygget om den dag. Disse gulve
+    gælder riggen <i>efter</i> ombygningen og kan ikke bruges på ældre kørsler.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="secnum">07</span><div>
+    <h2>Hvor rådata ligger</h2></div></div>
+  <p>Hver blok er en komplet HDF5 på samme form som en rigtig kørsel: <code>/metadata</code>,
+  <code>/sweeps/sweep_NNN/{UL,AE,SP}/voltage</code> med skaleringsattributter, og <code>telem_*</code>
+  på hvert sweep. Tidsaksen er ikke gemt som datasæt (<code>store.time_axis: false</code>) — den
+  rekonstrueres tabsfrit fra <code>x_increment</code> og <code>x_origin</code>.</p>
+  <p>Azure, konto <span class="mono">csfbst001</span>, container <span class="mono">eceherning</span>,
+  under hver blok sit <span class="mono">&lt;run_id&gt;/</span>-præfiks. Kør-id'erne står i tabellen
+  ovenfor. Tallene på denne side ligger som <span class="mono">docs/0046_noise_floor.csv</span> og
+  <span class="mono">.json</span> i repoet, og samme to filer er lagt i
+  <span class="mono">eceherning/0046_REPORT/</span>.</p>
+  <p class="foot">Metode: pr. blok 12 sweeps fordelt over kørslen; Welch-periodogram, Hanning,
+  nperseg 65536 (38 Hz opløsning), DC fjernet, <span class="mono">scaling='spectrum'</span> så summen
+  over bins er middelkvadratet. Båndværdi = kvadratroden af summen i båndet. Reproducerbar med
+  <span class="mono">docs/0046_noise_floor.json</span> og scriptet i ticket 0046.</p>
+</section>
+</div>
+<script>
+const DATA={"bands":["0-10k","10-50k","50-100k","100-126k","126-135k","135-500k","500k-1M","1055-1066k","1M-1.25M"],"rows":[{"b":"B0","run":"20260930_085412_ABORTED_modbus","ch":"UL","cfg":"alt slukket i rummet","ver":"\u2014","t":"2026-09-30 08:54","sw":14,"dc":0.04396,"rms":0.0291613,"q":0.01741,"m":1.68,"bd":[0.003998,0.006544,0.007171,0.005161,0.003023,0.01924,0.02247,0.00337,0.0159]},{"b":"B0","run":"20260930_085412_ABORTED_modbus","ch":"AE","cfg":"alt slukket i rummet","ver":"\u2014","t":"2026-09-30 08:54","sw":14,"dc":0.01014,"rms":0.0145263,"q":0.007254,"m":2.0,"bd":[0.002251,0.003139,0.003805,0.002538,0.002765,0.01028,0.01056,0.001667,0.007474]},{"b":"B0","run":"20260930_085412_ABORTED_modbus","ch":"SP","cfg":"alt slukket i rummet","ver":"\u2014","t":"2026-09-30 08:54","sw":14,"dc":4.98632,"rms":0.0197745,"q":0.0116,"m":1.7,"bd":[0.002621,0.004286,0.004696,0.003372,0.001977,0.01248,0.01444,0.007414,0.01258]},{"b":"B0","run":"20260930_085938_SPLIT_device_off_at_t20","ch":"UL","cfg":"alt slukket i rummet","ver":"\u2014","t":"2026-09-30 09:00","sw":149,"dc":0.04674,"rms":0.0284726,"q":0.01741,"m":1.64,"bd":[0.003894,0.006376,0.007,0.005039,0.002951,0.01878,0.02196,0.003294,0.01552]},{"b":"B0","run":"20260930_085938_SPLIT_device_off_at_t20","ch":"AE","cfg":"alt slukket i rummet","ver":"\u2014","t":"2026-09-30 09:00","sw":149,"dc":0.01061,"rms":0.0146558,"q":0.007254,"m":2.02,"bd":[0.00222,0.003177,0.003836,0.002551,0.002764,0.01037,0.01066,0.001673,0.007551]},{"b":"B0","run":"20260930_085938_SPLIT_device_off_at_t20","ch":"SP","cfg":"alt slukket i rummet","ver":"\u2014","t":"2026-09-30 09:00","sw":149,"dc":4.98631,"rms":0.0192274,"q":0.0116,"m":1.66,"bd":[0.002558,0.004217,0.00461,0.003314,0.001954,0.01228,0.01423,0.006563,0.01191]},{"b":"B0","run":"20260930_093141","ch":"UL","cfg":"alt slukket i rummet","ver":"\u2014","t":"2026-09-30 09:32","sw":149,"dc":0.04631,"rms":0.0285587,"q":0.01741,"m":1.64,"bd":[0.003919,0.006392,0.007032,0.005045,0.002964,0.01885,0.02201,0.003306,0.01555]},{"b":"B0","run":"20260930_093141","ch":"AE","cfg":"alt slukket i rummet","ver":"\u2014","t":"2026-09-30 09:32","sw":149,"dc":0.01179,"rms":0.0150026,"q":0.007254,"m":2.07,"bd":[0.002279,0.003248,0.003905,0.002606,0.0028,0.0106,0.01095,0.001702,0.007736]},{"b":"B0","run":"20260930_093141","ch":"SP","cfg":"alt slukket i rummet","ver":"\u2014","t":"2026-09-30 09:32","sw":149,"dc":4.98326,"rms":0.0175829,"q":0.0116,"m":1.52,"bd":[0.002428,0.00398,0.004365,0.003143,0.001846,0.01162,0.01351,0.002392,0.009551]},{"b":"B2","run":"20260930_102402","ch":"UL","cfg":"24 V paa lineaer forsyning","ver":"\u2014","t":"2026-09-30 10:24","sw":149,"dc":0.04294,"rms":0.0294026,"q":0.01741,"m":1.69,"bd":[0.004114,0.00658,0.007264,0.005205,0.003053,0.01945,0.02262,0.003365,0.01601]},{"b":"B2","run":"20260930_102402","ch":"AE","cfg":"24 V paa lineaer forsyning","ver":"\u2014","t":"2026-09-30 10:24","sw":149,"dc":0.0107,"rms":0.0145908,"q":0.007254,"m":2.01,"bd":[0.00258,0.003144,0.004421,0.002775,0.002542,0.009969,0.01064,0.001712,0.007535]},{"b":"B2","run":"20260930_102402","ch":"SP","cfg":"24 V paa lineaer forsyning","ver":"\u2014","t":"2026-09-30 10:24","sw":149,"dc":4.98472,"rms":0.017657,"q":0.0116,"m":1.52,"bd":[0.00245,0.003992,0.004392,0.003157,0.001856,0.01167,0.01345,0.002364,0.009767]},{"b":"B0b","run":"20260930_110822","ch":"UL","cfg":"probe kortsluttet (CHAN3)","ver":"\u2014","t":"2026-09-30 11:08","sw":50,"dc":0.04414,"rms":0.0291766,"q":0.01741,"m":1.68,"bd":[0.004074,0.006575,0.007214,0.005199,0.003059,0.01928,0.02247,0.003325,0.01587]},{"b":"B0b","run":"20260930_110822","ch":"AE","cfg":"probe kortsluttet (CHAN3)","ver":"\u2014","t":"2026-09-30 11:08","sw":50,"dc":0.01053,"rms":0.0145353,"q":0.007254,"m":2.0,"bd":[0.002529,0.003136,0.004381,0.002806,0.002517,0.009925,0.01061,0.001698,0.007517]},{"b":"B0b","run":"20260930_110822","ch":"SP","cfg":"probe kortsluttet (CHAN3)","ver":"\u2014","t":"2026-09-30 11:08","sw":50,"dc":-0.02295,"rms":0.0220245,"q":0.0116,"m":1.9,"bd":[0.003221,0.004983,0.005444,0.003907,0.002279,0.01453,0.01694,0.002555,0.01198]},{"b":"B2B","run":"20260930_112905","ch":"UL","cfg":"varmeboks slukket","ver":"\u2014","t":"2026-09-30 11:29","sw":149,"dc":0.04505,"rms":0.028881,"q":0.01741,"m":1.66,"bd":[0.003915,0.006465,0.007125,0.005107,0.002981,0.01908,0.02227,0.003301,0.01573]},{"b":"B2B","run":"20260930_112905","ch":"AE","cfg":"varmeboks slukket","ver":"\u2014","t":"2026-09-30 11:29","sw":149,"dc":0.01125,"rms":0.0142479,"q":0.007254,"m":1.96,"bd":[0.002157,0.003216,0.003695,0.002539,0.001536,0.009386,0.01091,0.001772,0.007732]},{"b":"B2B","run":"20260930_112905","ch":"SP","cfg":"varmeboks slukket","ver":"\u2014","t":"2026-09-30 11:29","sw":149,"dc":4.98424,"rms":0.0169445,"q":0.0116,"m":1.46,"bd":[0.002336,0.003795,0.004183,0.002999,0.001757,0.01116,0.01303,0.002305,0.009296]},{"b":"B3a","run":"20261001_084527","ch":"UL","cfg":"VFD spaendingssat, motor stille","ver":"bekraeftet 0.00 paa display","t":"2026-10-01 08:45","sw":74,"dc":0.04251,"rms":0.0301499,"q":0.01741,"m":1.73,"bd":[0.004079,0.00679,0.007476,0.00537,0.00317,0.02012,0.02322,0.003376,0.01617]},{"b":"B3a","run":"20261001_084527","ch":"AE","cfg":"VFD spaendingssat, motor stille","ver":"bekraeftet 0.00 paa display","t":"2026-10-01 08:45","sw":74,"dc":0.01041,"rms":0.0143187,"q":0.007254,"m":1.97,"bd":[0.002156,0.003222,0.003696,0.002611,0.001918,0.009549,0.01088,0.001637,0.007662]},{"b":"B3a","run":"20261001_084527","ch":"SP","cfg":"VFD spaendingssat, motor stille","ver":"bekraeftet 0.00 paa display","t":"2026-10-01 08:45","sw":74,"dc":4.98522,"rms":0.0262515,"q":0.0116,"m":2.26,"bd":[0.003783,0.006536,0.007508,0.005252,0.003308,0.01889,0.01923,0.00261,0.01243]},{"b":"B3b","run":"20261001_103916","ch":"UL","cfg":"motor paa riggen, 600 rpm","ver":"bekraeftet: tach 590 rpm","t":"2026-10-01 10:39","sw":49,"dc":0.06502,"rms":0.283973,"q":0.01741,"m":16.31,"bd":[0.3361,0.02783,0.008095,0.005712,0.003328,0.0211,0.02408,0.003487,0.01657]},{"b":"B3b","run":"20261001_103916","ch":"AE","cfg":"motor paa riggen, 600 rpm","ver":"bekraeftet: tach 590 rpm","t":"2026-10-01 10:39","sw":49,"dc":0.0126,"rms":0.0258065,"q":0.007254,"m":3.56,"bd":[0.002474,0.009535,0.01711,0.01551,0.004544,0.01249,0.01107,0.001636,0.00773]},{"b":"B3b","run":"20261001_103916","ch":"SP","cfg":"motor paa riggen, 600 rpm","ver":"bekraeftet: tach 590 rpm","t":"2026-10-01 10:39","sw":49,"dc":4.98557,"rms":0.0454663,"q":0.0116,"m":3.92,"bd":[0.005866,0.01255,0.01317,0.00962,0.005196,0.03228,0.03421,0.004432,0.02053]},{"b":"B5a","run":"20261001_113117","ch":"UL","cfg":"afkoblet, sinus TIL, 0 rpm","ver":"\u2014","t":"2026-10-01 11:31","sw":24,"dc":0.04262,"rms":0.0304289,"q":0.01741,"m":1.75,"bd":[0.004161,0.006938,0.007612,0.005498,0.003197,0.02038,0.02338,0.003399,0.01616]},{"b":"B5a","run":"20261001_113117","ch":"AE","cfg":"afkoblet, sinus TIL, 0 rpm","ver":"\u2014","t":"2026-10-01 11:31","sw":24,"dc":0.01085,"rms":0.0142785,"q":0.007254,"m":1.97,"bd":[0.002127,0.003199,0.00383,0.002569,0.001739,0.009431,0.01087,0.001742,0.007701]},{"b":"B5a","run":"20261001_113117","ch":"SP","cfg":"afkoblet, sinus TIL, 0 rpm","ver":"\u2014","t":"2026-10-01 11:31","sw":24,"dc":4.98672,"rms":0.0883229,"q":0.0116,"m":7.61,"bd":[0.0117,0.02419,0.0264,0.01933,0.01108,0.06684,0.06052,0.01721,0.04061]},{"b":"B5b","run":"20261001_114015","ch":"UL","cfg":"afkoblet, sinus TIL, 500 rpm","ver":"Kim saa drev koere","t":"2026-10-01 11:40","sw":25,"dc":0.04189,"rms":0.0314515,"q":0.01741,"m":1.81,"bd":[0.008352,0.006998,0.007712,0.005557,0.003221,0.02062,0.02381,0.003501,0.01647]},{"b":"B5b","run":"20261001_114015","ch":"AE","cfg":"afkoblet, sinus TIL, 500 rpm","ver":"Kim saa drev koere","t":"2026-10-01 11:40","sw":25,"dc":0.01179,"rms":0.0239773,"q":0.007254,"m":3.31,"bd":[0.002429,0.008974,0.01707,0.01183,0.005288,0.01178,0.01094,0.001721,0.007682]},{"b":"B5b","run":"20261001_114015","ch":"SP","cfg":"afkoblet, sinus TIL, 500 rpm","ver":"Kim saa drev koere","t":"2026-10-01 11:40","sw":25,"dc":4.98876,"rms":0.136294,"q":0.0116,"m":11.74,"bd":[0.01576,0.04385,0.05821,0.03404,0.01658,0.08503,0.09389,0.02095,0.06965]},{"b":"B5c","run":"20261001_114854","ch":"UL","cfg":"afkoblet, sinus TIL, 1500 rpm","ver":"ikke bekraeftet","t":"2026-10-01 11:49","sw":23,"dc":0.04349,"rms":0.0310527,"q":0.01741,"m":1.78,"bd":[0.006487,0.006953,0.007707,0.005526,0.003256,0.02053,0.02371,0.003466,0.01641]},{"b":"B5c","run":"20261001_114854","ch":"AE","cfg":"afkoblet, sinus TIL, 1500 rpm","ver":"ikke bekraeftet","t":"2026-10-01 11:49","sw":23,"dc":0.01243,"rms":0.0236212,"q":0.007254,"m":3.26,"bd":[0.002148,0.00774,0.01667,0.01233,0.005032,0.01174,0.01095,0.001728,0.007683]},{"b":"B5c","run":"20261001_114854","ch":"SP","cfg":"afkoblet, sinus TIL, 1500 rpm","ver":"ikke bekraeftet","t":"2026-10-01 11:49","sw":23,"dc":4.98723,"rms":0.136461,"q":0.0116,"m":11.76,"bd":[0.01611,0.04028,0.05849,0.03393,0.01652,0.08511,0.09471,0.02091,0.07029]},{"b":"B5e","run":"20261001_125027","ch":"UL","cfg":"afkoblet, sinus AF, 0 rpm","ver":"\u2014","t":"2026-10-01 12:50","sw":23,"dc":0.0419,"rms":0.0306659,"q":0.01741,"m":1.76,"bd":[0.004149,0.006899,0.007593,0.005434,0.00321,0.02034,0.02356,0.003482,0.01668]},{"b":"B5e","run":"20261001_125027","ch":"AE","cfg":"afkoblet, sinus AF, 0 rpm","ver":"\u2014","t":"2026-10-01 12:50","sw":23,"dc":0.00957,"rms":0.013993,"q":0.007254,"m":1.93,"bd":[0.003523,0.003097,0.003444,0.002456,0.001446,0.009132,0.01061,0.001661,0.00755]},{"b":"B5e","run":"20261001_125027","ch":"SP","cfg":"afkoblet, sinus AF, 0 rpm","ver":"\u2014","t":"2026-10-01 12:50","sw":23,"dc":4.98893,"rms":0.0904296,"q":0.0116,"m":7.79,"bd":[0.01166,0.02372,0.02658,0.0186,0.01085,0.06621,0.06465,0.01426,0.04274]},{"b":"B5f","run":"20261001_125757","ch":"UL","cfg":"afkoblet, sinus AF, 500 rpm","ver":"SP-vidne: drev live","t":"2026-10-01 12:58","sw":24,"dc":0.04295,"rms":0.0312829,"q":0.01741,"m":1.8,"bd":[0.008605,0.006927,0.007578,0.005475,0.003174,0.02035,0.02362,0.003499,0.01657]},{"b":"B5f","run":"20261001_125757","ch":"AE","cfg":"afkoblet, sinus AF, 500 rpm","ver":"SP-vidne: drev live","t":"2026-10-01 12:58","sw":24,"dc":0.00939,"rms":0.0140172,"q":0.007254,"m":1.93,"bd":[0.003546,0.003091,0.00344,0.002476,0.00145,0.009143,0.01064,0.00166,0.007557]},{"b":"B5f","run":"20261001_125757","ch":"SP","cfg":"afkoblet, sinus AF, 500 rpm","ver":"SP-vidne: drev live","t":"2026-10-01 12:58","sw":24,"dc":4.98797,"rms":0.120572,"q":0.0116,"m":10.39,"bd":[0.01316,0.02854,0.03066,0.02252,0.01198,0.0823,0.09543,0.01809,0.05797]},{"b":"B5g","run":"20261001_130453","ch":"UL","cfg":"afkoblet, sinus AF, 1500 rpm","ver":"ikke bekraeftet","t":"2026-10-01 13:05","sw":24,"dc":0.04283,"rms":0.0312095,"q":0.01741,"m":1.79,"bd":[0.007971,0.006903,0.007612,0.00548,0.003204,0.02035,0.02369,0.003545,0.01661]},{"b":"B5g","run":"20261001_130453","ch":"AE","cfg":"afkoblet, sinus AF, 1500 rpm","ver":"ikke bekraeftet","t":"2026-10-01 13:05","sw":24,"dc":0.00946,"rms":0.0140319,"q":0.007254,"m":1.93,"bd":[0.003516,0.003102,0.003442,0.002464,0.001453,0.009168,0.01065,0.00165,0.007572]},{"b":"B5g","run":"20261001_130453","ch":"SP","cfg":"afkoblet, sinus AF, 1500 rpm","ver":"ikke bekraeftet","t":"2026-10-01 13:05","sw":24,"dc":4.987,"rms":0.1196,"q":0.0116,"m":10.31,"bd":[0.01428,0.02758,0.03094,0.02244,0.01281,0.08145,0.09451,0.01818,0.05749]},{"b":"B5h","run":"20261001_133652","ch":"UL","cfg":"sinus TIL + filter-VFD-jord sat paa, 0 rpm","ver":"\u2014","t":"2026-10-01 13:37","sw":24,"dc":0.04353,"rms":0.030228,"q":0.01741,"m":1.74,"bd":[0.00407,0.006844,0.007531,0.005396,0.00316,0.0201,0.02315,0.003454,0.01643]},{"b":"B5h","run":"20261001_133652","ch":"AE","cfg":"sinus TIL + filter-VFD-jord sat paa, 0 rpm","ver":"\u2014","t":"2026-10-01 13:37","sw":24,"dc":0.00891,"rms":0.0141175,"q":0.007254,"m":1.95,"bd":[0.002052,0.003017,0.003995,0.00248,0.002132,0.009781,0.01047,0.001609,0.007345]},{"b":"B5h","run":"20261001_133652","ch":"SP","cfg":"sinus TIL + filter-VFD-jord sat paa, 0 rpm","ver":"\u2014","t":"2026-10-01 13:37","sw":24,"dc":4.98594,"rms":0.0838204,"q":0.0116,"m":7.22,"bd":[0.01134,0.02362,0.02653,0.01857,0.01094,0.06519,0.0546,0.0151,0.03836]},{"b":"B5i","run":"20261001_134851","ch":"UL","cfg":"sinus TIL + jord paa, 500 rpm","ver":"Kim: display 0.00 \u2014 motor koerte IKKE","t":"2026-10-01 13:49","sw":23,"dc":0.04468,"rms":0.0318246,"q":0.01741,"m":1.83,"bd":[0.007821,0.006873,0.007618,0.005447,0.003164,0.02034,0.0244,0.003675,0.01742]},{"b":"B5i","run":"20261001_134851","ch":"AE","cfg":"sinus TIL + jord paa, 500 rpm","ver":"Kim: display 0.00 \u2014 motor koerte IKKE","t":"2026-10-01 13:49","sw":23,"dc":0.01041,"rms":0.0543985,"q":0.007254,"m":7.5,"bd":[0.002258,0.008464,0.04119,0.02429,0.01406,0.03727,0.02044,0.001904,0.008656]},{"b":"B5i","run":"20261001_134851","ch":"SP","cfg":"sinus TIL + jord paa, 500 rpm","ver":"Kim: display 0.00 \u2014 motor koerte IKKE","t":"2026-10-01 13:49","sw":23,"dc":4.98806,"rms":0.238985,"q":0.0116,"m":20.59,"bd":[0.02017,0.04718,0.1237,0.06892,0.03936,0.1324,0.1545,0.03162,0.1418]},{"b":"B5k","run":"20261001_141121","ch":"UL","cfg":"sinus TIL, jord fjernet igen, 500 rpm","ver":"ikke bekraeftet","t":"2026-10-01 14:11","sw":24,"dc":0.04487,"rms":0.0305473,"q":0.01741,"m":1.75,"bd":[0.007595,0.006787,0.007491,0.005391,0.003151,0.01999,0.02323,0.003406,0.01614]},{"b":"B5k","run":"20261001_141121","ch":"AE","cfg":"sinus TIL, jord fjernet igen, 500 rpm","ver":"ikke bekraeftet","t":"2026-10-01 14:11","sw":24,"dc":0.00967,"rms":0.0266786,"q":0.007254,"m":3.68,"bd":[0.002293,0.01005,0.02065,0.01335,0.00597,0.01224,0.01073,0.001632,0.007452]},{"b":"B5k","run":"20261001_141121","ch":"SP","cfg":"sinus TIL, jord fjernet igen, 500 rpm","ver":"ikke bekraeftet","t":"2026-10-01 14:11","sw":24,"dc":4.98856,"rms":0.163957,"q":0.0116,"m":14.13,"bd":[0.0176,0.04785,0.06613,0.04058,0.01942,0.09292,0.1206,0.02389,0.09018]},{"b":"B4b","run":"20261001_142438","ch":"UL","cfg":"varmeboks TIL igen, 0 rpm","ver":"\u2014","t":"2026-10-01 14:25","sw":49,"dc":0.03975,"rms":0.0303878,"q":0.01741,"m":1.75,"bd":[0.004288,0.006867,0.007537,0.005433,0.003188,0.02003,0.02328,0.003514,0.01667]},{"b":"B4b","run":"20261001_142438","ch":"AE","cfg":"varmeboks TIL igen, 0 rpm","ver":"\u2014","t":"2026-10-01 14:25","sw":49,"dc":0.00853,"rms":0.0139136,"q":0.007254,"m":1.92,"bd":[0.002403,0.003018,0.003774,0.002464,0.002567,0.009526,0.01025,0.001609,0.007275]},{"b":"B4b","run":"20261001_142438","ch":"SP","cfg":"varmeboks TIL igen, 0 rpm","ver":"\u2014","t":"2026-10-01 14:25","sw":49,"dc":4.98657,"rms":0.0988539,"q":0.0116,"m":8.52,"bd":[0.01125,0.02304,0.02873,0.019,0.01509,0.06745,0.06977,0.01858,0.05621]},{"b":"B6","run":"20261001_145326","ch":"UL","cfg":"varmerelae slaaet til/fra, 0 rpm","ver":"relaeklik hoert af Kim","t":"2026-10-01 14:53","sw":74,"dc":0.04274,"rms":0.0299907,"q":0.01741,"m":1.72,"bd":[0.00419,0.006848,0.007506,0.005364,0.003151,0.01988,0.02294,0.003457,0.01634]},{"b":"B6","run":"20261001_145326","ch":"AE","cfg":"varmerelae slaaet til/fra, 0 rpm","ver":"relaeklik hoert af Kim","t":"2026-10-01 14:53","sw":74,"dc":0.00967,"rms":0.014327,"q":0.007254,"m":1.97,"bd":[0.002259,0.003104,0.004472,0.002604,0.002447,0.009676,0.01052,0.001682,0.007487]},{"b":"B6","run":"20261001_145326","ch":"SP","cfg":"varmerelae slaaet til/fra, 0 rpm","ver":"relaeklik hoert af Kim","t":"2026-10-01 14:53","sw":74,"dc":4.98807,"rms":0.111863,"q":0.0116,"m":9.64,"bd":[0.01293,0.02635,0.04028,0.02198,0.01874,0.07448,0.07633,0.02223,0.06609]},{"b":"B2C","run":"20261002_092610","ch":"UL","cfg":"VFD net AF, varmeboks TIL","ver":"\u2014","t":"2026-10-02 09:26","sw":74,"dc":0.04281,"rms":0.0294952,"q":0.01741,"m":1.69,"bd":[0.004134,0.006657,0.007298,0.00525,0.003066,0.01949,0.02268,0.00345,0.0161]},{"b":"B2C","run":"20261002_092610","ch":"AE","cfg":"VFD net AF, varmeboks TIL","ver":"\u2014","t":"2026-10-02 09:26","sw":74,"dc":0.01205,"rms":0.0148696,"q":0.007254,"m":2.05,"bd":[0.00249,0.003253,0.003976,0.002666,0.002369,0.01016,0.01101,0.002014,0.007863]},{"b":"B2C","run":"20261002_092610","ch":"SP","cfg":"VFD net AF, varmeboks TIL","ver":"\u2014","t":"2026-10-02 09:26","sw":74,"dc":4.98777,"rms":0.0424121,"q":0.0116,"m":3.65,"bd":[0.004114,0.006797,0.01274,0.007001,0.009233,0.02585,0.02194,0.02601,0.03455]},{"b":"B2D","run":"20261002_100026","ch":"UL","cfg":"VFD net AF, boks AF, afkoblet","ver":"\u2014","t":"2026-10-02 10:00","sw":74,"dc":0.04148,"rms":0.0296595,"q":0.01741,"m":1.7,"bd":[0.004055,0.006643,0.007294,0.005254,0.003083,0.01958,0.02287,0.003453,0.01618]},{"b":"B2D","run":"20261002_100026","ch":"AE","cfg":"VFD net AF, boks AF, afkoblet","ver":"\u2014","t":"2026-10-02 10:00","sw":74,"dc":0.01124,"rms":0.0142671,"q":0.007254,"m":1.97,"bd":[0.002094,0.003212,0.003713,0.002547,0.001546,0.009385,0.01092,0.001822,0.007758]},{"b":"B2D","run":"20261002_100026","ch":"SP","cfg":"VFD net AF, boks AF, afkoblet","ver":"\u2014","t":"2026-10-02 10:00","sw":74,"dc":4.98861,"rms":0.0246196,"q":0.0116,"m":2.12,"bd":[0.002731,0.004272,0.005684,0.003366,0.002242,0.01252,0.01461,0.01901,0.02165]}],"floor":{"UL":0.0296595,"AE":0.0142671,"SP":0.0246196},"quant":{"UL":0.01741,"AE":0.007254,"SP":0.0116}};</script>
+<script>
+const SENSOR={UL:'Kistler akustisk emission (CHAN1)',AE:'Piezo accelerometer (CHAN2)',SP:'Slæbering (CHAN3)'};
+const FL={}, QU={};
+['UL','AE','SP'].forEach(ch=>{const r=DATA.rows.find(x=>x.b==='B2B'&&x.ch===ch);FL[ch]=r.rms;QU[ch]=r.q;});
+
+// ---- gulvkort
+document.getElementById('floorcards').innerHTML=['UL','AE','SP'].map(ch=>{
+  const r=DATA.rows.find(x=>x.b==='B2B'&&x.ch===ch);
+  const run=DATA.rows.find(x=>x.b==='B3b'&&x.ch===ch);
+  const hd=(run.rms/r.rms);
+  const cls=hd>5?'o':(hd>2?'':'w');
+  return `<div class="card"><div class="ch">${ch}</div><div class="sensor">${SENSOR[ch]}</div>
+  <span class="big">${r.rms.toFixed(5)}<span class="unit"> V rms</span></span>
+  <div class="kv" style="border-top:0;padding-top:10px"><span>kvantiseringsgulv</span><b>${r.q.toFixed(5)} V</b></div>
+  <div class="kv"><span>gange over kvantisering</span><b>${r.m.toFixed(2)}×</b></div>
+  <div class="kv"><span>middelværdi (dc)</span><b>${r.dc>0?'+':''}${r.dc.toFixed(3)} V</b></div>
+  <div class="kv" style="padding-top:10px"><span>ved 600 rpm (3b)</span><b>${run.rms.toFixed(5)} V</b></div>
+  <div style="margin-top:10px"><span class="pill ${cls}">signal ${hd.toFixed(1)}× gulv</span></div></div>`;
+}).join('');
+
+// ---- båndkort
+const F0=1e3,F1=1.25e6,LX=f=>(Math.log10(Math.max(f,F0))-Math.log10(F0))/(Math.log10(F1)-Math.log10(F0))*100;
+document.getElementById('axis').innerHTML=[1e3,1e4,5e4,1e5,2e5,5e5,1e6,1.25e6].map(f=>{
+  const t=f>=1e6?(f/1e6).toFixed(f===1.25e6?2:0)+' MHz':(f/1e3)+' kHz';
+  return `<span class="tick" style="left:${LX(f)}%">${t}</span>`;}).join('');
+const SRC=[
+ {n:'Drevets udgangstrin',lo:5e3,hi:1.25e6,c:'var(--crit)',s:'SP · bredbåndet, kun under kørsel · op til 5×'},
+ {n:'Varmerelæet',lo:50e3,hi:100e3,c:'var(--warn)',s:'SP 2,2× · AE svagt'},
+ {n:'Varme/temp-boksen',lo:126e3,hi:135e3,c:'var(--accent)',s:'SP 4,1× · AE 1,5×'},
+ {n:'Instrumentkæden',lo:1055e3,hi:1066e3,c:'var(--muted)',s:'alle tre kanaler · inde i måleudstyret'}];
+document.getElementById('spans').innerHTML=SRC.map(s=>{
+  const l=LX(s.lo),w=Math.max(LX(s.hi)-l,1.1);
+  return `<div class="srcrow"><div class="span" style="left:${l}%;width:${w}%;background:${s.c}"
+   title="${s.n}">${w>14?s.n:''}</div></div>
+   <div class="srclab" style="margin-left:${Math.min(l,70)}%">${w>14?'':s.n+' · '}<span class="srcsub">${s.s}</span></div>`;
+}).join('');
+
+// ---- stor tabel
+const B=DATA.bands, H=['blok','kør-id','kanal','konfiguration','verificeret','sweeps','dc','rms',...B];
+let rel=false, fch='', sk=null, sd=1;
+document.getElementById('bigh').innerHTML='<tr>'+H.map((h,i)=>
+  `<th class="srt ${i>=5?'n':''}" data-i="${i}">${h}</th>`).join('')+'</tr>';
+function val(r,i){
+  if(i===0)return r.b; if(i===1)return r.run; if(i===2)return r.ch; if(i===3)return r.cfg;
+  if(i===4)return r.ver; if(i===5)return r.sw; if(i===6)return r.dc; if(i===7)return r.rms;
+  return r.bd[i-8];
+}
+function fmt(r,i){
+  const v=val(r,i);
+  if(i<5)return v;
+  if(i===5)return v;
+  if(i===6)return (v>0?'+':'')+v.toFixed(3);
+  if(i===7)return rel?(v/FL[r.ch]).toFixed(2)+'×':v.toFixed(5);
+  return rel?(v/DATA.rows.find(x=>x.b==='B2B'&&x.ch===r.ch).bd[i-8]).toFixed(2)+'×':v.toPrecision(3);
+}
+function draw(){
+  let rows=DATA.rows.filter(r=>!fch||r.ch===fch);
+  if(sk!==null)rows=rows.slice().sort((a,b)=>{
+    let x=val(a,sk),y=val(b,sk);
+    if(sk===7||sk>=8){if(rel){const f=o=>sk===7?FL[o.ch]:DATA.rows.find(z=>z.b==='B2B'&&z.ch===o.ch).bd[sk-8];
+      x=x/f(a);y=y/f(b);}}
+    return (typeof x==='string'?x.localeCompare(y):x-y)*sd;});
+  document.getElementById('bigb').innerHTML=rows.map(r=>'<tr>'+H.map((h,i)=>{
+    const strong=(i===7&&rel&&val(r,i)/FL[r.ch]>3);
+    return `<td class="${i>=5?'n':''}"${strong?' style="color:var(--crit);font-weight:600"':''}>${fmt(r,i)}</td>`;
+  }).join('')+'</tr>').join('');
+}
+document.querySelectorAll('#bigh th').forEach(th=>th.onclick=()=>{
+  const i=+th.dataset.i; sd=(sk===i)?-sd:1; sk=i; draw();});
+const bA=document.getElementById('bAbs'),bR=document.getElementById('bRel');
+bA.onclick=()=>{rel=false;bA.setAttribute('aria-pressed','true');bR.setAttribute('aria-pressed','false');draw();};
+bR.onclick=()=>{rel=true;bR.setAttribute('aria-pressed','true');bA.setAttribute('aria-pressed','false');draw();};
+document.querySelectorAll('.fch').forEach(b=>b.onclick=()=>{
+  fch=b.dataset.ch;document.querySelectorAll('.fch').forEach(o=>o.setAttribute('aria-pressed',o===b));draw();});
+draw();
+</script>
