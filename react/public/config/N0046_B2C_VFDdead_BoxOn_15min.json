@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 2C - VFD mains OFF, heater box ON, 0 rpm, 15 min",
+ "description": "BLOCK 2C — DOES THE HEATER BOX'S COUPLING INTO SP NEED AN ENERGIZED DRIVE? windows created this block after 4b raised the question (2026-10-01); Kim approved it. BASELINE IS 2B = 20260930_112905 — VFD MAINS OFF, box OFF. This run is the same with the BOX ON, so against 2B it changes exactly ONE thing: the box. THE QUESTION. 2B (drive mains off) found the box barely touched SP: 131.5 kHz moved only -4.8 %. 4b (drive energized, idle) found the box raised SP +11.9 % overall, 127-133 kHz bins up x1.06-1.65. The one difference was THE DRIVE'S STATE, so the hypothesis is that the box's coupling into SP needs an energized drive as its path — a COMBINATION effect rather than the box alone. DECIDED BY COMPARING TWO DELTAS, NOT TWO RUNS:    drive DEAD       2B (box off) vs 2C (box on)   <- this run supplies the second half    drive ENERGIZED  5a (box off) vs 4b (box on)   <- already measured Box shows on SP with the drive energized but NOT with it dead -> combination, drive is the path. Shows in both -> the box reaches SP on its own and 2B's small number was something else. AE IS EXPECTED TO RESPOND EITHER WAY: 2B and 4b already agree on AE (x0.51 off, x2.27 on), so AE's 126-135 kHz structure is the box reaching AE directly. SP is the open question, not AE. CONFIGURATION, otherwise identical to 2B: 24 V sensor supply LINEAR, slip-ring/OE LINEAR, sinus filter FITTED with the filter-VFD ground REMOVED (a FUNCTIONAL ground, per Kim 2026-10-02), heater relay OPEN, external tachometer OFF. The motor is DECOUPLED now and was COUPLED in 2B — irrelevant at 0 rpm, since a stationary motor produces no vibration either way. Same argument that made block 3a clean. max_consecutive_modbus_errors stays RAISED: with the VFD dead the runner's status polls time out and the failed connects lock the shared RS485 port so the Omron read fails too, firing the safety stop after 10 ticks and taking the acquisition down with it. That killed the first bare-floor attempt three minutes into a 30 minute block. DO NOT copy this setting into a profile that drives the motor. NOTHING IS REQUIRED OF THE OPERATOR once the VFD mains is off.",
+ "duration_minutes": 15,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}
