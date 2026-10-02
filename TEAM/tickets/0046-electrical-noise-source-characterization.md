@@ -400,6 +400,11 @@ specimen under test** — slow, invisible, indistinguishable from real mechanica
 a measurement problem to optimise away; it is an EMC installation / grounding design question.** Do not let
 anyone silently pick the quiet configuration. **Follow-up: a single-point grounding redesign of the
 filter / VFD / sensor system — ticket 0048 (EMC, not characterisation).**
+**Update 2026-10-02:** Kim identified the strap as a **functional ground, not protective earth**, so there
+is no safety constraint — but the trade-off stands and resolves in favour of the specimen. **Interim
+decision: run filter ON / ground OFF** (specimen-protected and the quieter of the two filter states),
+**never "no filter."** The proper fix is 0048's single-point scheme; the measured options + the decision
+live in 0048.
 
 **Only one measurement remains open:** 2C (the box×drive SP combination control, waiting on Kim to power
 the drive down). 4b (box bidirectional) and 6 (heater relay = SP 50–100 kHz) are done; the explicit

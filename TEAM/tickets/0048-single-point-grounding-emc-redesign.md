@@ -25,17 +25,28 @@ indistinguishable from real mechanical degradation. **Removing the filter to qui
 prohibited** — it would silently contaminate every bearing-life measurement the rig exists to make. (This
 belongs as a hard line in CLAUDE.md too.)
 
-## ⛔ SAFETY GATE: is that strap protective earth, or a functional ground?
-**Not established — and it must be before the "ground removed" state is left in place.** 0046 found that
-removing the filter–VFD ground *reduces* sensor noise (closed-loop signature), so the quiet configuration
-has the strap OFF. **But if that strap is protective earth (PE), removing it for noise is an electrical-
-safety violation, not an optimisation** — it defeats the fault path that keeps exposed metal from going
-live. Whether it is PE or a functional / screen ground has not been determined from the wiring.
-- **Someone who can see what it physically connects must identify it** before the strap is left off.
-- **If it is PE it stays on, full stop** — the noise is then solved elsewhere (single-point topology,
-  shielding, cable routing), never by defeating protective earth.
-- Until identified, the rig's present "ground removed" state is a **temporary test condition to be
-  restored**, not a configuration to run in.
+## ✅ SAFETY GATE CLEARED: it is a FUNCTIONAL ground, not protective earth (Kim, 2026-10-02)
+0046 found that removing the filter–VFD ground *reduces* sensor noise, so the quiet configuration has the
+strap OFF — which would be an electrical-safety violation if the strap were protective earth (PE). **Kim
+has identified it: it is a FUNCTIONAL / screen ground, not PE.** So leaving it off is a legitimate
+engineering choice, not a hazard, and **no safety constraint forces the configuration either way.**
+`docs/0046_RIG_RESTORE.md` updated accordingly. What remains is the engineering trade-off below.
+
+## Interim operating configuration (until the redesign exists)
+The trade-off is now purely sensor noise vs specimen integrity, and the three measured options are all
+suboptimal:
+
+    no filter            AE at its 0.0140 floor   specimen LEAST protected  — do NOT run for clean sensors
+    filter, no ground    AE +71-91 %              specimen protected, quieter of the two filter states  <- interim
+    filter + ground      AE +288 %                specimen protected, worst noise (closed loop)
+
+**Decision (architect, 2026-10-02): run bearing tests with the filter ON and the functional ground OFF —
+the current state.** On a bearing test rig **specimen integrity outranks sensor cleanliness**: elevated
+sensor noise is a known, quantified, subtractable offset, whereas bearing-current erosion silently
+destroys the very specimen being measured. "Filter, no ground" is both specimen-protected and the quieter
+of the two filter-on states, so it is the right interim. **Never run "no filter" to clean up the sensors.**
+The real answer — filter fitted with a deliberate single-point grounding scheme, AE back at its floor
+*with* the filter — is this ticket's goal and has not been measured because it does not exist yet.
 
 ## What 0046 established (the evidence to design against)
 Decoupled, motor at 500 rpm, AE floor ≈ 0.0140 (AE is the most affected channel):
