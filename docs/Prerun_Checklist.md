@@ -119,8 +119,15 @@ If it is silent, press the reset button on the unit (ticket 0019 — it cannot b
 
 ## 7. Housekeeping
 
-- [ ] Disk space for the run — roughly **2.7 GB/hour** at 1 M points and a 12 s sweep interval.
-      A 13 h run needs ~35 GB. `df -h /home/aau`
+- [ ] Disk space for the run — roughly **0.32 GB/hour** at 1 M points (clamped to 500 k with three
+      channels) and a 12 s sweep interval. **A 13 h run needs ~4.5 GB.** `df -h /home/aau`
+
+      > **This used to say 2.7 GB/hour and ~35 GB, and that was stale by a factor of eight.** The old
+      > figure came from runs that stored the time axis as its own dataset. Since `store.time_axis`
+      > was set false (ticket 0044 — lossless, the attrs carry the ramp) the files are a fraction of
+      > the size: the 13 h baseline `20260923_125909` was **4.26 GB for 793 minutes**. Corrected
+      > 2026-10-02 after the stale figure was used to justify deleting a run as urgent when there was
+      > room for seven more.
 - [ ] The tree on the Pi is the current one. Several older copies of `acquire_scope_data.py`
       exist; make sure you are running the deployed current file.
 - [ ] Heater guard arms at run start — check `heater_guard.log` in the run folder. Note the Shelly

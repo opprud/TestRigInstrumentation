@@ -25,11 +25,10 @@ Written 2026-10-01 at the end of the 0046 block series.
       | filter, no ground | 0.024-0.027 | +71 to +91 % |
       | filter + ground | 0.0544 | +288 % |
 
-      **Do not read that as "leave the ground off".** Two things block it:
-      1. **It is not established whether that strap is protective earth or a functional ground.**
-         Removing a PE connection is a safety decision, not a noise optimisation. Someone who can see
-         what it connects must say which it is.
-      2. **The filter protects the specimen.** It limits dv/dt at the motor terminals and reduces
+      **The strap is a FUNCTIONAL ground, not protective earth (Kim, 2026-10-02).** That settles the
+      safety question: leaving it off is a legitimate engineering choice rather than a hazard. One
+      thing still blocks treating it as the answer:
+      1. **The filter protects the specimen.** It limits dv/dt at the motor terminals and reduces
          bearing currents — electrical erosion that pits bearing races. On a bearing test rig,
          running without it risks eroding the very bearing being characterised, slowly and
          invisibly, in a way indistinguishable from real mechanical degradation.
