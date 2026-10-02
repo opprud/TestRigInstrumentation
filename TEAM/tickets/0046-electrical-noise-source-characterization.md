@@ -206,6 +206,12 @@ decoupled sweep. Every block:
    rise with the box toggled while the drive is mains-off, the box→SP path is a **combination effect** that
    needs the energized drive, not the box alone (AE's attribution is unaffected either way). Cheap and
    Kim-light: drive mains off, toggle the box. Closes the one loose end 4b opened.
+   > **RESULT 2C / 2D (`20261002_092610` box ON + `20261002_100026` box OFF, both VFD mains-off, decoupled,
+   > archived): the box couples into SP on its OWN — NOT a drive combination.** With the drive mains-off,
+   > box on vs off moves SP's 126–135 kHz band **~4×** and SP total **1.71×** (0.0424 → 0.0246). So the
+   > box is an independent source on SP too; the earlier 2B→2C delta (2.50×) was inflated by the
+   > decoupling confound. AE's box effect is **×1.6 in-band regardless of drive state** (drive-dead 1.64×
+   > vs drive-idle 1.59×) — an independent AE source, confirmed. **Last open block closed.**
 
 ### The 2×2 (the "4 combinations")
 Blocks 1–4 already contain it, but run it explicitly as a clean 2×2 at one condition (manual mode, slow
@@ -276,6 +282,11 @@ motor, no heat, ~5 min per cell):
    > ~0.0140 floor — **and the filter can stay** (what we want for bearing currents); if the ground is
    > irrelevant, filter+ground resembles the filter-without-ground series, the filter itself is the
    > problem, and the fix is shielding / cable routing.
+   > **⛔ RETRACTED 2026-10-02 (see Conclusion revision).** The "+288 % / closed ground loop" below rests
+   > on **5i**, where Kim read **0.00 on the display — the motor was not running**, so it is not comparable
+   > to the running blocks. The clean *stationary* test (5a vs 5h) shows **no ground effect (0.95–0.99×)**;
+   > the grounding question is **UNRESOLVED**. The original (wrong) reading is kept below for the audit
+   > trail — do not cite it.
    > **RESULT 5h-5j, filter ON + ground RESTORED (decoupled — `20261001_133652` / `134851` at 0 / 500 rpm,
    > archived): the prediction FAILED, in the OPPOSITE direction — restoring the ground made it markedly
    > WORSE.** At 500 rpm vs 5b (filter ON, ground MISSING): **AE +127.2 %, SP +75.1 %**, UL +1.4 %. AE
@@ -406,9 +417,10 @@ decision: run filter ON / ground OFF** (specimen-protected and the quieter of th
 **never "no filter."** The proper fix is 0048's single-point scheme; the measured options + the decision
 live in 0048.
 
-**Only one measurement remains open:** 2C (the box×drive SP combination control, waiting on Kim to power
-the drive down). 4b (box bidirectional) and 6 (heater relay = SP 50–100 kHz) are done; the explicit
-{PSU}×{sinus} 2×2 is answered in substance by 2A and block 5.
+**All blocks are run** (2C/2D done — box couples to SP on its own; 4b box bidirectional; 6 heater relay;
+the {PSU}×{sinus} 2×2 answered in substance by 2A and block 5). The characterization is complete. The open
+threads are the **grounding** question (unresolved — needs one clean *running* ground on/off pair, 0048)
+and the **drive command behaviour** (0047).
 
 **Rig left abnormal after this series** (motor decoupled, 24 V on a lab supply, filter–VFD ground removed)
 — **restore per `docs/0046_RIG_RESTORE.md` before any bearing run**; several of these would silently
@@ -422,6 +434,36 @@ conclusions were retracted in the making** — 1.06 MHz as a bench PSU (→ exte
 chain), AE "over-ranged into 7 levels" (an undersampled-test-capture artefact; real rate uses 41–70
 levels), and the "SP 129/131 kHz line" (flat broadband). The method that caught all three: **made-and-
 unmade reversal, and reading shape not amplitude.**
+
+### Revision 2026-10-02 — uniform reference, and two more conclusions retracted
+All 23 blocks are now measured by **one method** (12 sweeps, Welch, 38 Hz bins, 3 channels, 9 bands):
+**`docs/0046_noise_floor.csv` / `.json` (63 channel rows) and `py/tools/0046_noise_reference.html`** — the
+single findable, comparable reference. **It is the source of truth; prefer it over the scalar band figures
+in the blocks above.** Putting the numbers side by side surfaced the real headlines and caught two
+contaminated comparisons:
+
+- **UL is electrically clean.** Across all 23 blocks UL is **0.0285–0.0304 V rms (±3 %)** regardless of
+  box, drive, sinus filter or relay — nothing we toggled is measurable on the main sensor. At 600 rpm UL
+  is 0.284 V, **9.8× its own floor**; AE and SP sit only 1.8× and 2.7× over theirs, so for them the
+  background is a real part of the signal.
+- **The floor is near the instrument's quantization limit.** All three channels sit only **1.5–2.0× over
+  the scope's quantization floor** (effectively 8-bit, step = range/199). Much of the "broadband" noise in
+  AE and SP **is the digitisation** — electrical cleanup has a hard ceiling, and the real lever is **more
+  ADC bits or a smaller voltage range, not more shielding.**
+- **RETRACTED — the filter–VFD ground "closes a loop / +288 %" (blocks 5h–5k).** It rested on **5i**,
+  which Kim read as **0.00 on the display — the motor was not running**, so it was never comparable to the
+  running blocks. Measured cleanly **stationary** (5a vs 5h, sinus ON, ground off vs on) the effect is
+  **0.95–0.99× = none.** The grounding question is **UNRESOLVED**, not "ground makes it worse" — there is
+  no clean *running* ground comparison because 5i was dead-motor. **0048 reframed accordingly.**
+- **RETRACTED — "coupling is irrelevant at 0 rpm."** Decoupling the motor alone raises SP **1.45×**
+  (B2B 0.0169 → B2D 0.0246) with everything else off — a real path, not a non-effect.
+- **2C answered (`20261002_092610` + 2D):** the heater box couples into SP **on its own**, not only with
+  an energized drive — box on/off with the drive mains-off moves SP's 126–135 kHz band ~4×. The earlier
+  2B→2C SP delta (2.50×) was inflated by the coupling/decoupling confound; clean it is **1.71×**. The box
+  stays an independent AE source (×1.6 in-band, drive-independent).
+
+The band **attributions** (1.06 MHz instrument-side, box→AE 126–135 kHz, relay→SP 50–100 kHz, drive→SP
+broadband) stand; their **magnitudes** should be read from the reference, not from the scalars above.
 
 ## Owner / test
 - **Kim / hardware:** swap PSU (switch-mode ↔ linear 24 VDC), sinus filter in/out (**a quick wire-move**, confirmed Kim 2026-09-30 — so the {PSU}×{sinus} 2×2 is two fast swaps), decouple the motor,

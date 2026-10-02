@@ -9,6 +9,16 @@ branch:
 pr:
 ---
 
+> **⛔ PREMISE LARGELY RETRACTED 2026-10-02.** This ticket was opened on the "+288 % closed ground loop"
+> result, which rested on a **dead-motor block (5i, Kim read 0.00 on the display)** and does not survive
+> 0046's uniform re-measurement: the clean *stationary* ground comparison (5a vs 5h) shows **no effect
+> (0.95–0.99×)**. So the grounding **topology is not demonstrated to be wrong**, and there is **no clean
+> running ground comparison** yet. What actually changed: (1) the ground question is **UNRESOLVED** —
+> it needs one clean *running* ground-on/off pair, not a redesign; (2) 0046's reference shows the floor is
+> only **1.5–2× over the scope's quantization limit**, so the highest-value lever for a quieter floor is
+> **ADC resolution / voltage range, not grounding or shielding.** Do not action a single-point redesign on
+> the retracted evidence. Reframed below.
+
 ## Why this ticket exists
 0046 characterised the sensor-channel noise and ended on a conflict it cannot resolve by measurement: the
 **sensor-cleanest** configuration and the **specimen-safest** configuration are currently opposites. The
@@ -32,21 +42,23 @@ has identified it: it is a FUNCTIONAL / screen ground, not PE.** So leaving it o
 engineering choice, not a hazard, and **no safety constraint forces the configuration either way.**
 `docs/0046_RIG_RESTORE.md` updated accordingly. What remains is the engineering trade-off below.
 
-## Interim operating configuration (until the redesign exists)
-The trade-off is now purely sensor noise vs specimen integrity, and the three measured options are all
-suboptimal:
+## Interim operating configuration (corrected 2026-10-02)
+The earlier "+288 %" / "filter+ground worst" row is **retracted** (dead-motor 5i). The only clean ground
+comparison we have is **stationary** (5a vs 5h, sinus ON): ground off vs on = **0.95–0.99×, i.e. no
+difference**. There is no clean *running* comparison either way.
 
-    no filter            AE at its 0.0140 floor   specimen LEAST protected  — do NOT run for clean sensors
-    filter, no ground    AE +71-91 %              specimen protected, quieter of the two filter states  <- interim
-    filter + ground      AE +288 %                specimen protected, worst noise (closed loop)
+**Decision (architect, 2026-10-02, corrected): run bearing tests with the filter ON and the functional
+ground RESTORED** — the normal, conservative configuration. The filter stays because on a bearing test rig
+**specimen integrity outranks sensor cleanliness** (it limits dv/dt and bearing currents; elevated sensor
+noise is a known, subtractable offset, whereas bearing-current erosion silently destroys the specimen).
+The ground goes back because, once 5i is discarded, removing it **bought nothing measurable**. **Never run
+"no filter" to clean the sensors.** If a quieter floor is genuinely wanted, the evidence points at **ADC
+resolution / a smaller voltage range** (the floor is only 1.5–2× over the quantization limit), not at
+regrounding — and any grounding change must first be judged on a **clean running ground-on/off pair**,
+which does not yet exist.
 
-**Decision (architect, 2026-10-02): run bearing tests with the filter ON and the functional ground OFF —
-the current state.** On a bearing test rig **specimen integrity outranks sensor cleanliness**: elevated
-sensor noise is a known, quantified, subtractable offset, whereas bearing-current erosion silently
-destroys the very specimen being measured. "Filter, no ground" is both specimen-protected and the quieter
-of the two filter-on states, so it is the right interim. **Never run "no filter" to clean up the sensors.**
-The real answer — filter fitted with a deliberate single-point grounding scheme, AE back at its floor
-*with* the filter — is this ticket's goal and has not been measured because it does not exist yet.
+> This supersedes the earlier interim note that recommended *ground OFF*; that was based on the retracted
+> +288 % block. Net correction: **ground back ON, filter ON.**
 
 ## What 0046 established (the evidence to design against)
 Decoupled, motor at 500 rpm, AE floor ≈ 0.0140 (AE is the most affected channel):
