@@ -482,6 +482,39 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   `Could not exclusively lock port /dev/ttyUSB0` (63 lines in the first minute) and `omron_pv_c` to be
   null — both are expected when the bus has nothing to talk to.
 
+- **⚠️ `frequency_out_hz` DOES NOT CLEAR ON STOP — it holds the last commanded frequency, so it can
+  never confirm a stop (2026-10-02).** Measured with the shaft provably at rest: the drive reported
+  `ud=20.00 Hz` while the tach read `rpm=0.00` and the pulse counter sat frozen at 2441550 across
+  4.05 s. `run_command` *does* go to `STOP` correctly; it is the output-frequency readback that is
+  stale.
+
+  **This masquerades as a drive that will not stop.** A stop loop whose success test is
+  `frequency_out_hz < 0.2` can never pass, so it burns every attempt and reports failure on a motor
+  that stopped on the first command. That is exactly what happened on 2026-10-02: seven "failed"
+  stops, all of which had probably worked. It also produces the opposite error — believing a drive is
+  still running and power-cycling it for nothing.
+
+  **The only valid test for a stopped shaft is `rpm == 0` AND a frozen pulse count across two reads**,
+  which is what `docs/Prerun_Checklist.md` §3 already asks for. Note the pulse count is also the only
+  speed figure independent of both the drive's registers and the tach's own period maths — compute
+  `60 * dpulses / dt` and compare.
+
+- **⚠️ The motor cannot BREAK AWAY at 10 Hz under the ~142 kg clamp load, but sustains it once moving
+  (2026-10-02, after the 0046 reassembly).** From standstill, a verified 10 Hz command produced
+  **26 rpm — three pulses in ten seconds**, i.e. a shaft that does not turn. Started at 20 Hz and then
+  stepped *down* to 10 Hz, the same drive held **584.7 rpm** rock-steady. Static friction, not torque
+  at speed, is the limit.
+
+  **A profile whose first step is 600 rpm can therefore record a stationary bearing** while the drive
+  reports healthy and the staircase tracks every later step — the same silent-failure shape as the
+  100 rpm step documented below, but at a speed nobody suspects. Give new profiles a short breakaway
+  step at a higher frequency before the lowest point, and **check the tach's pulse count is advancing
+  at the first step**, not just that the drive accepted the command.
+
+  Verified the same session, coupled and post-reassembly: **20 Hz → 1180.6 rpm** (tach field) and
+  **1184.9 rpm** computed from the pulse count, i.e. **59.0-59.2 rpm/Hz**; 10 Hz held → 58.5 rpm/Hz.
+  Slip falls with speed as it should, and the tach is healthy.
+
 - **⚠️ VFD writes degrade on a held connection — RECONNECT, do not retry (2026-09-23).** Sharper than
   the "registers do not reflect reality" entry below, and with an actual remedy. Measured in one session:
   after a working 20 Hz step on the same `RS510VFDController` connection, **five consecutive writes of

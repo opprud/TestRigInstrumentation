@@ -62,9 +62,15 @@ Written 2026-10-01 at the end of the 0046 block series.
       optional.
 - [ ] **Check the pot is at its bottom stop** (Prerun_Checklist §3). Unchanged by this work, but it
       is the other setting that lets a run look healthy while the shaft does something else.
-- [ ] **Verify the tach against commanded Hz** once re-coupled — `59.83 x Hz - 11.7`. With the motor
-      decoupled the tach reads 0 with a frozen counter, so it has been unusable throughout 0046 and
-      its health has not been checked since.
+- [x] **Verify the tach against commanded Hz once re-coupled — DONE 2026-10-02.** Coupled, fresh
+      Keratech 22 in: **20 Hz -> 1180.6 rpm** (tach field) and **1184.9 rpm** from the pulse count,
+      **59.0-59.2 rpm/Hz**; 10 Hz held -> 584.7 rpm, 58.5 rpm/Hz. Slip falls with speed, the two
+      independent speed figures agree to 0.4 %, and the shaft stops cleanly (rpm 0 + frozen counter).
+      The tach is healthy.
+
+      Found in the same session and recorded in CLAUDE.md: the motor **cannot break away at 10 Hz**
+      under this clamp load though it sustains it once moving, and `frequency_out_hz` never clears on
+      stop so it cannot confirm one.
 
 ## The last 0046 measurement — and it can only be taken AFTER this list is done
 
