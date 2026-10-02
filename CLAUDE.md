@@ -299,7 +299,18 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   temperature across the speed staircase). The `config.json` and profile notes were already cleared.
 
 
-- **⚠️ The post-rebuild 13 h run had ZERO scope resets — the wedging may be gone, and that matters for
+- **✅ TICKET 0029 IS SETTLED: TWO consecutive 13 h runs with ZERO scope resets — the wedging belonged
+  to the pre-rebuild rig.** `20260923_125909` (3964 sweeps, 0 skipped, 0 resets) and
+  `20261002_122423` (3964 sweeps, 0 skipped, 0 resets, **2 error lines in the whole log** — both the
+  deterministic cold-start refusals at startup). Against August's regime of **114 reset cycles per
+  3778 sweeps**, i.e. one every seven minutes with 468 error lines. Same 500 k points/channel, same
+  12 s cadence, same profile.
+
+  The entry below said not to delete it on one run. There are now two, and they are identical.
+  **Size `sweep_retries` and point counts freely again** — the resilience machinery is still correct
+  to keep, but it is no longer absorbing a fault every seven minutes.
+
+- **⚠️ (superseded, kept for the history) The post-rebuild 13 h run had ZERO scope resets — the wedging may be gone, and that matters for
   how much of the entry below still applies.** Run `20260923_125909` (2026-09-23/24, the first 13 h after
   the rebuild): **3964 sweeps, 0 skipped, 0 resets, 0 recovery cycles** across 13.2 hours at the same
   500 k points/channel and the same 12 s cadence as the August run. On August's rate (114 resets per
@@ -360,7 +371,14 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   > steps), and it was the *old firmware* that over-read by a constant ~582 rpm. The calibration
   > below was measured after flashing 1.1.1 and does not retroactively validate those readings.
 
-- **The profile's 100 rpm step does not turn the bearing.** It commands 1.68 Hz, 3.4 % of rated
+- **⚠️ The 100 rpm step DOES turn the bearing now — 86 rpm, measured 2026-10-03.** With fresh
+  Keratech 22 in and the rig rebuilt, run `20261002_122423` records **86 rpm** at that step, not the
+  0 rpm below. It follows the same lubrication-state mechanism as the 10 Hz breakaway entry above.
+  **This is a real difference against the three older 13 h runs:** where they have stationary-bearing
+  data at those 52 points, this run has rotation, and the two cannot be compared there. The entry
+  below describes the OLD behaviour and is kept because it still applies to the archived runs.
+
+- **(pre-2026-10-03 behaviour, still true of the older runs) The profile's 100 rpm step does not turn the bearing.** It commands 1.68 Hz, 3.4 % of rated
   frequency, and the motor has too little torque: measured **0 rpm** on the tach while the drive
   reported running. It recurs 26 times through `Keratech22.json` (the 13 h profile), so those points record a
   *stationary* bearing. Left in place deliberately to keep comparability with earlier runs —
@@ -373,6 +391,20 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   processes open `/dev/ttyUSB0` in quick succession (`Could not exclusively lock port`), and a
   `stop()` can be reported as successful without stopping the motor. **Verify actuation against
   the tach, never against a readback.**
+
+- **✅ rpm/Hz IS NOT TEMPERATURE-DEPENDENT — measured across 40-100 C (2026-10-03, run
+  `20261002_122423`).** At a fixed 1800 rpm over all seven temperature decades of the 13 h profile,
+  8601 telemetry ticks:
+
+  | °C | 40 | 50 | 60 | 70 | 80 | 90 | 100 |
+  |---|---|---|---|---|---|---|---|
+  | rpm/Hz | 59.39 | 59.23 | 59.33 | 59.25 | 59.39 | 59.27 | 59.21 |
+
+  **Spread 0.18, i.e. 0.30 % over sixty degrees.** The 57-60 drift quoted below is a function of
+  **speed** — slip falls as the shaft speeds up — not of oil temperature. **A temperature-dependent
+  factor is not worth introducing**, which closes "next step" 6. Deviation against
+  `59.83 x Hz - 11.7` has a **median of 0.29 %** over the whole run; the large tail values are
+  transition samples during step changes, where measured rpm necessarily lags a new frequency.
 
 - **Closed loop hides sensor scale errors.** In closed loop `rpm_meas` always converges to
   the target regardless of sensor accuracy. Only comparing `rpm_meas` against `59.5 × Hz`
@@ -630,6 +662,14 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   vertical range**. The real quantisation step is `volt_range / 199`, which makes vertical range the main
   lever on data quality: a channel scaled 10x too wide loses a decade of resolution that no format or
   point count recovers.
+
+  > **Vpp LARGER than the configured window is NOT clipping — the scope digitises beyond the display
+  > (2026-10-03).** On run `20261002_122423` SP reports Vpp **10.21 V in an 8.0 V window** and AE
+  > **5.58 V in a 5.0 V window**, which looks alarming. SP's samples run **-0.606 to 9.606 V** against
+  > a nominal 0.5-8.5 V window, so the ADC covers roughly 1.1 V beyond each edge. Apply the test this
+  > entry already states — the **fraction** pinned at a rail: UL **0.0021 %**, AE **0.0006 %**, SP
+  > **0.0028 %**, i.e. 52, 16 and 71 samples out of 2.5 M. Isolated spikes, not clipping. **The window
+  > is the display, not the ADC's limit.**
 
   > **But measure it at the run's own sample rate, not with a quick hand-rolled capture.** On 2026-09-23
   > a check with `points=40000` over a 200 ms window (~190 kHz) made AE look catastrophically
