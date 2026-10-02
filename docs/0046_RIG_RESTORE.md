@@ -9,7 +9,7 @@ Written 2026-10-01 at the end of the 0046 block series.
 
 ## Must be restored before any bearing run
 
-- [ ] **Re-couple the motor to the rig.** It was decoupled for block 5 so that noise scaling with rpm
+- [x] **Re-couple the motor to the rig — DONE 2026-10-02, verified on the tach.** It was decoupled for block 5 so that noise scaling with rpm
       could be attributed to the drive rather than to vibration. A decoupled rig turns no bearing:
       the test would run its whole schedule and record a stationary specimen.
 - [x] **Move the 24 V sensor supply back to the rig's own switch-mode supply — DECIDED 2026-10-02
@@ -22,7 +22,7 @@ Written 2026-10-01 at the end of the 0046 block series.
       The external **tachometer** standing near the OE/slip-ring supply was, and that turned out to be
       instrument-side anyway (it survives a shorted probe tip). Do not re-litigate the 24 V supply on
       the strength of that line.
-- [ ] **Settle the sinus filter and its ground, and this one needs a decision, not a default.**
+- [x] **Settle the sinus filter and its ground — Kim confirmed the bench is fully re-established 2026-10-02; interim state stands (filter FITTED, filter-VFD ground REMOVED).** Original note below., and this one needs a decision, not a default.**
       Current state: **filter FITTED, filter-VFD ground REMOVED.** Measured at 500 rpm, decoupled:
 
       | configuration | drive | AE | vs AE's 0.0140 floor |
@@ -55,12 +55,12 @@ Written 2026-10-01 at the end of the 0046 block series.
 
       So the sensor-cleanest and specimen-safest configurations are **opposites**, and the real fix is
       a deliberate single-point grounding scheme — not choosing the quietest of three poor options.
-- [ ] **Check drive parameter 02-03 is on communication.** It does **not** survive a power cycle on
+- [x] **Check drive parameter 02-03 is on communication — VERIFIED 2026-10-02: commands acted on, 10.08/30.25/50 Hz all reached the shaft.** It does **not** survive a power cycle on
       this drive: after the VFD was re-powered on 2026-10-01, seven consecutive start commands were
       refused while plain register reads worked fine, until the mode was set again.
       `docs/Prerun_Checklist.md` §3 says to check it before a run; after any power cycle it is not
       optional.
-- [ ] **Check the pot is at its bottom stop** (Prerun_Checklist §3). Unchanged by this work, but it
+- [x] **Check the pot is at its bottom stop — implied verified 2026-10-02: 59.0-59.2 rpm/Hz with no additive offset, so nothing is being summed onto the Modbus reference.** (Prerun_Checklist §3). Unchanged by this work, but it
       is the other setting that lets a run look healthy while the shaft does something else.
 - [x] **Verify the tach against commanded Hz once re-coupled — DONE 2026-10-02.** Coupled, fresh
       Keratech 22 in: **20 Hz -> 1180.6 rpm** (tach field) and **1184.9 rpm** from the pulse count,
