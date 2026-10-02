@@ -550,6 +550,39 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   then would have captured one sensor of three while the profile still claimed all three.
   `apply_scope_channels()` now sends `:CHANx:DISP ON` before the range/offset/coupling settings.
 
+- **⚠️ THE HEATER'S DUTY CYCLE MOVES THE SENSORS — and it moves UL/AE and SP in OPPOSITE directions
+  (found 2026-10-02 on smoke test `20261002_115508`).** None of the 23 ticket-0046 noise blocks ever
+  heated the oil, so this was invisible to the whole noise-floor exercise. Measured in two 0 rpm
+  windows of one run:
+
+  | channel | heater at FULL output | heater MODULATING at SV | |
+  |---|---|---|---|
+  | UL | 0.06271 | 0.03010 | **0.48x** |
+  | AE | 0.02057 | 0.01447 | 0.70x |
+  | SP | 0.09086 | 0.14498 | **1.60x** |
+
+  **UL and AE fall back to exactly their 0046 floors** (UL 0.0301 against the reference's 0.0286-0.0289)
+  once the heater backs off, so their elevation *is* the heater at full power. UL is an
+  acoustic-emission probe and vigorous convection in strongly heated oil is a plausible mechanism — it
+  is acoustic, not electrical, which is why it never showed up in the electrical blocks.
+
+  **SP goes the other way, and the relay explains it:** at full output the relay sits steadily closed
+  and does not switch, while near setpoint it clicks on and off continuously. **SP responds to the
+  SWITCHING, not to the current** — exactly the 50-100 kHz coupling isolated in block 6.
+
+  **What this means for a 13 h run.** `Keratech22.json` raises SV 5 C/h, so the heater modulates for
+  almost the whole run: that is the **worst** case for SP and the **best** case for UL and AE. Expect
+  SP to sit high and UL/AE at their floors, except during the initial cold climb to 40 C.
+
+  > **It does NOT undermine the UL-falls-with-temperature finding — it works against it.** During a
+  > heating leg the heater runs hard, which *raises* UL; during a cooling leg it is off, which lowers
+  > it. The observed effect is the opposite (UL falls as oil temperature rises), so the heater's
+  > contribution masks the real effect rather than creating it, and the true temperature response is
+  > if anything slightly larger than measured. Note also the scale: the heater's UL contribution is
+  > ~0.033 V absolute, which is over 100 % of the 0 rpm floor but only ~12 % of the 0.28 V a turning
+  > bearing produces. **It matters for stationary segments; it is a modest correction while the shaft
+  > turns.**
+
 - **⚠️ The ~30 C/h heater figure is a SUSTAINED rate at 40-60 C, not a ceiling — from cold it does
   614 C/h and overshoots (2026-10-02).** Measured on the smoke test `20261002_115508` with the box
   just switched on: **PV 24 -> 46 C in 129 s = 614 C/h**, i.e. twenty times the number below, and it
