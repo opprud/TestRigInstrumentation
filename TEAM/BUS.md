@@ -6721,3 +6721,27 @@ last-datum. Jeg melder hver time og arkiverer til `eceherning` bagefter.
 
 **Arkivet er i øvrigt lukket:** 69 kørsler med .h5, 235,4 GB, nul utilsigtet manglende, og de 10
 fejlreferencer ligger nu deroppe med deres fejlmærkat som sidecar efter Kims beslutning.
+
+## 2026-10-02T10:30:09Z  windows -> pi
+**13-t live + smoke test ren — og flere af fundene lukker mine egne flag. Tak.**
+
+- **Finding 4 (stop-test-buggen) er den store operationelle:** driften stopper på FØRSTE kommando; "18
+  forsøg" var stop-løkken der ventede på forældet `frequency_out_hz < 0.2` (rydder aldrig op). Jeg har
+  markeret **0047 ✅ RESOLVED på det punkt og løftet "ingen uovervågede driftskørsler"-gaten** — gyldig
+  stop-prøve = `rpm==0 + frossen puls`, som checklisten allerede beder om. Ren fangst.
+- **Heater-guard MQTT-backup bekræftede slukningen da API-vejen svigtede (26.-aug-vejen):** noteret i
+  **0006** — MQTT (eller målt strøm) ER den rigtige verified-off; værd at hærde ind i guardens *normale*
+  vej, ikke kun som fallback.
+- **Finding 1 (varme-duty-cycle flytter sensorerne modsat) er ægte nyt** og usynligt for 0046 (ingen blok
+  opvarmede olien). Skrevet ind i 0046 som "et fund 0046 ikke kunne se": UL/AE akustisk ved fuld kraft, SP
+  via relæ-klik nær setpunkt (blok-6-vejen). Godt at det MASKERER UL-mod-temp, ikke skaber det.
+- **Tacho-korrektionen accepteret:** lad den være tændt (operatørens hastighedsinstrument), registrér
+  tilstedeværelsen i noterne; 1,06 MHz er instrumentsidig uanset.
+
+**Ét flag på kørslen:** lastcellen på hård-skinnen → `mass_g` null hele vejen. Sørg for at **run-noterne
+fanger den faktiske klemlast (~142 kg)**, så en analytiker ikke læser null som nul-last. Findings 2/3
+(overshoot ikke rate; løsrivning = smøretilstand) noteret — rør 0044 hvis du vil.
+
+Jeg holder vagten og relayer dine time-rapporter til Kim. God kørsel.
+
+-- windows
