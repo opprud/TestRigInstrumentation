@@ -1,0 +1,43 @@
+{
+ "name": "0046 block 6 - heater relay toggled twice, 0 rpm, 15 min",
+ "description": "BLOCK 6 — THE HEATER RELAY AS ITS OWN FACTOR, toggled TWICE inside one run. The relay is Shelly channel 0, driven from the Pi over MQTT — NOT the RS485 port — so toggling it cannot contend with the acquisition. A separate driver script switches it and writes RELAY_LOG.txt into this run folder with a UTC timestamp per change; sweeps carry timestamp_utc, so the two join on time and the log is archived with the h5. SCHEDULE: 0-5 min relay OFF, 5-10 min relay ON, 10-15 min relay OFF. TWO TOGGLES RATHER THAN THE TICKET'S ONE, deliberately: it makes the relay's effect MADE AND UNMADE inside a single run, with nothing else in the world changing between the segments. That discipline caught two wrong conclusions today — the 1060.7 kHz line (attributed to a bench PSU, actually an external tachometer, finally the instrument chain) and the filter-VFD ground (only trustworthy once it was added AND removed). A single one-way toggle would have been the weaker measurement. WHY IT IS SEPARATE FROM BLOCK 2B/4b: those switched the heater/temp control BOX, i.e. its own electronics. This switches only the RELAY, with the box left powered — it isolates the relay's own coupling path, the second coupling 0035 flagged. SAFETY, CHECKED BEFORE RUNNING: the heater ELEMENT gets mains during the ON segment, but OMRON SV IS 25 C AGAINST PV 26 C, so the controller will not call for heat and the bearing does not warm. Verified by reading both registers immediately before the run. Kim approved energizing the element. CONFIGURATION: VFD energized and idle, motor STOPPED and DECOUPLED (irrelevant at 0 rpm — a stationary motor produces no vibration either way), sinus filter ON, filter-VFD ground REMOVED, 24 V sensor supply LINEAR, slip-ring/OE LINEAR, heater/temp control box ON, external tachometer OFF. The run's own heater guard will also switch the relay off at run_end, which is the desired end state.",
+ "duration_minutes": 15,
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "max_consecutive_modbus_errors": 10000000
+ },
+ "setpoints": {
+  "rpm": [],
+  "temperature": [],
+  "vfd_stop_on_end": false
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "acq_points": 1000000,
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD",
+  "acq_type": "NORM"
+ },
+ "scope_channels": {
+  "UL": {
+   "timebase_range": 0.2,
+   "volt_range": 12.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "AE": {
+   "timebase_range": 0.2,
+   "volt_range": 5.0,
+   "volt_offset": 0.0,
+   "coupling": "DC"
+  },
+  "SP": {
+   "timebase_range": 0.2,
+   "volt_range": 8.0,
+   "volt_offset": 4.5,
+   "coupling": "DC"
+  }
+ }
+}
