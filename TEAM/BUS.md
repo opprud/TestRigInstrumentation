@@ -6407,3 +6407,61 @@ HVER power cycle." Jeg folder en "re-deriver citerede tal når formatet ændres"
 CLAUDE.md-konsolideringen jeg skylder.
 
 -- windows
+
+## 2026-10-02T08:32:37Z — Claude (instrumentering) → arkitekt, Kim
+
+**Blok 2D er færdig, og dermed er varmeboksens virkning målt rent — samme kobling i begge rækker.**
+
+Boksen af → på, begge rækker med motoren **afkoblet**, så koblingen ikke længere forurener deltaet:
+
+| | AE total | AE 127–133k | SP total | SP 127–133k | SP 50–100k |
+|---|---|---|---|---|---|
+| drev dødt (2D→2C) | 1,04× | **1,64×** | 1,71× | **4,28×** | 2,24× |
+| drev i tomgang (5a→4b) | 0,98× | **1,59×** | 1,12× | **1,36×** | 1,09× |
+
+Boksens virkning i sit eget bånd er **1,6× på AE uanset drevets tilstand** (1,64 mod 1,59) — en
+selvstændig kilde, der ikke blandes med drevet. På SP er den stor når drevet er dødt (4,3×) og lille
+når drevet kører (1,4×), fordi drevets eget bidrag da dominerer båndet. Det tidligere 2B→2C-delta på
+SP (2,50×) var oppustet af koblingen og er nu 1,71×.
+
+**Jeg trækker to af mine egne konklusioner tilbage.** Begge hvilede på sammenligninger mellem blokke,
+der ikke delte tilstand:
+
+1. **Filter–VFD-jorden gør det ikke værre.** Det byggede på 5i mod 5k ved 500 rpm — og 5i er netop
+   blokken, hvor Kim læste **0.00 på displayet: motoren kørte ikke**. Målt rent med bøjlen i ro
+   (5a → 5h) er virkningen 0,95–0,99×, altså ingen. Spørgsmålet er **uafklaret**, ikke afvist.
+2. **Koblingen er en jordvej for SP.** Med alt andet slukket hæver afkobling SP med 1,45×
+   (0,0169 → 0,0246 V). Mit tidligere argument om, at koblingen var irrelevant ved 0 rpm fordi en
+   stillestående motor ikke vibrerer, holder for vibration og er forkert for SP.
+
+**Og så er der leveret det, Kim bad om: én findbar reference over alle blokke.** Tallene lå spredt i
+bus-beskeder og et spektrum-view over syv konfigurationer; de var hverken findbare eller
+sammenlignelige. Alle 23 blokke er nu målt med samme metode (12 sweeps, Welch, 38 Hz-bins), 3 kanaler,
+9 bånd:
+
+- `docs/0046_noise_floor.csv` / `.json` — 63 kanalmålinger, maskinlæsbare
+- `py/tools/0046_noise_reference.html` — opslagsside med båndkort, nulresultater og forbehold
+
+**Hovedfundet blev først synligt med tallene ved siden af hinanden:**
+
+**UL er elektrisk ren.** Hen over alle 23 blokke ligger UL mellem 0,0286 og 0,0304 V rms — ±3 %,
+uanset varmeboks, drev, sinusfilter eller relæ. Intet af det, vi har tændt og slukket, kan måles på
+hovedsensoren. Ved 600 rpm står UL på 0,284 V, **9,8× sit eget gulv**. AE og SP ligger derimod kun
+1,8× og 2,7× over deres gulv ved 600 rpm — for dem er baggrunden en reel del af signalet.
+
+**Alle tre kanaler ligger 1,5–2,0× over scopets kvantiseringsgulv.** Scopet er reelt 8-bit
+(trin = volt_range/199), så en stor del af den «brede» støj i AE og SP *er* digitaliseringen. Det
+sætter en grænse for, hvad elektrisk oprydning kan give: gevinsten ligger i flere bit eller et
+mindre spændingsområde, ikke i mere afskærmning.
+
+**Nulresultater, så ingen leder forgæves:** skift til lineær 24 V-forsyning 1,00–1,03× (og
+1060,7 kHz-linjen rører sig ikke), sinusfilter med bøjlen i ro 0,98–1,02×, drev spændingssat med
+motoren stille 1,00–1,07×.
+
+**Forbehold, der står på siden:** hastighederne i 5-serien er kommanderede, ikke instrumentverificerede
+(motoren er afkoblet, så tacho læser bøjleakslen og kan ikke bevidne motoren); 500 og 1500 rpm kan
+ikke skelnes i nogen af serierne; og **blok 3b er den eneste blok, hvor bearingen faktisk drejer.**
+
+**Arkiv:** jeg fandt samtidig, at **38 kørsler med scope-data aldrig er kommet i Azure** (27,5 GB).
+Ni af dem er bevidst mærket `DO_NOT_ARCHIVE` af Kim 1. september som fejlreferencer — dem rører jeg
+ikke. De resterende 27 uploades nu til `eceherning`; det kører mens jeg skriver dette.
