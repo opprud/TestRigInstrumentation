@@ -6759,3 +6759,72 @@ reference-HTML'erne, så den rejser med dataen. Sig til hvis du vil have noget r
 især hvis din time-rapportering viser noget nyt om varme-duty-cyklen i §6.
 
 -- windows
+
+## 2026-10-02T23:48:06Z — Claude (instrumentering) → arkitekt, Kim
+
+**13-timers kørslen er færdig og arkiveret. Den er den bedste kørsel riggen har lavet.**
+`20261002_122423`, 12:24 → 01:37, stop_reason `duration_reached`. Profilen `Keratech22.json`
+**uændret** (sidst rettet 30. august).
+
+| | denne kørsel | 13 t, 20. august |
+|---|---|---|
+| sweeps | **3964** | 3778 |
+| sprunget over | **0** | 1 |
+| scope-reset / recovery | **0** | **114** |
+| fejllinjer i loggen | **2** | 468 |
+| huller i sweep-nummereringen | **0** | — |
+| OE-optagelser | 157 (2 fejl, 2 genforbindelser) | 249 |
+| tacho-læsefejl | **0 af 8601 ticks** | — |
+
+De to fejllinjer er kold-start-afvisningerne ved opstart, altså den deterministiske LXI-egenskab vi
+har karakteriseret. **Ingen vedhængning overhovedet.**
+
+**Det afgør ticket 0029.** Det er nu **to 13-timers kørsler i træk uden et enkelt reset** — 23.
+september (3964 sweeps, 0 reset) og denne (3964 sweeps, 0 reset) — mod august-regimets 114 reset per
+3778 sweeps, altså ét hvert syvende minut. Entry'en i CLAUDE.md sagde "slet ikke posten på én kørsel".
+Nu er der to, og de er identiske. **Vedhængningen tilhørte riggen før ombygningen**, og
+`sweep_retries` og punkttal kan dimensioneres frit igen.
+
+**Og punkt 6 på næste-skridt-listen kan lukkes: rpm/Hz er IKKE temperaturafhængig.** Målt ved fast
+1800 rpm hen over alle syv temperaturdekader, 8601 ticks:
+
+| °C | 40 | 50 | 60 | 70 | 80 | 90 | 100 |
+|---|---|---|---|---|---|---|---|
+| rpm/Hz | 59,39 | 59,23 | 59,33 | 59,25 | 59,39 | 59,27 | 59,21 |
+
+**Spredning 0,18, altså 0,30 % over tres grader.** Den variation på 57-60, der står i noterne, følger
+**hastigheden** (slip falder med omdrejningstallet), ikke olietemperaturen. En temperaturafhængig
+faktor er ikke værd at indføre. Hastighedsafvigelsen mod `59,83 × Hz − 11,7` har **median 0,29 %**
+over hele kørslen; de store udfald i halen er overgangssamples under trinskift, hvor målt rpm
+naturligt halter efter en ny frekvens.
+
+**Alle fjorten SV-trin blev ramt** — 40 til 100 °C i femgraders trin plus 25-graders haleleddet — og
+**de 100 °C blev nået og holdt.** PV lå 0 til +4 °C over setpunktet i den kolde ende, faldt til −1 ved
+SV 95 under rampen, og indhentede derefter. Riggen har altså ikke et temperaturloft under 100.
+
+**En post skal rettes: 100 rpm-trinnet drejer nu bøjlen.** CLAUDE.md siger, at det trin måler **0 rpm**
+fordi motoren har for lidt moment ved 1,68 Hz, og at de 52 forekomster derfor er data på en
+*stillestående* bearing. Denne kørsel måler **86 rpm** der. Det hænger sammen med dagens
+løsrivningsfund: med frisk Keratech 22 er den statiske friktion lav nok. **Det er en reel forskel mod
+de tre gamle 13-timers kørsler** — hvor de havde stilstand på de trin, har denne rotation, og de kan
+ikke sammenlignes direkte der.
+
+**Varmen: slukket og bekræftet tre veje.** Guarden fangede `run_end` korrekt, men dens første tre
+slukningsforsøg endte i `state UNKNOWN` fordi HTTP-API'en afvises og MQTT-reservevejen er langsom; den
+**nåede at bekræfte** kl. 01:42:01 og lukkede med `heater guard done`. Jeg slukkede desuden manuelt med
+bekræftelse, og PV er faldet **100 → 93 → 87 → 77 → 65 °C**. Værd at bemærke for 0006: guardens
+verifikation er langsom, ikke blind — men den var tre forsøg fra at ramme samme udgang som 26. august,
+hvor den gik af uden bekræftelse mens varmen stod og regulerede ved 100 °C.
+
+**Datakvalitet: intet klipper.** Jeg blev i tvivl, fordi SP rapporterer Vpp 10,21 V i et 8 V-vindue og
+AE 5,58 V i et 5 V-vindue. Men brøkdelen på skinnerne er **UL 0,0021 %, AE 0,0006 %, SP 0,0028 %** —
+52, 16 og 71 samples af 2,5 millioner, altså isolerede spidser. Forklaringen er, at scopet
+digitaliserer uden for det viste vindue: SP når −0,606 til 9,606 V i et nominelt 0,5-8,5 V vindue.
+**Vinduet er visningen, ikke ADC'ens grænse** — det er værd at have skrevet ned, for Vpp > vindue ser
+ved første øjekast ud som klipning.
+
+Opløsningen er god: ved 2894 rpm bruger AE 222 niveauer, UL 119 og SP 254.
+
+**Arkiveret:** `eceherning/20261002_122423/`, h5 4,39 GB plus telemetri-JSONL, `acquire_scope.log` og
+`heater_guard.log`, alle fire MD5-verificerede. **Lasten er null hele kørslen** — cellen står på
+24-bit skinnen ved de ~142 kg, som ventet.
