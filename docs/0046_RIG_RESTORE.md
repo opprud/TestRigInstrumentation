@@ -98,8 +98,18 @@ Written 2026-10-01 at the end of the 0046 block series.
 
 - Heater/temp control box: **ON** (restored 2026-10-01).
 - Heater relay: left **OFF** by the run's heater guard.
-- External tachometer (the one that produced the 1060.7 kHz line): **OFF**, and it should stay off,
-  or at least be recorded in the run notes when it is on.
+- External tachometer (the one first suspected of the 1060.7 kHz line): **ON, and it stays on — Kim,
+  2026-10-02.** It is how the motor's speed is read at the bench, so it is a permanent part of the
+  setup, not stray gear to be switched off. My earlier "it should stay off" was wrong about how the
+  rig is actually used.
+
+  **It is also not the culprit.** Block 0b put a short across the probe input and the 1060.7 kHz line
+  was still there; swapping the 24 V supply (0 -> 2) did not move it either (0.00331 -> 0.00336 V).
+  The line lives in the **instrument chain** — scope, probe, cable — so it is a fixed feature of every
+  run on this bench at every configuration. **Treat it as a known constant and record the tacho's
+  presence in the run notes; do not chase it.** Splitting scope-internal from probe pickup needs the
+  probe off and a BNC short at the input, which changes the 10x attenuation and so needs its own
+  baseline.
 
 ## What cannot be fixed by restoring anything
 
