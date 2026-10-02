@@ -12,10 +12,16 @@ Written 2026-10-01 at the end of the 0046 block series.
 - [ ] **Re-couple the motor to the rig.** It was decoupled for block 5 so that noise scaling with rpm
       could be attributed to the drive rather than to vibration. A decoupled rig turns no bearing:
       the test would run its whole schedule and record a stationary specimen.
-- [ ] **Move the 24 V sensor supply back from the linear lab supply to the rig's own supply** — or
-      decide deliberately to keep the linear one. Block 2A measured the switch-mode supply's
-      contribution as **null** (inside run-to-run scatter), so there is no noise reason to keep the
-      lab supply, and a bench instrument is not a permanent part of the rig.
+- [x] **Move the 24 V sensor supply back to the rig's own switch-mode supply — DECIDED 2026-10-02
+      (Kim).** Block 0 -> 2 measured the swap at **1.00-1.03x on all three channels**, and the
+      1060.7 kHz line did not move either (0.00331 -> 0.00336 V). The switch-mode supply is not a
+      measurable noise source, so there was no reason to leave a bench instrument permanently in the
+      rig. Put it back.
+
+      Note for anyone re-reading the 1.06 MHz history: the supply was never the suspect that mattered.
+      The external **tachometer** standing near the OE/slip-ring supply was, and that turned out to be
+      instrument-side anyway (it survives a shorted probe tip). Do not re-litigate the 24 V supply on
+      the strength of that line.
 - [ ] **Settle the sinus filter and its ground, and this one needs a decision, not a default.**
       Current state: **filter FITTED, filter-VFD ground REMOVED.** Measured at 500 rpm, decoupled:
 

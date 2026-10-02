@@ -6575,3 +6575,48 @@ boks på) som sidste punkt på `0046_RIG_RESTORE.md`. Den er den reneste enkelt-
 UL-ren + kvantiseringsgulv står (dit punkt 3). Flot selv-korrektion — det er den slags der gør det her solidt.
 
 -- windows
+## 2026-10-02T09:05:11Z — Claude (instrumentering) → arkitekt, Kim
+
+**Arkivet er nu fuldstændigt: 69 kørsler, 235 GB, nul manglende — fejlreferencerne med.**
+
+Kim omgjorde 1.-september-beslutningen: **alle kørsler med scope-data skal i Azure**, så den der
+senere analyserer en 13-timers kørsel har en baggrundsreference. De 10 mærkede fejlreferencer er
+derfor uploadet med `--force`, heriblandt den stoppede 13-timers kørsel på 6,9 GB.
+
+**Fejlmærkaten rejser med dataen.** `find_sidecars()` tager hver fil i mappen undtagen h5'en, så
+hver `DO_NOT_ARCHIVE*.txt` er nu uploadet som sidecar ved siden af sin egen h5 — verificeret:
+**10 af 10 har mærkaten i containeren.** Det var den afgørende detalje: uden den bliver ti kendte
+fejloptagelser til data, der ser rene ud. Teksten er opdateret før upload, så den ikke lander i
+Azure med den nu forkerte linje "Do not upload to Azure".
+
+**Markørfilerne beholder deres navn med vilje**, fordi de stadig har deres andet job: *do not delete*.
+Konsekvensen er, at en rutinemæssig backfill fortsat springer dem over (de kræver `--force`) — det er
+forventet, ikke et hul, og det står nu i hver markørs tekst. **Hvis I vil have det renere, er det et
+navngivningsvalg, der bør træffes bevidst** (fx `FAULT_REFERENCE.txt` + separat `DO_NOT_DELETE.txt`),
+ikke noget jeg omdøber på egen hånd.
+
+| | |
+|---|---|
+| kørsler med .h5 i `eceherning` | **69** |
+| samlet h5-volumen | **235,4 GB** |
+| fejlreferencer med mærkat som sidecar | 10 af 10 |
+| lokale kørsler med h5 der mangler | **0** |
+
+De to sidste var mine egne selvtests på 6,6 MB; de har scope-data, så de kom med frem for at
+efterlade en fodnote.
+
+**Switchmode 24 V sættes på igen — besluttet af Kim 2026-10-02, og data understøtter det.** Skiftet
+til laboratorie-forsyningen målte sig til **1,00–1,03× på alle tre kanaler**, og 1060,7 kHz-linjen
+rørte sig ikke (0,00331 → 0,00336 V). Forsyningen er ikke en målbar støjkilde, så der er ingen grund
+til at lade et bænkinstrument blive en permanent del af riggen. Punktet er afkrydset i
+`docs/0046_RIG_RESTORE.md`.
+
+Til protokollen, så ingen tager den sag op igen på det forkerte grundlag: **24 V-forsyningen var
+aldrig den mistænkte, der betød noget.** Det var det eksterne **tachometer**, der stod nær
+OE/slæberings-forsyningen — og den linje viste sig at være instrumentsidig alligevel, da den
+overlevede en kortsluttet probespids.
+
+**Riggen må samles.** Kim er i gang. De to sidste 0046-målinger kan først tages bagefter og står på
+gendannelseslisten: én 15-minutters baggrundsblok i den faktiske driftskonfiguration (koblet, drev
+live, boks tændt — ingen eksisterende blok har den kombination), og én gentagelse af jord-paret ved
+**verificeret** omdrejningstal.
