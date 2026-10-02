@@ -203,6 +203,13 @@ python3 util_tool.py --port <PORT> calibrate --weight-g 10000    # guided load-c
 python3 util_tool.py --port <PORT> setppr --ppr 1                # tach pulses per revolution
 python3 util_tool.py --port <PORT> --json load                  # machine-readable output
 ```
+> **`test_scope_connection.py` points at the WRONG IP and will tell you the scope is dead when it is
+> not (2026-10-02).** It tries **169.254.196.182** while `config.json → scope_ip` is
+> **169.254.227.43**, and it uses the old PyVISA path rather than the raw socket a run actually uses.
+> It failed with `VI_ERROR_RSRC_NFOUND` seconds before a run connected to the scope on its first
+> attempt and read back `AGILENT TECHNOLOGIES,MSO-X 2024A,MY53510378`. **Test the scope the way a run
+> does** — a raw socket to `scope_ip:5025` with `*IDN?` — not with that tool.
+
 Inspect a captured file:
 ```bash
 python3 plot_waveform.py <file>.h5 --sweep sweep_000 --channels UL,AE,SP --fft --spectrogram
@@ -505,6 +512,13 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   stepped *down* to 10 Hz, the same drive held **584.7 rpm** rock-steady. Static friction, not torque
   at speed, is the limit.
 
+  > **But FRESH OIL removes it — measured the same day.** After Kim put new Keratech 22 in and the
+  > bearing was coupled, the smoke test's 600 rpm step broke away immediately and held **591.4 rpm**
+  > against a 600 rpm target (10.08 Hz on the drive's own display, confirmed by Kim). So the 26 rpm
+  > stall above was measured on a dry or stale-oil bearing. Treat breakaway as a property of
+  > **lubrication state**, not of the clamp load alone — which makes it one more reason the standing
+  > instruction to lubricate before every run matters.
+
   **A profile whose first step is 600 rpm can therefore record a stationary bearing** while the drive
   reports healthy and the staircase tracks every later step — the same silent-failure shape as the
   100 rpm step documented below, but at a speed nobody suspects. Give new profiles a short breakaway
@@ -536,7 +550,19 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   then would have captured one sensor of three while the profile still claimed all three.
   `apply_scope_channels()` now sends `:CHANx:DISP ON` before the range/offset/coupling settings.
 
-- **The heater's maximum rate is ~30 C/h, measured — not the ~5 C/h the 13 h profile suggests.**
+- **⚠️ The ~30 C/h heater figure is a SUSTAINED rate at 40-60 C, not a ceiling — from cold it does
+  614 C/h and overshoots (2026-10-02).** Measured on the smoke test `20261002_115508` with the box
+  just switched on: **PV 24 -> 46 C in 129 s = 614 C/h**, i.e. twenty times the number below, and it
+  **overshot SV 40 by 6 C** before settling back to 42-43. The two figures do not conflict — near
+  ambient the loss to the room is small so almost all heater power raises temperature, while at
+  40-60 C most of it goes to holding against losses.
+
+  **The consequence is overshoot, not speed.** `Keratech22.json` raises SV 5 C/h, so the heater is
+  never near full output there and nothing overshoots. **Any profile with a faster ramp, or any cold
+  start to a setpoint well above ambient, will overshoot by several degrees** — and on a bearing test
+  that transient is recorded as data. Size fast ramps with a soak, or accept the overshoot knowingly.
+
+- **The heater's sustained rate is ~30 C/h at 40-60 C, measured — not the ~5 C/h the 13 h profile suggests.**
   From run `20260825_145918`: the fastest sustained 20-minute window with the heater calling is 30 C/h
   (41 -> 51 C, and again 50 -> 60 C). `Keratech22.json` looks far slower only because its SV rises 5 C per
   hour, so the heater is never the limit there. Size temperature ramps in new profiles from 30 C/h — and
