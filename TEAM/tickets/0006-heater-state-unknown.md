@@ -51,3 +51,15 @@ per the architect it is not being restarted. Its risky path only executes when t
 trigger fires at ~03:08. Rather than restart it, a **second** guard running this fixed
 code was armed alongside it — additive, no gap in coverage, and both simply send the
 same OFF command. Outcome goes on ticket 0005.
+
+## 2026-10-01 — the WRITE ack is unreliable too, not just the status read (0046 block 6)
+Block 6 (`20261001_145326`) toggled the heater relay twice. The Shelly's command acknowledgement was
+unreliable in **both** directions: the first `--off` returned *"Command sent but no confirmation received
+within 5 s"* while the `--on` returned a clean confirmation — and `--status` still reports `???` per
+channel. **Both relay states were only known because Kim physically verified them** (confirmed not-pulled
+during the first OFF, heard the click at ON). So beyond the status-read problem this ticket already
+covers, **`shelly_control.py --off heater` returning cleanly is not proof the heater is off** — and that
+is the exact command the **heater guard (0004 / 0008) relies on** to make the rig safe. The guard can
+believe it has shut the heater off when it has not, with no read-back that would reveal it. A real fix
+needs a **verified** off (measured current, or a confirmed relay state), not a command return code.
+Evidence: `eceherning/20261001_145326/RELAY_LOG.txt`.

@@ -304,6 +304,20 @@ motor, no heat, ~5 min per cell):
    > with **two toggles in one run** (made-and-unmade — the discipline that caught two of today's
    > retractions). Thermally safe: Kim approved energizing the element, and **Omron SV 25 °C < PV 26 °C**,
    > so the controller never calls for heat and the bearing does not warm.
+   > **RESULT 6 (`20261001_145326`, 0 rpm, two toggles, archived + `RELAY_LOG.txt`): the heater-relay
+   > coupling is REAL, ISOLATED and REVERSIBLE in one run.** SP **+29.0 %** (OFF 0.0999 → ON 0.1321 → OFF
+   > 0.1048), concentrated in **50–100 kHz (SP +90.1 %, AE +39.5 %)**; UL +0.8 %. AE's *total* moved only
+   > +1.6 % while its 50–100 kHz band moved +39.5 % — a single RMS would have said "AE: nothing." This is
+   > 0035's second coupling path, now separated from both the drive and the box. **Two toggles
+   > (made-and-unmade) in one run** — Pi's proposed default for any switchable-variable block; the
+   > discipline has caught three wrong conclusions this week. Safety: Omron SV 25 °C < PV 26 °C throughout,
+   > element energized but never called to heat, bearing did not warm; relay ended OFF (confirmed twice +
+   > heater guard).
+   > **⚠ SHELLY ACK IS UNRELIABLE (matters beyond 0046).** Both relay states had to be **human-verified**
+   > (Kim confirmed not-pulled, heard the ON click): the first OFF returned *"Command sent but no
+   > confirmation within 5 s"* while ON confirmed cleanly, and `--status` shows `???` per channel (ticket
+   > 0006). So **`shelly_control.py --off heater` returning cleanly is NOT proof the heater is off — and
+   > that is the command the heater guard relies on.** Flagged to 0006.
 
 > **DATA NOTE (telem-stamp scan, Pi 2026-09-30):** the block 0 (`20260930_093141`) and 2A
 > (`20260930_102402`) h5s carry **no `telem_*` per-sweep stamps** — they predate the `_telemetry_store`
@@ -358,6 +372,15 @@ Look in the spectrum for switch-mode / PWM switching frequencies and their harmo
 > floor**, not to attribute it.
 
 ## Conclusion (2026-10-01)
+**The headline: four sources, four bands, no overlap.** There is no single noise source to chase — four
+sources couple into the sensors by four different paths, so a fix for one does not touch the others:
+
+    source                    signature      channel(s)
+    instrument chain          1060.7 kHz     all three
+    heater/temp control box   126-135 kHz    AE
+    heater relay              50-100 kHz     SP strongly, AE weakly
+    drive output stage        broadband      SP (step with output active, flat with rpm)
+
 Every major question in the ladder is answered, each pinned to one source by one controlled step:
 - **24 V switch-mode PSU:** null (2A) — not the 1.06 MHz line, not a measurable contributor.
 - **Heater/temp box:** real structure on AE near 129/131 kHz — **bidirectionally confirmed** (2B ×0.51
@@ -378,9 +401,13 @@ a measurement problem to optimise away; it is an EMC installation / grounding de
 anyone silently pick the quiet configuration. **Follow-up: a single-point grounding redesign of the
 filter / VFD / sensor system — ticket 0048 (EMC, not characterisation).**
 
-**Remaining ladder items are optional confirmations, not open questions:** 4b (done — box bidirectional),
-2C (the box×drive SP combination control), 6 (heater-relay toggle, two-toggle plan above), and the
-explicit {PSU}×{sinus} 2×2, which 2A and block 5 already answer in substance.
+**Only one measurement remains open:** 2C (the box×drive SP combination control, waiting on Kim to power
+the drive down). 4b (box bidirectional) and 6 (heater relay = SP 50–100 kHz) are done; the explicit
+{PSU}×{sinus} 2×2 is answered in substance by 2A and block 5.
+
+**Rig left abnormal after this series** (motor decoupled, 24 V on a lab supply, filter–VFD ground removed)
+— **restore per `docs/0046_RIG_RESTORE.md` before any bearing run**; several of these would silently
+corrupt a run rather than stop it. That list carries the unresolved **protective-earth question** (0048).
 
 **Interactive spectra report:** `py/tools/0046_spectra.html` (also `eceherning/0046_REPORT/`, artifact
 `18f492b3`) — seven configurations × three channels, 100 Hz–1.25 MHz log-log, 40-sweep averaged
