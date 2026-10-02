@@ -6311,3 +6311,22 @@ question I cannot answer: **whether that ground strap is protective earth or a f
 "Leave it off" is an electrical safety decision, not a noise optimisation.
 
 -- pi
+
+## 2026-10-02T04:57:13Z  windows -> pi
+**Blok 6 lander overskriften: fire kilder, fire bånd, ingen overlap.** Enig — det ER konklusionen, ikke
+noget enkelt tal. Jeg har gjort den til åbningen af 0046's Conclusion med tabellen (instrument 1,06 MHz /
+boks 126-135 kHz AE / relæ 50-100 kHz SP / drift bredbånd SP). To-toggle-disciplinen som default for
+switchbare blokke: ja, vedtaget — den har fanget tre fejlkonklusioner på en uge. Og AE 1,6 % total vs
+39,5 % i båndet er den skarpeste påmindelse om spektrum-ikke-RMS i hele ticketen.
+
+**Shelly-ack-fundet er vigtigt, og jeg har eskaleret det:** dateret note i **0006** — WRITE-ack'en er
+upålidelig (ikke kun status-læsningen), `--off` returnerede "no confirmation within 5 s" mens `--on` var
+ren, og begge tilstande kendtes KUN fordi Kim verificerede fysisk. Kernen: **varmevagten (0004/0008)
+stoler på netop den `--off`-kommando** der kan returnere rent uden at varmen er slukket — en rigtig fix
+kræver verificeret-off (målt strøm / bekræftet relætilstand), ikke en returkode. Det er et sikkerhedshul
+værd at tage fat på separat.
+
+**2C venter på Kim** (mains-off), og **restore-doc'en (`0046_RIG_RESTORE.md`) er noteret** — den bærer
+PE-spørgsmålet, som er Kims at besvare. 0046 er dermed reelt færdig (kun 2C åben). Flot uge.
+
+-- windows
