@@ -6636,3 +6636,88 @@ i RIG_RESTORE.
 dem når de er inde; så er 0046 helt lukket.
 
 -- windows
+## 2026-10-02T10:26:58Z — Claude (instrumentering) → arkitekt, Kim
+
+**Riggen er samlet, smoke testen gik rent, og 13-timers kørslen er i gang: `20261002_122423`,
+startet 12:24, færdig ca. 01:37 i nat.** Profilen er `Keratech22.json` **uændret** — sidst rettet
+30. august (`f0714171`), urørt i dag. Det var smoke-testens egen profil, der blev rettet, se nedenfor.
+
+**Smoke test `20261002_115508`:** 74 af 75 sweeps, **0 sprunget over, 0 scope-reset**, 3 OE-optagelser
+med **0 fejl**, hastighed inden for 1,5 % på alle trin (591 ved 600, 1778-1793 ved 1800, 50 Hz-trinnet
+nået), varmen virker, og heater guarden **bekræftede** slukningen via sin MQTT-reservevej efter at
+API-vejen ikke kunne — netop den vej, der svigtede 26. august. Arkiveret til `eceherning`.
+
+**Fire fund fra opstarten, hvoraf tre modsiger det, CLAUDE.md sagde i morges.**
+
+**1 — Varmens duty cycle flytter sensorerne, og den flytter UL/AE og SP i MODSATTE retninger.** Det
+vigtigste fund i dag, og det var usynligt for hele 0046: ingen af de 23 støjblokke opvarmede olien.
+Målt i to 0 rpm-vinduer af samme kørsel:
+
+| kanal | varme på FULD kraft | varme MODULERER ved SV | |
+|---|---|---|---|
+| UL | 0,06271 | 0,03010 | **0,48×** |
+| AE | 0,02057 | 0,01447 | 0,70× |
+| SP | 0,09086 | 0,14498 | **1,60×** |
+
+UL og AE falder tilbage til **præcis deres 0046-gulv** (UL 0,0301 mod referencens 0,0286-0,0289), så
+forhøjelsen *er* varmen på fuld kraft — akustisk, ikke elektrisk, hvilket er grunden til at de
+elektriske blokke aldrig så den. UL er en akustisk sensor, og kraftig konvektion i opvarmet olie er en
+plausibel mekanisme. **SP går modsat, og relæet forklarer det:** ved fuld kraft står relæet konstant
+sluttet og kobler ikke; tæt på setpunktet klikker det uafbrudt. SP reagerer på **koblingen**, ikke på
+strømmen — samme 50-100 kHz-kobling som blok 6 isolerede.
+
+**Konsekvens for kørslen i gang:** SV stiger 5 °C/t, så varmen modulerer næsten hele vejen. Det er
+**værste tilfælde for SP og bedste for UL og AE.**
+
+Det **underminerer ikke** UL-mod-temperatur-fundet — det trækker imod det. Opvarmningsben kører varmen
+hårdt og *hæver* UL, afkølingsben slukker den; det observerede er, at UL *falder* når olietemperaturen
+stiger, så varmen maskerer den virkelige effekt i stedet for at skabe den. Og skalaen: ~0,033 V
+absolut er over 100 % af 0 rpm-gulvet men kun ~12 % af de 0,28 V en drejende bearing giver.
+
+**2 — Den maksimale varmerate på ~30 °C/t er en VEDVARENDE rate ved 40-60 °C, ikke et loft.** Fra kold
+stand: **PV 24 → 46 °C på 129 s = 614 °C/t**, tyve gange så hurtigt, og den **overskød SV 40 med 6 °C**
+før den faldt til 42-43. Ingen modstrid: tæt på stuetemperatur er tabet til rummet lille, så næsten al
+effekt hæver temperaturen. **Konsekvensen er overshoot, ikke hastighed** — 13-timers profilens 5 °C/t
+rammer det ikke, men enhver hurtigere rampe gør.
+
+**3 — Frisk olie fjerner 10 Hz-løsrivningsproblemet.** Jeg skrev en time tidligere, at motoren ikke kan
+bryde fri ved 10 Hz under de ~142 kg — målt som 26 rpm, tre pulser på ti sekunder. Med ny Keratech 22 i
+og bøjlen koblet brød 600 rpm-trinnet fri med det samme og holdt **591,4 rpm** (10,08 Hz på drevets
+display, bekræftet af Kim). **Løsrivning er en egenskab ved SMØRETILSTANDEN**, ikke ved klemlasten
+alene. Begge målinger står; posten er nuanceret, ikke slettet.
+
+**4 — `frequency_out_hz` rydder ALDRIG op efter et stop.** Med akslen bevisligt i ro (tacho rpm=0,
+pulstælling frosset på 2441550 over 4,05 s) rapporterede drevet stadig `ud=20.00 Hz`. `run_command`
+går korrekt til STOP; det er frekvens-readbacken, der er forældet. **Det maskerer sig som et drev, der
+ikke vil stoppe:** min egen stop-løkke testede på `frequency_out_hz < 0.2`, som aldrig kan opfyldes, så
+den brændte syv forsøg og meldte fejl på en motor, der stoppede på første kommando. Jeg meldte først
+portlåsen som årsag — den var reel, men den var ikke årsagen. **Eneste gyldige prøve er `rpm == 0` OG
+frossen pulstælling**, som checklisten allerede beder om.
+
+**Og en fælde i værktøjskassen:** `test_scope_connection.py` peger på **169.254.196.182**, mens
+`config.json` har **169.254.227.43**, og den bruger den udfasede PyVISA-vej. Den meldte
+`VI_ERROR_RSRC_NFOUND` sekunder før en kørsel nåede scopet på første forsøg. Den vil overbevise nogen
+om, at scopet er dødt.
+
+**To rettelser til mine egne tidligere meldinger.**
+
+**Det eksterne tachometer bliver tændt — Kim, i dag.** Det er sådan motorens hastighed læses ved bænken,
+altså en permanent del af opstillingen, ikke løst udstyr der skal slukkes. Min note om, at det "bør
+blive slukket", var forkert om hvordan riggen bruges, og at følge den ville have fjernet operatørens
+eget hastighedsinstrument. **Det er heller ikke synderen:** blok 0b kortsluttede probeindgangen og
+1060,7 kHz-linjen var der stadig, og 24 V-skiftet rørte den ikke (0,00331 → 0,00336 V). Linjen bor i
+**instrumentkæden**, så den er en konstant ved hver kørsel her. Registrér tachoets tilstedeværelse i
+kørselsnoterne, og lad linjen være.
+
+**Smoke-testens SP-område var efterladt på en forældet værdi.** Den havde `6.0/5.0` mens
+13-timers profilen har `8.0/4.5`. Et 6 V-vindue om 5,0 dækker 2,0-8,0 V, og SP måler 6,55 Vpp ved
+3000 rpm om en 4,99 V middelværdi, altså ~1,7-8,3 V — klipning i begge ender på topfarten. Rettet i
+**smoke-testprofilen alene**; 13-timers profilen er urørt.
+
+**Status for kørslen i gang:** 0 sprunget over, 0 reset, PV 40 mod SV 40 (restvarme fra smoke testen
+gav forspring), OE-link holdt åbent. **Lasten måles ikke:** cellen står på den hårde 24-bit skinne
+(`raw=8388607`), så `mass_g` er null hele kørslen — ventet ved de ~142 kg, men filen får intet
+last-datum. Jeg melder hver time og arkiverer til `eceherning` bagefter.
+
+**Arkivet er i øvrigt lukket:** 69 kørsler med .h5, 235,4 GB, nul utilsigtet manglende, og de 10
+fejlreferencer ligger nu deroppe med deres fejlmærkat som sidecar efter Kims beslutning.
