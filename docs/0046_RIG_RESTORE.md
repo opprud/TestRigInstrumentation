@@ -19,11 +19,25 @@ Written 2026-10-01 at the end of the 0046 block series.
 - [ ] **Settle the sinus filter and its ground, and this one needs a decision, not a default.**
       Current state: **filter FITTED, filter-VFD ground REMOVED.** Measured at 500 rpm, decoupled:
 
-      | configuration | AE | vs AE's 0.0140 floor |
-      |---|---|---|
-      | no filter | 0.0140 | at the floor |
-      | filter, no ground | 0.024-0.027 | +71 to +91 % |
-      | filter + ground | 0.0544 | +288 % |
+      | configuration | drive | AE | vs AE's 0.0140 floor |
+      |---|---|---|---|
+      | filter, no ground (5a) | **at rest** | 0.01428 | at the floor |
+      | filter + ground (5h) | **at rest** | 0.01412 | at the floor |
+      | no filter (5f) | live | 0.01402 | at the floor |
+      | filter, no ground (5b) | live | 0.02398 | +71 % |
+      | filter + ground (5i) | live | **0.05440** | **+288 %** |
+      | filter, no ground again (5k) | live | 0.02668 | +91 % |
+
+      **Read the two halves together: the ground costs nothing at rest and a factor two when the
+      drive's output stage is switching**, and 5b → 5i → 5k is reversible (up with the strap, back
+      down without it). Two caveats, both recorded 2026-10-02 against the full 23-block dataset in
+      `docs/0046_noise_floor.csv`:
+      - **Kim read 0.00 on the drive display during 5i**, so that block may not share its neighbours'
+        motor state. This pulls conservative rather than the other way: a motor running *less* in 5i
+        cannot explain twice the noise. The reading stands, but it deserves one repeat at a
+        **verified** rpm before a grounding scheme is designed on it.
+      - **The filter alone does nothing at rest** (5e → 5a, 1.02x). It shapes what the drive emits;
+        it is not itself a source.
 
       **The strap is a FUNCTIONAL ground, not protective earth (Kim, 2026-10-02).** That settles the
       safety question: leaving it off is a legitimate engineering choice rather than a hazard. One

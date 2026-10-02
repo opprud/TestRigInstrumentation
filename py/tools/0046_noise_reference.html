@@ -222,12 +222,26 @@ a{color:var(--accent)}
 <section>
   <div class="sechead"><span class="secnum">06</span><div>
     <h2>Hvad tallene ikke viser</h2></div></div>
-  <div class="callout c">
-    <p><b>Jordsløjfe-konklusionen trækkes tilbage.</b> Jeg meldte tidligere, at det gjorde støjen værre at
-    sætte filter–VFD-jorden på igen. Det hvilede på 5i mod 5k ved 500 rpm — og 5i er netop den blok,
-    hvor Kim læste <b>0.00 på displayet: motoren kørte ikke.</b> De to blokke havde altså ikke samme
-    drevtilstand, og sammenligningen var ugyldig. Målt rent ved bøjlen i ro (5a → 5h) er virkningen
-    0,95–0,99×, altså ingen. <b>Jordforbindelsens virkning på sensorstøj er uafklaret</b>, ikke negativ.</p>
+  <div class="callout w">
+    <p><b>Jordsløjfen: virkningen findes kun når drevet kobler — og den er reversibel.</b>
+    Ved bøjlen i ro er der <b>ingen</b> virkning (5a jord af 0,01428 V → 5h jord på 0,01412 V, altså
+    0,99×). Med drevets udgang live skifter billedet:</p>
+    <div class="scroll" style="margin:12px 0"><table>
+      <thead><tr><th>blok</th><th>filter–VFD-jord</th><th class="n">AE rms</th><th class="n">× gulv</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">5b</td><td>af</td><td class="n">0,02398</td><td class="n">1,68×</td></tr>
+        <tr><td class="mono">5i</td><td><b>på</b></td><td class="n"><b>0,05440</b></td><td class="n"><b>3,82×</b></td></tr>
+        <tr><td class="mono">5k</td><td>af igen</td><td class="n">0,02668</td><td class="n">1,87×</td></tr>
+      </tbody></table></div>
+    <p>Jorden på fordobler AE; jorden af igen bringer den tilbage. <b>Forbeholdet er, at Kim læste 0.00
+    på drevets display under 5i</b>, så den blok har muligvis ikke haft samme motortilstand som sine
+    naboer. Det trækker dog i konservativ retning: havde motoren kørt <i>mindre</i> i 5i, kan det ikke
+    forklare dobbelt så meget støj. <b>Læsningen står derfor: jorden koster en faktor to på AE når
+    drevet kobler, og ingenting når riggen står stille</b> — men den fortjener én gentagelse med
+    verificeret omdrejningstal, før den bruges til at designe et jordingsskema.</p>
+    <p>En tidligere udgave af denne side trak konklusionen helt tilbage på grund af 5i-tvivlen. Det var
+    for hårdt: reversibiliteten over tre blokke og nul-virkningen i ro hænger sammen som én
+    mekanisme.</p>
   </div>
   <div class="callout w">
     <p><b>Koblingen er en jordvej for SP.</b> Med alt andet slukket hæver det at koble motoren fra SP med
