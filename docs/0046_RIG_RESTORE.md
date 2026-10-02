@@ -60,6 +60,28 @@ Written 2026-10-01 at the end of the 0046 block series.
       decoupled the tach reads 0 with a frozen counter, so it has been unusable throughout 0046 and
       its health has not been checked since.
 
+## The last 0046 measurement — and it can only be taken AFTER this list is done
+
+- [ ] **One 15-minute background block at 0 rpm in the true operating configuration:** motor
+      **coupled**, drive **live**, heater/temp box **ON**, heater relay as a run leaves it, sinus
+      filter as restored, nothing else powered in the room, and the room's state written down
+      positively in the run notes.
+
+      **No existing block has that combination.** Blocks 0 and 2 are coupled with the box on but the
+      drive dead; 3a and 3b are coupled with the drive live but the box off; everything from 4b
+      onward is decoupled. The box's effect is drive-independent (1.64x vs 1.59x on AE), so the
+      operating background can be *composed* from the parts — but one measured block in the exact
+      configuration a 13 h run uses is a far better reference than a composition, and it costs
+      15 minutes.
+
+      Archive it to `eceherning` like every other block and add it to
+      `docs/0046_noise_floor.csv`. That closes ticket 0046.
+
+- [ ] **Repeat the filter-VFD ground pair at a VERIFIED rpm** (ground off, then on, then off again,
+      reading the drive display at each step and recording it). The 2x effect on AE is reversible and
+      almost certainly real, but the block that carries it — 5i — is the one where the display read
+      0.00. Nobody should design a single-point grounding scheme on a number with that asterisk on it.
+
 ## Already back to normal
 
 - Heater/temp control box: **ON** (restored 2026-10-01).
