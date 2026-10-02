@@ -478,6 +478,26 @@ contaminated comparisons:
 The band **attributions** (1.06 MHz instrument-side, box→AE 126–135 kHz, relay→SP 50–100 kHz, drive→SP
 broadband) stand; their **magnitudes** should be read from the reference, not from the scalars above.
 
+### Heat duty-cycle moves the sensors — a 13 h-run finding 0046 could not see (2026-10-02)
+None of the 23 noise blocks heated the oil, so this was invisible to the whole ladder. Measured in two
+0 rpm windows of run `20261002_122423`, **heat at full power vs heat modulating at setpoint moves UL/AE and
+SP in OPPOSITE directions:**
+
+    channel   heat FULL   heat MODULATING   ratio
+    UL        0.06271     0.03010           0.48x   <- acoustic: full-power convection in heated oil
+    AE        0.02057     0.01447           0.70x
+    SP        0.09086     0.14498           1.60x   <- relay switching near setpoint (the block-6 path)
+
+UL/AE fall back to **exactly their 0046 floor** when the heat modulates, so the rise is the heat at full
+power — **acoustic, not electrical** (UL is an acoustic sensor; strong convection is the plausible
+mechanism), which is why the electrical blocks never saw it. **SP is the opposite:** at full power the
+relay stays closed (no switching); near setpoint it clicks constantly, and SP responds to the **switching**
+(the same 50–100 kHz relay coupling block 6 isolated), not the current. A heated run's SV rises ~5 °C/h so
+the heat modulates almost throughout — **worst case for SP, best for UL/AE.** This does **not** undermine
+the UL-vs-temperature finding — heat *raises* UL, so it **masks** the real (falling) effect rather than
+creating it; and at ~0.033 V it is >100 % of the 0 rpm floor but only ~12 % of the 0.28 V a rotating
+bearing gives.
+
 ## Owner / test
 - **Kim / hardware:** swap PSU (switch-mode ↔ linear 24 VDC), sinus filter in/out (**a quick wire-move**, confirmed Kim 2026-09-30 — so the {PSU}×{sinus} 2×2 is two fast swaps), decouple the motor,
   run manual mode. Record which configuration each block is.

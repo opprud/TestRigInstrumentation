@@ -63,3 +63,10 @@ is the exact command the **heater guard (0004 / 0008) relies on** to make the ri
 believe it has shut the heater off when it has not, with no read-back that would reveal it. A real fix
 needs a **verified** off (measured current, or a confirmed relay state), not a command return code.
 Evidence: `eceherning/20261001_145326/RELAY_LOG.txt`.
+
+## 2026-10-02 — the MQTT backup path IS a working verified-off (smoke test)
+During the 2026-10-02 smoke test the heater guard's **API off-path could not confirm** the shutoff (the
+same failure seen 2026-08-26), but its **MQTT backup path confirmed the relay actually opened.** So the
+guard does have a redundant, confirming off-channel — which is the real answer to the WRITE-ack problem
+above: do not trust the API return code alone; the MQTT confirmation (or a measured current / frozen state)
+is what proves OFF. Worth hardening into the guard's normal path, not just the fallback.

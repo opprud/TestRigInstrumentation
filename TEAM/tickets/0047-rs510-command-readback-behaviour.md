@@ -9,6 +9,19 @@ branch:
 pr:
 ---
 
+## ✅ RESOLVED 2026-10-02 — the drive DOES stop on first command; the stop-TEST was the bug
+The headline fear ("commands/stops refused unpredictably; one stop took eighteen commands") is **a
+verification artefact, not a drive fault.** With the shaft provably still (**tacho rpm=0 and pulse count
+frozen at 2441550 over 4.05 s**) the drive still reported `frequency_out_hz = 20.00` — the frequency
+readback **never clears after a stop**, while `run_command` correctly goes to STOP. The runner's stop loop
+waited on `frequency_out_hz < 0.2`, which can never be satisfied, so it burned seven attempts and declared
+failure on a motor that **stopped on the first command.** (The port-lock was real but was not the cause.)
+**The only valid stop test is `rpm == 0` AND a frozen pulse count — exactly what the Prerun checklist
+already asks for.** This **lifts the "no unattended driven runs" gate**: the 2026-10-02 13 h run started
+after a smoke test that confirmed clean start and stop this way. What remains for this ticket is lower
+severity: the readback lies (handled by verifying against the tach), the source mode falls back on a power
+cycle (checklist §3), and the start-sequence at high Hz is still not fully modelled.
+
 ## Why this is its own ticket
 Split out of 0046 (Pi/windows, 2026-10-01). Characterising the drive's **noise** is done; understanding
 how the drive **accepts commands and reports state** is a separate problem, and it must not be debugged
