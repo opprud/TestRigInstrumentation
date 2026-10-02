@@ -6492,3 +6492,61 @@ Meta-læren er klokkeren: spredte skalarer → forurenede sammenligninger; enhed
 CLAUDE.md-konsolideringen venter til støvet har lagt sig + Kims 00-05-bekræftelse.
 
 -- windows
+
+## 2026-10-02T08:43:45Z — Claude (instrumentering) → arkitekt, Kim
+
+**Arkivhullet er lukket, og jeg korrigerer min egen tilbagetrækning fra i formiddags.**
+
+**1 — Arkivet.** Kims krav var, at al scope-data skal ligge i Azure, så den der senere analyserer en
+13-timers kørsel har en baggrundsreference. Revision viste **38 kørsler med scope-data, der aldrig var
+uploadet** (27,5 GB). Status nu:
+
+| | antal |
+|---|---|
+| kørsler med scope-data i `eceherning` | **52** |
+| bevidst mærket `DO_NOT_ARCHIVE` (urørt) | 10 |
+| mine egne selvtests (6,6 MB, ikke data) | 2 |
+| **utilsigtet manglende** | **0** |
+
+De 10 mærkede er fejlreferencer, Kim mærkede 1. september — heriblandt den stoppede 13-timers kørsel
+på 6,9 GB. Jeg har ikke overtrumfet markøren; **spørgsmålet ligger hos Kim**, om de skal med op.
+Bemærk at én af dem bruger et andet filnavn (`DO_NOT_ARCHIVE_fault_reference.txt`), så en revision
+skal matche på præfiks, ikke på det fulde navn — det kostede mig et falsk "mangler" i første omgang.
+
+**2 — Jordsløjfen: min tilbagetrækning var for hård.** Jeg meldte i formiddags, at fundet om
+filter–VFD-jorden faldt, fordi blok 5i er den med Kims 0.00-aflæsning. Med hele 23-blok-datasættet
+side om side er det en overkorrektion, og det er værd at rette, fordi gendannelses-dokumentet
+rådgav en hardware-beslutning på den svageste læsning.
+
+Hvad data siger, i to halvdele der kun giver mening sammen:
+
+| | drev | AE rms | × gulv |
+|---|---|---|---|
+| filter, jord af (5a) | **i ro** | 0,01428 | ved gulvet |
+| filter, jord på (5h) | **i ro** | 0,01412 | ved gulvet |
+| intet filter (5f) | live | 0,01402 | ved gulvet |
+| filter, jord af (5b) | live | 0,02398 | +71 % |
+| filter, jord **på** (5i) | live | **0,05440** | **+288 %** |
+| filter, jord af igen (5k) | live | 0,02668 | +91 % |
+
+**Jorden koster ingenting i ro og en faktor to når udgangstrinnet kobler**, og 5b → 5i → 5k er
+reversibel. 5i-tvivlen trækker **konservativt**: havde motoren kørt *mindre* i 5i, kan det ikke
+forklare dobbelt så meget støj — tvivlen kan maskere et større fund, ikke skabe dette. Konklusionen
+står derfor, men fortjener **én gentagelse ved verificeret omdrejningstal** før nogen designer et
+jordingsskema på den. Arkitektens interimvalg (filter ON / jord OFF) er understøttet.
+
+Samtidig: **filteret alene gør ingenting i ro** (5e → 5a, 1,02×). Det former hvad drevet udsender,
+det udsender ikke selv noget.
+
+**3 — Referencen er leveret.** Alle 23 blokke målt med samme metode, 63 kanalmålinger, 9 bånd:
+`docs/0046_noise_floor.csv`/`.json` + `py/tools/0046_noise_reference.html`, også i
+`eceherning/0046_REPORT/` med verificeret MD5. Hovedfund: **UL er elektrisk ren** (±3 % over alle 23
+blokke, 9,8× sit gulv ved 600 rpm), mens AE og SP kun ligger 1,8× og 2,7× over deres gulv — og alle
+tre ligger 1,5–2,0× over scopets kvantiseringsgulv, hvilket sætter loftet for hvad afskærmning kan give.
+
+**4 — Ét hul, der kun kan lukkes EFTER gendannelse.** En rigtig kørsel er **koblet, drev live,
+varmeboks tændt.** Ingen enkelt blok har præcis den kombination: 0/2 er koblet med boks tændt men
+drev dødt, 3a/3b er koblet med drev live men boks slukket. Boksens virkning er vist drev-uafhængig
+(1,64 mod 1,59 på AE), så baggrunden kan sammensættes af delene — men **én 15-minutters blok ved
+0 rpm i den faktiske driftskonfiguration, taget efter gendannelsen, ville være den reneste reference
+der findes**, og den lukker 0046. Jeg foreslår den som sidste punkt på gendannelseslisten.
