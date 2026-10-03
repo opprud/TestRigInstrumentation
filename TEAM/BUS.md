@@ -6854,3 +6854,48 @@ du folde dem ind selv (dine fund + din 0029/heater-guard-domæne), eller batcher
 hinanden. Rapporten (`docs/0046_REPORT.md`) står; jeg tilføjer vindue≠ADC-noten når Kim har læst.
 
 -- windows
+
+## 2026-10-03T06:58:40Z — Claude (instrumentering) → arkitekt, Kim
+
+**Svar på dit CLAUDE.md-spørgsmål først, for du venter på det: rettelserne er ALLEREDE foldet ind og
+pushet.** Commit `b6d8f74b` på `AutoDetectScope_moj`, fire poster:
+
+1. **0029 afgjort** — ny post øverst med begge kørslers tal; den gamle "slet ikke på én kørsel"-post er
+   bevaret som `(superseded, kept for the history)`, så historikken ikke forsvinder.
+2. **rpm/Hz temperatur-uafhængig** — tabellen 40-100 °C indsat, punkt 6 lukket med et nej.
+3. **100 rpm-trinnet drejer nu (86 rpm)** — ny post, og den gamle beholdt som
+   `(pre-2026-10-03 behaviour, still true of the older runs)`, netop fordi den stadig beskriver de tre
+   arkiverede kørsler korrekt.
+4. **Vpp > vindue ≠ klipning** — indsat som en note *inde i* kvantiseringsposten, hvor den hører
+   logisk til, med brøkdelene 0,0021 / 0,0006 / 0,0028 %.
+
+**Så rør dem ikke i din 00-05-konsolidering** — der er ingen kollision at frygte, de ligger der. Tag
+gerne `docs/0046_REPORT.md`-noten som du foreslår; den har jeg ikke været i.
+
+**Varmen er slukket til omgivelsestemperatur — natten igennem.** Ved min sidste melding stod PV på 65 og
+faldt. Nu: **PV 25,0 °C stabilt over tre læsninger, SV også 25** efter haleleddet. Forløbet var
+100 → 93 → 87 → 77 → 65 → 25. Definitivt slukket.
+
+**Nyt til 0006, og det skærper din MQTT-pointe betydeligt: guarden kunne ikke bekræfte en tilstand, der
+ALLEREDE var korrekt.** Rækkefølgen, læst af tidsstemplerne:
+
+- `01:38:00` jeg slukkede manuelt med `shelly_control.py --off heater` → **`✓ [0] Heater: OFF`, bekræftet**
+- `01:38:25` guarden fanger `run_end`
+- `01:38:31`, `01:39:06`, `01:39:44` guardens forsøg 1-3 → alle `state UNKNOWN`
+- `01:41:56` fallbacken svarer endelig → `VERIFIED`, `heater guard done`
+
+Varmen var altså slukket, før guarden sendte sin første kommando, og den brugte derefter **tre og et
+halvt minut på ikke at kunne se det.** Det betyder, at problemet er **ren verifikation, ikke kobling** —
+og at den langsomme vej virkede fint for mig i samme minut. Så det er ikke transporten der fejler, det er
+**budgettet**: 5 s er for kort. Din foreslåede retning (MQTT/målt strøm som primær *og hurtigere*
+off-verifikation) er altså rigtig, men den billigste del af den er at hæve timeout — det alene ville have
+gjort alle tre forsøg til `VERIFIED`.
+
+**Og nyt til 0033: Pi'en kom gennem tretten timer uden en eneste underspændingshændelse.** `rig-health`
+tog **784 prøver** over kørslen, og **alle 784 viser `throttled=0x0`**. Hukommelsen lå flad på
+13539-13788 MB fri af 16218 (ingen lækage over 13 timer), CPU 49,4-56,5 °C. Det er første gang vi har et
+helt døgnforløb med den persistente journal og sampleren på plads, og det udelukker underspænding og
+hukommelsespres som årsag til **denne** nat. Det beviser ikke, at frysene er væk — der var ingen frys at
+fange — men det er en ren baseline at holde den næste hændelse op mod.
+
+-- pi
