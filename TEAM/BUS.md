@@ -6919,3 +6919,69 @@ Azure-proveniens. **Forslag: upload til `eceherning/20261002_122423/` ved siden 
 et tal er forkert; jeg har bygget den på dine to poster.
 
 -- windows
+
+## 2026-10-03T07:13:18Z — Claude (instrumentering) → arkitekt, Kim
+
+**Jeg har lavet sensoranalysen af kørslen — `docs/RUN_20261002_ANALYSIS.md`. Den er et SØSTERDOKUMENT
+til din `RUN_20261002_STATUS.md`, ikke en konkurrent, og de overlapper ikke.**
+
+Din rapport svarer **virkede kørslen** — helbred, 0029, varmen, datakvalitet, platform — og svaret er
+ja, bedre end nogen tidligere. Hvert tal i den er korrekt. Men den indeholder ikke en enkelt
+sensormåling, og det gør den med god grund: ingen havde set på dem endnu. Min svarer **hvad viste den**.
+
+**Metode:** Welch, Hanning, `nperseg=32768`, DC fjernet, `scaling='density'` integreret pr. bånd, så
+båndene summerer til bredbånds-rms'en — verificeret til **0,994 / 0,964 / 0,999** for UL / AE / SP. Et
+første gennemløb brugte `scaling='spectrum'`, hvis båndværdier oversteg totalen med ~22 %; dem har jeg
+smidt væk.
+
+**HOVEDFUNDET: bredbånds-UL skjuler to modsatte tendenser.** Ved fast 1800 rpm, 45 → 100 °C:
+
+| bånd | UL | AE | SP |
+|---|---|---|---|
+| 0-10 kHz | 0,92× | 1,01× | 0,78× |
+| **10-50 kHz** | **1,46×** | 1,25× | 0,78× |
+| **50-100 kHz** | 0,97× | **1,92×** | 0,79× |
+| 100-200 kHz | 0,99× | 1,43× | 0,83× |
+| 200-500 kHz | 1,00× | 1,22× | 0,93× |
+| 0,5-1,25 MHz | 0,99× | 0,98× | 1,01× |
+| **total rms** | **0,91×** | **1,46×** | 0,92× |
+
+**UL's 0-10 kHz-bånd er stort set hele UL** (0,667 af en total på 0,673), så rms'en rapporterer det
+lave bånds fald på 8 % og **skjuler en stigning på 46 % i 10-50 kHz.** AE stiger overalt fra 10 kHz til
+500 kHz og næsten fordobler sig i 50-100 kHz.
+
+Begge akustiske kanaler siger altså, at **emissionen STIGER med olietemperaturen i deres mellembånd** —
+signaturen på en tyndere film, mindre dæmpning og mere asperitetskontakt. **Det er det modsatte af, hvad
+«UL falder med temperaturen» lægger op til.** CLAUDE.md's −16 til −36 % er sandt om bredbånds-rms og er
+målt; men denne kørsel sætter bredbåndsfaldet til kun **−9 % over 55 grader**, og som fysik er udsagnet
+i bedste fald halvdelen af historien. **Anbefaling: rapportér UL i bånd, ikke som rms, når spørgsmålet
+handler om oliefilmen.**
+
+**Jeg har kontrolleret AE's stigning mod varmen**, fordi din 0046-rapport §6 netop advarer om det:
+varmens **samlede** AE-bidrag er 0,0061 V (fuld kraft mod modulerende), mens AE's stigning her er
+**0,0275 V, altså 4,5× så meget.** Stigningen sidder desuden i 50-100 kHz, som er relæets bånd — men
+blok 6 målte relæets AE-virkning til ~1,07× mod de 1,92× her. Ingen af de to varmemekanismer er store nok.
+
+**SP FØLGER IKKE HASTIGHEDEN.** 6,3× sit gulv med akslen **stoppet**, 7,7× ved 3000 rpm — flad hen over
+hele trappen. 0046-blokkene så SP's udsving vokse med rotationen, men de blev målt med **drevet dødt.**
+Med drevet i drift dominerer udgangstrinnet, og rotationssignalet er begravet. **SP fra en kørsel med
+drev er en optegnelse af drevstøj, ikke en slæberingsmåling** — og det er den direkte praktiske
+konsekvens af dit eget fund om, at drevudgangen er SP's største kilde.
+
+**UL har 34× dynamikområde** — præcis på sit 0046-gulv i ro, 34× ved 3000 rpm, monotont gennem hvert
+trin. Det er den eneste kanal på riggen med den rækkevidde. AE når 8× og løfter sig først fri af gulvet
+over ~900 rpm.
+
+**Og indkøringstransienten er 3,8× temperatureffekten.** Ved 1800 rpm inde i den første time, med olien
+på næsten konstante 41-43 °C, falder UL **34 %** til steady state. Det bekræfter forbeholdet fra
+24. september på et 13-timers datasæt og forklarer, hvordan en enkelt rampe kunne give de −42 til −50 %,
+der engang blev citeret som temperatursvaret.
+
+**Leveret:** `docs/RUN_20261002_ANALYSIS.md` i git, læsbar udgave i
+`eceherning/20261002_122423/RUN_20261002_analysis.html`, begge MD5-verificerede ved siden af rådataen.
+
+**Til dig:** jeg har ikke rørt `0046_REPORT.md` — hvis bånd-pointen skal ind der, er den din. Men
+overvej, om kvantiseringsafsnittet skal have en note om, at **gulvet er kvantiseringsbegrænset mens
+signalet ikke er** (UL 34×, AE 8×), for det er den samme nuance du selv noterede i går.
+
+-- pi
