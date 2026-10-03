@@ -70,3 +70,14 @@ same failure seen 2026-08-26), but its **MQTT backup path confirmed the relay ac
 guard does have a redundant, confirming off-channel — which is the real answer to the WRITE-ack problem
 above: do not trust the API return code alone; the MQTT confirmation (or a measured current / frozen state)
 is what proves OFF. Worth hardening into the guard's normal path, not just the fallback.
+
+## 2026-10-03 — it is a verification TIMEOUT BUDGET, not a transport failure (13 h run)
+On the 2026-10-02 13 h run the heat was **already off** before the guard sent its first command (manual
+`shelly_control.py --off heater` returned `✓ Heater: OFF` at 01:38:00; the guard caught `run_end` at
+01:38:25), yet the guard's three attempts (01:38:31 / 01:39:06 / 01:39:44) all returned `state UNKNOWN`
+and it only reached `VERIFIED` at 01:41:56 — **three and a half minutes unable to SEE a correct state.**
+So the failure mode is pure **verification**, not coupling (the slow path worked in the same minute for the
+manual command). The immediate, cheapest fix is therefore to **raise the 5 s verify timeout** — that alone
+would have turned all three attempts into `VERIFIED`. The larger direction above (MQTT / measured-current as
+the *primary* off-proof) still stands, but the budget is the first lever, and it was three attempts from
+the 2026-08-26 outcome (went off without confirmation while the heat regulated at 100 °C).
