@@ -52,10 +52,12 @@ Two findings outrank the individual numbers:
    **0.0285–0.0304 V rms (±3 %)** regardless of box, drive, sinus filter or relay. At 600 rpm UL reaches
    0.284 V, **9.8× its own floor**; AE and SP sit only 1.8× and 2.7× over theirs, so for them the
    background is a real part of the signal while for UL it is negligible.
-2. **The floor is near the instrument's quantization limit.** All three channels sit only **1.5–2.0× over
-   the scope's quantization floor** (effectively 8-bit, step = range/199). Much of the "broadband" noise in
-   AE and SP *is* the digitisation — so electrical cleanup has a hard ceiling, and the highest-value lever
-   for a quieter floor is **more ADC bits or a smaller voltage range, not more shielding.**
+2. **The floor is near the instrument's quantization limit — but the *signal* is not.** All three channels
+   sit only **1.5–2.0× over the scope's quantization floor** (effectively 8-bit, step = range/199), so much
+   of the "broadband" noise in AE and SP at the quiet floor *is* the digitisation — electrical cleanup has
+   a hard ceiling there, and the lever is **more ADC bits or a smaller voltage range, not more shielding.**
+   On a *driven* run the picture inverts: UL reaches **34×** its floor and AE **8×** (companion
+   `RUN_20261002_ANALYSIS.md`), so the quantization ceiling only binds the floor, not the measurement.
 
 ## 4. Source-by-source
 - **24 V switch-mode PSU — not a culprit (null).** Swapping to a linear lab supply moved every channel
@@ -122,7 +124,12 @@ mechanism) — which is why the electrical blocks never saw it. **SP is the oppo
 relay stays closed, near setpoint it clicks continuously, and SP responds to the *switching* (the block-6
 50–100 kHz path), not the current. A profile whose setpoint ramps ~5 °C/h modulates almost throughout —
 worst case for SP, best for UL/AE. This does **not** undermine the UL-vs-temperature finding; heat *raises*
-UL, so it masks the real (falling) effect rather than creating it.
+UL, so it masks the real temperature effect rather than creating it — and that temperature effect is itself
+**band-dependent**, not a simple fall: at a fixed 1800 rpm over 45→100 °C, broadband UL rms falls only
+~9 % (dominated by its 0–10 kHz band, which is ~99 % of UL), while **UL's 10–50 kHz band rises +46 % and
+AE's 50–100 kHz nearly doubles (1.92×)** — the signature of a thinning film (less damping, more asperity
+contact). So **report UL in bands, not rms, when the question is the oil film.** Full treatment, and the
+check that this rise is 4.5× too large to be the heater, is in the companion `RUN_20261002_ANALYSIS.md`.
 
 ## 7. Open threads
 - **Grounding magnitude (0048)** — one clean *running* ground-on/off pair at a **verified** rpm.
