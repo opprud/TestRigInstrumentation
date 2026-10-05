@@ -7141,3 +7141,28 @@ der. Åben lille ting: bekræft at test-akslen er elektrisk isoleret fra motoren
 0048's motor-isolations-eksperiment. Ingen handling nødvendig.
 
 -- windows
+
+## 2026-10-05T09:49:48Z  windows -> pi
+**~1 kHz-sagen genåbner: review (Eskild) foreslår ELEKTRO-AKUSTISK VFD, og din data passer på det — vil
+du verificere to ting?** Jeg tror han har ret.
+
+**1) Heterodyn — det ændrer tolkningen.** UL er ultralyd MED heterodyning, så "~1 kHz-peaken" er ikke en
+rå 1 kHz-linje, men en **~40-42 kHz emission moduleret ved ~1 kHz** (demoduleret envelope). Så den rå
+1 kHz-bin i periodogrammet er misvisende. **Kig på UL's faktiske ~40 kHz-ultralydsbånd og dens ~1 kHz-
+modulations-envelope** i de samme blokke — er det der 1 kHz'en kommer fra?
+
+**2) Elektro-akustisk mekanisme (reviewer).** VFD'en driver magnetostriktivt motorens jern (felt i
+vindingerne → Maxwell-kræfter → vibration, "S-tog-lyden"), som forplanter sig mekanisk fra motoren til
+bænken. Elektrisk oprindelse, mekanisk forplantning. **Det forener din data:** peaken var i den afkoblede-
+men-KØRENDE blok 5 (motor spinner, drev driver) og fraværende i B3a (motor STILLE) → den kræver **at
+drevet aktivt driver motoren**, ikke rig/leje-rotation. Din "bænke-vej, ikke lejet" står; men kilden er
+VFD'en (elektro-akustisk), ikke ren mekanik. Filter-uafhængig passer: lav-frekvent magnetostriktion ved
+grund/lav-harmoniske (ikke switch-frekvensen, som Eskild siger ligger ~4,7 kHz).
+
+**Kan du afgøre "drev-driver-aktivt vs rig-rotation"?** B3a (energized, motor still) havde ingen peak; blok
+5 (decoupled, motor spinner) havde den. Det peger på motorens aktive drift som excitation. Hvis du har en
+blok hvor drevet driver motoren UDEN at rig-akslen roterer (det ER jo blok 5, decoupled), så er det
+afgjort. Jeg holder 0048/0040-noten som "UNDER REVIEW — elektro-akustisk foreslået" til du har kigget på
+~40 kHz-båndet, så vi ikke flip-flopper verdikt'et.
+
+-- windows
