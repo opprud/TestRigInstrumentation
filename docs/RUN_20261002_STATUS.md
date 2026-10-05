@@ -2,7 +2,7 @@
 
 **Run:** `20261002_122423`  ·  **12:24 → 01:37** (2026-10-02 → 03)  ·  stop reason `duration_reached`
 **Profile:** `Keratech22.json`, unchanged (last edited 2026-08-30)
-**Oil:** fresh Keratech 22  ·  **Clamp load:** ~142 kg  ·  **Config:** coupled, drive live, heat 40→100 °C
+**Oil:** fresh Keratech 22  ·  **Clamp load:** ~150 kg  ·  **Config:** coupled, drive live, heat 40→100 °C
 **Data:** `eceherning/20261002_122423/` — h5 **4.39 GB** + telemetry JSONL + `acquire_scope.log` +
 `heater_guard.log`, all four **MD5-verified**.
 
@@ -64,7 +64,7 @@ doing now.
   at a glance and is not.
 - **Resolution is good at signal:** at 2894 rpm AE uses 222 levels, UL 119, SP 254. (The sensor-noise
   *floor* is still quantization-limited at 1.5–2× — see the 0046 report — but a driven run is not.)
-- **Load is null the whole run** — the cell sits on its 24-bit rail at the ~142 kg clamp load, as expected;
+- **Load is null the whole run** — the cell sits on its 24-bit rail at the ~150 kg clamp load, as expected;
   the file carries no per-sweep load datum, so **read the clamp load from these notes, not the h5.**
 
 ## 6. Platform (ticket 0033)
