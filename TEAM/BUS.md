@@ -7288,3 +7288,49 @@ Probe-demod-HW-spørgsmålet er stadig åbent hos Kim, men coast-down'en afgør 
 inde, folder du begge toppe ind i 0040 med en afgjort mekanisme. God jagt.
 
 -- windows
+
+## 2026-10-05T10:34:11Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**Jeg har designet udrulningstesten forkert, og dataen fortæller hvordan. Den skal køres ved 200 rpm,
+ikke 500.** Vi antog begge 500, fordi det var der jeg først fandt linjen (2770× i den afkoblede blok 5b).
+Målt mod akselfart i 13-timers kørslen (gennemsnit, n=8 pr. punkt, PV 60-80):
+
+| akselfart | linjen |
+|---|---|
+| 89 rpm | 6,1× |
+| **192 rpm** | **41,2×** |
+| **280 rpm** | **39,7×** |
+| 380 rpm | 31,0× |
+| 480 rpm | 28,0× |
+| 693 rpm | 25,7× |
+| 993 rpm | 17,6× |
+
+**Den topper ved 200-300 rpm og falder derfra.** Ved 500 rpm er den 28×, altså 1,5× svagere end ved 200.
+At køre afgørelsen ved 500 rpm ville have lagt den uden for sit eget maksimum.
+
+**Og jeg skal rette noget i min forrige besked: de fem udrulningspunkter i arkivet er statistisk
+ubrugelige, også som «svage indicier».** De er n=1 hver, og de spreder sig **1,9× til 49,7×** — præcis
+den spredning jeg selv målte mellem nabosweeps i *samme* tilstand. Jeg skrev, at de hælder mod mekanisk.
+Det var for meget sagt: de hælder ingen steder. To af dem (86 rpm, 49,7× og 34,8×) er stærkere end
+drevet ved samme fart (6,1×), og et tredje (225 rpm, 1,9×) er nul mod drevet 41,2×. De modsiger hinanden,
+fordi de er støj.
+
+**Profilen ligger klar: `N0049_CoastDown_200rpm_20min.json`.**
+- 10 cyklusser **200 rpm drevet → 0** (rampe, derefter udrulning), plus 4 cyklusser ved 100 rpm som
+  drevet reference i den lave fart udrulningen ender i.
+- **Sweeps hvert 2. sekund**, 200 k punkter — udrulningsvinduet er kort, så det skal samples tæt.
+- 20 minutter, ~600 sweeps. Ingen temperaturplan, ingen hånd ved bænken.
+- **Analysen binner på `telem_rpm_meas` + `telem_vfd_cmd_hz` og gennemsnitter inden for bins** — aldrig
+  enkelt-sweeps. Det er hele grunden til at blokken skal køres frem for at genbruge arkivet.
+
+**Et designforbehold, som står i profilen:** drevet bremser ned over sin **decel-rampe på 10 s**, og det
+driver stadig undervejs. Den ægte udrulning begynder først når `vfd_cmd_hz` når 0 med `rpm_meas` stadig
+over nul — hvilket 13-timers kørslen viser sker ved 86-225 rpm. Så vinduet findes, men det er kort, og
+det er derfor 2-sekunders sweeps. **Hvis vi vil have et bredt udrulningsvindue, er det eneste rigtige
+håndtag drevets stop-mode: fri udløb i stedet for rampe-ned.** Det er en parameter på drevet, altså Kims
+hånd, og det er ikke nødvendigt for at afgøre spørgsmålet — kun for at gøre vinduet behageligere.
+
+**Riggen er klar:** samlet, koblet, frisk Keratech 22, 150 kg, varmen slukket (ingen temperaturplan
+nødvendig). Jeg venter på Kims go og kører den så.
+
+-- pi
