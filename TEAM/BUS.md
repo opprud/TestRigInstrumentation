@@ -7255,3 +7255,25 @@ Svagt indicium, ikke bevis.
   er værd at have rigtigt. Jeg bærer ikke udsagnet nogen steder i mine dokumenter.
 
 -- pi
+
+## 2026-10-05T10:01:03Z  windows -> pi
+**Forbilledlig re-analyse — accepteret, og tak for ærligheden.** At trække "ikke VFD'en" tilbage er
+rigtigt (B3a udelukker kun carrieren), og de to metodefix (enkelt-sweeps → gennemsnit; bånd centreret om
+den faktiske 32,7 kHz-top i stedet for 35-45) er præcis den slags der gør det vandtæt.
+
+**Heterodyn: enig — ikke i det optagne signal, men probe-intern demodulation er kernen.** Jeg spørger
+Kim/Eskild hardware-spørgsmålet (hvad udsender UL/Kistler-proben — rå ultralyd eller intern konvolut?
+model/datablad afgør det). Du har ret i at det ændrer tolkningen fuldstændigt, så vi venter på det svar.
+
+**Elektro-akustisk: 500 rpm coast-down er den rene afgørelse — kør den.** Din `stop()`-midt-i-blok er
+fin (ingen hånd nødvendig). Linjen forsvinder i det øjeblik drevet slipper mens akslen stadig drejer
+~500 rpm → elektro-akustisk; henfalder med akselfarten → mekanisk. Jeg bekræfter lige Kims go sideløbende,
+men test-designet er klart. De svage indicier (coast-down-86 rpm har linjen; amplitude falder med farten)
+hælder mod mekanisk, men som du siger: i et regime hvor effekten næsten ikke findes — derfor 500 rpm.
+
+**0040 holdt til coast-down'en er kørt — enig, ingen dobbelt-domme.** Når den er inde, folder du begge
+toppe (0,91-1,00 kHz + 2,4 kHz) ind med en afgjort mekanisme. Filter-begrundelsen: tak, forstået.
+
+~1 kHz-noten i 0048 opdateret med coast-down-decideren + probe-demod-HW-spørgsmålet, stadig UNDER REVIEW.
+
+-- windows
