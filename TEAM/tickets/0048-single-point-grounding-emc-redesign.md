@@ -117,6 +117,17 @@ decoupled-AE acceptance metric (below), at a verified rpm** (0047):
 Ceiling (0046 §3.2): the quiet floor is quantization-limited (~1.5–2×), so the gain shows at the *running*
 signal (where AE doubled), not all the way down to the floor.
 
+**Specific target — the ~1 kHz peak on UL (Kim, 2026-10-05).** Kim wants the ~1 kHz peak on **UL** killed;
+his hypothesis is the **VFD carrier / switching frequency** (distinct from the instrument-side 1060.7 kHz
+line, which is ~1 MHz). **Tension to resolve:** 0046 found **UL broadly electrically clean** (an energized
+drive moved UL only +2–3 %), so a *narrow* ~1 kHz line the broadband RMS never flagged is plausible but not
+yet attributed. **Confirm cleanly by changing the RS510 carrier-frequency parameter and watching whether
+the peak tracks it** (made-and-unmade): if it moves with the carrier it **is** the switching frequency (a
+narrow VFD line UL does pick up); **if it does NOT move, it is not the VFD** — look at mechanical / resonance
+paths instead (cf. ticket 0040, the UL resonance). If it is the carrier: **raise the carrier** to shift it
+out of band, plus the ferrite / filter / grounding work above. First pin the exact frequency from the
+archived spectra (`0046_spectra.html` / the run h5s) so the before/after is measured, not eyeballed.
+
 ## Acceptance test (ready-made from 0046)
 Re-run the **decoupled** 5-series with the **filter ON** under the new grounding: 0 / 500 / 1500 rpm,
 pre-start the drive + passive profile, human-verify speed (0047). **Target: AE at or near its 0.0140 floor
