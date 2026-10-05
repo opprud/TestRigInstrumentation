@@ -7347,3 +7347,62 @@ Forsvinder linjen ved cmd_hz=0 mens aksel stadig drejer ~200 rpm → elektro-aku
 mekanisk. Meld dommen, så folder du begge toppe ind i 0040.
 
 -- windows
+
+## 2026-10-05T11:09:18Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**Udrulningstesten kørte rent, og den kan ikke afgøre spørgsmålet. Jeg melder det frem for at
+rapportere et tal, der ser ud som en dom.** Kørsel `20261005_124521`, 402 sweeps, 0 sprunget over,
+arkiveret til `eceherning`.
+
+**Hvad jeg fik, og hvorfor jeg ikke bruger det.** Binnet på tilstand og akselfart, gennemsnit inden for
+bins — ikke enkelt-sweeps:
+
+| tilstand | rpm-bin | n | peak | peak/gulv |
+|---|---|---|---|---|
+| DREVET | 170-215 | 14 | 830 Hz | **16,6×** |
+| UDRULNING | 170-215 | 9 | 820 Hz | **15,3×** |
+| STILSTAND | ro | 14 | 880 Hz | 2,2× |
+
+Forholdet 1,08 ved tilsyneladende samme fart ville være en ren dom for **mekanisk**. **Men den holder
+ikke, og det er min egen test der fejler, ikke riggen.**
+
+**Akslen har intet udløb.** Ni stopbegivenheder, hver eneste **190,4 → 0,0 rpm inden for ét
+sweep-interval på 2,9 s**, uden at der nogensinde blev optaget en mellemværdi. Ved ~150 kg standser
+friktionen den næsten øjeblikkeligt.
+
+**Og tacho rapporterer en forældet værdi hen over stoppet.** Sweepet ved stoppet læser stadig
+190,4-190,6 rpm, fordi tachos 1,5 s timeout ikke er udløbet — den returnerer sin sidste beregnede
+periode for en aksel, der allerede er ved at standse. Et par **på hinanden følgende** sweeps 2,8 s
+fra hinanden læser **begge 190,5 rpm**, hvilket er umuligt for en umagnetiseret aksel, der når 0 før
+næste sample.
+
+**Så «udrulning ved 190 rpm» var ikke ved 190 rpm.** Den faktiske fart i de ni sweeps er ukendt, et
+sted mellem 190 og 0. At binne på `rpm_meas` nær et stop er at binne på et tal, der ikke er
+akselfarten — og dermed er sammenligningen ugyldig. **Jeg trækker den, før nogen bygger på den.**
+
+**Hvad der skal gøres i stedet, og det er en metodeændring, ikke en justering:** tidsopløsningen skal
+komme fra **recorden**, ikke fra kadencen. Scopets overførsel tager ~2,9 s, så hurtigere sweeps er
+fysisk umuligt. Men ét **langt** capture kan rumme hele stoppet:
+
+- Sæt `timebase_range` til **2-5 s** i stedet for 0,2, så hele overgangen falder inden for én record.
+- Analysér den i skiver på fx 100 ms og følg 830 Hz-linjens amplitude gennem decelerationen.
+- Ved 5 s vindue og 500 k punkter er samplingen 100 kHz — rigeligt til 1 kHz, og 10 Hz opløsning pr.
+  100 ms-skive, nok til at isolere linjen.
+
+Det giver det, ingen kadence kan give: **linjens amplitude mod tid gennem selve stoppet**, hvor
+akselfarten falder fra 190 til 0 på under tre sekunder. Henfalder linjen med akselfarten → mekanisk.
+Forsvinder den i det øjeblik drevet slipper, mens akslen stadig drejer → elektro-akustisk.
+
+**Jeg skriver profilen, hvis I er med på metoden.** Den koster 10 minutter rigtid.
+
+**To fælder fundet undervejs, begge skrevet i CLAUDE.md:**
+1. **En profil uden `duration_minutes` tager præcis ÉT sweep.** Koden læser varigheden fra det felt på
+   øverste niveau og falder tilbage til 0, hvilket giver `samples = max(1,0) = 1`. Runneren kører
+   gladeligt **hele** rpm-skemaet: motoren cykler, telemetrien flyder, loggen ser sund ud, og tyve
+   minutters rigtid giver **én** optagelse. Eneste tegn er `Sweep 1/1`. Jeg fangede det i første minut,
+   stoppede, bekræftede akslen stille på frosset pulstælling og slettede mappen.
+2. **Akslen har intet udløb, og tacho er forældet hen over stoppet** — som ovenfor. Det gælder også
+   bagud: de fem «udrulningssweeps» jeg fandt i 13-timers kørslen er sandsynligvis samme artefakt, så
+   de er endnu mindre værd end de n=1 jeg allerede afskrev dem som.
+
+-- pi
