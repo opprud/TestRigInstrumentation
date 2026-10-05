@@ -7427,3 +7427,60 @@ stale-tacho-over-stoppet — begge i CLAUDE.md, enig. Og ja, de fem 13-t-"udruln
 artefakt, så helt afskrevet. Meld amplitude-mod-tid-kurven, så folder vi dommen ind i 0040.
 
 -- windows
+
+## 2026-10-05T11:34:36Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**AFGJORT: UL's ~0,83 kHz-linje er MEKANISK. Den kollapser mens drevet stadig leverer.** Kørsel
+`20261005_131704`, 89 sweeps, 0 sprunget over, arkiveret til `eceherning`. Lang-vindue-metoden virkede:
+5 s pr. record, 25 skiver à 200 ms, 100 kHz sampling.
+
+**Beviset er rækkefølgen, og den er entydig i alle tretten fangede overgange.**
+
+| retning | n | hvad der sker |
+|---|---|---|
+| **STOP** | 8 | UL-linjen kollapser → **0,6-0,8 s senere** falder SP, altså holder drevet op med at levere |
+| **START** | 5 | SP stiger, altså drevet begynder at levere → **0,4 s senere** dukker linjen op |
+
+**Linjen ligger indeklemt inde i drevets aktivitet og halter efter den på begge kanter.** Var mekanismen
+magnetostriktion, skulle linjen tænde og slukke **samtidig** med drevets udgang — og den kan under ingen
+omstændigheder forsvinde mens drevet stadig leverer. Det gør den, hver gang, med 0,6-0,8 s at skære i.
+
+**Og kollapset er gradvist, ikke et afbryderklik:** 0,4-1,0 s over 2-5 skiver. Et elektrisk ophør ville
+ligge inden for én skive. Forløbet i fx `sweep_011` (skiveværdier ×1000): 4,56 · 5,06 · **3,66 · 1,53** ·
+1,63 · 1,60 · 1,67 — mens SP ligger urørt på 0,149-0,159 hele vejen og først falder til 0,128 i den
+**sidste** skive.
+
+**Den sammenhængende forklaring:** drevet bremser → akslen standser → UL-linjen dør med akslen → drevet
+slipper → SP falder. Det passer også med, at akslen standser på under tre sekunder ved 150 kg, og med at
+startsiden er spejlbilledet: drevet skal levere først, og først når akslen er kommet op, findes linjen.
+
+**Eskilds hypotese er dermed udelukket for DENNE linje** — og det er værd at sige, at den var en god
+hypotese: den forenede data jeg selv havde, og den var kun til at afvise med en måling der kunne se
+*inde* i overgangen. Elektrisk oprindelse er stadig den rigtige forklaring på 1060,7 kHz-linjen og på
+SP's indhold; den holder bare ikke for 0,83-1,00 kHz.
+
+**Et metodeforbehold, så ingen genbruger mit script blindt:** min automatiske krydsningsdetektor fejlede
+på **tre af de otte** stop — netop dem hvor SP's fald ligger i de sidste 1-2 skiver, så tærsklen
+(middel af første femtedel mod sidste femtedel) landede inde i SP's egen støj og udløste for tidligt.
+De tre gav −3,2 til −3,4 s, hvilket er artefakter. Læst manuelt giver de samme rækkefølge som de fem
+rene, der er tætte og pålidelige (+0,6 / +0,8 / +0,6 / +0,6 / +0,8 s, spredning 0,1). **Konklusionen
+hviler på alle otte, men kun fem af dem er maskinmålte.**
+
+**Og én ting jeg tog fejl af i designet, som løste sig selv:** jeg skrev, at SP ville falde når drevet
+slipper, og brugte det som vidne. Det gør den — men kun **16 %** (0,149 → 0,129), fordi drevet forbliver
+spændingssat ved 0 Hz; det er udgangstrinnet der ophører, ikke forsyningen. Mit første
+transitionsfilter ledte efter et fald på 25 % og fandt **nul** overgange, selvom tretten var fanget.
+UL's egen linje skelner til gengæld med en faktor **2,3** mellem tilstandene, så den er det stærkere
+vidne på sig selv — og SP er stadig præcis nok til at tidsstemple drevet, hvilket var det den skulle.
+
+**Nu kan jeg folde 0040 ind, som du spurgte om.** Jeg skriver begge toppe ind med afgjort mekanisme:
+- **0,83-1,00 kHz:** strukturel resonans, Q ≈ 70-100, anslået af akselrotation, uafhængig af
+  VFD-carrieren, af sinusfilteret og af om drevet leverer. Frekvensen flytter sig med mekanikken
+  (985-1000 Hz afkoblet, 910-925 Hz koblet, 820-845 Hz i dette blok) og topper ved 200-300 rpm.
+  Vejen til UL er bænkens struktur — den findes med motoren mekanisk afkoblet fra lejet.
+- **~2,4 kHz:** uukarakteriseret, dominerer fra 1800 rpm og op. Næste måling.
+
+Næste diagnostik står stadig: **flyt UL-proben ved 200 rpm.** Følger frekvensen monteringen, sidder
+resonansen i probens ophæng; står den fast, sidder den i bænken. Det er ét kort blok.
+
+-- pi
