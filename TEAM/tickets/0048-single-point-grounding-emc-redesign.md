@@ -36,8 +36,15 @@ the VFD's electrical path (capacitive stator↔housing → shaft voltage → dis
 bearings). **The test specimen bearing — the one the sensor package measures — is mechanically downstream
 and electrically away from the VFD, so it does NOT see those bearing currents.** Removing the filter would
 therefore **not** electrically erode the specimen. (An earlier version of this ticket claimed the filter
-protects the *specimen* — that was wrong; corrected on review feedback.) The filter still matters for the
-**motor's** longevity and for how much VFD noise couples into the sensors.
+protects the *specimen* — that was wrong; corrected on review feedback.)
+
+**The priority is NOT bearing wear (motor or specimen) but NOISE CONTAMINATION of the measurements**
+(Kim / review, 2026-10-05), by two VFD paths: **(1) electro-acoustic** — the drive magnetostrictively
+vibrates the motor iron (strongest at relatively low frequency — e.g. the ~1 kHz question), and that
+vibration propagates mechanically into the rig and is registered; **(2) capacitive coupling** —
+higher-frequency common-mode from the stator↔housing capacitance puts the whole setup on a potential and
+couples onward into cables and sensors. The filter attenuates both at the source; reduced motor-bearing
+wear is only a side benefit.
 
 **So the filter is a development aid, not a specimen-safety hard constraint.** The end goal is a
 data-sampling / processing pipeline **robust to unfiltered VFD noise** — field machines vary (many run
@@ -131,8 +138,18 @@ decoupled-AE acceptance metric (below), at a verified rpm** (0047):
 Ceiling (0046 §3.2): the quiet floor is quantization-limited (~1.5–2×), so the gain shows at the *running*
 signal (where AE doubled), not all the way down to the floor.
 
-**~1 kHz peak on UL — RESOLVED, and NOT an EMC target (Pi desk-analysis, 2026-10-05).** 5 Hz-bin
-periodograms on the archived blocks refute the VFD-carrier hypothesis: the peak is **absent** in all three
+**~1 kHz peak on UL — REOPENED 2026-10-05 (review): electro-acoustic VFD proposed, verdict UNDER REVIEW.**
+Review (Eskild Herskind) proposes an **electro-acoustic** mechanism that fits Pi's data: the VFD
+magnetostrictively excites the motor iron (the "S-train" whine) → mechanical vibration that propagates from
+the motor to the bench — electrical *origin*, mechanical *propagation*. And **UL heterodynes**, so the
+"~1 kHz" is really a **~40 kHz ultrasonic emission modulated at ~1 kHz**, not a raw line; the raw-bin reading
+can mislead. Pi to re-examine UL's ~40 kHz band + its 1 kHz modulation, and confirm whether the peak needs
+the drive **actively driving** the motor (present in decoupled-but-spinning B5, absent in motor-still B3a)
+rather than rig rotation. Pi's original desk-analysis follows — its *propagation* finding (it reaches UL via
+the bench, not the bearing) stands; the "not the VFD" part is what review revises.
+
+**[Original, Pi desk-analysis 2026-10-05]** 5 Hz-bin periodograms on the archived blocks refute the
+VFD-**carrier** hypothesis (but not an electro-acoustic VFD origin): the peak is **absent** in all three
 drive-dead blocks *and* in B3a (drive **energized, motor STILL**, +7 % = nothing) — **it requires ROTATION,
 not an energized drive.** It is a **sharp structural resonance, 0.91–1.00 kHz, Q ≈ 70–100**: independent of
 the sinus filter (present with the filter out, B5f), not a rotation harmonic (speed triples 500→1500 rpm,
