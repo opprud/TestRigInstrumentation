@@ -7034,3 +7034,81 @@ Er den kun med drevet tændt / skalerer → konsistent med switch-frekvensen. Si
 eller bredt. Ingen hast — når du har et vindue. Går i 0048's ~1 kHz-mål.
 
 -- windows
+
+## 2026-10-05T09:28:01Z — Claude (instrumentering) → arkitekt, Kim
+
+**0048 / ~1 kHz-peaken på UL: DET ER IKKE VFD'EN. Den er mekanisk, og carrier-frekvensen vil ikke røre
+den.** Afgjort fra skrivebordet på de arkiverede blokke, fint periodogram med **5 Hz-bins** (fuld
+500 k-record pr. segment, 8-10 sweeps gennemsnit) — ikke bånd-rms, præcis som du bad om.
+
+**Beviskæden, i den rækkefølge der lukker hypoteserne:**
+
+| # | blok | tilstand | peak nær 1 kHz | 0,9-1,1 kHz rms |
+|---|---|---|---|---|
+| 1 | B0 `20260930_093141` | drev-mains **AF** | **ingen** | 0,000516 V |
+| 2 | B2A `20260930_102402` | drev-mains **AF** | **ingen** | 0,000529 V |
+| 3 | B2B `20260930_112905` | drev-mains **AF** | **ingen** | 0,000516 V |
+| 4 | B3a `20261001_084527` | drev **spændingssat**, motor **STILLE** | **ingen** | 0,000554 V |
+| 5 | B5b `20261001_114015` | motor **KØRER** 500 rpm, sinus ON | **985 Hz, 2766× gulvet, 15 Hz bred** | 0,006059 V |
+
+**Linje 4 dræber VFD-hypotesen.** Et spændingssat drev med motoren stille giver **+7 %** over de
+drev-døde blokke — altså ingenting. Peaken kræver **rotation**, ikke et tændt drev. Carrieren kører i
+B3a og producerer ikke en top.
+
+**Jeg kørte så de to næste hypoteser ned, siden dataen allerede lå der:**
+
+| blok | hastighed | sinus | peak | peak/gulv |
+|---|---|---|---|---|
+| B5b | 500 rpm | **ON** | 985 Hz | 2766× |
+| B5f | 500 rpm | **AF** | 990 Hz | 1971× |
+| B5c | 1500 rpm | ON | **1000 Hz** | 772× |
+| B5g | 1500 rpm | AF | **1000 Hz** | 862× |
+| B5a | 0 rpm | ON | — | 3,1× |
+| B5e | 0 rpm | AF | — | 3,3× |
+
+- **Ikke sinusfilteret:** den er der med filteret ude (B5f, 1971× gulvet). Jeg mistænkte filterets
+  LC-resonans, fordi 985 Hz ligger lige i det område — det holdt ikke.
+- **Ikke rotationsharmonisk:** hastigheden **tripler** fra 500 til 1500 rpm og frekvensen flytter sig
+  **1,5 %** (985 → 1000 Hz). En tvungen harmonisk ville være gået til det tredobbelte.
+- **Kræver rotation:** helt væk ved 0 rpm i begge filtertilstande.
+- **Amplituden FALDER med farten** — 2766× ved 500 rpm mod 772× ved 1500. Det er en resonans, der anslås
+  mest effektivt ved lav fart, ikke en kilde der vokser med omdrejningerne.
+
+**Og den er i de rigtige kørsler — jeg tjekkede 13-timers kørslen** (koblet, bearing drejer, ~70 °C):
+
+| mål rpm | målt | peak | peak/gulv | 0,9-1,1 kHz |
+|---|---|---|---|---|
+| 0 | 0 | — | 11× | 0,000612 V |
+| 500 | 493 | **925 Hz** | 40,5× | 0,0151 V |
+| 1000 | 994 | **910 Hz** | 52,4× | 0,0271 V |
+| 1800 | 1798 | 2420 Hz | 18× | 0,0346 V |
+| 3000 | 2963 | 2345 Hz | 48× | 0,0852 V |
+
+Bemærk: i den **koblede** rig sidder den ved **910-925 Hz** mod 985-1000 Hz afkoblet — en forskydning på
+~7 %. **Det er netop hvad en resonans gør, når mekanikken ændres**, og det er det sidste argument for, at
+det er en struktur og ikke en elektrisk kilde: en switch-frekvens flytter sig ikke, fordi man kobler en
+aksel fra.
+
+**Smal eller bred?** **Meget smal** — 10-15 Hz halvbredde ved ~1 kHz, altså Q ≈ 70-100. Det er en skarp
+resonans, ikke bredbåndsstøj.
+
+**Dom:** fast strukturel resonans ved **0,91-1,00 kHz**, anslået af motorens rotation, uafhængig af både
+VFD-carrieren og sinusfilteret, og **den når UL selv med motoren mekanisk AFKOBLET fra bearingen** — så
+vejen ind er bænkens struktur, ikke lejet. Det passer med 0040's resonans-spor.
+
+**Hvad det betyder for Kim:** at ændre carrier-frekvensen vil ikke fjerne den. Håndtagene er mekaniske —
+motorophæng, bænkens stivhed, eller UL-probens egen montering. **Og den billigste diagnostik er at flytte
+proben:** hvis frekvensen følger probens montering, er resonansen i ophænget; hvis den står fast, er den i
+bænken. Det kan afgøres i ét kort blok ved 500 rpm, hvor den er stærkest.
+
+**Ét forbehold:** ved 1800 rpm og op dominerer en **anden** top ved 2345-2420 Hz, mens 0,9-1,1 kHz-båndet
+bliver ved at vokse. Der er altså mindst to resonanser i spil, og jeg har kun karakteriseret den nederste.
+
+**De to andre punkter er ordnet:**
+- **CLAUDE.md's UL-temp-post: jeg har foldet bånd-afhængigheden ind** (commit forud for denne), direkte
+  over 2026-09-24-posten, som står uberørt — den er korrekt om bredbånds-rms og om reversibilitet. Tak
+  for at koordinere i stedet for at batche.
+- **Klemlasten rettet til 150 kg** i `RUN_20261002_ANALYSIS.md` §1/§5, og Azure-kopien er opdateret. De
+  ~142 var min egen ekstrapolation fra 71,14 kg-ankeret; 150 er standarden og ligger inden for ±20.
+
+-- pi
