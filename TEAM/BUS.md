@@ -7484,3 +7484,58 @@ Næste diagnostik står stadig: **flyt UL-proben ved 200 rpm.** Følger frekvens
 resonansen i probens ophæng; står den fast, sidder den i bænken. Det er ét kort blok.
 
 -- pi
+
+## 2026-10-05T11:40:04Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**0040 er foldet ind, og den har ændret karakter undervejs: ud over de to resonanser måtte jeg
+TRÆKKE ticketens egen foreskrevne handling tilbage.** Titel og status opdateret, den oprindelige
+finding står urørt øverst.
+
+**A — 0,83-1,00 kHz: mekanisk, afgjort.** Fire hypoteser faldt i rækkefølge, hver med sin blok:
+
+| hypotese | dræbt af |
+|---|---|
+| VFD'ens switch-carrier | B3a: drev spændingssat, motor stille → ingen top, +7 % |
+| sinusfilterets LC-resonans | B5f: til stede med filteret **ude**, 1971× gulvet |
+| rotationsharmonisk | farten **tripler**, frekvensen flytter **1,5 %** |
+| elektro-akustisk magnetostriktion | `20261005_131704` — krævede at kunne se **inde i** overgangen |
+
+Plus: frekvensen flytter sig med mekanikken (985-1000 Hz afkoblet, 910-925 koblet, 820-845 i 0049b), den
+topper ved **200-300 rpm** (41×, ikke 500 rpm), og vejen til UL er **bænkens struktur** — den er stærkest
+i de afkoblede blokke, hvor lejet slet ikke drejer.
+
+**B — en anden top ved ~2,4 kHz**, dominerende fra 1800 rpm og op, voksende med farten (18× → 31× → 48×).
+Uukarakteriseret: ingen hypotese prøvet. Næste måling, og den skal bruge lang-vindue-metoden.
+
+**C — og her er det, der ikke var bedt om: ticketens egen handling er forkert, og jeg har trukket den.**
+
+0040 foreskriver at **subtrahere det afkoblede UL-gulv målt i 0035 fra arkivet** før nogen
+UL-mod-hastighed-konklusion. To grunde til at det ikke må gøres:
+
+1. **Findingen er dateret 2026-08-27, altså FØR ombygningen 2. september.** CLAUDE.md gør den dato til en
+   hård grænse: absolutte niveauer bærer ikke over den. Handlingen ville anvende et **før**-gulv på
+   **efter**-data.
+2. **Og målt på data efter ombygningen findes anomalien slet ikke.** Koblet, 13-timers kørslen ved ~70 °C:
+
+| rpm | 2200 | 2300 | **2400** | 2500 | 2600 |
+|---|---|---|---|---|---|
+| UL | 0,883 | 0,895 | **0,864** | 0,916 | 1,028 |
+
+**2400 rpm ligger 5,7 % UNDER sine naboers middel** — lidt lavt, ikke højt. Der er intet at subtrahere.
+
+**Og de 75 % var målt mod det afkoblede gulv, hvilket er den forkerte nævner for en rigtig kørsel.**
+Overskuddet var 0,06629 − 0,03821 = **0,0281 V**. Mod det koblede signal ved 2400 rpm (0,864 V) er det
+**3,2 %.** Selv hvis artefaktet overlever ombygningen, er det en 3 %-korrektion, ikke 75 % — og
+ticketens ordlyd ("part of UL is motor artefact") inviterer til en overkorrektion, der ville være
+større end effekten.
+
+Vil nogen have artefaktet kvantificeret for data efter ombygningen, kræver det **en frisk afkoblet dwell
+ved 2350-2450 rpm.** De gamle tal kan ikke genbruges.
+
+**Tre punkter båret videre i ticketen:**
+- Flyt UL-proben og mål igen ved 200 rpm — ophæng mod bænk for 0,83-1,00 kHz-resonansen.
+- Karakterisér ~2,4 kHz-toppen, lang-vindue, 1800-3000 rpm.
+- **Besvar hardware-spørgsmålet om proben** (Kim/Eskild): demodulerer Kistler-proben internt? Det afgør,
+  om disse er akustiske frekvenser eller modulationsrater, og det ændrer tolkningen af hele ticketen.
+
+-- pi
