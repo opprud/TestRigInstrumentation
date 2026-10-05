@@ -65,10 +65,10 @@ register afterwards.
 (gain 64); band ratio 1.992; unloaded reads within ±0.8 g. The 2026-08-25 zero had drifted 150 g across
 the teardown, as expected — the zero travels with the mechanics, only the slope travels with the unit.
 
-**Clamp load re-set to an estimated ~142 kg over 8 turns**, anchored on the last measured value
-**71.14 kg at 4 turns**. Per-turn increments while still measurable: +16.8 / +18.7 / +20.1 / +15.5 kg
-(mean 17.8) — **markedly more repeatable than the pre-rebuild +19.9 / +13.9 / +31.5**. Final figure
-carries ~±20 kg. Full 2 Hz trace: `py/data/loadcell_tightening_20260923.log`.
+**Clamp load re-set over 8 turns — extrapolated ~142 ± 20 kg, working figure 150 kg** (Kim, 2026-10-05,
+within the band), anchored on the last measured value **71.14 kg at 4 turns**. Per-turn increments while
+still measurable: +16.8 / +18.7 / +20.1 / +15.5 kg (mean 17.8) — **markedly more repeatable than the
+pre-rebuild +19.9 / +13.9 / +31.5**. Full 2 Hz trace: `py/data/loadcell_tightening_20260923.log`.
 
 > **Record the anchor, not the estimate.** 71.14 kg / 4 turns is the only measured point on the way up
 > and the only thing a later attempt to reproduce this load can aim at.
@@ -98,7 +98,7 @@ commanded drive frequency, every setpoint verified before reading:
 
 One glitch in 724 pulses. `rpm_meas` is usable again and `Prerun_Checklist.md` §3 can be performed.
 **rpm/Hz runs consistently below the 2026-08-19 calibration** (56.1 vs 57.6 at 5 Hz; 58.8 vs 59.5 at
-20 Hz) — more slip, as the ~142 kg clamp load should produce. Re-measure the factor if absolute speed
+20 Hz) — more slip, as the ~150 kg clamp load should produce. Re-measure the factor if absolute speed
 matters.
 
 **Drive fault found while doing it — writes degrade on a held connection.** Five writes of 30 Hz and
@@ -143,7 +143,7 @@ speed-responsive, SP mean +4.996 V (probe ground attached), OE 3/3 cycles.
 > byte-exact later without re-downloading. The sidecars are archived too, so the per-tick record no
 > longer exists only on the SD card.
 
-**Rig state during the run:** clamp load ~142 kg estimated (anchor 71.14 kg at 4 turns, 2026-09-23), so
+**Rig state during the run:** clamp load 150 kg (extrapolated ~142 ± 20 kg from anchor 71.14 kg at 4 turns, 2026-09-23), so
 `LOAD?` returns `ERR 21` throughout and `mass_g` is null in every telemetry tick — expected, not a fault.
 Lubricant metadata corrected before the run to Keratech 22 applied 2026-09-23 on the rebuilt bearing.
 
@@ -170,7 +170,7 @@ a correctly seated retaining ring**, at roughly half the strength.
 > same way:
 > - the old bearing **re-seating on the new bushing surface**,
 > - **fresh oil redistributing** and establishing its film over the first hour,
-> - the new **~142 kg clamp settling**.
+> - the new **~150 kg clamp settling**.
 >
 > Note the second one is a *lubricant* effect but a **time**-conditioning one, not a
 > viscosity-versus-temperature one — so even an answer of "it's the oil" still needs the cycle to separate

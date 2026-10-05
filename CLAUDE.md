@@ -482,7 +482,7 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
   **One glitch in 724 pulses.** Slip falls with speed as an induction motor under light load should, and
   `rpm_meas` is usable again. Note the rpm/Hz runs **consistently below the 2026-08-19 calibration**
-  (56.1 vs 57.6 at 5 Hz, 58.8 vs 59.5 at 20 Hz) — more slip, which is what the ~142 kg clamp load
+  (56.1 vs 57.6 at 5 Hz, 58.8 vs 59.5 at 20 Hz) — more slip, which is what the ~150 kg clamp load
   should produce. Re-measure the factor if absolute speed matters; `59.83 × Hz − 11.7` now reads ~1 %
   high at the top of this range.
 
@@ -538,7 +538,7 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   speed figure independent of both the drive's registers and the tach's own period maths — compute
   `60 * dpulses / dt` and compare.
 
-- **⚠️ The motor cannot BREAK AWAY at 10 Hz under the ~142 kg clamp load, but sustains it once moving
+- **⚠️ The motor cannot BREAK AWAY at 10 Hz under the ~150 kg clamp load, but sustains it once moving
   (2026-10-02, after the 0046 reassembly).** From standstill, a verified 10 Hz command produced
   **26 rpm — three pulses in ten seconds**, i.e. a shaft that does not turn. Started at 20 Hz and then
   stepped *down* to 10 Hz, the same drive held **584.7 rpm** rock-steady. Static friction, not torque
@@ -928,7 +928,7 @@ assembly and had drifted **150 g** by the time the scale unit was refitted. With
 (128) and **-0.2…+0.6 g** (64). Band ratio **1.992** — the one free internal check, and it passes. Full
 trace in `py/data/loadcell_tightening_20260923.log` (1507 readings, loose to rail).
 
-### The clamp load of 2026-09-23 — anchor 71.14 kg at 4 turns, set to ~142 kg estimated
+### The clamp load of 2026-09-23 — anchor 71.14 kg at 4 turns, extrapolated ~142 ± 20 kg, working figure 150 kg
 
 Tightened turn by turn from zero with the cell logged at 2 Hz:
 
@@ -946,9 +946,10 @@ more repeatable than 2026-08-25's +19.9 / +13.9 / +31.5** (factor 2.3 between ne
 appears to have made the tightening mechanism materially more predictable — worth re-checking against
 ticket 0036, which was written to fix exactly that non-repeatability.
 
-The final **~142 kg carries roughly ±20 kg** (four blind turns at the measured per-turn spread). Kim
-chose to go above the measurement ceiling knowing the bound, as on 2026-08-25. **Quote it as an estimate
-with its turn count, never as a measurement.**
+The extrapolation reaches **~142 kg ± 20 kg** (four blind turns at the measured per-turn spread); Kim
+chose to go above the measurement ceiling knowing the bound, as on 2026-08-25. **The working figure is
+standardized to 150 kg (Kim, 2026-10-05)** — within that band, and the number to use in run logs, reports
+and the experiment sheet. Still an estimate with a turn count, never a measurement.
 
 > **Mounted, the mechanics are ~50x quieter than the bench.** Reading spread with the unit in the
 > rig is **2.8 g**, against 150 g within a single bench measurement and 555 g between placements of
