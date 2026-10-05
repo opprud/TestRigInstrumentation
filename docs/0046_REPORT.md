@@ -92,8 +92,8 @@ Two findings outrank the individual numbers:
   SP. So the drive's contribution is the output stage being *active*, not the frequency it runs at. This
   turns the 0035 coupled inference ("SP +43 % flat with speed") into a decoupled measurement. *(B5a–B5c.)*
 - **Sinus (output) filter — only acts when the drive is driving.** Stationary it does nothing (0.98–1.02×).
-  Running, removing it drops AE ~41 % and SP ~12 % — i.e. the filter *raises* the sensor noise. **But it
-  must not be removed** (see §5). *(B5a/B5e vs B5b/B5f.)*
+  Running, removing it drops AE ~41 % and SP ~12 % — i.e. the filter *raises* the sensor noise. **It is kept
+  for now** (clean dev data + the motor's own bearings, not the specimen — see §5). *(B5a/B5e vs B5b/B5f.)*
 - **Filter–VFD ground — direction stands, magnitude pending a verified-rpm repeat.** Stationary the ground
   does nothing (5a vs 5h, 0.95–0.99×). *Running*, ground-ON is much worse and reversibly so: ground-off
   +71 % (5b) → ground-on +288 % (5i) → ground-off +91 % (5k). Block 5i carries an unverified rpm (the drive
@@ -106,18 +106,23 @@ Two findings outrank the individual numbers:
   while its band moved +40 % — a single RMS would have reported "nothing." *(B6.)*
 
 ## 5. The operating trade-off and recommendation
-The **sensor-cleanest** configuration (no filter) and the **specimen-safest** configuration (filter fitted)
-are opposites. The sinus filter limits dv/dt at the motor terminals and suppresses **bearing currents** —
-the electrical erosion that pits bearing races. On a *bearing test rig* that is the thing we must not do to
-the specimen under test; the erosion is slow, invisible, and indistinguishable from real mechanical
-degradation. The filter–VFD ground was confirmed by Kim to be a **functional ground, not protective earth**
-(2026-10-02), so there is no safety constraint forcing either ground state.
+Removing the sinus filter makes the sensor channels quieter (it is the largest contributor at speed), so
+there is a trade-off — but **not** the specimen-safety one an earlier version of this report implied; this
+is the correction from review (Kim, 2026-10-05). The filter limits dv/dt and suppresses **bearing
+currents**, but that protects the **motor's own bearings** (which sit in the VFD's electrical path), **not
+the test specimen** — the specimen bearing is mechanically downstream and electrically away from the VFD, so
+removing the filter would **not** electrically erode it. The real objective is a data pipeline **robust to
+unfiltered VFD noise** (field machines vary — many run without a VFD — and the specimen is electrically
+unaffected either way), reached more easily from a clean baseline, which is what the filter buys during
+development. The filter–VFD ground was confirmed by Kim to be a **functional ground, not protective earth**
+(2026-10-02), so no safety constraint forces either ground state.
 
 **Recommendation (interim, provisional until the verified-rpm ground repeat):**
-- **Filter ON** — specimen integrity outranks sensor cleanliness; elevated sensor noise is a known,
-  subtractable offset.
+- **Filter ON** — for clean development data and the motor's own bearing health (not the specimen);
+  elevated sensor noise is a known, subtractable offset.
 - **Functional ground OFF** — the quieter *running* configuration on the current (unverified-rpm) evidence.
-- **Never run "no filter"** to clean up the sensors.
+- **Running "no filter" is a legitimate robustness test** later, not a specimen hazard — keep it ON while
+  the data pipeline is being developed.
 - If a quieter *floor* is genuinely wanted, the lever is **ADC resolution / voltage range** (§3.2), not
   regrounding or shielding.
 

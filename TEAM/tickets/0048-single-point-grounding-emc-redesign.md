@@ -29,13 +29,26 @@ and get the sensor channels back to their quiet floor — because the dominant n
 **installation / grounding**, not the filter component itself. This is an EMC design task, not more
 characterisation.
 
-## The constraint that rules everything: the sinus filter stays
-The filter is not there for the sensors. It limits **dv/dt** at the motor terminals and suppresses
-**bearing currents** — the electrical erosion that pits bearing races. On a **bearing test rig**, running
-without it risks introducing electrical wear in the specimen under test: slow, invisible, and
-indistinguishable from real mechanical degradation. **Removing the filter to quieten the sensors is
-prohibited** — it would silently contaminate every bearing-life measurement the rig exists to make. (This
-belongs as a hard line in CLAUDE.md too.)
+## The sinus filter: what it is actually for (corrected 2026-10-05, Kim / review)
+The filter limits **dv/dt** at the motor terminals and suppresses **bearing currents** — the dv/dt-driven
+EDM discharges that pit bearing races. **But that protection is for the MOTOR's own bearings**, which sit in
+the VFD's electrical path (capacitive stator↔housing → shaft voltage → discharge through the motor
+bearings). **The test specimen bearing — the one the sensor package measures — is mechanically downstream
+and electrically away from the VFD, so it does NOT see those bearing currents.** Removing the filter would
+therefore **not** electrically erode the specimen. (An earlier version of this ticket claimed the filter
+protects the *specimen* — that was wrong; corrected on review feedback.) The filter still matters for the
+**motor's** longevity and for how much VFD noise couples into the sensors.
+
+**So the filter is a development aid, not a specimen-safety hard constraint.** The end goal is a
+data-sampling / processing pipeline **robust to unfiltered VFD noise** — field machines vary (many run
+without a VFD) and the specimen is electrically unaffected either way — but that robustness is **easier to
+reach from a clean baseline**, which is what the filter (and removing external noise sources) buys during
+development. **Keep the filter ON for now** for clean dev data and motor health; running without it later as
+a robustness test is a legitimate step, **not prohibited and not a specimen hazard.**
+
+> **Worth confirming (measurable):** that the test shaft is electrically **isolated** from the motor
+> (insulated coupling / separate ground), so the specimen's electrical immunity is *known, not assumed* —
+> fits the motor-isolation experiment below.
 
 ## ✅ SAFETY GATE CLEARED: it is a FUNCTIONAL ground, not protective earth (Kim, 2026-10-02)
 0046 found that removing the filter–VFD ground *reduces* sensor noise, so the quiet configuration has the
@@ -52,9 +65,10 @@ banner.)
 
 **Decision (architect, 2026-10-02): run bearing tests with the filter ON and the functional ground OFF**
 — it is the quieter *running* configuration, and leaving a **functional** (non-PE) ground off is a
-legitimate choice. The filter stays because on a bearing test rig **specimen integrity outranks sensor
-cleanliness** (dv/dt / bearing currents; elevated sensor noise is a known, subtractable offset). **Never
-run "no filter" to clean the sensors.** Hold this as **provisional until the verified-rpm ground repeat**
+legitimate choice. The filter stays for **clean development data and the motor's own bearing health** (not
+for the specimen — see the corrected filter section above); elevated sensor noise is a known, subtractable
+offset. Running "no filter" is a legitimate **robustness test** later, not a specimen hazard — just keep it
+ON while the data pipeline is being developed. Hold this as **provisional until the verified-rpm ground repeat**
 confirms the magnitude. Separately, the floor itself is quantization-limited (1.5–2×), so the deepest
 "quieter floor" lever is **ADC resolution**, independent of the ground's running penalty.
 
