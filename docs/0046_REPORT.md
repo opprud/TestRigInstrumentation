@@ -13,6 +13,18 @@
 > at `eceherning/0046_REPORT/` with verified MD5. **Prefer those numbers over any scalar quoted in prose.**
 > The block → run-id map is in the appendix (§10), so every claim below traces to a specific blob.
 
+## Companion documents (read alongside this report)
+- **FFT / spectra figures — `py/tools/0046_spectra.html`.** Log-log averaged periodograms (40-sweep
+  averages, DC removed), seven configurations × three channels, 100 Hz–1.25 MHz, crosshair read-out and
+  the known lines marked. This is the visual FFT analysis the report's conclusions rest on — a scalar
+  cannot show a line nobody looked for (see §8). Also published as an artifact:
+  `https://claude.ai/code/artifact/18f492b3-dd25-4d43-8dc9-e1eae73819b7`.
+- **Per-run sensor FFT analysis — `docs/RUN_20261002_ANALYSIS.md`.** The Welch-periodogram band breakdown
+  of the first clean 13 h run (dynamic range per channel, the band-dependent UL-vs-temperature finding,
+  the run-in transient). Companion to the run's status doc `docs/RUN_20261002_STATUS.md`.
+- **Uniform band reference — `py/tools/0046_noise_reference.html` + `docs/0046_noise_floor.csv` / `.json`.**
+  All 23 blocks, one method (Welch, 38 Hz bins), 3 channels × 9 bands — the authoritative numbers.
+
 ---
 
 ## 1. Purpose
