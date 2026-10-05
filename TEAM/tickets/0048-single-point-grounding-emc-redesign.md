@@ -50,8 +50,12 @@ wear is only a side benefit.
 data-sampling / processing pipeline **robust to unfiltered VFD noise** — field machines vary (many run
 without a VFD) and the specimen is electrically unaffected either way — but that robustness is **easier to
 reach from a clean baseline**, which is what the filter (and removing external noise sources) buys during
-development. **Keep the filter ON for now** for clean dev data and motor health; running without it later as
-a robustness test is a legitimate step, **not prohibited and not a specimen hazard.**
+development. **DECISION STATUS (Kim, 2026-10-05): keep the filter ON provisionally — the ground + ferrite
+experiments below come FIRST, and the final keep/remove decision is deferred until they show whether the
+installation can be fixed to give filter-ON *and* clean sensors.** As installed today the filter makes the
+sensors worse (AE −41 % with it out), so the open question is the **installation, not the filter**. Running
+without it is a legitimate robustness test (no specimen hazard), not the default; it stays ON for now for
+clean dev data.
 
 > **Worth confirming (measurable):** that the test shaft is electrically **isolated** from the motor
 > (insulated coupling / separate ground), so the specimen's electrical immunity is *known, not assumed* —
