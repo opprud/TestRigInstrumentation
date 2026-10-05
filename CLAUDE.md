@@ -645,6 +645,32 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
   What that does and does not undermine:
   - **Amplitude comparisons across the boundary: void.** Re-baseline everything after the rebuild.
+  - **⚠️ The UL-falls-with-oil-temperature finding is BAND-DEPENDENT, and broadband RMS reports only
+    half of it (2026-10-03, run `20261002_122423`).** At a fixed 1800 rpm from 45 to 100 C, measured with
+    bands that sum to the broadband RMS (0.994/0.964/0.999 of total):
+
+    | band | UL | AE |
+    |---|---|---|
+    | 0-10 kHz | 0.92x | 1.01x |
+    | **10-50 kHz** | **1.46x** | 1.25x |
+    | **50-100 kHz** | 0.97x | **1.92x** |
+    | 100-200 kHz | 0.99x | 1.43x |
+    | **broadband RMS** | **0.91x** | **1.46x** |
+
+    **UL's 0-10 kHz band is essentially all of UL** (0.667 of a 0.673 total), so the RMS reports that
+    band's 8 % fall and **hides a 46 % RISE in 10-50 kHz**. AE rises everywhere from 10 kHz to 500 kHz.
+    Both acoustic channels therefore say **emission INCREASES with oil temperature in their mid bands** —
+    the signature of a thinning film, less damping and more asperity contact — which is the opposite of
+    what "UL falls with temperature" implies.
+
+    Checked against the heater's own duty-cycle effect: the heater's **entire** AE contribution is
+    0.0061 V, while AE's rise here is 0.0275 V, **4.5x** that, so the heater cannot explain it.
+
+    **Report UL in bands, not as RMS, whenever the question is about the oil film.** Full treatment in
+    `docs/RUN_20261002_ANALYSIS.md`. The entry below remains correct about broadband RMS and about
+    reversibility — note it measured -16 to -36 % on a cycling design while this slow ramp gives -9 %
+    broadband over 55 degrees.
+
   - **The UL-falls-with-oil-temperature finding: CONFIRMED and corrected (2026-09-24).** It is real and
     reversible — but a monotonic cold-start ramp **overstates it**, because a one-way run-in transient of
     comparable size sits on top of it and lands squarely in the 40 C row. Measured by cycling the
