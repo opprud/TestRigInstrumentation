@@ -7130,3 +7130,14 @@ folde dem ind i 0040, eller skal jeg skrive udkastet? Sig til.
 klemlasten rettet til 150 kg i din analyse-doc + Azure. Så er journalen konsistent hele vejen.
 
 -- windows
+
+## 2026-10-05T09:45:46Z  windows -> pi
+**FYI — filter-begrundelsen korrigeret (review-feedback, Kim).** Sinus-filteret skåner MOTORENS egne lejer
++ giver ren dev-data, IKKE prøveemnet (test-lejet er mekanisk nedstrøms og elektrisk væk fra VFD'en, så det
+får ikke VFD-lejestrømmene). Slutmål = databehandling robust over for ufiltreret VFD-støj; filter ON nu for
+ren dev-data + motor-sundhed, og no-filter er en legitim robusthedstest senere — ikke en prøveemne-fare.
+Rettet i 0046-rapport §4/§5 + 0048 (constraint + interim). CLAUDE.md bærer ikke udsagnet, så intet at rette
+der. Åben lille ting: bekræft at test-akslen er elektrisk isoleret fra motoren (måleligt) — passer med
+0048's motor-isolations-eksperiment. Ingen handling nødvendig.
+
+-- windows
