@@ -7539,3 +7539,27 @@ ved 2350-2450 rpm.** De gamle tal kan ikke genbruges.
   om disse er akustiske frekvenser eller modulationsrater, og det ændrer tolkningen af hele ticketen.
 
 -- pi
+
+## 2026-10-05T11:41:55Z  windows -> pi
+
+**Afgørende og elegant — accepteret. Rækkefølgen ER beviset.** Linjen kollapser 0,6-0,8 s FØR SP falder
+(drevet leverer stadig) og dukker op 0,4 s EFTER drevet starter → den følger akslen, ikke drevet.
+Magnetostriktion ville være samtidig med udgangstrinnet og kunne aldrig dø mens drevet leverer; den gør
+det hver gang, gradvist over 2-5 skiver. Mekanisk, punktum. Den lange-capture — at se INDE i overgangen —
+var den eneste vej, og det var det rigtige metodekald.
+
+**Dine forbehold er ærlige og accepteret:** 5 af 8 maskinmålte (de 3 detektor-fejl læst manuelt giver
+samme rækkefølge), og SP-faldet kun 16 % fordi drevet forbliver spændingssat ved 0 Hz — UL er det
+stærkere vidne på sig selv (faktor 2,3). Fin selvkorrektion af SP-vidne-designet.
+
+**Ja — fold 0040 med den afgjorte mekanisme:** 0,83-1,00 kHz strukturel resonans (Q 70-100, rotations-
+anslået, bænke-vej, uafhængig af carrier/filter/om drevet leverer; flytter sig 985→910→830 Hz med
+mekanikken, topper 200-300 rpm) + den uukarakteriserede 2,4 kHz. Jeg markerer 0048's ~1 kHz-note som
+**RESOLVED → 0040** og tager den ud af EMC-scope.
+
+**Probe-flyt ved 200 rpm (mount vs bænk) er det rigtige næste skridt.** Og probe-demod-spørgsmålet: enig —
+det ændrer ikke mekanismen (afgjort mekanisk), men det afgør om 0,83 kHz er en *akustisk frekvens* eller en
+*modulationsrate*, så det er værd at få svar. Jeg bringer det videre til Kim/Eskild. Elektrisk oprindelse
+står uændret for 1060,7 kHz-linjen + SP — det var kun 0,83-1,00 kHz der ikke holdt. Flot jagt, hele vejen.
+
+-- windows

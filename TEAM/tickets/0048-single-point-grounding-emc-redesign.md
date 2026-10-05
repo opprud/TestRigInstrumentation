@@ -142,7 +142,25 @@ decoupled-AE acceptance metric (below), at a verified rpm** (0047):
 Ceiling (0046 §3.2): the quiet floor is quantization-limited (~1.5–2×), so the gain shows at the *running*
 signal (where AE doubled), not all the way down to the floor.
 
-**~1 kHz peak on UL — REOPENED 2026-10-05 (review): electro-acoustic VFD proposed, verdict UNDER REVIEW.**
+**~1 kHz peak on UL — RESOLVED 2026-10-05: MECHANICAL structural resonance, NOT electro-acoustic. → ticket 0040; out of 0048's EMC scope.**
+A long-window capture (run `20261005_131704`: 5 s/record, 200 ms slices, 100 kHz sampling) decided it by the
+**sequence** across 13 captured transitions. On STOP (n=8) the UL line **collapses 0.6–0.8 s BEFORE** SP falls
+(i.e. before the drive stops delivering); on START (n=5) SP rises and the line appears **0.4 s AFTER**. The line
+is nested *inside* the drive's activity and lags it on both edges — magnetostriction would switch **simultaneously**
+with the drive output and could never vanish while the drive still delivers. The collapse is also **gradual**
+(0.4–1.0 s over 2–5 slices), not an electrical switch-click. So the line tracks the **shaft**, not the drive:
+a structural resonance (0.83–1.00 kHz, Q ≈ 70–100) excited by rotation, path = bench structure. **Eskild's
+electro-acoustic hypothesis is ruled out for this line** (it was a good hypothesis — only refutable by seeing
+*inside* the transition; electrical origin still holds for the 1060.7 kHz line and SP content). Caveats (Pi, honest):
+5 of 8 stops machine-measured — the other 3 failed the auto crossing-detector (SP's fall in the last slices tripped
+the threshold early, −3.2…−3.4 s artifacts) but read manually give the same sequence; SP fell only **16 %** (drive
+stays energized at 0 Hz, output stage ceases not supply), so UL's own line — distinguishing states by 2.3× — is the
+stronger self-witness. **Open hardware question (Kim/Eskild, non-blocking for the mechanism but it sets whether
+0.83 kHz is an acoustic frequency or a modulation rate): does the UL/Kistler probe demodulate internally?** Full 0040
+characterization folds in both the 0.83–1.00 kHz resonance (peaks 200–300 rpm) and the uncharacterized ~2.4 kHz
+(dominates ≥1800 rpm). The review trail below is kept for the record.
+
+**[trail] ~1 kHz peak on UL — REOPENED 2026-10-05 (review): electro-acoustic VFD proposed, verdict UNDER REVIEW.**
 Review (Eskild Herskind) proposes an **electro-acoustic** mechanism that fits Pi's data: the VFD
 magnetostrictively excites the motor iron (the "S-train" whine) → mechanical vibration that propagates from
 the motor to the bench — electrical *origin*, mechanical *propagation*. And **UL heterodynes**, so the
