@@ -152,6 +152,18 @@ the drive **actively driving** the motor (present in decoupled-but-spinning B5, 
 rather than rig rotation. Pi's original desk-analysis follows — its *propagation* finding (it reaches UL via
 the bench, not the bearing) stands; the "not the VFD" part is what review revises.
 
+**Pi re-analysis (2026-10-05) — cannot decide from the archive, withdraws the "not VFD" certainty.** The
+heterodyne is **not visible in the recorded signal** (the ultrasonic peak wanders 32–51 kHz, no stable
+carrier; the envelope of the ultrasound is only 2.2–3.4× floor vs the raw line's 2770×) — **but that only
+rules out heterodyning in the *recording*, not inside the probe.** Open **hardware question (Kim/Eskild):
+does the UL/Kistler probe demodulate internally?** — its datasheet settles it and it changes everything.
+Electro-acoustic vs mechanical is undecidable from the archive (block 5 localises the source to the *motor*
+but magnetostriction and motor imbalance both live there). **Decider — a 500 rpm coast-down:** cut the
+drive while recording; the line **vanishing** on drive-release (shaft still ~500 rpm) = **electro-acoustic**,
+**decaying** with shaft speed = **mechanical**. (Weak archive hints — the line is present in an 86 rpm
+coast-down, and amplitude *falls* with speed — lean mechanical, but in the regime where the effect barely
+exists.)
+
 **[Original, Pi desk-analysis 2026-10-05]** 5 Hz-bin periodograms on the archived blocks refute the
 VFD-**carrier** hypothesis (but not an electro-acoustic VFD origin): the peak is **absent** in all three
 drive-dead blocks *and* in B3a (drive **energized, motor STILL**, +7 % = nothing) — **it requires ROTATION,
