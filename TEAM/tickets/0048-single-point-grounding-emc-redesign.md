@@ -92,6 +92,31 @@ Standard VFD-EMC practice, to be confirmed against the rig's actual layout — n
 - Check filter placement and lead lengths (a sinus/dv-dt filter belongs close to the drive output with
   short leads).
 
+## Experiments to try (Kim + review feedback, 2026-10-05)
+From the review (Eskild Herskind, CeramicSpeed) and Kim, on the counterintuitive "the sinus filter makes
+the sensor noise worse" result. **Mechanism identified:** the VFD couples **capacitively between the stator
+windings and the motor housing** (common-mode); the motor sits **close to the bearings and in direct
+electrical contact with the base plate**, so that common-mode path runs straight into the rig / sensors
+(and is also the classic bearing-current path). Candidates, each tested **one change at a time against the
+decoupled-AE acceptance metric (below), at a verified rpm** (0047):
+
+- **Ferrite / common-mode chokes** on the cables (drive output, and/or the sensor cables). Low risk, often
+  the single most effective CM fix — **try this first.**
+- **Split the shielding by cable SEGMENT.** The **drive→filter** cable carries raw PWM (high CM) and wants
+  shield + 360° ground at both ends. The **filter→motor** cable carries the near-sinusoidal, low-dv/dt
+  output — **Kim's hypothesis (2026-10-05): drop the shield AND the ground at both ends on the filter→motor
+  segment**, because post-filter there is little CM to contain, and that shield/ground is a prime suspect
+  for *being* the coupling path. Consistent with the **+288 % AE** measured when the filter–VFD ground was
+  restored (a closed loop). **Test it; do not assume** — the +288 % still owes one verified-rpm confirm.
+- **Break the motor→base-plate electrical path** if feasible (isolate the motor mount, or give the
+  common-mode current a dedicated return), since that direct contact near the bearings is the suspected
+  injection point.
+- **Single-point / star grounding** (candidate approach above) — but "ground on both sides" already
+  measured **worse** once, so measure each configuration, never strap in blind.
+
+Ceiling (0046 §3.2): the quiet floor is quantization-limited (~1.5–2×), so the gain shows at the *running*
+signal (where AE doubled), not all the way down to the floor.
+
 ## Acceptance test (ready-made from 0046)
 Re-run the **decoupled** 5-series with the **filter ON** under the new grounding: 0 / 500 / 1500 rpm,
 pre-start the drive + passive profile, human-verify speed (0047). **Target: AE at or near its 0.0140 floor
