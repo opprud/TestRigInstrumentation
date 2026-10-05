@@ -117,16 +117,18 @@ decoupled-AE acceptance metric (below), at a verified rpm** (0047):
 Ceiling (0046 §3.2): the quiet floor is quantization-limited (~1.5–2×), so the gain shows at the *running*
 signal (where AE doubled), not all the way down to the floor.
 
-**Specific target — the ~1 kHz peak on UL (Kim, 2026-10-05).** Kim wants the ~1 kHz peak on **UL** killed;
-his hypothesis is the **VFD carrier / switching frequency** (distinct from the instrument-side 1060.7 kHz
-line, which is ~1 MHz). **Tension to resolve:** 0046 found **UL broadly electrically clean** (an energized
-drive moved UL only +2–3 %), so a *narrow* ~1 kHz line the broadband RMS never flagged is plausible but not
-yet attributed. **Confirm cleanly by changing the RS510 carrier-frequency parameter and watching whether
-the peak tracks it** (made-and-unmade): if it moves with the carrier it **is** the switching frequency (a
-narrow VFD line UL does pick up); **if it does NOT move, it is not the VFD** — look at mechanical / resonance
-paths instead (cf. ticket 0040, the UL resonance). If it is the carrier: **raise the carrier** to shift it
-out of band, plus the ferrite / filter / grounding work above. First pin the exact frequency from the
-archived spectra (`0046_spectra.html` / the run h5s) so the before/after is measured, not eyeballed.
+**~1 kHz peak on UL — RESOLVED, and NOT an EMC target (Pi desk-analysis, 2026-10-05).** 5 Hz-bin
+periodograms on the archived blocks refute the VFD-carrier hypothesis: the peak is **absent** in all three
+drive-dead blocks *and* in B3a (drive **energized, motor STILL**, +7 % = nothing) — **it requires ROTATION,
+not an energized drive.** It is a **sharp structural resonance, 0.91–1.00 kHz, Q ≈ 70–100**: independent of
+the sinus filter (present with the filter out, B5f), not a rotation harmonic (speed triples 500→1500 rpm,
+frequency moves 1.5 %), amplitude **falls** with speed (2766× at 500 rpm → 772× at 1500), and it shifts
+~7 % (985–1000 Hz decoupled → 910–925 Hz coupled in the 13 h run) — a switch frequency does not move when
+you decouple a shaft. It reaches UL **even with the motor mechanically decoupled from the bearing**, so the
+path is the **bench structure, not the bearing**. **→ Mechanical, not EMC: tracked under ticket 0040 (UL
+resonance), out of 0048's scope.** Changing the carrier will not touch it. Cheapest next step: **move the UL
+probe at 500 rpm** — if the frequency follows the probe mount, the resonance is in the mount; if it stays,
+it is in the bench. (A *second* resonance at ~2.4 kHz dominates ≥ 1800 rpm — uncharacterized, also 0040.)
 
 ## Acceptance test (ready-made from 0046)
 Re-run the **decoupled** 5-series with the **filter ON** under the new grounding: 0 / 500 / 1500 rpm,
