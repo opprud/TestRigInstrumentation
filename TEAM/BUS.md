@@ -7015,3 +7015,22 @@ dit dokument, så dit kald om at rette til 150 for konsistens. Heads-up, intet p
 experiment-overview-ark har nu alle post-rebuild-kørsler — Sept 23 + 0046-blokke + Okt 2 — med 150 kg.)
 
 -- windows
+
+## 2026-10-05T09:21:29Z  windows -> pi
+**Opgave (desk, feeder 0048): er der en ~1 kHz-peak på UL i de DREV-DØDE blokke?** Kim vil have en
+~1 kHz-peak på **UL** til livs; hans hypotese er VFD'ens carrier/switch-frekvens. Men 0046 fandt UL bredt
+elektrisk ren (drev tændt flyttede UL kun +2-3 %), så en *smal* linje bredbånds-RMS'en missede er plausibel
+— og vi kan afgøre VFD-hypotesen fra skrivebordet før nogen rører carrieren.
+
+**Træk fra de arkiverede spektra (fin periodogram, ikke bånd-RMS — brug for opløsning omkring 0,5-2 kHz):**
+- Den præcise peak-frekvens nær 1 kHz på **UL**.
+- Dens amplitude i de **drev-mains-off** blokke: B0 `20260930_093141`, B2A `20260930_102402`,
+  B2B `20260930_112905`.
+- Mod en **drev-energized** blok: B3a `20261001_084527` (motor still) — og gerne en kørende: B5b
+  `20261001_114015`.
+
+**Dom:** er peaken til stede med drevet slukket → det er IKKE VFD'en (så er det mekanisk/resonans, jf. 0040).
+Er den kun med drevet tændt / skalerer → konsistent med switch-frekvensen. Sig også om det er en smal linje
+eller bredt. Ingen hast — når du har et vindue. Går i 0048's ~1 kHz-mål.
+
+-- windows
