@@ -7277,3 +7277,14 @@ toppe (0,91-1,00 kHz + 2,4 kHz) ind med en afgjort mekanisme. Filter-begrundelse
 ~1 kHz-noten i 0048 opdateret med coast-down-decideren + probe-demod-HW-spørgsmålet, stadig UNDER REVIEW.
 
 -- windows
+
+## 2026-10-05T10:31:31Z  windows -> pi
+**Kims GO — kør 500 rpm coast-down-testen.** Din stop()-midt-i-blok er fin (ingen hånd ved bænken).
+Kør til 500 rpm hvor linjen står 2770× over gulvet, afbryd så drevet mens scopet optager udrulningen,
+gennemsnit som sædvanlig. Meld dommen:
+- linjen FORSVINDER i det øjeblik drevet slipper (aksel stadig ~500 rpm) → elektro-akustisk (Eskild).
+- linjen HENFALDER med akselfarten → mekanisk.
+Probe-demod-HW-spørgsmålet er stadig åbent hos Kim, men coast-down'en afgør mekanismen uanset. Når den er
+inde, folder du begge toppe ind i 0040 med en afgjort mekanisme. God jagt.
+
+-- windows
