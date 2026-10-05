@@ -1,0 +1,348 @@
+{
+  "name": "0049b long-window stop transition, 14 min",
+  "duration_minutes": 14,
+  "description": "0049b / 0040 / 0048 LONG-WINDOW STOP TRANSITION. Second attempt at the drive-vs-rotation decider for UL's ~0.83-0.93 kHz line, after the coast-down approach failed: the shaft goes 190 rpm -> 0 inside one 2.9 s sweep interval at ~150 kg, and the tach reports a STALE value across the stop (two consecutive sweeps 2.8 s apart both read 190.5 rpm), so binning on rpm_meas near a stop bins on a number that is not the shaft speed. METHOD CHANGE: time resolution comes from the RECORD, not the cadence. timebase_range is 5.0 s instead of 0.2, so a whole stop transition falls inside ONE capture; 500 k points over 5 s is 100 kHz sampling, Nyquist 50 kHz, which still covers the ~32 kHz ultrasound feature. Analyse each record in 200 ms slices (5 Hz resolution per slice, 25 slices per record) and track the 830 Hz line's amplitude through the deceleration. LOCATING THE STOP INSIDE THE RECORD - this is why the method works without the tach: SP is dominated by the drive's output stage and is FLAT against shaft speed (measured: 6.3x its floor with the shaft stopped, 7.7x at 3000 rpm), so SP's level drops sharply the moment the drive releases. SP therefore timestamps the drive-off instant within the same record, to within one slice. UL's line is then read before and after that instant while the shaft is still turning. VERDICT: the line collapses at SP's drop, while the shaft is still turning -> electro-acoustic, the drive is the source. The line decays smoothly with shaft speed, indifferent to SP's drop -> mechanical resonance. 18 cycles of 200 rpm (where the line peaks at ~41x, not 500 rpm) for 21 s then 0 for 21 s. The 42 s cycle against an ~8 s sweep period drifts the phase 2 s per cycle, so stops land at every offset within the 5 s window and several will fall mid-window rather than at its edge.",
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 24,
+        "value": 0
+      },
+      {
+        "time_sec": 25,
+        "value": 200
+      },
+      {
+        "time_sec": 45,
+        "value": 200
+      },
+      {
+        "time_sec": 46,
+        "value": 0
+      },
+      {
+        "time_sec": 66,
+        "value": 0
+      },
+      {
+        "time_sec": 67,
+        "value": 200
+      },
+      {
+        "time_sec": 87,
+        "value": 200
+      },
+      {
+        "time_sec": 88,
+        "value": 0
+      },
+      {
+        "time_sec": 108,
+        "value": 0
+      },
+      {
+        "time_sec": 109,
+        "value": 200
+      },
+      {
+        "time_sec": 129,
+        "value": 200
+      },
+      {
+        "time_sec": 130,
+        "value": 0
+      },
+      {
+        "time_sec": 150,
+        "value": 0
+      },
+      {
+        "time_sec": 151,
+        "value": 200
+      },
+      {
+        "time_sec": 171,
+        "value": 200
+      },
+      {
+        "time_sec": 172,
+        "value": 0
+      },
+      {
+        "time_sec": 192,
+        "value": 0
+      },
+      {
+        "time_sec": 193,
+        "value": 200
+      },
+      {
+        "time_sec": 213,
+        "value": 200
+      },
+      {
+        "time_sec": 214,
+        "value": 0
+      },
+      {
+        "time_sec": 234,
+        "value": 0
+      },
+      {
+        "time_sec": 235,
+        "value": 200
+      },
+      {
+        "time_sec": 255,
+        "value": 200
+      },
+      {
+        "time_sec": 256,
+        "value": 0
+      },
+      {
+        "time_sec": 276,
+        "value": 0
+      },
+      {
+        "time_sec": 277,
+        "value": 200
+      },
+      {
+        "time_sec": 297,
+        "value": 200
+      },
+      {
+        "time_sec": 298,
+        "value": 0
+      },
+      {
+        "time_sec": 318,
+        "value": 0
+      },
+      {
+        "time_sec": 319,
+        "value": 200
+      },
+      {
+        "time_sec": 339,
+        "value": 200
+      },
+      {
+        "time_sec": 340,
+        "value": 0
+      },
+      {
+        "time_sec": 360,
+        "value": 0
+      },
+      {
+        "time_sec": 361,
+        "value": 200
+      },
+      {
+        "time_sec": 381,
+        "value": 200
+      },
+      {
+        "time_sec": 382,
+        "value": 0
+      },
+      {
+        "time_sec": 402,
+        "value": 0
+      },
+      {
+        "time_sec": 403,
+        "value": 200
+      },
+      {
+        "time_sec": 423,
+        "value": 200
+      },
+      {
+        "time_sec": 424,
+        "value": 0
+      },
+      {
+        "time_sec": 444,
+        "value": 0
+      },
+      {
+        "time_sec": 445,
+        "value": 200
+      },
+      {
+        "time_sec": 465,
+        "value": 200
+      },
+      {
+        "time_sec": 466,
+        "value": 0
+      },
+      {
+        "time_sec": 486,
+        "value": 0
+      },
+      {
+        "time_sec": 487,
+        "value": 200
+      },
+      {
+        "time_sec": 507,
+        "value": 200
+      },
+      {
+        "time_sec": 508,
+        "value": 0
+      },
+      {
+        "time_sec": 528,
+        "value": 0
+      },
+      {
+        "time_sec": 529,
+        "value": 200
+      },
+      {
+        "time_sec": 549,
+        "value": 200
+      },
+      {
+        "time_sec": 550,
+        "value": 0
+      },
+      {
+        "time_sec": 570,
+        "value": 0
+      },
+      {
+        "time_sec": 571,
+        "value": 200
+      },
+      {
+        "time_sec": 591,
+        "value": 200
+      },
+      {
+        "time_sec": 592,
+        "value": 0
+      },
+      {
+        "time_sec": 612,
+        "value": 0
+      },
+      {
+        "time_sec": 613,
+        "value": 200
+      },
+      {
+        "time_sec": 633,
+        "value": 200
+      },
+      {
+        "time_sec": 634,
+        "value": 0
+      },
+      {
+        "time_sec": 654,
+        "value": 0
+      },
+      {
+        "time_sec": 655,
+        "value": 200
+      },
+      {
+        "time_sec": 675,
+        "value": 200
+      },
+      {
+        "time_sec": 676,
+        "value": 0
+      },
+      {
+        "time_sec": 696,
+        "value": 0
+      },
+      {
+        "time_sec": 697,
+        "value": 200
+      },
+      {
+        "time_sec": 717,
+        "value": 200
+      },
+      {
+        "time_sec": 718,
+        "value": 0
+      },
+      {
+        "time_sec": 738,
+        "value": 0
+      },
+      {
+        "time_sec": 739,
+        "value": 200
+      },
+      {
+        "time_sec": 759,
+        "value": 200
+      },
+      {
+        "time_sec": 760,
+        "value": 0
+      },
+      {
+        "time_sec": 780,
+        "value": 0
+      },
+      {
+        "time_sec": 781,
+        "value": 0
+      },
+      {
+        "time_sec": 800,
+        "value": 0
+      }
+    ],
+    "temperature": []
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 500000,
+    "samples_per_step": 3,
+    "interval_sec": 8,
+    "waveform_format": "WORD",
+    "acq_type": "NORM",
+    "points_mode": "RAW"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 5.0,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 5.0,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 5.0,
+      "volt_range": 8.0,
+      "volt_offset": 4.5,
+      "coupling": "DC"
+    }
+  },
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true,
+    "vfd_stop_on_end": true
+  }
+}
