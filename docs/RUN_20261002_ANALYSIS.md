@@ -115,8 +115,8 @@ recorded time-since-start; this quantifies why. It also explains how a single ra
 
 ## 5. Limits
 
-- One run, one oil, one clamp load (~150 kg (standardised 2026-10-05; above the cell's range, so **load is null throughout** —
-  take it from the notes, not the file).
+- One run, one oil, one clamp load — **150 kg**, the standard set 2026-10-05, which is above the load
+  cell's range, so **load is null throughout the file**: take it from these notes, not from the h5.
 - Temperature and time-since-start are **correlated by construction** in this profile: SV rises
   monotonically. §3 separates them only because the first hour holds temperature roughly constant while
   the transient runs. A proper separation needs the temperature-cycling design of `UL_TempCycle_6h`.
