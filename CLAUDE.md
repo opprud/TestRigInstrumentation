@@ -503,6 +503,32 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   cold start had a coin-flip chance of silently running at the wrong memory depth. Nothing to do about the
   refusal itself; just never remove those retries.
 
+- **⚠️ A profile with no `duration_minutes` captures exactly ONE sweep — silently (found 2026-10-05).**
+  `_apply_profile_to_scope_cfg` reads the run length from **top-level `duration_minutes`** (or
+  `test_parameters.duration_minutes`) and falls back to **0**, which makes `samples = max(1, 0) = 1`.
+  The runner then drives the **whole** rpm schedule normally: the motor cycles, telemetry streams, the
+  log looks healthy, and twenty minutes of rig time produce **one** scope capture. The only visible tell
+  is `Sweep 1/1` in the log. Every working profile carries the field; a newly written one easily does not.
+  **Check `Sweep n/N` in the first minute of any new profile.**
+
+- **⚠️ THE SHAFT HAS NO COAST — it goes from 190 rpm to 0 inside one 2.9 s sweep interval, so
+  coast-down experiments do not work at this clamp load (2026-10-05, run `20261005_124521`).** Nine stop
+  events, every one of them 190.4 rpm -> **0.0** with no intermediate value ever recorded. At ~150 kg the
+  friction stops it almost instantly.
+
+  **And the tach reports a STALE value across the stop.** The sweep taken at the stop still reads
+  190.4-190.6 rpm because the tach's 1.5 s timeout has not expired, so its last computed period is
+  returned for a shaft that is already stopping. One pair of consecutive sweeps 2.8 s apart both read
+  190.5 rpm, which is impossible for an unpowered shaft that reaches 0 before the next sample. **Any
+  analysis that bins on `rpm_meas` near a stop is binning on a number that is not the shaft speed** —
+  this invalidated a first attempt at the 0049 drive-vs-rotation comparison, where "coasting at 190 rpm"
+  was not at 190 rpm at all.
+
+  **The fix for a transition measurement is one LONG capture, not more sweeps.** Raise
+  `timebase_range` to 2-5 s so the whole stop falls inside a single record, then resolve it in slices
+  within that record. The scope's ~2.9 s transfer time makes faster sweeping impossible, so time
+  resolution has to come from the record, not from the cadence.
+
 - **⚠️ A run with the VFD POWERED DOWN kills itself after 10 ticks — raise
   `max_consecutive_modbus_errors` for any block that needs the drive dead (found 2026-09-30).** The
   runner polls `vfd.get_status()` every tick purely for logging. With the drive unpowered those reads
