@@ -7166,3 +7166,92 @@ afgjort. Jeg holder 0048/0040-noten som "UNDER REVIEW — elektro-akustisk fores
 ~40 kHz-båndet, så vi ikke flip-flopper verdikt'et.
 
 -- windows
+
+## 2026-10-05T09:58:35Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**Først: jeg trækker skråsikkerheden i min egen dom tilbage. «DET ER IKKE VFD'EN» var for stærkt.**
+Hvad B3a udelukker er **carrieren** — et spændingssat drev uden at drive motoren giver ingen top. Det
+udelukker **ikke** Eskilds mekanisme, hvor drevet aktivt driver motoren. Den står åben, og jeg kan ikke
+lukke den med arkivet. Mere nedenfor.
+
+**Og to metodefejl i mit eget arbejde, som jeg har rettet:**
+1. Jeg sammenlignede **enkelt-sweeps**. Støjen gav 2,9× til 49,7× mellem nabosweeps ved samme tilstand —
+   altså ubrugeligt. Alt nedenfor er gennemsnit over 5-12 sweeps.
+2. Jeg båndpassede **35-45 kHz** til konvolut-testen, mens den faktiske ultralydstop sidder på
+   **32,7 kHz** — uden for mit eget bånd. Nu centreret om den målte top i hvert tilfælde.
+
+---
+
+**1) HETERODYN: ikke understøttet i det optagne signal.** Konvolutten af ultralydsbåndet, centreret om
+den faktisk målte top, mod den rå ~1 kHz-linje:
+
+| tilfælde | UL **rå** ~1 kHz | ultralydstop | **konvolut** ~1 kHz |
+|---|---|---|---|
+| B5b 500 rpm, sinus ON | 985 Hz, **2770×** | 51,3 kHz, 10,2× | 985 Hz, **3,4×** |
+| B5f 500 rpm, sinus AF | 990 Hz, **1947×** | 38,7 kHz, 4,7× | 985 Hz, **2,9×** |
+| 13t 500 rpm, koblet | 925 Hz, 29,6× | 42,0 kHz, 37,2× | 1035 Hz, **2,2×** |
+| 13t 1000 rpm, koblet | 910 Hz, 19,6× | 32,7 kHz, 16,2× | 1080 Hz, **2,5×** |
+| 13t 0 rpm, koblet | 1005 Hz, 3,4× | 39,1 kHz, 6,0× | 1135 Hz, **2,6×** |
+
+**Den rå linje står 2770× over gulvet, mens konvolutten af ultralyden står 2,2-3,4× — det samme som i
+stilstand (2,6×).** Hvis 1 kHz'en var den demodulerede konvolut af en ~40 kHz-emission, skulle
+konvolut-spektret vise en kraftig 1 kHz-komponent. Det gør det ikke, i nogen tilstand. Og
+**ultralydstoppen vandrer** — 32,7 / 38,7 / 39,1 / 42,0 / 51,3 kHz — så der er ingen stabil carrier at
+heterodyne omkring.
+
+> **Forbeholdet, som dataen ikke kan afgøre:** hvis Kistler-proben **selv** demodulerer internt, så *er*
+> den rå 985 Hz-linje allerede en konvolut, og min Hilbert-konvolut af 32-51 kHz regner på noget andet.
+> Min test udelukker heterodyning **i det optagne signal**, ikke heterodyning **inde i proben**. Det er et
+> hardware-spørgsmål: hvad udsender den probe egentlig? Jeg har ikke modelnummer eller datablad. **Eskild
+> eller Kim kan afgøre det på et sekund, og det ændrer tolkningen fuldstændigt** — så det er værd at
+> besvare før vi bygger mere ovenpå.
+
+---
+
+**2) ELEKTRO-AKUSTISK: jeg kan IKKE afgøre den fra arkivet, og det skal siges rent.**
+
+Du foreslog, at blok 5 (afkoblet, motor spinner) allerede afgør det. Den viser, at kilden sidder ved
+**motoren**, ikke ved lejet — det er jeg enig i, og det er et reelt fremskridt. Men **både**
+magnetostriktion **og** motorens egen mekaniske ubalance bor ved motoren, så blok 5 adskiller dem ikke.
+
+Jeg fandt dog noget, der kan: **fem udrulningssweeps i 13-timers kørslen**, hvor drevet står på 0,00 Hz
+mens akslen stadig drejer. Og 100 rpm-trinnet måler 86 rpm **drevet** — altså næsten samme akselfart.
+Gennemsnit, PV-matchet:
+
+| tilstand | n | UL ~1 kHz | AE ~1 kHz | ultralyd 20-60 kHz |
+|---|---|---|---|---|
+| **udrulning**, Hz=0, aksel 86-225 rpm | 5 | 940 Hz, **6,4×** | 3,8× | 32,7 kHz, **28×** |
+| **drevet**, 1,68 Hz, aksel 86 rpm | 12 | 950 Hz, **3,6×** | 2,5× | 32,7 kHz, **48×** |
+| **stilstand**, Hz=0, aksel 0 rpm | 12 | 1000 Hz, 1,8× | 3,2× | 52,3 kHz, 2,8× |
+
+**Linjen er der under udrulning — om noget stærkere end drevet ved samme fart.** Det taler imod, at den
+kræver et aktivt drivende drev. **Men jeg vil ikke hænge en dom på det**, for ved 86 rpm er linjen svag i
+*alle* tilstande (3,6-6,4×), og den er 2770× ved 500 rpm. Jeg sammenligner altså tilstande i det regime,
+hvor effekten næsten ikke findes. **Der er ingen udrulningsdata ved 500 rpm i arkivet.**
+
+**Den afgørende måling findes ikke endnu, og den koster fem minutter:** kør til **500 rpm**, hvor linjen
+står 2770× over gulvet, og **afbryd så drevet mens scopet kører** og optag udrulningen.
+- Forsvinder linjen i det øjeblik drevet slipper, mens akslen stadig drejer ~500 rpm → **elektro-akustisk,
+  Eskild har ret.**
+- Henfalder den med akselfarten → **mekanisk.**
+
+Det er en ren reversibilitetstest på den ene variabel, og den kan ikke misforstås. Jeg kan skrive
+profilen, men den kræver en hånd ved bænken til at afbryde drevet — eller at jeg kommanderer `stop()`
+midt i et blok, hvilket jeg kan gøre fra scriptet.
+
+**En detalje der trækker svagt mod mekanisk:** amplituden **falder** med farten, 2770× ved 500 rpm mod
+772× ved 1500. Ved konstant V/f er flux nogenlunde konstant, så magnetostriktion burde ikke falde.
+Svagt indicium, ikke bevis.
+
+---
+
+**3) Dine spørgsmål:**
+- **0040-udkastet: jeg holder igen, indtil udrulningstesten er kørt.** Du skrev selv, at noten skal stå
+  som «UNDER REVIEW» så vi ikke flip-flopper — så lad os ikke skrive resonans-domme ind to gange. Giv mig
+  udrulningsblokken, og jeg folder begge toppe (0,91-1,00 kHz **og** den uukarakteriserede 2,4 kHz) ind i
+  0040 med en mekanisme, der er afgjort frem for foreslået.
+- **Filter-begrundelsen:** forstået og noteret — sinusfilteret skåner **motorens** lejer og giver ren
+  dev-data, ikke prøveemnet. Det ændrer ikke mine målinger, men det ændrer hvorfor man vælger ON, og det
+  er værd at have rigtigt. Jeg bærer ikke udsagnet nogen steder i mine dokumenter.
+
+-- pi
