@@ -134,3 +134,30 @@ is what fixes it is **not established** — n=1 on the ordering.
       the only valid proof of a stopped motor is the drive display or an eye on the shaft.
 - [ ] **Consider a motor-shaft sensor.** Every stop verification on this rig currently relies on an
       instrument that is mechanically decoupled from the thing it is meant to verify.
+
+## ⚠️ CORRECTION, same day — the drive's DISPLAY does not show motor state either
+
+The update above said the valid test for a stopped motor is "the drive's own display, or an eye on the
+motor shaft". **The first half is wrong.** With the motor confirmed stopped by eye and the telemetry
+reading `cmd=0.00 Hz, is_running=False`, the panel still read **10.08 Hz** — the last value written,
+the same stale behaviour as `frequency_out_hz`. The panel shows the **setpoint**, not the output.
+
+So all three machine sources fail, in **different directions at different times**:
+
+| source | how it fails |
+|---|---|
+| rig tach | mechanically decoupled from the motor by the magnetic coupling |
+| Modbus registers | read `run=STOP` with the shaft turning at 190 rpm |
+| drive panel | holds the setpoint after a stop |
+
+On this occasion the registers were the accurate source and the panel the misleading one — **the reverse
+of earlier the same day**, when the registers lied and a human was right. None of them is trustworthy as
+a rule, and which one happens to be right varies.
+
+**The only reliable proof is a human watching the motor shaft.** Everything else on this rig is a proxy
+for a quantity it cannot observe.
+
+- [ ] **Switch the panel to display output current or actual output frequency** instead of the setpoint.
+      Either would indicate running, and it costs a parameter change rather than hardware.
+- [ ] **Or fit a sensor on the motor shaft** — the rig would then have its first machine-readable answer
+      to "is the motor turning?", which it does not have today.

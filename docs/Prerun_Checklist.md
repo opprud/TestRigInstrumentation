@@ -66,9 +66,24 @@ sleep 15
 > been caught reporting `run=STOP` with the shaft turning at 190 rpm. **The rig has NO sensor on the
 > motor shaft at all.**
 >
-> **The only valid proof that the motor has stopped is the drive's own display, or an eye on the motor
-> shaft.** Use the tach check below for the rig shaft, which is what it can see, and read the drive's
-> panel for the motor.
+> **⚠️ AND THE DRIVE'S DISPLAY DOES NOT SHOW IT EITHER — it shows the SETPOINT (2026-10-20).** An earlier
+> version of this entry said the panel was the valid test. It is not: with the motor confirmed stopped by
+> eye and the telemetry reading `cmd=0.00 Hz, is_running=False`, **the panel still read 10.08 Hz** — the
+> last value written to it, exactly the same stale behaviour as `frequency_out_hz` in the registers.
+>
+> So all three machine sources fail, and they fail in **different directions at different times**: the
+> tach is mechanically decoupled from the motor, the registers have read `run=STOP` with the shaft at
+> 190 rpm, and the panel holds the setpoint after a stop. On this one occasion the registers happened to
+> be the accurate source and the panel the misleading one — the reverse of earlier the same day. **That
+> is the point: none of them can be trusted as a rule.**
+>
+> **The only reliable proof that the motor has stopped is a human looking at the motor shaft.** Use the
+> tach check below for the **rig shaft**, which is what it can honestly see, and write the human
+> observation down with a timestamp.
+>
+> **Worth fixing:** the panel can usually be switched to display **output current** or **actual output
+> frequency** instead of the setpoint, and either would indicate running. That, or a sensor on the motor
+> shaft, would give the rig its first machine-readable answer to "is the motor turning?".
 >
 > The same applies in reverse when the motor is deliberately disengaged (the wheels turned apart): a run
 > logging `rpm_meas = 0` through a 600 or 3000 rpm segment is then **correct**, not failed — and the
