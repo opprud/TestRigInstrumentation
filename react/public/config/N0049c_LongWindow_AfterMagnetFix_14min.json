@@ -1,0 +1,348 @@
+{
+  "name": "0049c after magnet fix, 200 rpm, 14 min",
+  "duration_minutes": 14,
+  "description": "0049c / 0040 AFTER-MEASUREMENT FOR THE LOOSE COUPLING MAGNET. Kim traced a tick from the rig to a LOOSE MAGNET on the coupling between the rig shaft and the motor shaft, and tightened it (2026-10-20). A loose magnet is a rotating IMPACT source, which is exactly what excites a resonance - and that matches what 0040 measured about UL's 0.83-1.00 kHz line: the frequency does NOT scale with speed (985 Hz at 500 rpm, 1000 Hz at 1500, so impact rate follows the shaft while the ring frequency is fixed by the structure), it requires rotation but not the drive, it shifts with mechanical configuration, and UL sees it strongly while the accelerometer barely does - which is what an acoustic-emission probe does with impact transients. EVERY SETTING HERE IS IDENTICAL TO N0049b (run 20261005_131704, 2026-10-05), which is the BEFORE measurement: same 200 rpm cycles, same 5 s timebase, same 500 k points, same channel ranges. The only difference in the world is the tightened magnet. REFERENCE VALUES TO BEAT: the line sat at 820-845 Hz in 0049b; 41.2x the local floor at 192 rpm in the 13 h run 20261002_122423; up to 2770x in the decoupled 0046 block B5b. VERDICT: the line gone or much reduced -> the loose magnet was the exciter, and this is a FAULT that was fixed rather than a property of the rig to live with. The line unchanged -> the magnet was not the source and the resonance has another exciter still to find. Either way the archive needs a caveat: if the magnet was loose through the 0046 blocks and the 13 h run, the ~1 kHz content in all of that is this artefact. How far back it goes is UNKNOWN - do not guess a date.",
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 24,
+        "value": 0
+      },
+      {
+        "time_sec": 25,
+        "value": 200
+      },
+      {
+        "time_sec": 45,
+        "value": 200
+      },
+      {
+        "time_sec": 46,
+        "value": 0
+      },
+      {
+        "time_sec": 66,
+        "value": 0
+      },
+      {
+        "time_sec": 67,
+        "value": 200
+      },
+      {
+        "time_sec": 87,
+        "value": 200
+      },
+      {
+        "time_sec": 88,
+        "value": 0
+      },
+      {
+        "time_sec": 108,
+        "value": 0
+      },
+      {
+        "time_sec": 109,
+        "value": 200
+      },
+      {
+        "time_sec": 129,
+        "value": 200
+      },
+      {
+        "time_sec": 130,
+        "value": 0
+      },
+      {
+        "time_sec": 150,
+        "value": 0
+      },
+      {
+        "time_sec": 151,
+        "value": 200
+      },
+      {
+        "time_sec": 171,
+        "value": 200
+      },
+      {
+        "time_sec": 172,
+        "value": 0
+      },
+      {
+        "time_sec": 192,
+        "value": 0
+      },
+      {
+        "time_sec": 193,
+        "value": 200
+      },
+      {
+        "time_sec": 213,
+        "value": 200
+      },
+      {
+        "time_sec": 214,
+        "value": 0
+      },
+      {
+        "time_sec": 234,
+        "value": 0
+      },
+      {
+        "time_sec": 235,
+        "value": 200
+      },
+      {
+        "time_sec": 255,
+        "value": 200
+      },
+      {
+        "time_sec": 256,
+        "value": 0
+      },
+      {
+        "time_sec": 276,
+        "value": 0
+      },
+      {
+        "time_sec": 277,
+        "value": 200
+      },
+      {
+        "time_sec": 297,
+        "value": 200
+      },
+      {
+        "time_sec": 298,
+        "value": 0
+      },
+      {
+        "time_sec": 318,
+        "value": 0
+      },
+      {
+        "time_sec": 319,
+        "value": 200
+      },
+      {
+        "time_sec": 339,
+        "value": 200
+      },
+      {
+        "time_sec": 340,
+        "value": 0
+      },
+      {
+        "time_sec": 360,
+        "value": 0
+      },
+      {
+        "time_sec": 361,
+        "value": 200
+      },
+      {
+        "time_sec": 381,
+        "value": 200
+      },
+      {
+        "time_sec": 382,
+        "value": 0
+      },
+      {
+        "time_sec": 402,
+        "value": 0
+      },
+      {
+        "time_sec": 403,
+        "value": 200
+      },
+      {
+        "time_sec": 423,
+        "value": 200
+      },
+      {
+        "time_sec": 424,
+        "value": 0
+      },
+      {
+        "time_sec": 444,
+        "value": 0
+      },
+      {
+        "time_sec": 445,
+        "value": 200
+      },
+      {
+        "time_sec": 465,
+        "value": 200
+      },
+      {
+        "time_sec": 466,
+        "value": 0
+      },
+      {
+        "time_sec": 486,
+        "value": 0
+      },
+      {
+        "time_sec": 487,
+        "value": 200
+      },
+      {
+        "time_sec": 507,
+        "value": 200
+      },
+      {
+        "time_sec": 508,
+        "value": 0
+      },
+      {
+        "time_sec": 528,
+        "value": 0
+      },
+      {
+        "time_sec": 529,
+        "value": 200
+      },
+      {
+        "time_sec": 549,
+        "value": 200
+      },
+      {
+        "time_sec": 550,
+        "value": 0
+      },
+      {
+        "time_sec": 570,
+        "value": 0
+      },
+      {
+        "time_sec": 571,
+        "value": 200
+      },
+      {
+        "time_sec": 591,
+        "value": 200
+      },
+      {
+        "time_sec": 592,
+        "value": 0
+      },
+      {
+        "time_sec": 612,
+        "value": 0
+      },
+      {
+        "time_sec": 613,
+        "value": 200
+      },
+      {
+        "time_sec": 633,
+        "value": 200
+      },
+      {
+        "time_sec": 634,
+        "value": 0
+      },
+      {
+        "time_sec": 654,
+        "value": 0
+      },
+      {
+        "time_sec": 655,
+        "value": 200
+      },
+      {
+        "time_sec": 675,
+        "value": 200
+      },
+      {
+        "time_sec": 676,
+        "value": 0
+      },
+      {
+        "time_sec": 696,
+        "value": 0
+      },
+      {
+        "time_sec": 697,
+        "value": 200
+      },
+      {
+        "time_sec": 717,
+        "value": 200
+      },
+      {
+        "time_sec": 718,
+        "value": 0
+      },
+      {
+        "time_sec": 738,
+        "value": 0
+      },
+      {
+        "time_sec": 739,
+        "value": 200
+      },
+      {
+        "time_sec": 759,
+        "value": 200
+      },
+      {
+        "time_sec": 760,
+        "value": 0
+      },
+      {
+        "time_sec": 780,
+        "value": 0
+      },
+      {
+        "time_sec": 781,
+        "value": 0
+      },
+      {
+        "time_sec": 800,
+        "value": 0
+      }
+    ],
+    "temperature": []
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 500000,
+    "samples_per_step": 3,
+    "interval_sec": 8,
+    "waveform_format": "WORD",
+    "acq_type": "NORM",
+    "points_mode": "RAW"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 5.0,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 5.0,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 5.0,
+      "volt_range": 8.0,
+      "volt_offset": 4.5,
+      "coupling": "DC"
+    }
+  },
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true,
+    "vfd_stop_on_end": true
+  }
+}
