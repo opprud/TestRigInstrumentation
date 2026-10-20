@@ -7799,3 +7799,75 @@ resonans, til stede motor-alene via rammen, koblet løfter bredbånd. Luftspalte
 diskriminator; probe-flytningen udgår. Jeg melder begge forslag til Kim nu.
 
 -- windows
+
+## 2026-10-20T10:22:52Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**Status: slæberingssensoren er flyttet til direkte BNC-kabel, og det har gjort SP-vinduet forkert i
+48 af bibliotekets 51 profiler. En smoke test kører lige nu for at måle det rigtige vindue.**
+
+**1 — Hvad der er sket med SP.** Kim satte et BNC-kabel direkte på slæberingssensoren og syntes, det så
+støjfyldt ud — og gættede selv på, at scopets probe-faktor skulle fra ×10 til ×1. **Det var rigtigt, og
+konsekvensen var værre end støj.** CHAN3 stod på PROBE **×10** mens UL og AE stod på ×1. Med ×10 sætter
+scopet sit *faktiske* indgangsområde til range/10, altså **0,8 V** i stedet for 8 V, og offset til 0,45 V.
+Et ~5 V-signal gennem et direkte kabel lå dermed langt uden for — kanalen var kørt i bund mod skinnen, og
+det der lignede støj var et klippet signal.
+
+**×10 var korrekt i hele arkivet**, så længe der sad en ×10-probe: den delte med ti ved indgangen, scopet
+gangede med ti i softwaren, og SP's dokumenterede **+4,99 V** var rigtig. Det er kabelskiftet, der gjorde
+indstillingen forkert, ikke indstillingen der var forkert.
+
+**2 — Og en fælde i koden, som gjorde det muligt:** `acquire_scope_data.py` **læser** `:CHANx:PROB?` og
+gemmer den som metadata `probe_attenuation`, men **sætter den aldrig**. Probe-faktoren er altså en
+upåagtet frontpanel-tilstand, som ingen profil ejer — samme fejlklasse som kanal-visningen, der engang
+persisterede fra frontpanelet og kunne give en kørsel med én sensor af tre. **Forslag: `scope_channels`
+får et `probe`-felt, så profilen sætter den eksplicit.** Det gode er, at feltet *registreres*, så arkivet
+kunne fortælle mig, at SP har stået på ×10 i hver eneste kørsel.
+
+**3 — Signalet er et andet nu, ikke bare skaleret anderledes.** Målt med scopets egne målefunktioner,
+vindue åbnet til ±20 V:
+
+| tilstand | middel | min | max | Vpp |
+|---|---|---|---|---|
+| stilstand | **+0,37 V** | −0,60 | — | 2,0 |
+| motor kører (191 rpm) | **+4,69 V** | **−1,20** | +5,60 | 6,60 |
+| motor kører (2) | +4,79 V | **−2,80** | +5,40 | 6,40 |
+
+To ting skiller sig ud mod det dokumenterede. **DC-niveauet er ikke længere stabilt** — arkivet har SP
+som "rock-steady Vavg 4,87 V" uanset rotation, men nu står den på 0,37 V i ro og springer til 4,7 V når
+motoren kører. **Og signalet går under nul**, ned til −2,8 V, hvilket det gamle vindue 0,5-8,5 V ville
+klippe hver gang.
+
+**Jeg har to konkurrerende forklaringer og kan ikke adskille dem herfra.** Enten taper kablet et andet
+punkt end proben gjorde — så måler vi noget andet, og 5 V-referencen i dokumentationen gælder ikke. Eller
+også **belaster kablet kilden**: en ×10-probe har ~10 MΩ, et direkte kabel til scopet har 1 MΩ, altså ti
+gange tungere last. Er slæberingens udgangsimpedans høj, trækkes signalet ned — og så var proben
+**bedre**, og det direkte kabel forringer målingen. Det bør afklares før SP-data bruges til noget.
+
+**4 — Omfanget: 48 af 51 profiler ville klippe SP nu.** Alle med 8,0/4,5 (bund 0,5 V) og seks ældre med
+6,0/5,0 (bund 2,0 V), heriblandt **`Keratech22.json`**, hele 0046-serien, `UL_TempCycle_6h`,
+`RestReset_ConstTemp_6h` og standard-smoke-testen. Kun `N0046_B0b_ShortedInput` og den superseded
+april-fil har et vindue, der når ned til −4 V.
+
+**Jeg retter dem ikke på et gæt.** Alle mine tal er fra **191 rpm**, og slæberingens udsving vokser med
+omdrejningerne — i den gamle skalering fire gange fra ro til 1176 rpm. Derfor kører der nu en smoke test
+(`N0050_SmokeTest_SPwide_15min`, kørsel `20261020_121856`) med SP midlertidigt på 32 V/1,5 V, som måler
+udstrækningen ved 600, 1800 og 3000 rpm. **Det vide vindue er til at måle med, ikke til at beholde:** 32 V
+giver 0,161 V-trin, så signalet bruger ~52 af scopets ~199 niveauer mod 139 ved 1,5 V/div. Når kørslen er
+færdig, sætter jeg det rigtige vindue i hele biblioteket på én gang med det målte tal.
+
+**5 — Og en rigtig alvorlig ting om motoren, som skal stå et sted.** Drevet har i dag nægtet
+frekvensskrivninger gentagne gange (`Write error 0x2502`), så motoren hang på 191 rpm gennem kommandoer
+til 600, 1800 og 3000 rpm — og stop-kommandoer fejlede fire-fem gange i træk. **Det der virker er at give
+bussen 45 sekunders ro og så gøre ÉT forsøg**, hvor drevet svarer sandfærdigt (`run=RUN_FORWARD` mens
+akslen kører). Det har virket tre gange i træk, hvor retry-løkker fejlede hver gang.
+
+**Og min stop-verifikation har et blindt punkt, jeg ikke havde set: tacho sidder på BØJLEAKSLEN, og
+koblingen er magnetisk.** `rpm=0` med frossen pulstælling beviser derfor kun, at riggens aksel står
+stille — **ikke at motoren er stoppet.** Kim kunne se motoren køre, mens min prøve sagde "stoppet".
+Riggen har ingen føler på motorakslen, og drevets registre lyver dokumenterbart. **Prerun-checklistens §3
+skal omformuleres**, for den regel blev skrevet før magnetkoblingen var klar for os: det eneste gyldige
+bevis for en stoppet motor er drevets display eller et øje på motorakslen.
+
+Kim har i øvrigt smurt lejet med Keratech 22 før denne kørsel, så indkøringstransienten er til stede i UL.
+
+-- pi
