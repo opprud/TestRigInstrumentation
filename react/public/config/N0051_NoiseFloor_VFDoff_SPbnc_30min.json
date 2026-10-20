@@ -1,0 +1,43 @@
+{
+  "name": "0051 noise floor VFD OFF, sensors on, SP via BNC, 30 min",
+  "duration_minutes": 30,
+  "description": "0051 NOISE FLOOR RE-MEASUREMENT after the slip-ring sensor moved to a DIRECT BNC CABLE. Matches ticket 0046 BLOCK 0 (run 20260930_093141) in every respect that can be matched - 30 minutes, 0 rpm throughout, VFD mains OFF, sensors powered - so the comparison against docs/0046_noise_floor.csv isolates the one thing that changed: SP's cabling and its probe factor. SP WINDOW IS 9.0/2.0 (-2.5 to +6.5 V), sized on measured data from run 20261020_121856 rather than guessed: SP now runs -1.23 to +5.52 V across 0/600/1800/3000 rpm. The old 0.5-8.5 V window clipped every negative excursion, and CHAN3 had to go from PROBE 10x to 1x for the direct cable. REQUIRED: control.max_consecutive_modbus_errors is raised because the VFD is dead - every Modbus read times out and the failed connects lock the shared RS485 port so the Omron read fails too, so nothing resets the counter and the safety stop fires after ten ticks. That killed 0046's first bare-floor attempt three minutes into a thirty minute block. Expect the log to fill with 'Could not exclusively lock port /dev/ttyUSB0' and omron_pv_c to be null - both are expected when the bus has nothing to talk to. DO NOT carry this setting into a profile that drives the motor: there it is exactly the guard that stops a run whose drive has stopped answering. VERIFY IN THE RESULTING FILE: metadata probe_attenuation must read SP=1.0 (the code records this field but never sets it, so it is unmanaged front-panel state). The rpm setpoint list is EMPTY and vfd_stop_on_end is false - the passive-profile pattern, so the runner never touches the drive at all, exactly as block 0 did.",
+  "setpoints": {
+    "rpm": [],
+    "temperature": []
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 9.0,
+      "volt_offset": 2.0,
+      "coupling": "DC"
+    }
+  },
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true,
+    "max_consecutive_modbus_errors": 10000000,
+    "vfd_stop_on_end": false
+  }
+}
