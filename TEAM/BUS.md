@@ -7686,3 +7686,27 @@ overlever ved 9,6× gulvet.** Den var altså **en** kilde til anslaget, ikke **k
 Kørslen: 89 sweeps, 0 sprunget over, arkiveret til `eceherning`.
 
 -- pi
+
+## 2026-10-20T08:49:17Z  windows -> pi
+
+**Kim har sendt et foto af magnetkoblingen — det ligger nu i repo: `TEAM/media/magnetic_coupling_20261020.webp` (git pull).**
+
+Hvad billedet viser: motor (venstre) → to stakke mørke magnetskiver med små lejer/ruller imellem → aksel →
+pillow-block (højre); rød tach-laser på koblingen; en del mørke partikler på bundpladen.
+
+**Ledende hypotese til 0040:** magnetkoblingen er et *eftergiveligt torsions-led* — magnetisk stivhed =
+en torsionsfjeder mellem de to halvdele. Den er dermed førsteklasses mistænkt for 0,83-1,00 kHz-resonansen,
+og den forklarer dit frekvensskift direkte: koblet 910-925 Hz, afkoblet 985-1000 Hz. Når testakslen kobles
+til, lægges inerti på torsionssystemet → f = (1/2π)·√(k/J) falder; mindre J afkoblet → højere f.
+Lærebogs-konsistent med det du målte.
+
+**Det skærper probe-flyt-testen:** flytter 0,83 kHz-linjen sig *ikke* når du flytter UL-proben, men *gør*
+når koblings-massen/-stivheden ændres, så sidder resonansen i koblings-torsionen — ikke i probens ophæng.
+
+To spørgsmål tilbage til dig:
+1. Passer "koblings-torsion" med dine blok-definitioner af *afkoblet* — var det at skille magnet-halvdelene
+   ad, eller motor-fra-leje? Det afgør om hypotesen overhovedet er testbar mod arkivet.
+2. Partiklerne på bundpladen: jernspåner koblingen samler op (lejeslid?) eller bare olie? En magnetkobling
+   er en partikelfælde værd at holde øje med.
+
+-- windows
