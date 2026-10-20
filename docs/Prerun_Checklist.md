@@ -55,6 +55,26 @@ sleep 15
 .venv/bin/python util_tool.py --port /dev/ttyACM0 speed                # expect rpm=0.00
 ```
 
+> **⚠️ THE TACH CANNOT VERIFY THAT THE MOTOR HAS STOPPED — it is on the RIG shaft, and the coupling is
+> MAGNETIC (2026-10-20).** The rig shaft and the motor shaft are joined by two wheels of four magnets
+> each, across an air gap, with no mechanical contact. So `rpm=0` with a frozen pulse count proves the
+> **rig shaft** is stopped and says nothing about the motor, which can keep turning behind a coupling
+> that is slipping or disengaged. Caught the same day: the check below reported "stopped" on a frozen
+> pulse count while Kim could see the motor still running.
+>
+> It is worse than a blind spot, because the drive's own registers lie in the same direction — they have
+> been caught reporting `run=STOP` with the shaft turning at 190 rpm. **The rig has NO sensor on the
+> motor shaft at all.**
+>
+> **The only valid proof that the motor has stopped is the drive's own display, or an eye on the motor
+> shaft.** Use the tach check below for the rig shaft, which is what it can see, and read the drive's
+> panel for the motor.
+>
+> The same applies in reverse when the motor is deliberately disengaged (the wheels turned apart): a run
+> logging `rpm_meas = 0` through a 600 or 3000 rpm segment is then **correct**, not failed — and the
+> only record of whether the motor actually ran is a human watching it. Write that down with a
+> timestamp in the run folder; nothing in the data file can supply it.
+
 The tach must read **`59.83 x Hz - 11.7`** — 1185 rpm at 20.00 Hz, within a few rpm. If it reads
 high, the pot is summing in. If it reads zero while the drive claims to run, 02-03 is wrong.
 

@@ -91,3 +91,46 @@ All three are marked NOT ESTABLISHED in the 2026-10-01 run notes.
 - **Pi / dev:** the command-model investigation, the runner actuation fix.
 - **Kim / hardware:** the tach-mark move (+ re-cal), and reading the display during any decoupled run
   until the mark is moved.
+
+---
+
+# ⚠️ UPDATE 2026-10-20 — the verification this ticket was RESOLVED on cannot see the motor
+
+The resolution above rests on "the shaft provably still (**tacho rpm=0 and pulse count frozen**)". That
+test is sound for the **rig shaft** and blind to the **motor**, and the difference matters here because
+the two are joined by a **magnetic coupling** — two wheels of four magnets each across an air gap, with
+no mechanical contact. The motor can keep turning behind a coupling that is slipping or disengaged while
+the rig shaft, and therefore the tach, sits at zero.
+
+**This is not theoretical. It happened on 2026-10-20:** a stop sequence reported
+`STOPPET — rpm=0 OG pulstaelling frosset paa 3634649` and Kim, watching the motor, reported it still
+running. **The rig has no sensor on the motor shaft at all**, and the drive's registers lie in the same
+direction — on the same day they read `cmd=0.00 run=STOP` while the shaft turned at 190 rpm.
+
+So the conclusion "the drive DOES stop on first command" was reached with an instrument that cannot
+observe the thing being claimed. It may still be true — and the same day produced three sequences
+consistent with it (below) — but it is not established by the evidence cited.
+
+**What the same day did establish, three times out of three:**
+
+| approach | result |
+|---|---|
+| 7 attempts, reconnect each time, no pause | all failed, `Could not exclusively lock port` — self-inflicted |
+| 5 attempts with 6-8 s pauses, writing immediately on connect | all failed, **both** registers (0x2501 and 0x2502) |
+| **45 s of bus silence, then ONE attempt: connect, read status, pause, stop** | **worked, three times in a row** |
+
+And the readback tells you which state the drive is in: on every attempt that worked it answered
+truthfully (`run=RUN_FORWARD` with the shaft turning); on every attempt that failed it answered
+`cmd=0.00 run=STOP` **while the shaft turned at 190 rpm**. **A readback that contradicts the shaft is a
+signal to stop writing and wait**, not to try harder. Whether the leading read or simply the elapsed time
+is what fixes it is **not established** — n=1 on the ordering.
+
+## Actions
+
+- [ ] **Re-verify the stop claim with an instrument that can see the motor** — the drive's own display,
+      or a sensor on the motor shaft. Until then treat the 2026-10-02 resolution as plausible but
+      unproven.
+- [x] **Prerun checklist §3 rewritten 2026-10-20** to say the tach proves only the rig shaft, and that
+      the only valid proof of a stopped motor is the drive display or an eye on the shaft.
+- [ ] **Consider a motor-shaft sensor.** Every stop verification on this rig currently relies on an
+      instrument that is mechanically decoupled from the thing it is meant to verify.
