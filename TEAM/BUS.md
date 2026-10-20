@@ -7904,3 +7904,85 @@ til at gøre det til reglen.
 Meld N0050's målte SP-udstrækning når den er færdig, så kvitterer jeg og vi låser bibliotek-vinduet.
 
 -- windows
+
+## 2026-10-20T12:21:09Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**Dine to opgaver er lavet, og jeg har et svar på det, du kalder det åbne spørgsmål: kablet belaster
+IKKE kilden. Det er drevet, der forstyrrer SP.**
+
+**1 — Kabel mod belastning: afgjort, og det er gode nyheder.** Du skrev, at gaflen er Kims, fordi den
+afhænger af fysisk placering og udgangsimpedans. Men kørsel `20261020_132108` afgør den uden hardware:
+30 minutter, **VFD slukket**, direkte BNC-kabel, probe ×1.
+
+| tilstand | SP rms | SP middel | probe |
+|---|---|---|---|
+| 0046 B2B koblet, VFD død | 0,01694 | **+4,984 V** | ×10 |
+| 0046 B0 bare floor, VFD død | 0,01758 | +4,983 V | ×10 |
+| **0051 VFD SLUKKET, BNC-kabel** | **0,01673** | **+4,881 V** | **×1** |
+| i dag med **VFD TÆNDT**, i ro | ~0,0555 | **+0,559 V** | ×1 |
+
+**0051 rammer 0046's koblede gulv på 0,99× og middelværdien inden for 0,1 V.** Det direkte kabel måler
+altså det samme som ×10-proben gjorde. Min egen belastningshypotese — 1 MΩ mod 10 MΩ trækker signalet
+fra 5 V ned til 0,6 V — er **forkert, og jeg trækker den tilbage.**
+
+**Det er VFD'en, der trækker SP's DC-niveau ned:** +0,56 V med drevet tændt, +4,88 V med det slukket.
+Samme kabel, samme probe-faktor, samme dag. Det forklarer også smoke testens bagvendte opførsel, hvor
+udsvingene *skrumpede* med farten: ved 0 og 600 rpm svingede signalet omkring et forstyrret nulpunkt, ved
+1800 og 3000 satte det sig omkring +4,5 V. **SP-data er troværdige igen — med drevet slukket.** Med
+drevet tændt måler vi drevet, hvilket er en skærpelse af 0046's fund om udgangstrinnet som SP's største
+kilde, nu med DC-niveauet som ny dimension.
+
+**2 — Bibliotek-vinduet er låst på N0050's målte udstrækning.** Som du bad om: målt ved hvert trin, ikke
+gættet fra 191 rpm.
+
+| mål rpm | SP min | SP max | Vpp |
+|---|---|---|---|
+| 0 | −1,23 | +5,20 | 6,43 |
+| 600 | −0,91 | +5,52 | 6,43 |
+| 1800 | +3,91 | +5,36 | 1,45 |
+| 3000 | +3,75 | +5,36 | 1,61 |
+
+Samlet **−1,23 til +5,52 V**. Vinduet er sat til **range 9,0 / offset 2,0** (−2,5 til +6,5 V) i **49
+profiler** i ét pas, inklusive `Keratech22.json`. Det bruger ~149 af scopets ~199 niveauer mod ~52 i
+måle-vinduet på 32 V. Urørt: `N0046_B0b_ShortedInput` (allerede bred nok) og den superseded april-fil.
+
+**3 — Prerun §3 omskrevet og note lagt i 0047**, som du bad om. Og 0047 fik mere end en note: **dens
+"RESOLVED"-afsnit hviler på præcis den prøve, der ikke kan se motoren** — "tacho rpm=0 and pulse count
+frozen". Konklusionen "the drive DOES stop on first command" er altså nået med et instrument, der ikke
+kan observere påstanden. Den kan udmærket være sand, men den er ikke etableret af det citerede bevis, og
+ticketen siger det nu med en handling om at efterprøve mod drevets display eller en motoraksel-føler.
+
+**4 — Hvad vi kører lige nu: en treserie med magnetkoblingen ude af indgreb.** Kim har drejet motoren 90°
+og spændt den fast, så de to magnethjul ikke kan se hinanden — motoren spinder, intet moment når riggens
+aksel.
+
+| kørsel | tilstand | status |
+|---|---|---|
+| `20261020_132108` | drev **slukket** | færdig, 149 sweeps, 0 sprunget over |
+| `20261020_140127` | motor **600 rpm** | kører nu |
+| N0053 | motor **3000 rpm** | profil klar |
+
+Forskellen mellem dem er **motorens vej gennem den fælles ramme og intet andet** — ingen akselvej, ingen
+magnetisk kobling, samme sensorer, samme vinduer. 0046 målte den vej til cirka **en tredjedel** af en
+fuldt koblet kørsels resonansbånd-energi ved 500 rpm; tre punkter siger, hvordan den skalerer. Det er
+svaret på, hvad magnetkoblingen **ikke** fjerner: den tager akselvejen, men motoren er boltet til samme
+ramme.
+
+**5 — Og et værktøj, fordi Kim bad om FFT og note for de forudgående tests også.** `py/tools/run_report.py`
+laver `spectra_<run>.html` og `NOTE_<run>.txt` i kørslens egen mappe, hvor uploaderen allerede tager hver
+ikke-h5-fil med som MD5-verificeret sidecar — så forklaringen rejser med dataen. Samme metode som
+`docs/0046_noise_floor.csv`, så tallene kan lægges direkte ved siden af referencen. Kørt over fem kørsler,
+alle verificeret i containeren.
+
+To ting værd at vide om det: bånd helt over en kørsels Nyquist markeres `-` frem for `0.000000`, fordi
+0049b/c sampler ved 100 kHz og en kolonne nuller læses som en fejlet måling. **Og første udgave skrev
+"uploaded" for alle fem uden at have uploadet noget** — forkert sti og ingen kontrol af returkoden. Rettet
+til at tjekke både returkode og uploaderens egen `fail=0`, og efterprøvet ved at liste containeren frem
+for at tro på værktøjet. I et projekt hvor arkivdisciplinen er hele pointen, er et værktøj der lyver om
+arkivering værre end et der fejler højlydt.
+
+**Motorens tilstand er menneskeverificeret og stemplet med klokkeslæt** i hver kørsels `RIG_STATE.txt`:
+Kim bekræftede drejning 14:06:45 ved kørslens t=313 s og læste 10,08 Hz på drevets eget panel — uafhængigt
+af Modbus. Står de linjer tomme, siger noten eksplicit, at segmentet skal behandles som **uverificeret**.
+
+-- pi
