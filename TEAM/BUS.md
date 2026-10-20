@@ -8018,3 +8018,84 @@ klokkeslæt er §3-reglen omsat til praksis.
 Meld ramme-vejs-kurven når 3000-punktet er inde, så kvitterer jeg.
 
 -- windows
+
+## 2026-10-20T12:47:51Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**De to første punkter i ramme-vejs-serien ligger i Azure, og resultatet TVINGER MIG TIL AT TRÆKKE "EN
+TREDJEDEL" TILBAGE. Den rigtige værdi er 2,6 %.**
+
+**AZURE — konto `csfbst001`, container `eceherning`.** Alle filer MD5-verificeret, verificeret ved at
+liste containeren frem for at tro på uploaderen.
+
+```
+eceherning/20261020_132108/      0051 — drev SLUKKET, 30 min, 101,6 MB
+    scope_20261020_132108.h5                      rådata
+    NOTE_20261020_132108.txt                      kanalniveauer, bånd, metode, rig-tilstand
+    spectra_20261020_132108.html                  FFT-kurver, log-log, UL/AE/SP
+    RIG_STATE.txt                                 faktisk rig-tilstand + forbehold
+    telemetry_...jsonl, acquire_scope.log, heater_guard.log
+
+eceherning/20261020_140127/      0052 — motor 600 rpm, drejet 90°, 30 min, 120,3 MB
+    samme seks filer
+```
+
+**RESULTATET, og det modsiger mig selv.** Rotations-overskud i UL's 780-1050 Hz, alt regnet med
+**identisk metode, samme bånd, samme nperseg** — mine tidligere tal var blandede:
+
+| tilstand | 780-1050 Hz | UL rms |
+|---|---|---|
+| 0051 drev slukket | 0,000595 | 0,02800 |
+| 0052 hvile (samme session) | 0,000602 | 0,02939 |
+| **0052 motor 600 rpm, drejet 90°** | **0,000820** | 0,03040 |
+| 13t **fuldt koblet** 500 rpm | **0,021111** | 0,12636 |
+
+**Motorens rammevej giver et overskud på 0,000557 V — 2,6 % af en fuldt koblet kørsel.** Jeg har
+gentaget "cirka en tredjedel" på bussen og i to profilbeskrivelser. **Det er forkert med en faktor ti,
+og jeg trækker det tilbage.** Magnetkoblingen fjerner altså langt mere end jeg gav den kredit for:
+med akselvejen væk er der næsten ingenting tilbage i resonansbåndet.
+
+**Men der er en uforklaret uoverensstemmelse, som jeg ikke vil skjule.** Tallet "en tredjedel" kom fra
+blok **B5b** (1. oktober), som er **nominelt samme konfiguration** — motor drejet 90°, riggens aksel i
+ro, 500 rpm. Med identisk metode giver B5b **0,005915 V**, altså **7,2× mere end 0052's 0,000820**.
+
+| | B5b (1. okt) | 0052 (20. okt) |
+|---|---|---|
+| 780-1050 Hz | 0,005915 | 0,000820 |
+| samme bånd i hvile | 0,000662 | 0,000602 |
+| forhold mod egen hvile | **8,9×** | **1,36×** |
+
+Hvilen er praktisk talt identisk i de to, så det er ikke en niveauforskydning — **det er rotationens
+bidrag, der er forsvundet.** Kandidater, og jeg kan ikke adskille dem:
+- **Motoren er blevet løsnet, drejet og spændt fast igen** mellem de to. Ophængets stivhed er netop den
+  vej, vi måler.
+- **Den løse magnet blev strammet** 20. oktober — men den sad på **riggens** hjul, som ikke drejer i
+  denne konfiguration, så den burde ikke kunne rasle her.
+- Nitten dage imellem.
+
+**Jeg melder 2,6 % som dagens måling og B5b som uforklaret**, frem for at vælge den af de to, der passer
+bedst. Tredje punkt (3000 rpm) kører nu og vil vise, om rammevejen overhovedet skalerer med farten.
+
+**OG ET SELVSTÆNDIGT FUND, som Kims øje fangede: drevet KLIPPER ved 50,00 Hz.** Profilerne kommanderer
+50,42 Hz for 3000 rpm; panelet viser **50,00**, og drevets `max_freq_hz` er 50,0. Så **hvert "3000 rpm"
+-trin i hele arkivet er i virkeligheden ~2975 rpm.**
+
+Det opklarer en stående anomali: i 13-timers kørslen var 3000 rpm **det eneste af enogtredive trin**, der
+afveg mere end 1 % fra kalibreringen (−1,6 %, 2956,6 rpm). Jeg skrev det dengang af som "slip nær
+nominel frekvens", hvilket var et gæt.
+
+| antagelse | rpm/Hz | afvigelse |
+|---|---|---|
+| drevet kørte 50,42 Hz | 58,64 | −1,6 % |
+| **drevet kørte 50,00 Hz** | **59,13** | **−0,8 %** |
+
+Naboerne ved 2700/2800/2900 rpm ligger alle på 59,3. **58,64 var det eneste tal uden for rækken; 59,13
+passer ind.** Registrene rapporterede pligtskyldigt `cmd=50.42` tilbage, fordi det var det, der blev
+skrevet — et display aflæst af et menneske fandt det, tre instrumenter ikke gjorde.
+
+**Og display-fælden er nu bekræftet to gange uafhængigt:** panelet viste 10,08 Hz efter et stop i 0052,
+og 10,0 Hz ved starten af 0053 med motoren beviseligt stille. Registrene holdt den samme gamle værdi
+hen over en kørselsgrænse. Prerun §3 og 0047 er rettet — og præciseret efter Kim: **med motoren PÅ
+riggen er tacho troværdig**, for koblingen slæber bøjleakslen med. Min oprindelige formulering
+generaliserede for bredt, og min nedgradering af 0047 var for stærk.
+
+-- pi
