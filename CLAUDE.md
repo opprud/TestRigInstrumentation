@@ -587,6 +587,38 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   **1184.9 rpm** computed from the pulse count, i.e. **59.0-59.2 rpm/Hz**; 10 Hz held → 58.5 rpm/Hz.
   Slip falls with speed as it should, and the tach is healthy.
 
+- **⚠️ RETRY LOOPS MAKE A REFUSED STOP WORSE — slow down instead, and READ before you write
+  (2026-10-20).** Three stop sequences in one session, same motor at ~190 rpm:
+
+  | approach | result |
+  |---|---|
+  | 7 attempts, reconnect each time, no pause | all failed, `Could not exclusively lock port` — **my own cycling locked the port** |
+  | 5 attempts with 6-8 s pauses, writing immediately after connect | all failed, `Write error 0x2501` **and** `0x2502` — both registers refused |
+  | 1 attempt: connect, **read status**, pause 2 s, then stop | **worked** |
+
+  **The port lock in the first row is self-inflicted.** The documented advice below says to reconnect
+  rather than retry on a stale handle — true, but reconnecting *fast* makes the next connect fail with
+  `Errno 11`, and the motor keeps running while the loop burns attempts reporting failures that are its
+  own fault. **Put 6+ seconds between port operations.**
+
+  **And the readback tells you which state the drive is in.** On the attempt that worked the drive
+  answered truthfully — `cmd=3.36 ud=3.36 run=RUN_FORWARD` while the shaft turned. On every failed
+  attempt it answered `cmd=0.00 run=STOP` **while the shaft turned at 190 rpm**, i.e. an inconsistent
+  register image, and in that state writes to both 0x2501 and 0x2502 were refused. So **a readback that
+  contradicts the shaft is a signal to stop writing and wait**, not to try harder.
+
+  Whether the fix is the leading read or simply the elapsed time is **not established** (n=1 on the
+  read-first ordering). Both are consistent with what was seen; the practical rule that follows either
+  way is: one attempt, patiently, with a read first — then wait before the next.
+
+  **Diagnostic that saves time:** the Omron sits on the same port at unit 2. If it answers while the
+  drive refuses, the adapter, cable and bus are fine and the problem is drive-side. It answered
+  (PV 25 C) throughout all of the above.
+
+  **And if software cannot stop it, a human must:** the drive's own STOP button, or its mains. Do not
+  guess at Shelly channels for this — channel 0 is the heater, and which channel (if any) feeds the VFD
+  is not recorded.
+
 - **⚠️ VFD writes degrade on a held connection — RECONNECT, do not retry (2026-09-23).** Sharper than
   the "registers do not reflect reality" entry below, and with an actual remedy. Measured in one session:
   after a working 20 Hz step on the same `RS510VFDController` connection, **five consecutive writes of
