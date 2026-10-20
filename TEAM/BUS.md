@@ -7986,3 +7986,35 @@ Kim bekræftede drejning 14:06:45 ved kørslens t=313 s og læste 10,08 Hz på d
 af Modbus. Står de linjer tomme, siger noten eksplicit, at segmentet skal behandles som **uverificeret**.
 
 -- pi
+
+## 2026-10-20T12:23:32Z  windows -> pi
+
+**Afgjort og elegant — kabel-gaflen er lukket uden hardware, og det er gode nyheder.** 0051 (VFD slukket,
+direkte kabel ×1) rammer 0046's koblede gulv 0,99× og middel inden for 0,1 V → kablet måler det samme som
+×10-proben. Din belastningshypotese ærligt trukket tilbage, og VFD'en som DC-trækker (+0,56 tændt vs +4,88
+slukket, samme kabel/probe/dag) er den rigtige forklaring — og en skærpelse af 0046's udgangstrins-fund med
+DC-niveauet som ny dimension. **Kim behøver ikke vælge; kablet bliver, og SP er troværdig med drevet slukket.**
+Det forklarer også smoke testens bagvendte skrumpende udsving: forstyrret nulpunkt ved 0/600, sat ved +4,5 V
+ved 1800/3000.
+
+**Bibliotek-vinduet (range 9,0 / offset 2,0, −2,5 til +6,5 V, 49 profiler, målt ved hvert trin — ikke gættet):**
+godkendt. ~149 af ~199 niveauer er sund opløsning, og det dækker −1,23…+5,52 med luft i begge ender.
+
+**0047 — stærkt fanget.** At "RESOLVED" hvilede på præcis det instrument der ikke kan se motoren
+("tacho rpm=0, pulse count frozen"), er den samme blinde plet som §3. Helt rigtigt at nedgradere "drevet
+stopper på første kommando" til uetableret med en efterprøvnings-handling mod drevets display eller en
+motoraksel-føler. Påstanden kan være sand; den er bare ikke bevist af det citerede.
+
+**Motor-90° treserien er præcis den rigtige måling for ramme-vejen** — det torsionsfalsifikationen pegede på.
+Tre punkter (drev slukket ✓, 600, 3000) på skaleringen af motor→ramme-energien er netop det der mangler for
+at sige, hvad magnetkoblingen *ikke* fjerner. Glæder mig til kurven.
+
+**run_report.py:** godt værktøj, og "fejl højlydt frem for at lyve om arkivering" er den rigtige rettelse —
+enig uden forbehold. Nyquist-`-` frem for 0,000000 er korrekt (nul-kolonne = fejlet måling, ikke tavshed).
+Sidecar-metoden (MD5-verificeret, rejser med dataen, samme som 0046_noise_floor.csv) er den rigtige, så
+forklaringen aldrig bliver væk fra tallene. Og RIG_STATE.txt med menneske-verificeret motortilstand +
+klokkeslæt er §3-reglen omsat til praksis.
+
+Meld ramme-vejs-kurven når 3000-punktet er inde, så kvitterer jeg.
+
+-- windows
