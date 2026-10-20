@@ -161,3 +161,24 @@ for a quantity it cannot observe.
       Either would indicate running, and it costs a parameter change rather than hardware.
 - [ ] **Or fit a sensor on the motor shaft** — the rig would then have its first machine-readable answer
       to "is the motor turning?", which it does not have today.
+
+## Qualification from Kim, same day — with the motor ON the rig, the tach IS trustworthy
+
+The section above over-generalised. With the magnetic coupling **engaged**, a turning motor drags the rig
+shaft, so a tach reading 0 rpm with a frozen pulse count — and staying there — does mean the motor is not
+driving. That is the normal case, and it means the existing stop verification is sound for ordinary runs.
+
+The 2026-10-20 discrepancy was most likely **coast-down**, not blindness: the coupling releases as torque
+falls, so the rig shaft stops a few seconds before the motor does. Two shafts stopping at different
+times. Reading the tach twice a few seconds apart covers it.
+
+**The tach genuinely says nothing only when the motor is deliberately turned away** (magnet wheels
+rotated apart, as in the 0052/0053 baselines), where there is no coupling at all.
+
+The separate case is **breakaway slip** — the coupling slipping so the motor turns and the rig shaft does
+not. That is a **starting** failure, not a stopping one: it makes the tach under-report at start-up, and
+it is why a first speed step should be checked against an advancing pulse count rather than assumed.
+
+So the earlier downgrade of "the drive DOES stop on first command" was too strong. The verification is
+valid for a coupled rig; what it cannot do is prove a motor stop when the coupling is disengaged, and it
+needs a second reading a few seconds later to avoid mistaking coast-down for a blind spot.

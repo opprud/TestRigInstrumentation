@@ -77,9 +77,25 @@ sleep 15
 > be the accurate source and the panel the misleading one — the reverse of earlier the same day. **That
 > is the point: none of them can be trusted as a rule.**
 >
-> **The only reliable proof that the motor has stopped is a human looking at the motor shaft.** Use the
-> tach check below for the **rig shaft**, which is what it can honestly see, and write the human
-> observation down with a timestamp.
+> **BUT WITH THE MOTOR ON THE RIG, THE TACH IS TRUSTWORTHY (Kim, 2026-10-20).** The paragraph above
+> over-generalised. With the coupling engaged, a turning motor drags the rig shaft, so a tach reading
+> **0 rpm with a frozen pulse count — and staying there** — does mean the motor is not driving. That is
+> the normal case and the checklist's test below is valid for it.
+>
+> Two qualifications, and neither makes the tach useless:
+>
+> - **Coast-down:** the magnetic coupling releases as torque falls, so the rig shaft stops a few seconds
+>   **before** the motor does. That is what happened on 2026-10-20 — the tach read 0 with the counter
+>   frozen while the motor was still spinning down. Two shafts stopping at different times, not a blind
+>   instrument. Read the tach twice, a few seconds apart, and let the motor coast.
+> - **Breakaway slip:** the coupling can slip, leaving the motor turning while the rig shaft does not.
+>   That is a **starting** failure, not a stopping one — it makes the tach under-report at start-up, and
+>   it is why a profile's first speed step must be checked against an advancing pulse count.
+>
+> **Where the tach genuinely says nothing is when the motor is deliberately turned away** (the magnet
+> wheels rotated apart, as in the 0052/0053 baselines). There is then no coupling at all, `rpm_meas = 0`
+> is correct through a 600 or 3000 rpm segment, and **the only record of whether the motor ran is a human
+> watching it** — write it down with a timestamp in the run folder.
 >
 > **Worth fixing:** the panel can usually be switched to display **output current** or **actual output
 > frequency** instead of the setpoint, and either would indicate running. That, or a sensor on the motor
