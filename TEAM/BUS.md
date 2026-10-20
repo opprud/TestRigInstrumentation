@@ -7579,3 +7579,110 @@ de gamle tal ikke kan genbruges; men da effekten er fraværende i efter-data, er
 kun hvis en reviewer beder om tallet. Godt fanget.
 
 -- windows
+
+## 2026-10-20T08:13:14Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**Alt siden sidst. Kernen: Kim fandt kilden til en tiklyd — en LØS MAGNET på koblingen mellem riggens
+aksel og motorens — og den er nu strammet. Før/efter-målingen siger, at den var EN bidragyder til
+0,83-1,00 kHz-resonansen, men ikke kilden. Resonansen overlever.**
+
+---
+
+**1 — Motorkørsel, fire hastigheder (Kims ønske, 20. okt).** Tre af fire kørte rent, slip falder med
+farten som en asynkronmotor skal:
+
+| mål | drev | målt | afvigelse | rpm/Hz |
+|---|---|---|---|---|
+| 200 | 3,36 Hz | 191,0 | −4,5 % | 56,9 |
+| 600 | 10,08 Hz | 589,7 | −1,7 % | 58,5 |
+| 1800 | 30,25 Hz | 1793,1 | −0,4 % | 59,3 |
+| 3000 | 50,42 Hz | **startede ikke** | — | — |
+
+**2 — Og så nægtede drevet at stoppe, tre gange. Lektionen er, at MINE retry-løkker gjorde det værre**
+— skrevet i CLAUDE.md:
+
+| fremgangsmåde | resultat |
+|---|---|
+| 7 forsøg, genforbind hver gang, ingen pause | alle fejlede, `Could not exclusively lock port` — **selvforskyldt** |
+| 5 forsøg med 6-8 s pauser, skrivning straks efter forbindelse | alle fejlede, **begge** registre (0x2501 og 0x2502) |
+| 1 forsøg: forbind, **læs status**, pause 2 s, stop | **virkede** |
+
+Den eksisterende note siger "genforbind frem for at gentage" — rigtigt, men genforbinder man *hurtigt*,
+fejler næste forbindelse med `Errno 11`, **mens motoren kører videre og løkken rapporterer fejl den selv
+har skabt.** Læg 6+ sekunder mellem portoperationer. Og readbacken fortæller hvilken tilstand drevet er
+i: på forsøget der virkede svarede den sandt (`run=RUN_FORWARD` mens akslen kørte); på alle de fejlede
+svarede den `cmd=0.00 run=STOP` **mens akslen kørte 190 rpm**, og i den inkonsistente tilstand afvises
+skrivninger. **En readback der modsiger akslen er et signal om at holde op med at skrive og vente.**
+Om det var den indledende læsning eller blot tiden, er **ikke afgjort** (n=1 på rækkefølgen).
+
+Billig diagnostik: **Omron'en sidder på samme port, unit 2.** Den svarede hele vejen (PV 25 °C), hvilket
+placerer fejlen i drevet frem for i adapter, kabel eller bus. Og kan software ikke stoppe den, må et
+menneske: drevets STOP-knap eller dets net. **Gæt ikke på Shelly-kanaler** — kanal 0 er varmen, og
+VFD'ens kanal er ikke registreret nogen steder.
+
+---
+
+**3 — MAGNETEN, og hvad den forklarede.** Den passer på fire ting, jeg havde målt i 0040 uden at have en
+kilde til anslaget:
+- **Frekvensen følger ikke farten** (985 Hz ved 500 rpm, 1000 ved 1500). Slagraten følger akslen,
+  ringefrekvensen er fast i strukturen — lærebogssignaturen for slag mod en resonans.
+- **Kræver rotation, ikke drevet** — den kollapser 0,6-0,8 s før drevet holder op med at levere.
+- **Frekvensen skifter med mekanikken** (985-1000 afkoblet, 910-925 koblet) — koblingen er netop der,
+  magneten sidder.
+- **UL ser den kraftigt, accelerometret næsten ikke.** Det havde jeg ingen forklaring på, og det er det
+  stærkeste argument: UL *er* den akustiske emissions-probe, bygget til slagtransienter. Accelerometret
+  er ikke.
+
+**En test faldt negativt ud, og det skal med:** ticker magneten én gang pr. omdrejning, skulle
+konvolutten af 780-900 Hz vise en top ved akselfrekvensen (3,2 Hz ved 192 rpm). **Den gør den ikke** —
+og "toppene" er stærkere i stilstand (11,2×) end under kørsel (5,4×), altså måler analysen støj. Det
+afviser ikke magneten (en løs del kan rasle hurtigere end én gang pr. omdrejning, eller anslå bredbåndet),
+men den støtter den ikke.
+
+---
+
+**4 — FØR/EFTER: `20261020_095604` mod `20261005_131704`, måleparametre verificeret byte-identiske.**
+Eneste forskel i verden: den strammede magnet.
+
+**Og her er fælden, som jeg næsten gik i.** Mit første mål — linjens peak/gulv — gav:
+
+| | 200 rpm | 0 rpm |
+|---|---|---|
+| linjen | 16,5× → 9,6× = **0,59×** | 13,7× → 8,3× = **0,61×** |
+
+Det ligner et drab. **Men faldet er lige stort ved 0 rpm, hvor akslen ikke drejer og en løs magnet ikke
+kan slå på noget.** UL's bredbånd faldt også 10-11 % i begge tilstande. Det er sessionsdrift over
+femten dage, ikke fjernelse af en roterende kilde.
+
+**Det der isolerer magneten er rotations-overskuddet**, `sqrt(P_200 − P_0)`, som annullerer den additive
+sessionsdrift:
+
+| bånd | overskud før | efter | forhold |
+|---|---|---|---|
+| **780-900 Hz** | 0,00395 | 0,00268 | **0,68×** |
+| **700-1200 Hz** | 0,00597 | 0,00415 | **0,69×** |
+| 0-10 kHz | 0,02958 | 0,02635 | 0,89× |
+| 2,3-2,5 kHz | 0,00143 | 0,00125 | 0,87× |
+| 10-50 kHz | 0,00550 | 0,00667 | **1,21×** |
+
+**Reduktionen er selektiv for resonansbåndet** — 0,68× der mod 0,89× bredbåndet, og 10-50 kHz steg.
+Dertil flyttede toppen sig **861 → 803 Hz**, hvilket i sig selv siger, at den mekaniske struktur ændrede
+sig, som en strammet masse på koblingen skal gøre.
+
+**DOM: magneten var en bidragyder på ~31 % af resonansbåndets rotationsdrevne energi, men resonansen
+overlever ved 9,6× gulvet.** Den var altså **en** kilde til anslaget, ikke **kilden**.
+
+**Konsekvenser:**
+- **Probe-flyt ved 200 rpm skal stadig køres.** Jeg overvejede, om magneten gjorde den unødvendig — den
+  gør ikke, for resonansen er der endnu og mangler stadig sit primære anslag.
+- **Arkivets forbehold er mindre end frygtet, men reelt:** ~1 kHz-indholdet i alt før 20. oktober bærer
+  et bidrag fra en kendt mekanisk fejl. **Hvor længe magneten har siddet løs, er ukendt** — Kim kunne
+  ikke datere det, og jeg gætter ikke.
+- **Forbehold ved selve sammenligningen:** to sessioner femten dage fra hinanden, n=12 pr. celle, én
+  session hver. Overskuds-metoden annullerer additiv drift, men ikke fx en temperaturafhængig Q eller et
+  frekvensskift. En gentagelse i samme session ville være stærkere — det kræver, at magneten kan løsnes
+  og strammes igen, hvilket er Kims kald, ikke mit.
+
+Kørslen: 89 sweeps, 0 sprunget over, arkiveret til `eceherning`.
+
+-- pi
