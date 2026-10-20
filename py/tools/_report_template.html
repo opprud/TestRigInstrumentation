@@ -1,0 +1,106 @@
+<!doctype html><html lang="da"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FFT — __RUN__</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#F1F4F3;--surface:#fff;--surface2:#E8EDEC;--line:#D2DAD8;--ink:#141D1C;
+ --muted:#5A6B68;--faint:#869592;--accent:#0E6B68;--ul:#0E6B68;--ae:#A8561C;--sp:#2C6E8F}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0E1312;--surface:#161D1C;
+ --surface2:#1E2625;--line:#2C3634;--ink:#E5EDEB;--muted:#95A5A2;--faint:#6D7D7A;
+ --accent:#4FBDB6;--ul:#4FBDB6;--ae:#D9914E;--sp:#6FB0D4}}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;
+ font-size:16px;line-height:1.6;margin:0;padding:0 clamp(14px,4vw,36px) 72px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,.ui{font-family:Archivo,Arial,sans-serif}
+h1{font-size:clamp(25px,4vw,36px);font-weight:700;letter-spacing:-.02em;margin:0 0 8px}
+h2{font-size:19px;font-weight:600;margin:34px 0 10px}
+header{padding:38px 0 20px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:Archivo,sans-serif;font-size:11px;font-weight:600;letter-spacing:.14em;
+ text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+.meta{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--faint);margin-top:14px}
+.mono,td.n,th.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:18px;
+ margin:16px 0;box-shadow:0 1px 2px rgba(20,29,28,.06)}
+canvas{width:100%;height:auto;display:block}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-family:Archivo,sans-serif;font-size:13px}
+.key{display:flex;align-items:center;gap:7px}
+.sw{width:16px;height:3px;border-radius:2px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{font-family:Archivo,sans-serif;font-size:11px;font-weight:600;letter-spacing:.07em;
+ text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 11px;
+ border-bottom:1px solid var(--line);background:var(--surface2);white-space:nowrap}
+td{padding:7px 11px;border-bottom:1px solid var(--line)}
+td.n{text-align:right;white-space:nowrap}
+p{max-width:68ch}
+.foot{font-size:13px;color:var(--faint);margin-top:28px;border-top:1px solid var(--line);padding-top:18px}
+</style></head><body><div class="wrap">
+<header>
+ <p class="eyebrow">ForeverBearing testrig · FFT-rapport</p>
+ <h1>__RUN__</h1>
+ <p class="mono" style="color:var(--muted);margin:0">__PROFILE__</p>
+ <p class="meta">__SWEEPS__ sweeps · spektre midlet over __N__ fordelt gennem kørslen · rpm-mål: __RPM__ · Nyquist __NYQ__ kHz</p>
+</header>
+
+<h2>Spektre</h2>
+<div class="card">
+ <canvas id="plot" width="1800" height="1000"></canvas>
+ <div class="legend">
+  <span class="key"><span class="sw" style="background:var(--ul)"></span>UL — akustisk emission (CHAN1)</span>
+  <span class="key"><span class="sw" style="background:var(--ae)"></span>AE — accelerometer (CHAN2)</span>
+  <span class="key"><span class="sw" style="background:var(--sp)"></span>SP — slæbering (CHAN3)</span>
+ </div>
+</div>
+<p>Log-log. Vandret: frekvens 20 Hz til 1,25 MHz. Lodret: amplitude i volt pr. log-bin. Kurverne er
+log-binnet til ~650 punkter alene for visningens skyld; båndtallene nedenfor er beregnet på det fulde
+spektrum.</p>
+
+<h2>Bånd</h2>
+<div class="scroll"><table id="bt"></table></div>
+<p class="foot">Metode: Welch-periodogram, Hanning, <span class="mono">nperseg 65536</span>, DC fjernet,
+<span class="mono">scaling='density'</span> integreret over hvert bånd, så båndene summerer til
+bredbånds-rms'en. Samme metode som <span class="mono">docs/0046_noise_floor.csv</span>, så tallene kan
+lægges direkte ved siden af 0046-referencen. Beskrivelse og rig-tilstand står i
+<span class="mono">NOTE___RUN__.txt</span> i samme mappe.</p>
+</div>
+<script>
+const D=__DATA__, B=__BANDS__;
+const COL={UL:getComputedStyle(document.documentElement).getPropertyValue('--ul').trim(),
+           AE:getComputedStyle(document.documentElement).getPropertyValue('--ae').trim(),
+           SP:getComputedStyle(document.documentElement).getPropertyValue('--sp').trim()};
+const cv=document.getElementById('plot'),cx=cv.getContext('2d');
+const W=cv.width,H=cv.height,L=110,R=30,T=28,Bm=70;
+let ymin=Infinity,ymax=-Infinity;
+for(const ch in D) for(const v of D[ch].y) if(v>0){ymin=Math.min(ymin,v);ymax=Math.max(ymax,v)}
+ymin=Math.max(ymin,ymax*1e-6);
+const x0=Math.log10(20),x1=Math.log10(1.25e6),y0=Math.log10(ymin),y1=Math.log10(ymax*1.6);
+const px=f=>L+(Math.log10(f)-x0)/(x1-x0)*(W-L-R);
+const py=v=>T+(1-(Math.log10(Math.max(v,ymin))-y0)/(y1-y0))*(H-T-Bm);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+cx.strokeStyle=css('--line');cx.fillStyle=css('--faint');cx.lineWidth=1;
+cx.font='22px "IBM Plex Mono",monospace';cx.textAlign='center';
+for(let d=1;d<=6;d++){const f=Math.pow(10,d);if(f<20||f>1.25e6)continue;
+ cx.globalAlpha=.5;cx.beginPath();cx.moveTo(px(f),T);cx.lineTo(px(f),H-Bm);cx.stroke();cx.globalAlpha=1;
+ cx.fillText(f>=1e6?(f/1e6)+' MHz':f>=1e3?(f/1e3)+' kHz':f+' Hz',px(f),H-Bm+30);}
+cx.textAlign='right';
+for(let e=Math.ceil(y0);e<=Math.floor(y1);e++){const v=Math.pow(10,e);
+ cx.globalAlpha=.5;cx.beginPath();cx.moveTo(L,py(v));cx.lineTo(W-R,py(v));cx.stroke();cx.globalAlpha=1;
+ cx.fillText('1e'+e,L-12,py(v)+8);}
+cx.lineWidth=2.6;cx.lineJoin='round';
+for(const ch of ['SP','AE','UL']){const d=D[ch];if(!d)continue;
+ cx.strokeStyle=COL[ch];cx.beginPath();
+ d.x.forEach((f,i)=>{const v=d.y[i];if(f<20||v<=0)return;i?cx.lineTo(px(f),py(v)):cx.moveTo(px(f),py(v))});
+ cx.stroke();}
+const names=Object.keys(B);
+const rows=names.length?Object.keys(B[names[0]]):[];
+let h='<thead><tr><th>bånd</th>'+names.map(c=>'<th class="n">'+c+'</th>').join('')+'</tr></thead><tbody>';
+const NYQ=__NYQ__*1000;
+const LOF={'0-10k':0,'10-50k':10e3,'50-100k':50e3,'100-126k':100e3,'126-135k':126e3,'135-500k':135e3,'500k-1M':500e3,'1055-1066k':1055e3,'1M-1.25M':1e6};
+for(const b of rows){ if(LOF[b]>=NYQ){ h+='<tr><td class="mono" style="color:var(--faint)">'+b+'</td>'+names.map(()=>'<td class="n" style="color:var(--faint)">over Nyquist</td>').join('')+'</tr>'; continue; }
+ h+='<tr><td class="mono">'+b+'</td>'+names.map(c=>'<td class="n">'+B[c][b].toPrecision(3)+'</td>').join('')+'</tr>'; }
+h+='<tr><td class="mono"><b>bredbånd rms</b></td>'+names.map(c=>'<td class="n"><b>'+D[c].rms.toPrecision(3)+'</b></td>').join('')+'</tr>';
+h+='<tr><td class="mono">middelværdi</td>'+names.map(c=>'<td class="n">'+D[c].dc.toFixed(3)+'</td>').join('')+'</tr>';
+h+='<tr><td class="mono">probe</td>'+names.map(c=>'<td class="n">'+(D[c].probe?'×'+D[c].probe:'?')+'</td>').join('')+'</tr></tbody>';
+document.getElementById('bt').innerHTML=h;
+</script></body></html>
