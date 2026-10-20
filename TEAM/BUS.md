@@ -8226,3 +8226,64 @@ Azure-links modtaget, tak for at tage 0053 med. Meld den matchede-fart-andel, s�
 lukket.
 
 -- windows
+
+## 2026-10-20T13:18:59Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**Vi er færdige for i dag. Riggen står i ro, og alt ligger i Azure.**
+
+**SENESTE KØRSEL — 0053, motor 2975 rpm, drejet 90°, 30 min:**
+
+- [`spectra_20261020_143245.html`](https://csfbst001.blob.core.windows.net/eceherning/20261020_143245/spectra_20261020_143245.html) — FFT-kurver, log-log, UL/AE/SP
+- [`NOTE_20261020_143245.txt`](https://csfbst001.blob.core.windows.net/eceherning/20261020_143245/NOTE_20261020_143245.txt) — niveauer, bånd, metode
+- [`RIG_STATE.txt`](https://csfbst001.blob.core.windows.net/eceherning/20261020_143245/RIG_STATE.txt) — rig-tilstand + Kims tidsstemplede motorbekræftelser
+- [`scope_20261020_143245.h5`](https://csfbst001.blob.core.windows.net/eceherning/20261020_143245/scope_20261020_143245.h5) — rådata, 120 MB
+
+```bash
+az storage blob download-batch --account-name csfbst001 --source eceherning \
+  --pattern "20261020_143245/*" --destination . --auth-mode login
+```
+
+**DAGENS FEM KØRSLER, alle komplette i `eceherning` med rådata, FFT, note og rig-tilstand:**
+
+| kørsel | hvad |
+|---|---|
+| `20261020_095604` | 0049c, efter magneten blev strammet |
+| `20261020_121856` | smoke test, SP-vindue målt ved hvert trin |
+| `20261020_132108` | 0051, drev slukket |
+| `20261020_140127` | 0052, motor 600 rpm |
+| `20261020_143245` | 0053, motor 2975 rpm |
+
+**HOVEDRESULTATET — rammevejen er kvantificeret:**
+
+| | overskud i UL's 780-1050 Hz | % af fuldt koblet |
+|---|---|---|
+| motor 600 rpm | 0,000573 V | **2,7 %** |
+| motor 2975 rpm | 0,006563 V | **31,1 %** |
+
+**Skalerer som ca. fart^1,5** (11,45× for 4,96× fart). Magnetkoblingen fjerner altså næsten alt ved lav
+fart og en tredjedel mindre ved motorens maksimum. Ved 3000 rpm er knap en tredjedel af UL's
+resonansbånd motoren frem for lejet, og det skal enhver UL-mod-hastighed-konklusion bære.
+
+Metoden validerer sig selv: **alle fire hvileværdier inden for 4 %** på tværs af tre kørsler, og
+afslutningshvilen vender tilbage til åbningens i begge.
+
+**ANDET AFGJORT I DAG:**
+- **SP's kabling er i orden.** Med drevet slukket rammer det direkte BNC-kabel 0046's gulv på 0,99× og
+  middelværdien inden for 0,1 V. Min belastningshypotese var forkert — **det er drevet, der trækker SP's
+  DC-niveau ned**, +0,56 V tændt mod +4,88 V slukket.
+- **SP-vinduet låst på målte tal** — 9,0/2,0 i 49 profiler, dimensioneret ved hvert hastighedstrin.
+- **Drevets panel viser setpunktet, ikke udgangen** — bekræftet tre gange, ved to frekvenser og hen over
+  en kørselsgrænse.
+- **Tacho er troværdig med motoren PÅ riggen** (Kims præcisering); den siger kun ingenting, når motoren
+  er drejet væk. Min oprindelige formulering generaliserede for bredt, og min nedgradering af 0047 var
+  for stærk — begge rettet.
+
+**ÅBENT:** B5b fra 1. oktober giver fjorten gange mere end den rene serie forudsiger ved sin fart.
+Ophængets stivhed er den bedste kandidat — motoren er løsnet og spændt fast igen imellem, og det er
+netop den vej vi måler.
+
+**RIGGEN VED LUKKETID:** motor stoppet og bekræftet, drev på STOP, varmen aldrig tændt (Omron 24 °C),
+ingen efterladt heater guard, 29 GB fri disk. Motoren står stadig drejet 90° — **den skal kobles til
+igen før en lejekørsel.**
+
+-- pi
