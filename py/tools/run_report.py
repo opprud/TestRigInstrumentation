@@ -153,7 +153,14 @@ def main():
         hp=os.path.join(rec["dir"],f"spectra_{run}.html"); open(hp,"w").write(write_html(rec))
         print(f"{run}: {os.path.basename(np_)} + {os.path.basename(hp)}")
         if up:
-            os.system(f'cd {ROOT}/py && .venv/bin/python tools/upload_to_azure.py '
-                      f'data/runs/{run} --container eceherning --log /tmp/report_upload.log >/dev/null 2>&1')
-            print(f"   uploaded {run}/ to eceherning")
+            import subprocess
+            r = subprocess.run([os.path.join(ROOT,".venv","bin","python"),
+                                os.path.join(ROOT,"tools","upload_to_azure.py"),
+                                os.path.join("data","runs",run),
+                                "--container","eceherning","--log","/tmp/report_upload.log"],
+                               cwd=ROOT, capture_output=True, text=True)
+            tail = (r.stdout or "").strip().splitlines()[-1:] or [""]
+            ok = r.returncode == 0 and "fail=0" in tail[0]
+            print(f"   {'uploaded' if ok else 'UPLOAD FAILED'} {run}/ -> eceherning"
+                  + ("" if ok else f"  rc={r.returncode} {tail[0][:90]}"))
 if __name__=="__main__": main()
