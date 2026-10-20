@@ -1,0 +1,91 @@
+{
+  "name": "Smoke test 15 min, SP wide window (BNC direct)",
+  "description": "SMOKE TEST + SP CHARACTERISATION after the slip-ring sensor was moved to a DIRECT BNC CABLE (Kim, 2026-10-20). Same schedule as NoiseFloor_SmokeTest_15min - 2 min at rest, then 600/1800/3000 rpm for 2 min each, then 7 min at rest - but SP's window is opened from 8.0/4.5 to 32.0/1.5 because the new cabling changed the signal completely. WHY: with a 10x probe the scope divided at the input and multiplied by 10 in software, so SP read a steady +4.99 V. With a direct BNC cable the channel had to be set to PROBE 1x (done 2026-10-20, it had been 10x in every archived run) and the signal is now different: at rest +0.37 V mean, and with the motor running +4.7 V mean swinging -2.8 to +5.6 V, i.e. 8.4 Vpp. The old 0.5-8.5 V window would clip every negative excursion. THE POINT OF THE WIDE WINDOW IS TO MEASURE, NOT TO KEEP: 32 V costs resolution (0.161 V steps, so the signal uses ~52 of the scope's ~199 usable levels against 139 at 1.5 V/div). Size the final window from this run's measured extent at 600/1800/3000 rpm and then narrow it, exactly as the August sizing was done - SP excursions grow with speed, and all current numbers come from 191 rpm only. NOTE the heater is NOT switched on for this run: a CLI run never energises it, and leaving it off keeps the relay's 50-100 kHz coupling out of the SP characterisation. The SV 40 setpoint is therefore inert. NOTE ALSO: the code records :CHANx:PROB as metadata but never SETS it, so the 1x setting is unmanaged front-panel state - verify probe_attenuation in the resulting h5.",
+  "duration_minutes": 15,
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true
+  },
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 119,
+        "value": 0
+      },
+      {
+        "time_sec": 120,
+        "value": 600
+      },
+      {
+        "time_sec": 239,
+        "value": 600
+      },
+      {
+        "time_sec": 240,
+        "value": 1800
+      },
+      {
+        "time_sec": 359,
+        "value": 1800
+      },
+      {
+        "time_sec": 360,
+        "value": 3000
+      },
+      {
+        "time_sec": 479,
+        "value": 3000
+      },
+      {
+        "time_sec": 480,
+        "value": 0
+      },
+      {
+        "time_sec": 899,
+        "value": 0
+      }
+    ],
+    "temperature": [
+      {
+        "time_sec": 0,
+        "value": 40
+      },
+      {
+        "time_sec": 899,
+        "value": 40
+      }
+    ]
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 32.0,
+      "volt_offset": 1.5,
+      "coupling": "DC"
+    }
+  }
+}
