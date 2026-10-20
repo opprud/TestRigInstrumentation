@@ -1,0 +1,67 @@
+{
+  "name": "0052 baseline VFD ON, motor turned 90 deg, 600 rpm, 30 min",
+  "duration_minutes": 30,
+  "description": "0052 ENVIRONMENT BASELINE with the drive LIVE and the motor DISENGAGED. Kim turns the motor 90 degrees so the two magnet wheels cannot see each other, then runs it at 600 rpm: the motor spins and the drive delivers, but NO torque reaches the rig shaft. WHAT IT MEASURES: the path the magnetic coupling does NOT remove. The coupling eliminates the shaft path, but the motor is bolted to the same massive frame, and measurement says that path carries: with the motor turned away and the rig shaft still, the motor alone put 0.00611 V into UL's 780-1050 Hz resonance band at 500 rpm - about ONE THIRD of the 0.01894 V a fully coupled run gives at the same speed. This run quantifies that properly at 600 rpm with the new SP cabling. ADDED TO KIM'S SPEC: 5 min at rest, 20 min at 600 rpm, 5 min at rest - all in ONE session. Rotation and rest are then measured minutes apart instead of days, which matters: a before/after across two sessions 15 days apart showed a 10 % drift in UL's broadband level that looked like a real effect until the rest segments cancelled it. EXPECT rpm_meas = 0 THROUGHOUT. The tach reads the RIG shaft, and with the motor turned away nothing drives it. A run logging 0 rpm while commanding 600 is CORRECT here, not a failure - and note the corollary found the same day: the rig tach therefore cannot verify that the MOTOR has stopped. SP window 9.0/2.0, sized on measured data from run 20261020_121856. Compare against run 20261020_132108 (same settings, VFD off) and against docs/0046_noise_floor.csv.",
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 299,
+        "value": 0
+      },
+      {
+        "time_sec": 300,
+        "value": 600
+      },
+      {
+        "time_sec": 1499,
+        "value": 600
+      },
+      {
+        "time_sec": 1500,
+        "value": 0
+      },
+      {
+        "time_sec": 1799,
+        "value": 0
+      }
+    ],
+    "temperature": []
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 9.0,
+      "volt_offset": 2.0,
+      "coupling": "DC"
+    }
+  },
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true,
+    "vfd_stop_on_end": true
+  }
+}
