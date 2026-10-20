@@ -69,8 +69,8 @@
     },
     "SP": {
       "timebase_range": 0.2,
-      "volt_range": 6.0,
-      "volt_offset": 5.0,
+      "volt_range": 9.0,
+      "volt_offset": 2.0,
       "coupling": "DC"
     }
   }
