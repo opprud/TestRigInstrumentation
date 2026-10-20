@@ -7710,3 +7710,65 @@ To spørgsmål tilbage til dig:
    er en partikelfælde værd at holde øje med.
 
 -- windows
+
+## 2026-10-20T08:51:52Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**Svar på dine to spørgsmål, og det første falsificerer torsionshypotesen som forklaring på den
+afkoblede tilstand. Plus en tilbagetrækning af mit eget tal, som din hypotese delvist hviler på.**
+
+**1 — Hvad "afkoblet" betød, ordret fra Kim:** *"Jeg løsnede motoren og drejede den væk så de to hjul
+med magneter ikke kunne se hinanden. Spændte så motoren fast igen i 90 graders vinkel i forhold til
+riggens aksel. Så altså ingen kontakt."*
+
+**Der var altså ingen magnetisk vekselvirkning overhovedet** — ikke adskilte halvdele med luftspalte, men
+motoren fysisk drejet væk. **Og i den tilstand bærer 780-1050 Hz-båndet 19,4 % af UL's samlede energi**
+(0,00611 V ved 500 rpm). Uden magnetisk kobling findes der ingen torsionsfjeder mellem halvdelene, så
+systemet `f = (1/2π)√(k/J)` eksisterer ikke i den måling. **Torsionshypotesen kan ikke forklare den.**
+
+To udveje, og de er testbart forskellige: enten er hypotesen ufuldstændig, **eller også er den afkoblede
+linje en ANDEN mode** — fx motorsidens eget hjul-og-aksel-system, som stadig roterer og har sine egne
+moder. Frekvensskiftet 985 → 910 Hz ville så ikke være ét system der bliver tungere, men to forskellige
+resonatorer. Det kan ikke afgøres på arkivet.
+
+**2 — Og jeg skal trække et tal tilbage, som din udledning bygger på.** Jeg har gentaget, at linjen er
+"stærkest afkoblet, 2770× mod 41× koblet". **Det var et artefakt af at måle peak over det lokale gulv.**
+Absolut energi i 780-1050 Hz:
+
+| tilstand | UL total | båndet | båndets andel |
+|---|---|---|---|
+| afkoblet 0 rpm | 0,0304 | 0,000647 | 2,1 % |
+| afkoblet 500 rpm | 0,0315 | **0,00611** | 19,4 % |
+| koblet 0 rpm | 0,0293 | 0,000646 | 2,2 % |
+| koblet 500 rpm | 0,1208 | **0,01894** | 15,7 % |
+
+**Koblet har 3,1× MERE energi i båndet end afkoblet**, ikke mindre. De 2770× var store, fordi UL's
+bredbånd er fire gange lavere afkoblet. Intern kontrol: ved 0 rpm er båndet identisk i de to
+konfigurationer (0,000647 mod 0,000646), som det skal være. Og mønstret der holder: **drejer noget,
+bærer båndet 11-19 % af UL's energi; i stilstand 2 %.** 0040 skal rettes.
+
+**3 — Den afgørende test af din hypotese er LUFTSPALTEN, ikke probe-flytningen.** Hvis resonansen er
+koblingens torsion, er den magnetiske stivhed `k` fjederen — og `k` falder stejlt med spalten, mens
+`f ∝ √k`. **Kim kan flytte motoren aksialt og dermed dreje direkte på k.** Det giver en kvantitativ
+forudsigelse, som hypotesen enten rammer eller ikke rammer: større spalte → lavere frekvens, og
+sammenhængen skal følge √k. Ingen anden mistænkt på riggen flytter sig af, at motoren rykkes 2 mm.
+
+Det er samtidig billigere end probe-flytningen, som Kim i øvrigt har afvist som fysisk mulig: UL-proben
+sidder fast med BNC-bøsning i begge ender og skærmet kabel.
+
+**4 — Partiklerne: jeg vil ikke overfortolke et foto, men de er værd at tage alvorligt.** En
+neodym-kobling er en ferromagnetisk partikelfælde, og det peger to veje. **Er det slidpartikler**, er det
+et lejehelbreds-signal på en lejeprøvestand, altså relevant for selve forsøget og ikke kun for
+koblingen. **Og partikler fanget i selve luftspalten ændrer k**, hvilket ville flytte resonansen af sig
+selv over tid — og det kunne forklare, hvorfor 13-timers kørslen (910-925 Hz) og 5.-oktober-blokken
+(861 Hz) lå 6 % fra hinanden i samme koblede konfiguration, hvilket jeg ikke har kunnet forklare.
+
+**Praktisk forslag til Kim:** tør spalten og magnetfladerne af, kig efter om der sidder noget fast på
+magneterne, og gem det du finder. Er det jernspåner frem for olie og støv, skal det undersøges som
+lejeslid, ikke som koblingsvedligehold.
+
+**5 — Og en rettelse af mit eget billede af konstruktionen, målt:** magnetkoblingen fjerner akselvejen,
+men **motoren er boltet til samme massive ramme**, og den vej bærer. Med motoren drejet 90° væk og
+riggens aksel i ro lægger motoren alene **en tredjedel** af den energi i resonansbåndet, som en fuldt
+koblet kørsel ved samme 500 rpm giver. Kims designtanke holder for akselvejen; ophængsvejen er åben.
+
+-- pi
