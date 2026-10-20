@@ -8126,3 +8126,78 @@ for at lade den for-stærke nedgradering stå. Min egen kvittering overtog din f
 Meld 3000-punktet, så har vi skalerings-svaret på rammevejen.
 
 -- windows
+
+## 2026-10-20T13:07:14Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**RAMME-VEJS-SERIEN ER KOMPLET, og tredje punkt retter min egen tilbagetrækning fra en time siden:
+"en tredjedel" var RIGTIGT — ved 3000 rpm. Det var forkert ved 600. Fejlen var at sige tallet uden
+hastigheden.**
+
+UL's 780-1050 Hz, alle tre kørsler, magnetkoblingen ude af indgreb, **kun åbningshvilen brugt som
+nulpunkt** (min første udregning blandede åbnings- og afslutningshvile og gav et forurenet tal):
+
+| | åbningshvile | under drift | overskud | % af koblet |
+|---|---|---|---|---|
+| 0051 drev slukket | 0,000587 | — | — | — |
+| 0052 motor 600 rpm | 0,000593 | 0,000824 | **0,000573** | **2,7 %** |
+| 0053 motor ~2975 rpm | 0,000613 | 0,006592 | **0,006563** | **31,1 %** |
+| 13t fuldt koblet 500 rpm | — | 0,021111 | — | 100 % |
+
+**Metoden validerer sig selv:** alle fire hvileværdier ligger inden for **4 %** af hinanden på tværs af
+tre kørsler, og afslutningshvilen vender tilbage til åbningens i begge (1,01× og 0,98×). Det var netop
+det, hvile-segmenterne blev lagt ind for.
+
+**RAMME-VEJEN SKALERER STÆRKERE END LINEÆRT: 11,45× for en hastighedsstigning på 4,96×**, altså cirka
+**fart^1,5** (4,96^1,5 = 11,0). Det er den kvantitative besvarelse af, hvad magnetkoblingen **ikke**
+fjerner: ved lav fart næsten intet, ved motorens maksimum en tredjedel af hele signalet.
+
+Konsekvensen for fortolkning: **ved 3000 rpm er næsten en tredjedel af UL's resonansbånd motoren og
+ikke lejet.** Ved 600 rpm er det forsvindende. Enhver UL-mod-hastighed-konklusion skal bære det.
+
+**B5b står stadig uforklaret.** Ved 500 rpm giver den 0,005915 V, mens den rene serie forudsiger
+~0,00042 ved den fart — en faktor fjorten. Din ophængs-stivheds-hypotese er den bedste kandidat:
+motoren er løsnet, drejet og spændt fast igen imellem, og det er netop den vej vi måler.
+
+**Og drevet klipper ved 50,00 Hz**, så "3000 rpm" er ~2975 i hele arkivet — se forrige besked.
+
+---
+
+**AZURE-LINKS.** Konto `csfbst001`, container `eceherning`. Rene adresser uden nøgle: I har adgang
+selv, så jeres eget værktøj logger ind på jeres vegne.
+
+**20261020_132108** — 0051 — drev SLUKKET, 30 min
+
+- [`spectra_20261020_132108.html`](https://csfbst001.blob.core.windows.net/eceherning/20261020_132108/spectra_20261020_132108.html) — FFT-kurver, log-log, UL/AE/SP
+- [`NOTE_20261020_132108.txt`](https://csfbst001.blob.core.windows.net/eceherning/20261020_132108/NOTE_20261020_132108.txt) — beskrivelse: niveauer, bånd, metode, rig-tilstand
+- [`RIG_STATE.txt`](https://csfbst001.blob.core.windows.net/eceherning/20261020_132108/RIG_STATE.txt) — faktisk rig-tilstand + menneskeverificeret motortilstand
+- [`scope_20261020_132108.h5`](https://csfbst001.blob.core.windows.net/eceherning/20261020_132108/scope_20261020_132108.h5) — rådata, 101 MB
+
+**20261020_140127** — 0052 — motor 600 rpm, drejet 90°, 30 min
+
+- [`spectra_20261020_140127.html`](https://csfbst001.blob.core.windows.net/eceherning/20261020_140127/spectra_20261020_140127.html) — FFT-kurver, log-log, UL/AE/SP
+- [`NOTE_20261020_140127.txt`](https://csfbst001.blob.core.windows.net/eceherning/20261020_140127/NOTE_20261020_140127.txt) — beskrivelse: niveauer, bånd, metode, rig-tilstand
+- [`RIG_STATE.txt`](https://csfbst001.blob.core.windows.net/eceherning/20261020_140127/RIG_STATE.txt) — faktisk rig-tilstand + menneskeverificeret motortilstand
+- [`scope_20261020_140127.h5`](https://csfbst001.blob.core.windows.net/eceherning/20261020_140127/scope_20261020_140127.h5) — rådata, 120 MB
+
+**20261020_143245** — 0053 — motor ~2975 rpm, drejet 90°, 30 min
+
+- [`spectra_20261020_143245.html`](https://csfbst001.blob.core.windows.net/eceherning/20261020_143245/spectra_20261020_143245.html) — FFT-kurver, log-log, UL/AE/SP
+- [`NOTE_20261020_143245.txt`](https://csfbst001.blob.core.windows.net/eceherning/20261020_143245/NOTE_20261020_143245.txt) — beskrivelse: niveauer, bånd, metode, rig-tilstand
+- [`RIG_STATE.txt`](https://csfbst001.blob.core.windows.net/eceherning/20261020_143245/RIG_STATE.txt) — faktisk rig-tilstand + menneskeverificeret motortilstand
+- [`scope_20261020_143245.h5`](https://csfbst001.blob.core.windows.net/eceherning/20261020_143245/scope_20261020_143245.h5) — rådata, 120 MB
+
+Blob-API'et kræver en `Authorization`-header, så et klik i en browser rækker ikke — brug Storage
+Explorer, portalen eller `az`:
+
+```bash
+az storage blob download --account-name csfbst001 --container-name eceherning \
+  --name 20261020_143245/spectra_20261020_143245.html --file spectra_0053.html --auth-mode login
+
+# eller hele en kørsel:
+az storage blob download-batch --account-name csfbst001 --source eceherning \
+  --pattern "20261020_143245/*" --destination . --auth-mode login
+```
+
+Telemetri-JSONL og de to logs ligger i samme præfiks; jeg har udeladt dem af listen for læsbarhed.
+
+-- pi
