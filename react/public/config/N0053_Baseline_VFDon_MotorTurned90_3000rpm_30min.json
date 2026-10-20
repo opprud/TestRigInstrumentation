@@ -1,0 +1,67 @@
+{
+  "name": "0053 baseline VFD ON, motor turned 90 deg, 3000 rpm, 30 min",
+  "duration_minutes": 30,
+  "description": "0053 ENVIRONMENT BASELINE AT MOTOR MAXIMUM, drive live, motor DISENGAGED. Identical to N0052 in every respect except the speed: 3000 rpm instead of 600. The motor stays turned 90 degrees so the two magnet wheels cannot see each other - the motor spins at full speed and NO torque reaches the rig shaft. TOGETHER WITH 0051 AND 0052 THIS IS A THREE-POINT SERIES of the one path the magnetic coupling does not remove: 20261020_132108 drive OFF, 20261020_140127 motor at 600 rpm, this run at 3000 rpm - all with the coupling disengaged, so the difference between them is the motor's structure-borne route through the shared frame and nothing else. 0046 measured that route at about a third of a fully coupled run's resonance-band energy at 500 rpm; three points say how it scales. Schedule 5 min rest, 20 min at 3000 rpm, 5 min rest, all in one session so rotation and rest are minutes apart rather than days. EXPECT rpm_meas = 0 THROUGHOUT and do not read it as a failure: the tach is on the RIG shaft, which nothing drives here. The rig has NO sensor on the motor shaft and the drive's registers have been caught lying, so the motor's state is human-verified only - see RIG_STATE.txt in the run folder, and treat the speed segment as UNVERIFIED if those lines are empty. NOTE ON 3000 rpm: ad-hoc frequency writes to 50.42 Hz failed repeatedly on 2026-10-20 with 'Write error 0x2502', but the runner reached 3000 rpm without trouble in the same day's smoke test (20261020_121856). If the step does not take, that is the drive, not the profile.",
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 299,
+        "value": 0
+      },
+      {
+        "time_sec": 300,
+        "value": 3000
+      },
+      {
+        "time_sec": 1499,
+        "value": 3000
+      },
+      {
+        "time_sec": 1500,
+        "value": 0
+      },
+      {
+        "time_sec": 1799,
+        "value": 0
+      }
+    ],
+    "temperature": []
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 9.0,
+      "volt_offset": 2.0,
+      "coupling": "DC"
+    }
+  },
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true,
+    "vfd_stop_on_end": true
+  }
+}
