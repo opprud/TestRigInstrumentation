@@ -13,7 +13,7 @@ pr:
 Add a **phono cartridge (record-player pickup)** as a vibration / acoustic-emission sensor on the bearing,
 mounted to read the **inner ring** (and maybe the **outer ring**). A phono cartridge is a cheap, very
 sensitive mechanical-to-electrical transducer; in contact with a ring it could capture vibration / AE that
-complements the existing UL (Kistler AE probe), AE (accelerometer) and OE ultrasound-mic channels — a
+complements the existing UL (UL750 ultrasound), AE (Kistler acoustic emission) and OE ultrasound-mic channels — a
 different transduction and band, close to the contact.
 
 ## The signal-conditioning question (Kim's open point)

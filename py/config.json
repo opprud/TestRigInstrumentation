@@ -46,13 +46,13 @@
    "name": "UL",
    "source": "CHAN1",
    "enabled": true,
-   "notes": "Kistler acoustic emission probe"
+   "notes": "UE Systems UL750 ultrasound sensor"
   },
   {
    "name": "AE",
    "source": "CHAN2",
    "enabled": true,
-   "notes": "Piezo accelerometer"
+   "notes": "Kistler acoustic emission probe"
   },
   {
    "name": "SP",

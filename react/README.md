@@ -142,7 +142,7 @@ Located in `../py/config.json`:
 #### 1. Oscilloscope (MSO-X 2024A)
 - **Connection**: Ethernet (IP: 169.254.5.204)
 - **Protocol**: SCPI over TCP/IP
-- **Channels**: 4 analog inputs (AE probe, accelerometer, ultrasound, temperature)
+- **Channels**: UL750 ultrasound (`UL`/CHAN1), Kistler acoustic emission (`AE`/CHAN2), slip ring (`SP`/CHAN3), temperature (CHAN4, disabled)
 - **Control**: Python `acquire_scope_data.py`
 
 #### 2. RP2040 Microcontroller

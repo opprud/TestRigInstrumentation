@@ -16,7 +16,7 @@
       "name": "Accel",
       "source": "CHAN2",
       "enabled": true,
-      "notes": "Piezo accelerometer"
+      "notes": "Kistler acoustic emission probe (CHAN2; 'Accel' is a legacy alias)"
     }
   ],
 

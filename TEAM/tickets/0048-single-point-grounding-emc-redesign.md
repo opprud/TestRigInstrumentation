@@ -178,7 +178,7 @@ electro-acoustic hypothesis is ruled out for this line** (it was a good hypothes
 the threshold early, −3.2…−3.4 s artifacts) but read manually give the same sequence; SP fell only **16 %** (drive
 stays energized at 0 Hz, output stage ceases not supply), so UL's own line — distinguishing states by 2.3× — is the
 stronger self-witness. **Open hardware question (Kim/Eskild, non-blocking for the mechanism but it sets whether
-0.83 kHz is an acoustic frequency or a modulation rate): does the UL/Kistler probe demodulate internally?** Full 0040
+0.83 kHz is an acoustic frequency or a modulation rate): does the UL750 ultrasound probe (the `UL` channel, UE Systems UL750 — not a Kistler) demodulate internally?** Full 0040
 characterization folds in both the 0.83–1.00 kHz resonance (peaks 200–300 rpm) and the uncharacterized ~2.4 kHz
 (dominates ≥1800 rpm). The review trail below is kept for the record.
 
@@ -196,7 +196,7 @@ the bench, not the bearing) stands; the "not the VFD" part is what review revise
 heterodyne is **not visible in the recorded signal** (the ultrasonic peak wanders 32–51 kHz, no stable
 carrier; the envelope of the ultrasound is only 2.2–3.4× floor vs the raw line's 2770×) — **but that only
 rules out heterodyning in the *recording*, not inside the probe.** Open **hardware question (Kim/Eskild):
-does the UL/Kistler probe demodulate internally?** — its datasheet settles it and it changes everything.
+does the UL750 ultrasound probe (the `UL` channel, UE Systems UL750 — not a Kistler) demodulate internally?** — its datasheet settles it and it changes everything.
 Electro-acoustic vs mechanical is undecidable from the archive (block 5 localises the source to the *motor*
 but magnetostriction and motor imbalance both live there). **Decider — a 500 rpm coast-down:** cut the
 drive while recording; the line **vanishing** on drive-release (shaft still ~500 rpm) = **electro-acoustic**,

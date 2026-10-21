@@ -28,8 +28,8 @@
 ---
 
 ## 1. Purpose
-Find *where* the electrical noise in the three sensor channels (UL = ultrasonic/Kistler, AE =
-accelerometer, SP = slip-ring) comes from, and *how much* each source contributes — switch-mode vs linear
+Find *where* the electrical noise in the three sensor channels (UL = UE Systems UL750 ultrasound, AE =
+Kistler acoustic emission, SP = slip-ring) comes from, and *how much* each source contributes — switch-mode vs linear
 24 V supply, the heater/temperature control box, the VFD drive and its sinus (output) filter, the
 filter–VFD ground, and the heater relay — so that a long bearing run can be read against a known
 background.

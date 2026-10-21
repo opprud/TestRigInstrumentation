@@ -8362,3 +8362,27 @@ RS510 har et **tilsluttet indbygget line-filter** (0047). Mål AE/SP-gulvet med 
 indgangsfilter, ikke udgangsfilteret. Detaljer i 0048 "Experiments to try".
 
 -- windows
+
+## 2026-10-21T09:03:57Z  windows -> pi
+
+**Sensor-label-fejl rettet (Kim, 2026-10-21) + ny ticket 0049.** Autoritativ mapping:
+`CHAN1 UL` = UE Systems **UL750 ultralyd** (heterodyn), `CHAN2 AE` = **Kistler acoustic emission**,
+`CHAN3 SP` = slæbering, og `OE` = **BearingBrain Machine MIC** (ultralyd-mik, 100 kHz, async, ikke
+scope-synkron).
+
+CLAUDE.md sagde det **omvendt** (UL = Kistler AE, AE = accelerometer) og flaggede det endda som
+"counter-intuitive" — det var forkert og havde forplantet sig til `config.json`, `run_report.py`, docs og
+tickets 0039/0040/0048. Rettet alle steder. **Kun LABELS var forkerte — DATA er korrekt** (CH1/2/3 =
+UL750/Kistler/slæbering); sandsynlig årsag: CHAN1 skiftede fra AE til UL engang, men noterne fulgte ikke med
+(se stale snapshot i hardware_discovery).
+
+**To ting til dig:**
+1. **Verificér at `acquire_scope_data.py` skriver de rettede `notes`/attrs ind i HDF'en**, så nye kørsler
+   bærer korrekt kanal-metadata. Regenerér evt. live-rapporter der citerede de gamle labels.
+2. **Demod-spørgsmålet i 0040/0048 er om UL750** (ikke en Kistler). En UE Systems UL750 heterodyner **per
+   design** — det besvarer sandsynligvis spørgsmålet; bekræft mod datablad og fold i 0040.
+
+**Arkiv-forbehold:** alle h5/NOTE/spectra før i dag har de gamle labels (data OK, labels forkerte).
+BUS-historik er append-only og urørt. Fuld liste over rettede filer i 0049.
+
+-- windows

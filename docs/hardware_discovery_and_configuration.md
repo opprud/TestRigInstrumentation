@@ -167,6 +167,12 @@ The primary configuration file controls all aspects of data acquisition and hard
 
 #### Channel Configuration
 
+> ⚠️ **Stale snapshot — do not use this mapping.** Early discovery capture, kept for history. The
+> authoritative channel map is in the root `CLAUDE.md`: **CHAN1 `UL` = UE Systems UL750 ultrasound,
+> CHAN2 `AE` = Kistler acoustic emission, CHAN3 `SP` = slip ring.** The block below predates that and has
+> the aliases/channels wrong (corrected 2026-10-21, Kim). The 4th sensor — the BearingBrain "Machine MIC" /
+> OE — is asynchronous and is **not** a scope channel.
+
 ```json
 {
   "channels": [

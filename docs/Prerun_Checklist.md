@@ -162,7 +162,7 @@ If it is silent, press the reset button on the unit (ticket 0019 — it cannot b
 - [ ] **Never flash mid-run.** The same board serves the tacho *and* the load cell.
 - [ ] Load cell tared, and calibrated **per gain** if running the auto-gain firmware.
 - [ ] **Is the UL probe mounted?** If not, `UL` records nothing and the run is OE +
-      accelerometer + slip ring only (ticket 0015).
+      Kistler AE + slip ring only (ticket 0015).
 - [ ] **Slip-ring PSU set to ~5 VDC.** The slip ring (`SP`, CHAN3) is fed from its own bench PSU;
       at the wrong voltage the SP channel records garbage or nothing. Confirm the supply reads
       **~5 VDC** before starting — nothing in software reads it back, so a wrong setting is invisible

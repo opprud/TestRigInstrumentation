@@ -19,7 +19,7 @@ BANDS = [("0-10k",0,10e3),("10-50k",10e3,50e3),("50-100k",50e3,100e3),
          ("100-126k",100e3,126e3),("126-135k",126e3,135e3),("135-500k",135e3,500e3),
          ("500k-1M",500e3,1e6),("1055-1066k",1055e3,1066e3),("1M-1.25M",1e6,1.25e6)]
 CH = ("UL","AE","SP")
-SENSOR = {"UL":"Kistler acoustic emission (CHAN1)","AE":"piezo accelerometer (CHAN2)",
+SENSOR = {"UL":"UE Systems UL750 ultrasound (CHAN1)","AE":"Kistler acoustic emission (CHAN2)",
           "SP":"slip ring (CHAN3)"}
 NBINS, NSWEEP = 650, 16
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

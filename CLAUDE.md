@@ -75,15 +75,21 @@ Key Python modules:
 
 The VFD and the Omron share one RS485 bus (different Modbus slave IDs), so bus access is
 serialized with a lock. Sensor channels wired to the scope are configured in
-`config.json → channels`. **The aliases do not read as you would expect** — the alias `UL`
-is the acoustic-emission probe and the alias `AE` is the accelerometer:
+`config.json → channels`. **The aliases read straight** (corrected 2026-10-21, Kim — earlier
+versions of this table had CHAN1/CHAN2 inverted, calling `UL` the "Kistler acoustic-emission probe"
+and `AE` the "accelerometer"; that was wrong and had propagated into analysis): `UL` is the
+ultrasound probe, `AE` is the acoustic-emission probe.
 
 | Scope source | Alias (`name`) | Sensor |
 |---|---|---|
-| CHAN1 | `UL` | Kistler acoustic-emission probe |
-| CHAN2 | `AE` | Piezo accelerometer |
+| CHAN1 | `UL` | **UE Systems UL750** ultrasound sensor |
+| CHAN2 | `AE` | **Kistler acoustic-emission** probe |
 | CHAN3 | `SP` | Slip ring (slæbering) |
 | CHAN4 | `Temp` | Temperature — **disabled** |
+
+A fourth sensor — the **BearingBrain "Machine MIC" / OE sensor** (ultrasound mic, FS 100 kHz) — also
+lands in the HDF, but is **not synchronously sampled** with the three scope channels: it is the BLE
+OE device, captured asynchronously into `/oe_samples` (tickets 0001/0021/0024–0026).
 
 The aliases are what the profile's `scope_channels` block, `plot_waveform.py --channels` and
 the dashboard's preview picker refer to, so keep those three in sync with this table.
@@ -758,7 +764,7 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   > **But measure it at the run's own sample rate, not with a quick hand-rolled capture.** On 2026-09-23
   > a check with `points=40000` over a 200 ms window (~190 kHz) made AE look catastrophically
   > over-ranged — 7 levels of 199 — and nearly caused a re-scale. A real run digitises the same window at
-  > **500 k points / 2.5 MHz**, and AE then uses **41-70 levels**. The accelerometer's energy sits high in
+  > **500 k points / 2.5 MHz**, and AE then uses **41-70 levels**. The Kistler AE's energy sits high in
   > frequency, so the low-rate capture had simply undersampled it away. `9ebabe9e`'s note that AE is
   > *"nearly clipping, not over-ranged"* was right; the 7-level reading was an artefact of the test, not a
   > property of the channel.

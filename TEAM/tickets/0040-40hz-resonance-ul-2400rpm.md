@@ -92,7 +92,7 @@ blocks, where the bearing shaft is not turning at all and only the motor spins.
 block decides it: move the probe and re-measure at 200 rpm.** If the frequency follows the mounting it is
 the fixture; if it stays put it is the bench.
 
-**Also not settled:** whether UL's recorded signal is raw or already demodulated inside the Kistler probe.
+**Also not settled:** whether UL's recorded signal is raw or already demodulated inside the **UL750 ultrasound probe** (corrected 2026-10-21: the `UL` channel is the UE Systems **UL750**, a heterodyne ultrasound sensor — *not* a Kistler; the Kistler is the `AE` channel. That the UL750 heterodynes by design bears directly on this question).
 The ~1 kHz energy is a **raw** spectral line at 2770x the floor while the Hilbert envelope of the
 ultrasound band sits at 2.2-3.4x — the same as at rest — so there is no heterodyne modulation **in the
 recorded signal**. If the probe demodulates internally, that line *is* an envelope and the physical
