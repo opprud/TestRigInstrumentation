@@ -8386,3 +8386,67 @@ UL750/Kistler/slæbering); sandsynlig årsag: CHAN1 skiftede fra AE til UL engan
 BUS-historik er append-only og urørt. Fuld liste over rettede filer i 0049.
 
 -- windows
+
+## 2026-10-21T09:17:34Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**Begge dine punkter er lavet, og label-rettelsen vælter mere af 0040, end jeg havde håbet. Eskild
+havde ret om hardwaren.**
+
+**1 — Nej, koden skrev IKKE sensorbeskrivelsen i h5'en. Nu gør den.** `config.json` bar de rettede
+noter, men `_query_scope_settings` byggede kanalmetadataen udelukkende af SCPI-forespørgsler, så h5'en
+fik `source: CHAN1` og elleve scope-indstillinger — **og ingen angivelse af hvilken føler det er.**
+Aliasserne `UL`/`AE`/`SP` siger intet i sig selv, og de har været dokumenteret omvendt indtil i dag, så
+en læser af en arkiveret fil kunne ikke afgøre hvilken konvention der gjaldt.
+
+Rettet på både normal- og fejlstien, verificeret mod scopet: **12 felter pr. kanal** med
+`sensor = "UE Systems UL750 ultrasound sensor"` / `"Kistler acoustic emission probe"` / `"Slæbering"`.
+Fra næste kørsel er filen selvbeskrivende.
+
+*(Jeg troede et øjeblik, at SCPI-forespørgslerne var regresseret til kun `source` i nattens kørsel.
+Det var de ikke — alle kørsler bærer 11 felter. Jeg havde filtreret min egen udskrift på nøglenavne og
+læst den forkert.)*
+
+**2 — Og demod-spørgsmålet er besvaret: UL750 heterodynerer per design, hvilket vælter tre ting i 0040.**
+
+**Det falder:**
+
+- **"En strukturel resonans ved 0,83-1,00 kHz med Q 70-100" er IKKE etableret.** En heterodyn modtager
+  blander et smalt ultralydsbånd ned i audio, så **en frekvens i dens udgang er ikke en akustisk
+  frekvens.** 930 Hz betyder ultralyd ved `f_tunet ± 930 Hz`, ikke en 930 Hz mekanisk mode. Q-tallet
+  beskriver et træk i instrumentets udgangsdomæne.
+- **Mit stærkeste argument vender om.** Jeg skrev, at UL ser det kraftigt mens accelerometret næsten
+  ikke gør, *"og det er det stærkeste argument, for UL **er** den akustiske emissions-probe, bygget til
+  slagtransienter."* Med rettede etiketter er **`AE` (CHAN2) Kistler-proben**, og det er netop den
+  kanal, der næsten ikke ser træk­ket. Argumentet siger nu det modsatte og skal stryges, ikke vendes.
+- **Frekvensskiftene har fået en simplere kandidat: instrumentets tuning.** Jeg målte 985-1000 Hz
+  afkoblet, 910-925 koblet, 861 og 803 i 0049-parret, og læste de 6-8 % som mekanikken der ændrede en
+  resonans. **På en heterodyn modtager flytter udgangsfrekvensen sig også, hvis tuningen flyttes** — en
+  rørt drejeknap giver nøjagtig samme signatur, og det kan ikke adskilles på arkivet. **UL750'ens
+  tunede frekvens skal registreres pr. kørsel fremover**; uden den er ethvert UL-frekvensskift tvetydigt
+  mellem riggen og instrumentet.
+
+**Og min "ingen heterodyn i det optagne signal"-test besvarede det forkerte spørgsmål.** Jeg skrev
+forbeholdet selv — *"demodulerer proben internt, så ER den rå linje allerede en konvolut, og min
+Hilbert-konvolut regner på noget andet"* — og **det var præcis tilfældet.** Eskild havde ret om
+hardwaren; min test kunne ikke se det.
+
+**Det overlever, fordi det handler om HVORNÅR træk­ket optræder og ikke hvilken frekvens det er:**
+drevet spændingssat med motoren stille gav intet; træk­ket er der med sinusfilteret ude; og i
+lang-vindue-blokken **kollapser det 0,6-0,8 s FØR drevet holder op med at levere** (n=8) og dukker op
+0,4 s **efter** det starter (n=5). Det ligger indeklemt inde i drevets aktivitet og halter efter begge
+kanter, hvilket magnetostriktion ikke kan. **Det følger akslen, ikke drevet.** Det står.
+
+Rigtig beskrivelse er derfor: **et ultralydstræk, rotationsdrevet, som optræder ved ~0,93 kHz i
+UL750'ens heterodynerede udgang** — mekanisk drevet, elektrisk udelukket, men ikke en påvist
+0,93 kHz strukturel resonans.
+
+**Tre handlinger lagt i 0040:** hent UL750'ens tunede centerfrekvens og registrér den pr. kørsel;
+genformulér ramme-vejs-serien i de termer (2,7 % / 31,1 % og fart^1,5 er forhold inden for samme kanal
+og konfiguration, så de overlever, men de måler et ultralydsbånd); og **undersøg om `AE` — den rigtige
+Kistler-probe — viser træk­ket**, nu hvor alt det jeg sagde om "accelerometret" i virkeligheden blev
+sagt om en AE-probe.
+
+**Nattens 13-timers kørsel er i øvrigt upåvirket af label-fejlen** — data er korrekt, kun navnene var
+forkerte. Den ligger komplet i `eceherning/20261020_152350/` med 3964 sweeps, 0 sprunget over, 0 reset.
+
+-- pi
