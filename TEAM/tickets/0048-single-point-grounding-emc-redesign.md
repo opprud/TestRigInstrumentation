@@ -117,7 +117,7 @@ Standard VFD-EMC practice, to be confirmed against the rig's actual layout — n
 - Check filter placement and lead lengths (a sinus/dv-dt filter belongs close to the drive output with
   short leads).
 
-## Experiments to try (Kim + review feedback, 2026-10-05)
+## Experiments to try (Kim + review feedback, 2026-10-05; input-side EMI-filter hypothesis 2026-10-21)
 From the review (Eskild Herskind, CeramicSpeed) and Kim, on the counterintuitive "the sinus filter makes
 the sensor noise worse" result. **Mechanism identified:** the VFD couples **capacitively between the stator
 windings and the motor housing** (common-mode); the motor sits **close to the bearings and in direct
@@ -125,8 +125,22 @@ electrical contact with the base plate**, so that common-mode path runs straight
 (and is also the classic bearing-current path). Candidates, each tested **one change at a time against the
 decoupled-AE acceptance metric (below), at a verified rpm** (0047):
 
-- **Ferrite / common-mode chokes** on the cables (drive output, and/or the sensor cables). Low risk, often
-  the single most effective CM fix — **try this first.**
+- **Missing input (line-side) EMI filter — Kim's hypothesis (2026-10-21), now the leading candidate.** The
+  sinus filter is on the drive **output**; it cannot drain a common-mode source that leaves the VFD on its
+  **input / chassis** side. Without a line-side EMI filter (common-mode choke + Y-caps on the mains leads),
+  the VFD's HF common-mode current has **no local return path** to the drive PE — it circulates through the
+  building ground network and couples into the single-ended sensor cables, and the sinus filter's star-point
+  just becomes one more node in that uncontrolled CM network, which is why filter-ON looks *worse*. Fits
+  every symptom on record: the penalty appears **only when the drive output switches** (stationary
+  ground-on/off are equal), **ground-ON running is +288 %** (a CM loop), and **SP is hit hardest**
+  (single-ended on a ~5 V slip-ring pedestal, most exposed to a floating reference). **Cheap test, before
+  touching the sinus filter:** clamp a common-mode ferrite/choke on the VFD **input (mains) leads**, verify
+  the drive's own PE bond, and check whether the RS510 has a **built-in input filter that is actually
+  connected** (0047). Measure the decoupled-AE / SP floor with the drive **running**. If it drops → fit a
+  proper line-side EMI filter + single-point bond and **keep the sinus filter**; the root cause was the
+  missing input filter, not the output filter.
+- **Ferrite / common-mode chokes** on the output/sensor cables (drive output, and/or the sensor cables).
+  Low risk, often the single most effective CM fix — **do this alongside the input-side test above.**
 - **Split the shielding by cable SEGMENT.** The **drive→filter** cable carries raw PWM (high CM) and wants
   shield + 360° ground at both ends. The **filter→motor** cable carries the near-sinusoidal, low-dv/dt
   output — **Kim's hypothesis (2026-10-05): drop the shield AND the ground at both ends on the filter→motor

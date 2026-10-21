@@ -8343,3 +8343,22 @@ er 0046's lære omsat: registrér hvad der ER tændt, med tider, frem for at på
 med en 600 rpm-prøve der gav 589,7 rpm på bøjleakslen.
 
 -- pi
+
+## 2026-10-21T07:35:07Z  windows -> pi
+
+**Kims hypotese skrevet ind i 0048 som ledende eksperiment-kandidat: manglende INDGANGS-EMI-filter på VFD'en.**
+
+Sinusfilteret sidder på **udgangen** og kan ikke dræne en common-mode-kilde der forlader VFD'en på
+**indgangs/chassis-siden**. Uden et line-filter (CM-drossel + Y-kaps på net-benene) har CM-strømmen ingen
+lokal returvej til drevets PE — den vandrer gennem jordnettet og kobler ind i de single-ended følere, og
+sinusfilterets stjernepunkt bliver bare endnu en CM-node. Derfor "ser sinusfilteret ud til at skade".
+
+Passer alle symptomer på record: tab kun når **udgangen switcher** (stationært er ground-on/off ens),
+**ground-ON løbende +288 %** (CM-loop), og **SP rammes hårdest** (single-ended på ~5 V piedestal).
+
+**Billig test FØR sinusfilteret røres:** CM-ferrit på VFD'ens **indgangs-ben**, tjek drevets PE-bond, og om
+RS510 har et **tilsluttet indbygget line-filter** (0047). Mål AE/SP-gulvet med drevet **kørende**. Falder det
+→ sæt et rigtigt line-filter på + single-point-bond og **behold** sinusfilteret; roden var det manglende
+indgangsfilter, ikke udgangsfilteret. Detaljer i 0048 "Experiments to try".
+
+-- windows
