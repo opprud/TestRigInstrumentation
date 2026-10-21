@@ -8287,3 +8287,59 @@ ingen efterladt heater guard, 29 GB fri disk. Motoren står stadig drejet 90° �
 igen før en lejekørsel.**
 
 -- pi
+
+## 2026-10-21T03:00:14Z — Claude (instrumentering) → arkitekt, Kim, Eskild
+
+**13-timers kørsel færdig: `20261020_152350`, 15:23 → 04:36. Tredje i træk uden et eneste scope-reset,
+og den første med den nye SP-kabling.**
+
+| | denne | 2. okt | 20. aug |
+|---|---|---|---|
+| sweeps | **3964** | 3964 | 3778 |
+| sprunget over | **0** | 0 | 1 |
+| scope-reset | **0** | 0 | **114** |
+| huller i nummereringen | **0** | 0 | — |
+| OE-optagelser | 153 (6 fejl, 4 genforb.) | 157 | 249 |
+| temperaturtrin | **alle 13, til 100 °C** | alle 13 | alle 13 |
+
+Intet klipper: UL 0,0048 %, AE 0,0138 %, SP 0,0004 % af samplene på en yderkant.
+
+**Varmen slukket og bekræftet tre veje:** guarden nåede `VERIFIED` kl. 04:37:00, jeg slukkede desuden
+manuelt, og **PV faldt 93 → 91 → 88 → 86 → 83 °C** over to minutter. Akslen står stille med frossen
+pulstælling.
+
+**Arkiveret:** `eceherning/20261020_152350/`, 4,31 GB i syv filer, **MD5 på hver**, verificeret ved at
+liste containeren. Med FFT-kurver (`spectra_...html`), note (`NOTE_...txt`) og rig-tilstand
+(`RIG_STATE.txt`) som sidecars, så forklaringen ligger ved siden af dataen.
+
+```bash
+az storage blob download-batch --account-name csfbst001 --source eceherning \
+  --pattern "20261020_152350/*" --destination . --auth-mode login
+```
+
+**TRE FORBEHOLD, alle i `RIG_STATE.txt` i kørselsmappen.**
+
+**1 — SP kan ikke sammenlignes med tidligere 13-timers kørsler.** Vinduet er **9,0/2,0** mod 8,0/4,5 i
+alle tidligere, fordi slæberingen nu sidder på direkte BNC-kabel og scopet måtte fra PROBE ×10 til ×1.
+Signalet når −1,23 V, som det gamle vindue ville have klippet. **UL og AE er uændrede og fuldt
+sammenlignelige.**
+
+**2 — De første ~130 sekunder er forurenede.** Min koblingsprøve umiddelbart før kørslen efterlod
+motoren kørende, og dens stop nåede ikke at bekræfte. Så i åbningens 0 rpm-segment drejede bøjlen
+~590 rpm. Telemetrien viser det: ved t=105 s står `rpm_target=0` med `rpm_meas=590,9`. Runneren tog
+over ved t=124 s, og fra t=142 s følger den profilen korrekt.
+
+Det er værd at vide netop fordi **de to minutter normalt er den eneste rene stilstandsmåling i hele
+kørslen** — jeg efterprøvede det mod profilen (0 rpm til t=119 s) og mod begge tidligere 13-timers
+kørsler, som begge står på 0,0 rpm hele vejen igennem. Hvem der vil bruge åbningen som nulpunkt, skal
+kassere sweeps før ca. t=130 s.
+
+**3 — En lampe blev slukket i rummet undervejs**, bedste bud ved **t ≈ 280 s**, sikkert mellem t=250 og
+t=310 s. Skrevet som et vindue frem for et præcist tal, fordi mit første stempel var da jeg skrev det
+ned, ikke da lampen blev slukket. Et spring i sensorgulvene i det vindue har altså en kendt årsag. Det
+er 0046's lære omsat: registrér hvad der ER tændt, med tider, frem for at påstå at intet var.
+
+**Riggen er fuldt samlet** — motoren drejet på plads, magnetkoblingen i indgreb, verificeret før start
+med en 600 rpm-prøve der gav 589,7 rpm på bøjleakslen.
+
+-- pi
