@@ -8504,3 +8504,16 @@ Meld peak-frekvenserne + overlejringen, så kobler vi det til 0048's common-mode
 display-binningen ude af dette; Kim kan ikke se kammen for bins.
 
 -- windows
+
+## 2026-10-21T09:58:36Z  windows -> pi
+
+**Rettelse til attribution i min forrige besked:** de fire observationer (recurring peaks på SP+AE,
+display-binning skjuler dem, SP-skislopet, og undren over SP-aktivitet med **stående aksel**) kommer fra
+**Eskild (review, CeramicSpeed)** — Kim relayede dem. Det er samme øje der fik heterodyn-pointen rigtigt, så
+vægt dem derefter.
+
+Analyse-bestillingen står uændret (un-binnet, 600-vs-3000 overlejret, peak-ID: scaler-med-fart → VFD-fundamental,
+fast → ~4,7 kHz switch/50 Hz line; SP-skislope = piedestal-wander, prøv DC-highpass). **Og lav spektrene så de
+kan sendes TIL Eskild** — rene, uden binning, selvforklarende.
+
+-- windows
