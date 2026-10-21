@@ -135,10 +135,18 @@ decoupled-AE acceptance metric (below), at a verified rpm** (0047):
   ground-on/off are equal), **ground-ON running is +288 %** (a CM loop), and **SP is hit hardest**
   (single-ended on a ~5 V slip-ring pedestal, most exposed to a floating reference). **Cheap test, before
   touching the sinus filter:** clamp a common-mode ferrite/choke on the VFD **input (mains) leads**, verify
-  the drive's own PE bond, and check whether the RS510 has a **built-in input filter that is actually
-  connected** (0047). Measure the decoupled-AE / SP floor with the drive **running**. If it drops → fit a
-  proper line-side EMI filter + single-point bond and **keep the sinus filter**; the root cause was the
-  missing input filter, not the output filter.
+  the drive's own PE bond, and read the RS510 **nameplate for the filter code**. Manual finding (RS510
+  Operating Manual A700000006570788, ch. 2 Part-Number Definition): the model code has a dedicated **Filter
+  position — `F` = built-in Class "A" EMC filter (Category C2), blank = none** (e.g. `RS510-401-SH3F-P` has
+  it). So the series *can* ship with a line-side filter, but it is **not guaranteed** — confirm the `F` on
+  this unit's plate. Two caveats even if it is an `F` model: (1) the built-in filter only contains
+  common-mode if the drive **PE is solidly bonded** (manual §3.1.1: ≥10 mm² PE to an **unpainted galvanised
+  backplate**, short leads) — an unbonded/painted mount defeats it, which fits the symptoms; (2) Class A /
+  C2 meets **industrial** conducted-emission limits, not a measurement rig's floor (the manual itself says a
+  stricter environment needs an external **Class B** filter). Measure the decoupled-AE / SP floor with the
+  drive **running**. If a CM ferrite / better PE bond / external low-leakage filter drops it → that was the
+  path, and **keep the sinus filter**; the root cause was uncontained input-side common-mode, not the output
+  filter.
 - **Ferrite / common-mode chokes** on the output/sensor cables (drive output, and/or the sensor cables).
   Low risk, often the single most effective CM fix — **do this alongside the input-side test above.**
 - **Split the shielding by cable SEGMENT.** The **drive→filter** cable carries raw PWM (high CM) and wants
