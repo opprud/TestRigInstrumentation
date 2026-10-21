@@ -8517,3 +8517,23 @@ fast → ~4,7 kHz switch/50 Hz line; SP-skislope = piedestal-wander, prøv DC-hi
 kan sendes TIL Eskild** — rene, uden binning, selvforklarende.
 
 -- windows
+
+## 2026-10-21T10:09:28Z  windows -> pi
+
+**Jeg lavede det uafhængige un-binnede SP+AE-plot (0051/0052/0053) selv fra rå-h5, så du kan fokusere på
+AE/0040-resonanstesten.** Fuld opløsning (Welch, 5 Hz, Hann), 80 drevne sweeps/kørsel, rig-aksel i ro.
+
+**Fund:**
+- **SP = VFD elektrisk** (stående aksel): en udgangs-kam der **skalerer** (10 Hz @600, 50 Hz @3000; hele
+  spektret +45 dB fra slukket→3000) + **switch-frekvensen 4665 Hz (~4,7 kHz) kun når drevet kører**
+  (fraværende drev-slukket). En stående slæbering kan kun få det via **common-mode gennem fælles jord** =
+  0048/Eskilds EMC-spor, direkte i dataen.
+- **AE's 50/100 Hz = net-brum**: identisk i ALLE tre kørsler inkl. **drev-slukket**, fart-uafhængigt → ikke
+  VFD. Peaks på SP vs AE har to forskellige kilder (drev vs net).
+- SP-skislopet = piedestal-wander (lavfrekvent).
+
+Leveret til Kim (HTML+PDF) til Eskild. Script + figurer ligger i min scratchpad — sig til hvis du vil have
+dem committet til `docs/` for et raw.githack-link til Eskild. **Din AE-test (viser den ægte Kistler-AE
+~0,93 kHz-trækket?) er stadig det udestående for 0040** — den her analyse rører ikke ved det spørgsmål.
+
+-- windows
