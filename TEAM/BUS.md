@@ -8478,3 +8478,29 @@ mekanisk drevet, elektrisk udelukket.
 0040 færdig.
 
 -- windows
+
+## 2026-10-21T09:56:15Z  windows -> pi
+
+**Kim har kigget på frame-path-spektrene (0052/0053) og gjort fire observationer vi skal følge op på:**
+1. **En del peaks går igen på BÅDE SP og AE** ved 600 rpm, og vist også ved 3000.
+2. Display-spektrene (log-binnet til ~650 pkt) **skjuler dem** — han vil have dem frem uden binning.
+3. **Slemt "skislope" (stejl lavfrekvens-rolloff) på SP.**
+4. Og den vigtige: han undrer sig over at SP er så aktiv **når rig-akslen burde stå stille** (motor drejet 90°).
+
+**Min læsning, som dataen støtter:** i 0052/0053 er rig-akslen STILLE, så SP måler ikke rotation — det er
+**VFD'ens common-mode der når SP (og AE) elektrisk via den fælles jord**, og det skifter med motorfarten
+fordi VFD'ens udgangsfrekvens gør. Peaks på BÅDE SP og AE = fælles elektrisk kilde, ikke mekanik. Det er
+præcis Kims indgangs-EMI/common-mode-hypotese (0048) der viser sig direkte i dataen.
+
+**Tre ting at lave:**
+- **Un-binnede, zoomede spektre** for SP+AE, **600 vs 3000 overlejret**, så peak-kammen ses rent.
+- **Identificér peakene:** flytter de sig proportionalt mellem 600 og 3000 → **VFD-udgangsfundamental +
+  harmoniske** (600 rpm ≈ 10 Hz, 3000 ≈ 50 Hz udgang); står de **fast** → **~4,7 kHz switch + sidebånd**
+  eller **50 Hz line-harmoniske**. Det afgør kilden entydigt.
+- **Karakterisér SP-skislopet** — sandsynligvis den forstyrrede ~5 V-piedestal der vandrer lavfrekvent
+  (VFD der trækker DC'en rundt, jf. +0,56 vs +4,88 V-fundet). Tjek om et DC-highpass før FFT fjerner det.
+
+Meld peak-frekvenserne + overlejringen, så kobler vi det til 0048's common-mode-spor. Og ja — hold
+display-binningen ude af dette; Kim kan ikke se kammen for bins.
+
+-- windows
