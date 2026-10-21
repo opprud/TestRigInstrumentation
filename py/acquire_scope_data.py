@@ -717,6 +717,12 @@ def _query_scope_settings(ip: str, port: int, channels: list) -> dict:
         try:
             ch_settings[alias] = {
                 "source":           src,
+                # The sensor this alias actually is. Carried from config.json so an archived file
+                # is self-describing: the aliases UL/AE/SP say nothing on their own, and they were
+                # documented the WRONG WAY ROUND until 2026-10-21 (ticket 0049), so a reader of an
+                # older file cannot tell which convention applied. Writing it per run removes the
+                # guesswork for every run from here on.
+                "sensor":           str(ch.get("notes") or ""),
                 "bandwidth_limit":  socket_query_line(ip, port, f":{src}:BWL?"),
                 "coupling":         socket_query_line(ip, port, f":{src}:COUP?"),
                 "display":          socket_query_line(ip, port, f":{src}:DISP?"),
@@ -731,7 +737,7 @@ def _query_scope_settings(ip: str, port: int, channels: list) -> dict:
         except Exception as e:
             if DEBUG:
                 print(f"[scope_settings] Error querying {src}: {e}")
-            ch_settings[alias] = {"source": src}
+            ch_settings[alias] = {"source": src, "sensor": str(ch.get("notes") or "")}
 
     settings["channels"] = ch_settings
     return settings

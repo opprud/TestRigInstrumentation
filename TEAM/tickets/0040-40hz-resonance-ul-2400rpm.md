@@ -143,3 +143,69 @@ post-rebuild data, it needs a fresh decoupled dwell at 2350-2450 rpm — the old
 - [ ] **Answer the probe-demodulation hardware question** (Kim / Eskild) — it decides whether these are
       acoustic frequencies or modulation rates.
 - [x] ~~Subtract the 0035 decoupled floor from the archive~~ — withdrawn, see §C.
+
+---
+
+# ⚠️ 2026-10-21 — THE SENSOR LABELS WERE WRONG, AND IT BREAKS PART OF THIS TICKET
+
+Authoritative mapping (Kim, ticket 0049): **CHAN1 `UL` = UE Systems UL750 ultrasound (heterodyne)**,
+CHAN2 `AE` = Kistler acoustic emission, CHAN3 `SP` = slip ring. CLAUDE.md said the opposite and even
+flagged it as "counter-intuitive". **The data is correct; only the labels were wrong.** Everything
+written in this ticket before today assumed `UL` was the Kistler AE probe.
+
+## What falls
+
+**1. "A structural resonance at 0.83-1.00 kHz with Q 70-100" is NOT established.** A UL750 heterodynes
+by design: it mixes a narrow ultrasound band down to audio, so **a frequency in its output is not an
+acoustic frequency.** A component at 930 Hz means ultrasound at `f_tuned ± 930 Hz`, not a 930 Hz
+mechanical mode. There is no evidence here for a mechanical resonance at 0.93 kHz, and the Q figure
+describes a feature in the instrument's output domain, not a structural mode.
+
+**2. My strongest supporting argument was backwards.** I wrote: *"UL sees it strongly while the
+accelerometer barely does — and that is the strongest argument, because UL IS the acoustic-emission
+probe, built to catch impact transients."* With the labels corrected that inverts: **`AE` (CHAN2) is
+the Kistler AE probe**, and it is the channel that barely sees the feature. The argument now says the
+opposite of what I claimed, and it should be struck rather than re-pointed.
+
+**3. The frequency shifts have a new and simpler candidate: the instrument's tuning.** I recorded
+985-1000 Hz decoupled, 910-925 Hz coupled, 861 Hz and 803 Hz in the 0049 pair, and read the 6-8 %
+shifts as the mechanical configuration changing a resonance. **On a heterodyne receiver the output
+frequency also moves if the tuned centre frequency moves** — so a touched tuning knob produces exactly
+the same signature. This cannot be separated from the archive. **Record the UL750's tuned frequency in
+the run notes from now on**; without it, a frequency shift in UL is ambiguous between the rig and the
+instrument.
+
+**4. My "no heterodyne in the recorded signal" test answered the wrong question.** I bandpassed the
+32-51 kHz content of UL's output and found its Hilbert envelope carried no ~1 kHz component, and
+concluded there was no heterodyne modulation — while flagging the caveat that *"if the probe
+demodulates internally, that line IS an envelope and my test computes the envelope of an envelope."*
+**That caveat was the correct case.** Eskild was right about the hardware; my test could not see it.
+
+## What survives
+
+**The mechanism evidence does not depend on the labels, because it is about WHEN the feature appears,
+not what frequency it is:**
+
+- Drive energized with the motor still (B3a) → nothing. The VFD carrier is excluded.
+- Present with the sinus filter removed (B5f) → the filter is excluded.
+- Speed tripled, output frequency moved 1.5 % → not a forced rotational harmonic **in the output
+  domain** (and on a heterodyne receiver a true mechanical harmonic would not map linearly anyway).
+- **Long-window stop transition (`20261005_131704`): the feature collapses 0.6-0.8 s BEFORE the drive
+  stops delivering (n=8), and appears 0.4 s AFTER the drive starts (n=5).** It is bracketed inside the
+  drive's activity and lags both edges, which magnetostriction cannot do. **It follows the shaft, not
+  the drive.** This stands.
+
+So: **mechanically driven, electrically excluded — but NOT demonstrated to be a 0.93 kHz structural
+resonance.** The right description is "an ultrasound feature, rotation-driven, appearing at ~0.93 kHz in
+the UL750's heterodyned output".
+
+## Actions
+
+- [ ] **Get the UL750's tuned centre frequency** from the instrument and its datasheet, and record it
+      per run. Without it every UL frequency in the archive is an unknown offset.
+- [ ] **Re-express the frame-path series in those terms.** The 2.7 % / 31.1 % figures and the speed^1.5
+      scaling are ratios within the same channel and configuration, so they survive — but they measure
+      an ultrasound band, not a 0.93 kHz acoustic band.
+- [ ] **Re-check whether `AE` (the real Kistler probe) shows the feature** once it is looked for in the
+      right channel with the right expectation. Everything said about "the accelerometer not seeing it"
+      was said about an AE probe.
