@@ -147,6 +147,23 @@ decoupled-AE acceptance metric (below), at a verified rpm** (0047):
   drive **running**. If a CM ferrite / better PE bond / external low-leakage filter drops it → that was the
   path, and **keep the sinus filter**; the root cause was uncontained input-side common-mode, not the output
   filter.
+
+**Measured confirmation (2026-10-22, windows + Morten, independent analyses agree).** The frame-path runs
+(rig shaft **stationary**, motor turned 90°, no magnetic coupling) show the VFD reaching the **stationary**
+slip ring *electrically* — common-mode via the shared ground, not rotation. Full-resolution Welch spectra
+(`py/tools/sp_ae_spectra.py`, runs `20261020_132108` off / `20261020_140127` 600 rpm / `20261020_143245`
+~2975 rpm):
+- **VFD PWM carrier ~4.6–4.7 kHz on SP** — 4665 Hz at 600 rpm (−64 dB), ~4.6 kHz at 3000 rpm (−78 dB),
+  **absent drive-off** (−95 dB floor). It is **fixed — it does not scale with rpm** (a harmonic would move to
+  ~23 kHz at 3000), so it is the **switching carrier**. Triangulated three ways: this analysis (4665 Hz),
+  Morten's notebook (~4.6 kHz), Kim's prior estimate (~4.7 kHz).
+- **An output-fundamental comb on SP that DOES scale** — 10 Hz comb at 600 rpm → 50 Hz at 3000; the whole SP
+  spectrum lifts **~45 dB** from drive-off to 3000 rpm. The VFD output, also reaching the stationary slip ring.
+- **AE's 50/100 Hz is mains line hum**, not the VFD — **identical level in all three runs including
+  drive-off**, speed-independent. (So the recurring peaks on SP and AE have *different* origins: SP = drive,
+  AE 50/100 Hz = mains.)
+These are direct measured support for the common-mode picture above. **Remaining check:** read the RS510's
+**carrier-frequency parameter** and match it to the measured ~4.6–4.7 kHz to close the identification.
 - **Ferrite / common-mode chokes** on the output/sensor cables (drive output, and/or the sensor cables).
   Low risk, often the single most effective CM fix — **do this alongside the input-side test above.**
 - **Split the shielding by cable SEGMENT.** The **drive→filter** cable carries raw PWM (high CM) and wants

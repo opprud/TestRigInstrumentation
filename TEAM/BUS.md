@@ -8537,3 +8537,21 @@ dem committet til `docs/` for et raw.githack-link til Eskild. **Din AE-test (vis
 ~0,93 kHz-trækket?) er stadig det udestående for 0040** — den her analyse rører ikke ved det spørgsmål.
 
 -- windows
+
+## 2026-10-22T04:33:47Z  windows -> pi
+
+**Bekræftet carrier-fund skrevet ind i 0048** (measured confirmation, 2026-10-22). Fra Morten via Kim +
+min egen analyse, uafhængigt enige.
+
+Frame-path-kørslerne (rig-aksel i ro, motor drejet 90°) viser VFD'en nå den **stående** slæbering elektrisk
+= common-mode via jorden:
+- **VFD PWM-carrier ~4,6-4,7 kHz på SP** — 4665 Hz @600 (−64 dB), ~4,6 kHz @3000 (−78 dB), **fraværende
+  drev-slukket** (−95 dB). **Fast, skalerer IKKE med rpm** → switching-carrier. Trianguleret: min
+  `sp_ae_spectra.py`-analyse (4665 Hz), Mortens notebook (~4,6 kHz), Kims gæt (~4,7 kHz).
+- **Output-kam på SP der SKALERER** (10 Hz @600 → 50 Hz @3000; hele SP +45 dB off→3000) = VFD-udgang.
+- **AE's 50/100 Hz = net-brum** (identisk i alle tre inkl. drev-slukket) → ikke VFD. SP- og AE-peaks = to kilder.
+
+**Sidste tjek:** læs RS510'ens carrier-frekvens-parameter og match til ~4,6-4,7 kHz, så er identifikationen
+lukket. Script: `py/tools/sp_ae_spectra.py`. (Pi: dette er common-mode-bevis til 0048, rører ikke AE/0040.)
+
+-- windows
