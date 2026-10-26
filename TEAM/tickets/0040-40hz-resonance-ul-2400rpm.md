@@ -206,6 +206,37 @@ the UL750's heterodyned output".
 - [ ] **Re-express the frame-path series in those terms.** The 2.7 % / 31.1 % figures and the speed^1.5
       scaling are ratios within the same channel and configuration, so they survive — but they measure
       an ultrasound band, not a 0.93 kHz acoustic band.
-- [ ] **Re-check whether `AE` (the real Kistler probe) shows the feature** once it is looked for in the
-      right channel with the right expectation. Everything said about "the accelerometer not seeing it"
-      was said about an AE probe.
+- [x] **Re-check whether `AE` (the real Kistler probe) shows the feature** — **DONE (Morten, 2026-10-26):
+      the ~1 kHz is UL-ONLY**, absent from the Kistler-AE peak list (confirmation below). Consistent with the
+      heterodyne reading — a real broadband acoustic line would also show on the Kistler.
+
+## Confirmation (2026-10-26) — Morten's two notebooks are now the strongest evidence
+
+Independent of our analysis, Morten's `noise_floor_comparison` and `running_rig_assessment` notebooks
+(`Z:\Projects\AaU\Doc\Rig_Herning\*.pdf`; full-resolution Welch, same three frame-path runs + the 13 h run
+`0100` = `20261020_152350`) pin the ~1 kHz down:
+
+- **On `UL` only.** At 2975 rpm motor-only (axle decoupled, run 0053) UL carries lines at **944 / 992 /
+  1087 Hz, +22 / +27 / +35 dB** over drive-off. The Kistler `AE` peak list has nothing there (its only
+  driven lines are the 4.66 kHz switching + ~9.3 kHz). So the feature does not reach a true broadband AE
+  sensor — consistent with a UL750 **heterodyne** product, not a 0.93 kHz acoustic mode.
+- **Present even with the motor OFF (Kim, 2026-10-26, from the rendered spectra) — so it is NOT a rig/motor
+  mechanical resonance.** A ~1 kHz on UL with the drive off and nothing rotating points to the **UL750's own
+  heterodyned output** (receiver baseline and/or ambient ultrasound in the room), i.e. the measurement chain,
+  not the rig. *(An earlier draft of this confirmation called it "motor-driven via the frame", read off the
+  drive's `added-lines` table — which by construction only shows lines that rise above the drive-off
+  reference and therefore hid the baseline line. Corrected.)* Open discriminator: is the 1 kHz at the **same
+  level** motor-off and motor-on (pure instrument/ambient), or **lower** motor-off (a baseline that rotation
+  adds to)? Either way it is not the bearing and not VFD-electrical.
+- **Not electrical.** The lines are **not** integer multiples of the VFD output (x_vfd ≈ 19.7) or of 50 Hz
+  mains (x_50Hz ≈ 19.8), so they are distinct from the 4.66 kHz VFD switching carrier (electrical, on SP —
+  which Morten also independently flagged: *"MOJ: maybe 4.6KHz peak is VFD switching"*).
+- **Not the bearing diagnostic.** The running-rig notebook extracts the real bearing signal separately — a
+  **BPFO line at 3.64 shaft orders** (cage order 0.406 measured from the slip-ring contact signal), +10–14 dB
+  in AE and +5–10 dB in UL envelope, absent motor-only — plus the lubricant film-breakthrough map. The
+  ~1 kHz raw UL lines are none of that.
+
+So the ~1 kHz is most likely an **artifact of the UL750's heterodyned output itself** (present even with the
+motor off) — not a rig/motor/bearing mechanical resonance and not VFD-electrical. Open: (a) its motor-off vs
+motor-on **level** (the pure-instrument vs instrument-plus-rotation discriminator), and (b) the physical
+frequency, which needs the UL750 tuned centre (first action above).

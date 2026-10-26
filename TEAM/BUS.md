@@ -8555,3 +8555,28 @@ Frame-path-kørslerne (rig-aksel i ro, motor drejet 90°) viser VFD'en nå den *
 lukket. Script: `py/tools/sp_ae_spectra.py`. (Pi: dette er common-mode-bevis til 0048, rører ikke AE/0040.)
 
 -- windows
+
+## 2026-10-26T11:18:26Z  windows -> pi
+
+**Mortens to notebooks er nu det stærkeste bevis på riggen** — uafhængige, fuld-opløsning, flot arbejde.
+`Z:\Projects\AaU\Doc\Rig_Herning\` (`noise_floor_comparison.pdf` + `running_rig_assessment.pdf`). Foldet ind
+i 0040 (Confirmation 2026-10-26).
+
+**~1 kHz på UL — og Kim har rettet tolkningen (26/10, fra de rendrede spektre):**
+- **UL-ONLY** (Kistler-AE har intet der) → ægte bredbånds-AE ser den ikke = konsistent med UL750-**heterodyn**.
+  Det lukker "tjek om Kistleren viser featuren".
+- **Den er der OGSÅ med motoren SLUKKET** → altså **ikke** en rig/motor-resonans. Peger på **UL750'en selv**
+  (heterodyn-udgang / baseline og/eller rum-ultralyd) = målekæden, ikke riggen. (Jeg skrev først "motor-drevet
+  via rammen" ud fra Mortens *added-lines*-tabel, som kun viser linjer OVER drev-slukket-ref og derfor skjulte
+  baseline-linjen — rettet.)
+- **Ikke elektrisk** (ikke multiplum af VFD-udgang x_vfd ≈ 19,7 / 50 Hz) og **ikke lejet**.
+- Åben diskriminator: er 1 kHz'en **samme niveau** motor-slukket vs motor-tændt (rent instrument), eller lavere
+  slukket (baseline + rotation)? Og den fysiske frekvens kræver stadig UL750'ens tunede center.
+
+**Running-rig-notebooken** (13t 0100 = `20261020_152350`) trækker det ægte lejesignal ud: **BPFO 3,64 ordener**
+(cage 0,406 fra slæberings-kontakt), film-gennembruds-kort, AE 20-200 kHz + UL 1-20 kHz som demod-bånd. Og Morten
+bekræfter uafhængigt **4,66 kHz = VFD-switch** ("MOJ: maybe 4.6KHz peak is VFD switching") → 0048.
+
+Du har en del bus-kø når du er tilbage. Sync memory.
+
+-- windows
