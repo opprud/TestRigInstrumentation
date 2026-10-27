@@ -458,7 +458,8 @@ def _scpi_query_ieee_block(s, cmd, timeout_sec):
     return payload
 
 
-def socket_capture_sweep(ip, port, sources, points, fmt, timeout_sec=30.0, points_mode="RAW"):
+def socket_capture_sweep(ip, port, sources, points, fmt, timeout_sec=30.0, points_mode="RAW",
+                         read_fft=False):
     """
     Capture every channel from a SINGLE acquisition: one :DIGITIZE, then read
     each source from the same acquisition memory over one reused TCP connection.
@@ -468,6 +469,12 @@ def socket_capture_sweep(ip, port, sources, points, fmt, timeout_sec=30.0, point
 
     Returns: { source: (raw_ndarray, xinc, xorg, xref, yinc, yorg, yref), ... }
     Raises on protocol/transport failure so the caller can retry/skip the sweep.
+
+    read_fft: also read the scope's own FFT (math source FUNC) computed from the SAME
+    :DIGITIZE, after the channels. Returned under key "FUNC" with the same tuple shape, but
+    x is frequency (Hz) and y is the FFT's display unit (dBV on this scope). Its failure is
+    reported as "_fft_error" and never fails the sweep: losing the scope's FFT for one sweep
+    must not cost the waveforms it was computed from.
     """
     import socket
     import numpy as np
@@ -521,6 +528,27 @@ def socket_capture_sweep(ip, port, sources, points, fmt, timeout_sec=30.0, point
                 raw = np.frombuffer(payload, dtype=np.uint8)
 
             results[src] = (raw, xinc, xorg, xref, yinc, yorg, yref)
+
+        if read_fft:
+            try:
+                step = "SOUR FUNC"
+                _scpi_send(s, ":WAV:SOUR FUNC")
+                # RAW is a channel-memory mode; a math waveform is read in NORMal.
+                _scpi_send(s, ":WAV:POIN:MODE NORM")
+                _scpi_send(s, ":WAV:POIN MAX")
+                step = "PRE? FUNC"
+                pre_line = _scpi_query_text(s, ":WAV:PRE?", timeout_sec)
+                if not pre_line:
+                    raise RuntimeError("empty PRE? for FUNC")
+                pre = pre_line.split(",")
+                step = "DATA? FUNC"
+                payload = _scpi_query_ieee_block(s, ":WAV:DATA?", timeout_sec)
+                raw = (np.frombuffer(payload, dtype=">i2") if fmt == "WORD"
+                       else np.frombuffer(payload, dtype=np.uint8))
+                results["FUNC"] = (raw, float(pre[4]), float(pre[5]), float(pre[6]),
+                                   float(pre[7]), float(pre[8]), float(pre[9]))
+            except Exception as e:
+                results["_fft_error"] = f"step={step}: {type(e).__name__}: {e}"
 
         return results
     except Exception as e:
@@ -1375,7 +1403,7 @@ def acquire_loop(config):
     # Recorded whether or not this run changed it: a file should say what the screen showed.
     fft_state = _query_scope_fft(ip, port)
     if fft_state:
-        scope_settings["fft"] = fft_state       # -> /metadata/scope_settings/fft
+        scope_settings["fft"] = dict(fft_state)       # -> /metadata/scope_settings/fft
 
     # Shared telemetry dict — updated by test_runner via acq_cfg["_telemetry_store"];
     # acquire_loop reads the latest value per sweep and stamps it onto the sweep.
@@ -1428,6 +1456,12 @@ def acquire_loop(config):
         max_retries = int(acq_cfg.get("sweep_retries", 2))
         cap_channels = [(ch["name"], ch["source"]) for ch in channels]
         cap_sources = [src for (_a, src) in cap_channels]
+        # Store the scope's own FFT on every sweep whenever it is on screen at run start
+        # (scope_fft.save: false opts out). Decided from the read-back state, not the request,
+        # so a front-panel FFT nobody configured in software is captured too.
+        cap_fft = (str((fft_state or {}).get("display", "0")).strip() in ("1", "ON")
+                   and (config.get("scope_fft") or {}).get("save", True))
+        fft_errors = 0
 
         # Unified per-run event log shared with the runner side (see _event_log):
         # scope failures AND RS485/VFD/Modbus errors + stop reason land together.
@@ -1459,7 +1493,8 @@ def acquire_loop(config):
                 _logr(f"  recover: re-apply settings failed: {e!r}")
 
         _logr(f"acquire start: {len(cap_sources)} ch {cap_sources} points={cap_points} "
-              f"fmt={cap_fmt} mode={cap_points_mode} timeout={cap_timeout}s retries={max_retries}")
+              f"fmt={cap_fmt} mode={cap_points_mode} timeout={cap_timeout}s retries={max_retries} "
+              f"scope_fft={'stored per sweep' if cap_fft else 'not stored'}")
 
         skipped = 0
 
@@ -1484,6 +1519,7 @@ def acquire_loop(config):
                     captured = socket_capture_sweep(
                         ip, port, cap_sources, cap_points, cap_fmt,
                         timeout_sec=cap_timeout, points_mode=cap_points_mode,
+                        read_fft=cap_fft,
                     )
                     break
                 except Exception as e:
@@ -1539,6 +1575,28 @@ def acquire_loop(config):
                 for k, val in meta.items():
                     grp.attrs[k] = val
 
+            # The scope's own FFT of this same shot -> /sweeps/sweep_NNN/FFT
+            if cap_fft:
+                ftup = captured.get("FUNC")
+                if ftup is not None:
+                    fx, fmag, fmeta = _raw_to_tv(ftup[0], ftup[1:7], "FUNC")
+                    fg = sweep.create_group("FFT")
+                    fg.create_dataset("frequency", data=fx, **ds_kwargs)
+                    fg.create_dataset("magnitude", data=fmag, **ds_kwargs)
+                    fmeta.pop("sample_rate", None)          # x is Hz here, not seconds
+                    fmeta["x_unit"] = "Hz"
+                    fmeta["y_unit"] = "scope FFT display unit (dBV by default)"
+                    for k, val in fmeta.items():
+                        fg.attrs[k] = val
+                    for k, val in (fft_state or {}).items():
+                        fg.attrs[f"scope_{k}"] = str(val)
+                else:
+                    fft_errors += 1
+                    if fft_errors <= 5 or fft_errors % 100 == 0:
+                        _logr(f"[sweep {i+1}/{samples}] scope FFT not stored "
+                              f"({captured.get('_fft_error', 'no data')}); waveforms kept "
+                              f"[{fft_errors} so far]")
+
             _msg = f"Sweep {i+1}/{samples}" + (f"  (skipped: {skipped})" if skipped else "")
             if (i + 1) % 25 == 0:
                 _logr(_msg)                       # periodic checkpoint in the persistent log
@@ -1564,6 +1622,8 @@ def acquire_loop(config):
         if oe_state["n"]:
             _logr(f"acquire loop: stored {oe_state['n']} OE capture(s) in /oe_samples")
 
+        if cap_fft:
+            _logr(f"acquire loop: scope FFT missing on {fft_errors} sweep(s)")
         _logr(f"acquire loop ended — {skipped} sweep(s) skipped")
 
     print(f"Gemte data i: {out_path}")

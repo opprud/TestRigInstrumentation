@@ -265,9 +265,16 @@ untouched by default**. To choose explicitly before a run:
 - profile or `config.json`: `"scope_fft": true|false` or
   `{"enabled": true, "source": "UL", "window": "HANN", "center_hz": …, "span_hz": …}`.
 
-Precedence `--fft` > profile > `config.json`; absent everywhere = untouched. It is **display only** —
-the HDF5 still stores the time-domain channels — and the actual state is read back into
-`/metadata/scope_settings/fft` on every run. The `:FUNC:*` commands were written against the 2000 X
+Precedence `--fft` > profile > `config.json`; absent everywhere = untouched. The actual state is read
+back into `/metadata/scope_settings/fft` on every run.
+
+**The scope's FFT is also STORED, per sweep, whenever it is on screen at run start** — including
+one switched on only at the front panel. `/sweeps/sweep_NNN/FFT` holds `frequency` (Hz) and
+`magnitude` (the scope's display unit, dBV by default), read as math source `FUNC` from the **same
+`:DIGITIZE`** as the channels, so it is the FFT of exactly that sweep's waveforms; its attrs carry the
+preamble plus `scope_*` copies of the FFT settings. `"scope_fft": {"save": false}` opts out. A failed
+FFT read never costs the sweep — the waveforms are kept, the miss is logged, and the run ends with
+`scope FFT missing on N sweep(s)`. Tested end to end against a simulated scope only. The `:FUNC:*` commands were written against the 2000 X
 programmer's guide while the scope was unreachable (eth0 down) and are **not yet verified on the
 instrument**: check the `[scope_fft] … scope reports DISP=` line in the first minute of a run.
 
