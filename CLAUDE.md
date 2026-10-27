@@ -762,6 +762,12 @@ instrument**: check the `[scope_fft] … scope reports DISP=` line in the first 
   RS510 manual; the readbacks and the shaft agree with them. The "02-03" in older notes is the same
   thing miscalled (ticket 0047).
 
+- **First run with the scope FFT stored: `20261027_172235` (`Keratech22_coarse_FFT_4h40.json`, 4 h 41 min,
+  2026-10-27 17:22-22:03), in Azure `eceherning/20261027_172235/`, MD5-verified.** 1403 sweeps, 0 skipped,
+  FFT on all 1403, 53 OE captures; speed tracked the staircase; settled PV within -2/+4 C of every SV
+  40-100. Heater guard switched off and verified; PV fell 94 -> 85 C in 2 min. Channels 62,500 points
+  (FFT on), timebase 0.1 s, UL 0.4 V, AE 5.0 V — the first run after the UL/AE move and the 00-07 fix.
+
 - **⚠️ 2026-10-27: the drive obeyed Modbus run/stop but IGNORED the frequency — 2963 rpm (50.00 Hz) at
   every step.** Commanded 30.25, 10.08 and 50.42 Hz across three runs, the tach read 2962.5-2962.8 rpm
   throughout and the drive's display read 50.00. Constant, so not the summing pot (that tracks the
