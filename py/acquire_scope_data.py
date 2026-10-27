@@ -890,6 +890,30 @@ def _query_scope_fft(ip: str, port: int) -> dict:
     return out
 
 
+def _verify_scope_channel(ip: str, port: int, src: str, settings: dict):
+    """Raise if the scope does not report the range/offset/coupling just written."""
+    bad = []
+    time.sleep(0.2)
+    for key, q in (("volt_range", "RANG"), ("volt_offset", "OFFS"), ("coupling", "COUP")):
+        if key not in settings:
+            continue
+        got = (socket_query_line(ip, port, f":{src}:{q}?") or "").strip()
+        want = settings[key]
+        if key == "coupling":
+            ok = got.upper().startswith(str(want).upper()[:2])
+        else:
+            try:
+                g, w = float(got), float(want)
+                # The scope rounds ranges to its own steps; allow 2 % (or 1 mV near zero).
+                ok = abs(g - w) <= max(0.02 * abs(w), 1e-3)
+            except ValueError:
+                ok = False
+        if not ok:
+            bad.append(f"{q} want {want} got {got!r}")
+    if bad:
+        raise RuntimeError(f"{src} read-back mismatch: " + "; ".join(bad))
+
+
 def _apply_scope_channel_settings(ip: str, port: int, channels: list, profile_cfg: dict,
                                   strict: bool = False):
     """
@@ -932,6 +956,12 @@ def _apply_scope_channel_settings(ip: str, port: int, channels: list, profile_cf
                 _scope_write(ip, port, f":{src}:OFFS {settings['volt_offset']}")
             if "coupling" in settings:
                 _scope_write(ip, port, f":{src}:COUP {settings['coupling']}")
+            # Read every setting back and treat a mismatch as a failure, so the retry re-sends
+            # it. A write can be accepted and silently dropped: on 2026-10-27 AE stayed at the
+            # front panel's 0.16 V range (it clipped at 0.204 Vpp) through four runs whose
+            # profile said 5.0, with nothing logged, while the same block worked when re-run by
+            # hand. Only a read-back catches that.
+            _verify_scope_channel(ip, port, src, settings)
             if DEBUG:
                 print(f"[scope_channels] Applied {alias} ({src}): {settings}")
             last_err = None

@@ -756,6 +756,14 @@ instrument**: check the `[scope_fft] … scope reports DISP=` line in the first 
   command plus an offset); the frequency reference is pot/keypad — **check 02-03 (communication) and the
   pot at its bottom stop** before any run that expects the staircase.
 
+- **⚠️ A scope channel write can be silently dropped — AE sat at 0.16 V through four runs whose profile
+  said 5.0 (2026-10-27), and clipped at exactly 0.204 Vpp in every sweep at speed.** Nothing was logged and
+  the same setup block worked every time when re-run by hand, so the cause is not established. Fixed by
+  reading range/offset/coupling back after every channel block (`_verify_scope_channel`) and treating a
+  mismatch as a failure, so the existing retry re-sends it and a final miss is logged. **AE data from
+  `20261027_131156` … `20261027_134848` is clipped and should not be analysed for amplitude**; it is on
+  CHAN2 and responds to rotation (0.0019 -> 0.067 V rms at 2963 rpm, a clipped lower bound).
+
 - **⚠️ The runner's tick is `interval_sec / samples_per_step` — a long `interval_sec` silently slows the
   motor control too.** A profile with `interval_sec 400` (to leave the scope free) ticked every 133 s,
   fought itself for `/dev/ttyUSB0` and never started the motor. Raise `samples_per_step` with it
