@@ -756,6 +756,19 @@ instrument**: check the `[scope_fft] … scope reports DISP=` line in the first 
   command plus an offset); the frequency reference is pot/keypad — **check 02-03 (communication) and the
   pot at its bottom stop** before any run that expects the staircase.
 
+  **Confirmed by a direct test the same afternoon:** over a plain `pymodbus` connection, 0x2502 written
+  2000 and then 3500 read back **2000 and 3500**, RUN and STOP on 0x2501 were obeyed, and the shaft (tach
+  pulse count, not the rpm field) held **2965 rpm at both** — the 2026-08-19 pot-mode signature exactly.
+  Start/stop working over RS485 does **not** show the frequency reference is on communication: they are
+  separate parameters.
+
+  > **`rs510_vfd_control.py` run standalone LIED and could not stop the motor (2026-10-27).** Its shared
+  > Modbus manager started the drive, then reported `run=STOP, 0.00 Hz` while the shaft turned at 2970 rpm,
+  > and every later write — including `stop()` — failed with `Could not exclusively lock port`, with no
+  > other process holding `/dev/ttyUSB0`. A fresh `pymodbus.ModbusSerialClient` (`device_id=3`) read
+  > 0x2501 = 1 truthfully and stopped it on the first write. **For hand tests of the drive use a direct
+  > client, not this tool**; `test_runner.py` stopped correctly in every run that day.
+
 - **⚠️ A scope channel write can be silently dropped — AE sat at 0.16 V through four runs whose profile
   said 5.0 (2026-10-27), and clipped at exactly 0.204 Vpp in every sweep at speed.** Nothing was logged and
   the same setup block worked every time when re-run by hand, so the cause is not established. Fixed by
