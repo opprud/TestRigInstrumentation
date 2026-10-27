@@ -156,6 +156,8 @@ export default function Dashboard() {
 
   // Run control tuning
   const [regulatePeriodSec, setRegulatePeriodSec] = useState(0.5);
+  // Scope on-screen FFT for the next run: "keep" leaves the front panel as it is.
+  const [scopeFft, setScopeFft] = useState("keep");
 
   // Track which config path is loaded (ConfigSelector provides a path)
   const [currentConfigPath, setCurrentConfigPath] = useState(null);
@@ -197,6 +199,7 @@ export default function Dashboard() {
       configPath: currentConfigPath,
       config,
       max_rpm: 3500,
+      scopeFft,
       control: {
         regulate_period_sec: regulatePeriodSec,
       },
@@ -499,6 +502,23 @@ export default function Dashboard() {
                       disabled={!planEnabled}
                     />
                     <span className="text-xs text-muted-foreground">sec</span>
+                  </div>
+
+                  <Label htmlFor="scopeFft" className={runState === "running" ? "text-muted-foreground" : ""}>
+                    Scope FFT
+                  </Label>
+                  <div className="flex items-center gap-2 justify-end">
+                    <select
+                      id="scopeFft"
+                      className="h-9 rounded-md border bg-background px-2 text-sm"
+                      value={scopeFft}
+                      onChange={(e) => setScopeFft(e.target.value)}
+                      disabled={runState === "running"}
+                    >
+                      <option value="keep">Unchanged</option>
+                      <option value="on">On</option>
+                      <option value="off">Off</option>
+                    </select>
                   </div>
                   
                   <Label htmlFor="rpm" className={planEnabled ? "text-muted-foreground" : ""}>

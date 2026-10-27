@@ -760,6 +760,102 @@ def _scope_write(ip: str, port: int, cmd: str, timeout_sec: float = 3.0):
             pass
 
 
+def _resolve_scope_fft(scope_cfg: dict, profile_cfg: dict, cli_fft: str = None) -> dict:
+    """
+    Resolve the scope's on-screen FFT (math function) for this run.
+
+    Precedence: --fft on|off (CLI / dashboard)  >  profile scope_fft  >  config.json scope_fft.
+    Nothing set anywhere -> {} -> the scope is left exactly as the front panel has it. That is
+    the default on purpose: a run never sends *RST, so an FFT Kim switched on by hand survives
+    a run untouched unless something here asks to change it.
+
+    Accepted shapes:  "scope_fft": true | false
+                      "scope_fft": {"enabled": true, "source": "UL", "window": "HANN",
+                                    "center_hz": 50000, "span_hz": 100000}
+    """
+    def _norm(v):
+        if v is None:
+            return None
+        if isinstance(v, bool):
+            return {"enabled": v}
+        if isinstance(v, dict):
+            return dict(v)
+        return None
+
+    out = {}
+    for layer in ((scope_cfg or {}).get("scope_fft"), (profile_cfg or {}).get("scope_fft")):
+        n = _norm(layer)
+        if n:
+            out.update(n)
+    if cli_fft and cli_fft.lower() in ("on", "off"):
+        out["enabled"] = cli_fft.lower() == "on"
+    if "enabled" not in out:
+        return {}
+    return out
+
+
+def _apply_scope_fft(ip: str, port: int, channels: list, fft_cfg: dict):
+    """
+    Switch the scope's FFT math display on or off. Display only: the HDF5 still stores the
+    channels' time-domain waveforms (:WAV:SOUR CHANx), and analysis computes its own FFTs.
+
+    Never fatal -- an FFT that did not switch is a missing on-screen view, not bad data -- but
+    never silent either: the state is read back and logged, and recorded in the metadata.
+    """
+    if not fft_cfg:
+        return
+    enabled = bool(fft_cfg.get("enabled"))
+    name_to_source = {ch["name"]: ch["source"] for ch in channels}
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            if enabled:
+                _scope_write(ip, port, ":FUNC:OPER FFT")
+                src = fft_cfg.get("source")
+                if src:
+                    src = name_to_source.get(src, src)       # alias (UL) or raw (CHAN1)
+                    _scope_write(ip, port, f":FUNC:SOUR1 {src}")
+                if fft_cfg.get("window"):
+                    _scope_write(ip, port, f":FUNC:WIND {fft_cfg['window']}")
+                if fft_cfg.get("span_hz") is not None:
+                    _scope_write(ip, port, f":FUNC:SPAN {fft_cfg['span_hz']}")
+                if fft_cfg.get("center_hz") is not None:
+                    _scope_write(ip, port, f":FUNC:CENT {fft_cfg['center_hz']}")
+            _scope_write(ip, port, f":FUNC:DISP {'ON' if enabled else 'OFF'}")
+            last_err = None
+            break
+        except Exception as e:
+            last_err = e
+            if attempt < 3:
+                print(f"[scope_fft] attempt {attempt}/3 failed ({e!r}); retrying", flush=True)
+                time.sleep(1.0 * attempt)
+    if last_err is not None:
+        msg = f"[scope_fft] Error setting FFT {'ON' if enabled else 'OFF'}: {last_err!r}"
+        print(msg, flush=True)
+        _event_log(msg)
+        return
+    try:
+        got = socket_query_line(ip, port, ":FUNC:DISP?")
+        msg = f"[scope_fft] FFT requested={'ON' if enabled else 'OFF'} scope reports DISP={got}"
+    except Exception as e:
+        msg = f"[scope_fft] FFT {'ON' if enabled else 'OFF'} sent; readback failed: {e!r}"
+    print(msg, flush=True)
+    _event_log(msg)
+
+
+def _query_scope_fft(ip: str, port: int) -> dict:
+    """Read the FFT/math state for /metadata/scope_settings/FFT. Best effort, per field."""
+    out = {}
+    for key, q in (("display", ":FUNC:DISP?"), ("operation", ":FUNC:OPER?"),
+                   ("source", ":FUNC:SOUR1?"), ("window", ":FUNC:WIND?"),
+                   ("center_hz", ":FUNC:CENT?"), ("span_hz", ":FUNC:SPAN?")):
+        try:
+            out[key] = socket_query_line(ip, port, q)
+        except Exception:
+            pass
+    return out
+
+
 def _apply_scope_channel_settings(ip: str, port: int, channels: list, profile_cfg: dict,
                                   strict: bool = False):
     """
@@ -951,6 +1047,14 @@ def _write_metadata(h5f, config: dict, scope_idn: str, ts_local: str, ts_utc: st
     ss_grp = meta_grp.create_group("scope_settings")
     ch_data = scope_settings.pop("channels", {})
     for k, v in scope_settings.items():
+        if isinstance(v, dict):                 # e.g. "fft" -> its own subgroup
+            sg = ss_grp.create_group(k)
+            for kk, vv in v.items():
+                try:
+                    sg.attrs[kk] = float(vv)
+                except (ValueError, TypeError):
+                    sg.attrs[kk] = str(vv) if vv is not None else ""
+            continue
         # Try to cast numerics
         try:
             ss_grp.attrs[k] = float(v)
@@ -1255,6 +1359,10 @@ def acquire_loop(config):
         if DEBUG:
             print(f"[acquire_loop] Could not apply scope acquisition settings: {e}")
 
+    # On-screen FFT: only touched if config/profile/--fft asks (see _resolve_scope_fft).
+    # Not re-applied in the recovery path: :STOP/*CLS do not change the math setup.
+    _apply_scope_fft(ip, port, channels, config.get("scope_fft") or {})
+
     # Wait for scope to process settings before querying
     time.sleep(0.5)
 
@@ -1264,6 +1372,10 @@ def acquire_loop(config):
     except Exception as e:
         if DEBUG:
             print(f"[acquire_loop] Could not query scope settings: {e}")
+    # Recorded whether or not this run changed it: a file should say what the screen showed.
+    fft_state = _query_scope_fft(ip, port)
+    if fft_state:
+        scope_settings["fft"] = fft_state       # -> /metadata/scope_settings/fft
 
     # Shared telemetry dict — updated by test_runner via acq_cfg["_telemetry_store"];
     # acquire_loop reads the latest value per sweep and stamps it onto the sweep.
@@ -1462,6 +1574,9 @@ def main():
     parser.add_argument("config", help="config.json")
     parser.add_argument("profile", nargs="?", default=None, help="Optional test-profile.json (auto RPM+Temp)")
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--fft", choices=["on", "off", "keep"], default=None,
+                        help="Scope on-screen FFT for this run; overrides scope_fft in "
+                             "profile/config. Omitted or 'keep' = leave the scope as it is.")
     args = parser.parse_args()
 
     DEBUG = args.debug
@@ -1469,14 +1584,16 @@ def main():
     with open(args.config, "r") as f:
         scope_cfg = json.load(f)
 
-    # --- Manual mode (unchanged) ---
+    # --- Manual mode ---
     if not args.profile:
+        scope_cfg["scope_fft"] = _resolve_scope_fft(scope_cfg, None, args.fft)
         acquire_loop(scope_cfg)
         return
 
     # --- Auto mode: runner + scope acquisition paired by run_id ---
     with open(args.profile, "r") as f:
         profile_cfg = json.load(f)
+    scope_cfg["scope_fft"] = _resolve_scope_fft(scope_cfg, profile_cfg, args.fft)
 
     run_id = make_run_id()
 

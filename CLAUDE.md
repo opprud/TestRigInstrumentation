@@ -257,6 +257,20 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 > Note: `control` is currently read **only from the profile**, not from `config.json`.
 
+**Scope on-screen FFT (`scope_fft`, added 2026-10-27).** Kim runs the scope's own FFT math
+display during tests. A run never sends `*RST`, so whatever the front panel has **survives a run
+untouched by default**. To choose explicitly before a run:
+- dashboard: **Scope FFT → Unchanged / On / Off** (next to *Regulate*), sent as `scopeFft`;
+- command line: `--fft on|off|keep`;
+- profile or `config.json`: `"scope_fft": true|false` or
+  `{"enabled": true, "source": "UL", "window": "HANN", "center_hz": …, "span_hz": …}`.
+
+Precedence `--fft` > profile > `config.json`; absent everywhere = untouched. It is **display only** —
+the HDF5 still stores the time-domain channels — and the actual state is read back into
+`/metadata/scope_settings/fft` on every run. The `:FUNC:*` commands were written against the 2000 X
+programmer's guide while the scope was unreachable (eth0 down) and are **not yet verified on the
+instrument**: check the `[scope_fft] … scope reports DISP=` line in the first minute of a run.
+
 ---
 
 ## Architecture decisions (and why)
@@ -696,6 +710,16 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
   (41 -> 51 C, and again 50 -> 60 C). `Keratech22.json` looks far slower only because its SV rises 5 C per
   hour, so the heater is never the limit there. Size temperature ramps in new profiles from 30 C/h — and
   expect **less** with the bearing decoupled or unloaded, where there is no friction heat.
+
+- **⚠️ 2026-10-27 IS A BOUNDARY FOR UL AND AE NOISE: both sensors moved out of the box and onto a
+  linear supply (reported by Kim 2026-10-27).** The UL and AE sensor electronics no longer sit in the
+  box with the heater, the Raspberry Pi and the rest; the **UL750's cables are now terminated in a
+  Faraday cage**; and both are powered from a **B&O power supply with a mains transformer (linear)**
+  instead of the **24 VDC switch-mode supply**. That removes two coupling paths tickets 0046/0048 were
+  chasing at once — heater-relay switching and SMPS ripple — so **UL/AE noise floors and spectra are not
+  comparable across this date**: re-take a 0 rpm floor (heater off and modulating) before reading any
+  later run against the 0046 reference. Effects on the 1 kHz UL line (0040) and the heater duty-cycle
+  entry below should be re-measured, not assumed. SP is unchanged.
 
 - **⚠️ 2026-09-02 IS A HARD BOUNDARY IN THE DATA: the bench was stripped and rebuilt.** Bearing cleaned,
   clearances measured, everything re-tightened properly. Do **not** compare absolute levels across that

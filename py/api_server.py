@@ -1122,6 +1122,11 @@ async def run_start(payload: Dict):
         cmd = [sys.executable, "-u", str(script), str(config_json), str(resolved_profile)]
         if payload.get("debug", True):
             cmd.append("--debug")
+        # Scope on-screen FFT, chosen in the dashboard before Start: "on" | "off" | "keep".
+        # "keep" (or absent) leaves the scope exactly as the front panel has it.
+        scope_fft = str(payload.get("scopeFft") or "keep").lower()
+        if scope_fft in ("on", "off"):
+            cmd += ["--fft", scope_fft]
 
         _run_proc_stop = threading.Event()
 
