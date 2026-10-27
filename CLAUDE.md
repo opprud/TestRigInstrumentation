@@ -750,6 +750,18 @@ instrument**: check the `[scope_fft] … scope reports DISP=` line in the first 
   the new Faraday-cage cabling are the candidates. **`N0054b` uses UL `volt_range 0.4`** (~50 levels at
   full speed, ~4x headroom); **if the level comes back, 0.4 V clips — re-size before a long run.**
 
+- **✅ FIXED 2026-10-27 16:34 — the cause was 00-07 = 1, "main + alternative frequency SUMMED", with the
+  alternative source (00-06 = 1) the pot.** Read over Modbus with the motor stopped (parameter NN-MM at
+  address 0xNNMM): 00-02 = 2 and 00-05 = 5, i.e. run AND main frequency both already on communication —
+  Kim was right that the source parameters were set — but the drive's effective reference **0x2523 sat at
+  5000 (50.00 Hz) whatever 0x2502 said, even at 0**, because the pot alone reached the 50 Hz limit (00-12 =
+  5000). With Kim's OK **00-07 was written to 0 (main only)**: 0x2523 then followed 0x2502 exactly
+  (0 / 20.00 / 35.00 / 0), and the shaft measured by pulse count went **1188 rpm at 20 Hz and 2071 at
+  35 Hz**, stop to 0. The pot can no longer bias the speed at all. **0x2523 is the pre-run check** —
+  `docs/Prerun_Checklist.md` §3. The register meanings are inferred from the TECO A510 layout, not from an
+  RS510 manual; the readbacks and the shaft agree with them. The "02-03" in older notes is the same
+  thing miscalled (ticket 0047).
+
 - **⚠️ 2026-10-27: the drive obeyed Modbus run/stop but IGNORED the frequency — 2963 rpm (50.00 Hz) at
   every step.** Commanded 30.25, 10.08 and 50.42 Hz across three runs, the tach read 2962.5-2962.8 rpm
   throughout and the drive's display read 50.00. Constant, so not the summing pot (that tracks the

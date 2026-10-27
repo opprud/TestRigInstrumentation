@@ -37,6 +37,14 @@ bushing + lock nut then replaced. Full story in `docs/Maintenance_Log.md`.
 
 Both of these let a run look perfectly healthy while the shaft does something else.
 
+- [ ] **Read the drive's EFFECTIVE frequency reference, register 0x2523, with the motor stopped**
+      (added 2026-10-27). Write 0x2502 = 2000 and 0 in turn; 0x2523 must read **2000 and 0**. If it
+      stays put (it sat at 5000 = 50.00 Hz on 2026-10-27), something other than Modbus is setting the
+      frequency. The source parameters as read over Modbus that day: **00-02 = 2** (run source =
+      communication), **00-05 = 5** (main frequency = communication), **00-06 = 1** (alternative source =
+      analog / pot), **00-07 = main + alternative SUMMED** when 1 — set to **0** (main only) on 2026-10-27,
+      which makes the pot irrelevant. Re-check 00-07 after any drive power cycle (ticket 0047: source
+      settings have fallen back before). Use a plain `pymodbus` client, `device_id=3`.
 - [ ] **Parameter 02-03 is on communication**, not the pot. A drive in pot mode accepts a whole
       profile over Modbus, echoes it back in the registers, and follows none of it.
 - [ ] **The pot is at its bottom stop.** Nastier than pot mode, because the drive still *obeys*:
