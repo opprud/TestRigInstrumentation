@@ -274,7 +274,19 @@ one switched on only at the front panel. `/sweeps/sweep_NNN/FFT` holds `frequenc
 `:DIGITIZE`** as the channels, so it is the FFT of exactly that sweep's waveforms; its attrs carry the
 preamble plus `scope_*` copies of the FFT settings. `"scope_fft": {"save": false}` opts out. A failed
 FFT read never costs the sweep — the waveforms are kept, the miss is logged, and the run ends with
-`scope FFT missing on N sweep(s)`. Tested end to end against a simulated scope only. The `:FUNC:*` commands were written against the 2000 X
+`scope FFT missing on N sweep(s)`. Verified on the scope 2026-10-27 (runs `20261027_131853`,
+`20261027_134848`: 23/23 sweeps with FFT, 0 skipped).
+
+> **⚠️ THE SCOPE FFT COSTS 8x THE POINTS — with it on, every channel comes back as 62,500 points over
+> the window, not 500,000 (measured 2026-10-27).** Same scope, same `:ACQ:POIN` 500000, same RAW
+> readout: FFT display off gives 500 k points at 2.5 MS/s, on gives 62.5 k. The FFT itself is 65,536
+> points, so **its bandwidth is set by the timebase**: 0.2 s -> channels at 312.5 kS/s, FFT 0-156 kHz;
+> **0.1 s -> 625 kS/s, 0-312 kHz**; 0.05 s -> 1.25 MS/s, 0-357 kHz (the span limit). Nothing in UL/AE/SP
+> above the channels' Nyquist survives either, so a run with the FFT on has **no AE content above
+> 156 kHz at the usual 0.2 s window** — the band table under the 2026-09-02 entry goes to 500 kHz.
+> Kim's call 2026-10-27: accept it for FFT runs. Profiles that want the scope FFT should use
+> `timebase_range 0.1` (Kim's own front-panel setting; a 0.2 s profile silently halves the FFT).
+> Kim's FFT: source CHAN2 (AE), Hann, centre 107 kHz, span 500 kHz, 20 dB/div, offset -44.4 dB. The `:FUNC:*` commands were written against the 2000 X
 programmer's guide while the scope was unreachable (eth0 down) and are **not yet verified on the
 instrument**: check the `[scope_fft] … scope reports DISP=` line in the first minute of a run.
 
@@ -727,6 +739,27 @@ instrument**: check the `[scope_fft] … scope reports DISP=` line in the first 
   comparable across this date**: re-take a 0 rpm floor (heater off and modulating) before reading any
   later run against the 0046 reference. Effects on the 1 kHz UL line (0040) and the heater duty-cycle
   entry below should be re-measured, not assumed. SP is unchanged.
+
+- **⚠️ After the 2026-10-27 move, UL750 output is ~80x LOWER — it works, but `volt_range 12` no longer
+  sees it.** Measured on the scope with the shaft at 2963 rpm: **0.019 V rms / ~0.1 Vpp, energy at
+  5.5-6 kHz**, against **0.0010 V rms at rest** (19x, so it does sense rotation) — and against **1.5 V rms**
+  at the same speed on 2026-10-20 with identical CHAN1 settings (12 V, DC, 1 MΩ, probe 1x). At 12 V the
+  whole signal spans ~6 ADC levels and reads as quantisation noise, which is exactly how it first looked
+  "dead" (a run with the FFT off at 500 k points showed the same, so it is not the FFT decimation). The
+  sensor is on CHAN1. Cause not established — the UL750's sensitivity dial, the B&O supply's output, or
+  the new Faraday-cage cabling are the candidates. **`N0054b` uses UL `volt_range 0.4`** (~50 levels at
+  full speed, ~4x headroom); **if the level comes back, 0.4 V clips — re-size before a long run.**
+
+- **⚠️ 2026-10-27: the drive obeyed Modbus run/stop but IGNORED the frequency — 2963 rpm (50.00 Hz) at
+  every step.** Commanded 30.25, 10.08 and 50.42 Hz across three runs, the tach read 2962.5-2962.8 rpm
+  throughout and the drive's display read 50.00. Constant, so not the summing pot (that tracks the
+  command plus an offset); the frequency reference is pot/keypad — **check 02-03 (communication) and the
+  pot at its bottom stop** before any run that expects the staircase.
+
+- **⚠️ The runner's tick is `interval_sec / samples_per_step` — a long `interval_sec` silently slows the
+  motor control too.** A profile with `interval_sec 400` (to leave the scope free) ticked every 133 s,
+  fought itself for `/dev/ttyUSB0` and never started the motor. Raise `samples_per_step` with it
+  (`N0054c`: 300 / 75 = 4 s).
 
 - **⚠️ 2026-09-02 IS A HARD BOUNDARY IN THE DATA: the bench was stripped and rebuilt.** Bearing cleaned,
   clearances measured, everything re-tightened properly. Do **not** compare absolute levels across that

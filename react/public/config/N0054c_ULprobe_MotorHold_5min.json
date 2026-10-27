@@ -1,0 +1,66 @@
+{
+  "name": "UL probe experiment 5 min motor hold",
+  "description": "DIAGNOSTIC (2026-10-27): holds the motor running for 4 min so CHAN1/UL can be probed by hand at different ranges/couplings while the shaft turns (Kim's request). interval_sec 300 so the run takes ONE sweep at start and then leaves the scope free, with samples_per_step 75 so the runner still ticks every 4 s (tick = interval/samples_per_step; a first attempt with 400/3 ticked every 133 s and never started the motor). 20 s rest, 240 s at speed, 40 s rest.",
+  "duration_minutes": 5,
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true,
+    "vfd_stop_on_end": true
+  },
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 19,
+        "value": 0
+      },
+      {
+        "time_sec": 20,
+        "value": 1800
+      },
+      {
+        "time_sec": 259,
+        "value": 1800
+      },
+      {
+        "time_sec": 260,
+        "value": 0
+      },
+      {
+        "time_sec": 299,
+        "value": 0
+      }
+    ]
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 75,
+    "interval_sec": 300,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 9.0,
+      "volt_offset": 2.0,
+      "coupling": "DC"
+    }
+  }
+}

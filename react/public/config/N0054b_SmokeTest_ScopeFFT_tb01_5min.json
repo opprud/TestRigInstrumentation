@@ -1,0 +1,82 @@
+{
+  "name": "Smoke test 5 min scope FFT tb 0.1",
+  "description": "SMOKE TEST of the scope-FFT storage (2026-10-27): verifies that /sweeps/sweep_NNN/FFT is read from the scope's own FFT math display and stored on every sweep, alongside UL/AE/SP. No scope_fft key, so the FFT is left exactly as set on the front panel (Kim's setting). TIMEBASE 0.1 s, Kim's own front-panel setting (2026-10-27): with the scope FFT on, the scope returns 62,500 points per channel over the whole window regardless, so the FFT's bandwidth follows the timebase - 0.2 s gives 0-156 kHz, 0.1 s gives 0-312 kHz. Same schedule as N0054. UL volt_range 0.4 V (was 12.0): measured 2026-10-27 at 2963 rpm the UL750 output is now only ~0.019 V rms / ~0.1 Vpp (energy at 5.5-6 kHz) against 0.0010 V rms at rest - about 80x below the 1.5 V rms of 2026-10-20 - so at 12 V it spans ~6 ADC levels and is lost in quantisation. 0.4 V gives ~50 levels at full speed with ~4x headroom. If the UL level is restored (sensitivity dial / supply), 0.4 V will clip: re-size.",
+  "duration_minutes": 5,
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true,
+    "vfd_stop_on_end": true
+  },
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 59,
+        "value": 0
+      },
+      {
+        "time_sec": 60,
+        "value": 1800
+      },
+      {
+        "time_sec": 119,
+        "value": 1800
+      },
+      {
+        "time_sec": 120,
+        "value": 600
+      },
+      {
+        "time_sec": 179,
+        "value": 600
+      },
+      {
+        "time_sec": 180,
+        "value": 3000
+      },
+      {
+        "time_sec": 239,
+        "value": 3000
+      },
+      {
+        "time_sec": 240,
+        "value": 0
+      },
+      {
+        "time_sec": 299,
+        "value": 0
+      }
+    ]
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.1,
+      "volt_range": 0.4,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.1,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.1,
+      "volt_range": 9.0,
+      "volt_offset": 2.0,
+      "coupling": "DC"
+    }
+  }
+}

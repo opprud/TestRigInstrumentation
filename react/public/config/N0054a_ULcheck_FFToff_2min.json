@@ -1,0 +1,66 @@
+{
+  "name": "UL check 2 min scope FFT off",
+  "description": "DIAGNOSTIC (2026-10-27): run with --fft off at the normal 0.2 s / 500k points to decide whether UL's 0.24 Vpp at 2963 rpm in 20261027_131853 (vs ~7-8 Vpp on 2026-10-20 at identical CHAN1 settings) is the scope's FFT decimation or the sensor/supply after the move to the B&O linear supply. 30 s rest, 60 s at speed, 30 s rest.",
+  "duration_minutes": 2,
+  "control": {
+    "rpm_per_hz_guess": 59.5,
+    "open_loop": true,
+    "vfd_stop_on_end": true
+  },
+  "setpoints": {
+    "rpm": [
+      {
+        "time_sec": 0,
+        "value": 0
+      },
+      {
+        "time_sec": 29,
+        "value": 0
+      },
+      {
+        "time_sec": 30,
+        "value": 1800
+      },
+      {
+        "time_sec": 89,
+        "value": 1800
+      },
+      {
+        "time_sec": 90,
+        "value": 0
+      },
+      {
+        "time_sec": 119,
+        "value": 0
+      }
+    ]
+  },
+  "acquisition": {
+    "scope_points": "MAX",
+    "acq_points": 1000000,
+    "samples_per_step": 3,
+    "interval_sec": 12,
+    "waveform_format": "WORD",
+    "acq_type": "NORM"
+  },
+  "scope_channels": {
+    "UL": {
+      "timebase_range": 0.2,
+      "volt_range": 12.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "AE": {
+      "timebase_range": 0.2,
+      "volt_range": 5.0,
+      "volt_offset": 0.0,
+      "coupling": "DC"
+    },
+    "SP": {
+      "timebase_range": 0.2,
+      "volt_range": 9.0,
+      "volt_offset": 2.0,
+      "coupling": "DC"
+    }
+  }
+}

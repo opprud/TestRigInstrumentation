@@ -862,11 +862,17 @@ def _apply_scope_fft(ip: str, port: int, channels: list, fft_cfg: dict):
         print(msg, flush=True)
         _event_log(msg)
         return
-    try:
-        got = socket_query_line(ip, port, ":FUNC:DISP?")
-        msg = f"[scope_fft] FFT requested={'ON' if enabled else 'OFF'} scope reports DISP={got}"
-    except Exception as e:
-        msg = f"[scope_fft] FFT {'ON' if enabled else 'OFF'} sent; readback failed: {e!r}"
+    # The first read right after the writes can come back empty (seen 2026-10-27), so retry.
+    msg = f"[scope_fft] FFT {'ON' if enabled else 'OFF'} sent; readback empty"
+    for _ in range(3):
+        try:
+            time.sleep(0.5)
+            got = (socket_query_line(ip, port, ":FUNC:DISP?") or "").strip()
+            if got:
+                msg = f"[scope_fft] FFT requested={'ON' if enabled else 'OFF'} scope reports DISP={got}"
+                break
+        except Exception as e:
+            msg = f"[scope_fft] FFT {'ON' if enabled else 'OFF'} sent; readback failed: {e!r}"
     print(msg, flush=True)
     _event_log(msg)
 
