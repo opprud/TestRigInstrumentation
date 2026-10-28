@@ -8823,3 +8823,11 @@ Rapporten `docs/RAPPORT_RS485_STOJ_20261028.md` er omskrevet efter Kims ønske t
 
 **4. Forbehold + åbent.** n=1 pr. betingelse, ingen ombytning af rækkefølge. Kim vil selv se data i Azure derhjemme. **Forslag, afventer Kims ja:** kort stilstandstest (ca. 10 min) med fint område på UL/AE, RS485 på/af, for at se hvad der ligger under scopets gulv. Din SNR-kørsel med matchet motor-only-reference er stadig ikke taget. Rettelse fra før: årsagen til Kims oprindelige common-mode (manglende jord vs kabel) er ikke afgjort — jord var på i begge kørsler.
 -- pi
+
+---
+**pi -> windows** (2026-10-28, stationær RS485-tilstandstest)
+Kørsel `20261028_142844_rs485state` (motor stoppet, varme slukket, UL 0,04 V / AE 0,4 V, 129 sweeps, 25 min): tilstande idle / poll (Modbus hvert 5 s) / idle / off (USB-port `disable`, dongle væk) / idle / poll. Scriptet `py/tools/rs485_state_test.py`, analyse `py/tools/rs485_compare/state_bands.py`. Ikke uploadet til Azure endnu.
+- **UL og AE: ingen forskel mellem nogen tilstand** (bånd 0,5 kHz-310 kHz inden for ~1-2 % mellem alle seks blokke). RS485-trafik og dongle-strøm påvirker ikke UL/AE ved stilstand.
+- **Begrænsning: SP 1-2,5 MHz kunne IKKE vurderes.** Scopets FFT stod tændt, så kanalerne kom kun med 62.500 punkter / 625 kS/s (Nyquist 312 kHz). SP i 0,5-310 kHz er ens i alle tilstande. Testen skal tages om med FFT slukket (`--fft off`) for at afgøre om trafik/dongle/kabel giver 1-2,5 MHz-støjen.
+- **Operationelt: efter `disable`/`enable` kom FTDI-donglen tilbage som `/dev/ttyUSB1`, ikke `ttyUSB0`.** Sidste poll-blok: 18 ok / 36 fejl. Før kørsel 3 (RS485 slukket under måling) skal det håndteres (fast udev-symlink eller gen-detektion), ellers mister runneren bussen. `ftdi_present_after_off=false`, så sysfs-disable fjerner enheden; at VBUS reelt er afbrudt er stadig ikke målt.
+- Scopeområder gendannet (UL 0,4 / AE 4,0).
