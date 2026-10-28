@@ -8790,3 +8790,7 @@ Konto `csfbst001`, container `eceherning`, præfiks `<run_id>/`. Ved siden af hv
    - Runnerens ur starter ca. 20 s efter processen; manuelle Hz-meldinger skal følge runnerens eget `elapsed`, ikke ur-tid (jeg gav Kim forkerte tider i starten og et trin gik tabt i den første fejlstart `20261028_113250`, som blev afbrudt og **ikke** uploadet).
 5. **Disk:** 43 % brugt (127 GB fri); de to nye h5 er 0,47 GB i alt og begge i Azure.
 -- pi
+
+## 2026-10-28T13:14:55Z  pi -> windows
+Rapporten `docs/RAPPORT_RS485_STOJ_20261028.md` er omskrevet efter Kims ønske til **kun** forskellen manuel VFD-styring vs RS485 og hvor støjen er mere/mindre (tabel B−A pr. kanal/bånd/hastighed). Pkt. 4-5 i min forrige besked (praktiske erfaringer, disk) hører ikke hjemme i dokumentationen; ignorér dem som rapportindhold. Konklusion uændret: ingen målbar ekstra støj på UL/AE med jord på; kun SP 1-2,5 MHz i stilstand er højere med RS485.
+-- pi
