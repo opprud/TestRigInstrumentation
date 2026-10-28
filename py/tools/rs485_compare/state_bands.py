@@ -3,7 +3,7 @@ import sys, json, h5py, numpy as np
 from scipy.signal import welch
 run = sys.argv[1]
 st = json.load(open(f"{run}/states.json"))["states"]
-BANDS = [(500,1500),(1500,3000),(3000,6000),(6000,10000),(1e4,2e4),(2e4,5e4),(5e4,1e5),(1e5,2e5),(2e5,3.1e5)]
+BANDS = [(5e4,1e5),(1e5,2e5),(2e5,5e5),(5e5,1e6),(1e6,2.5e6),(2e6,2.5e6)]
 from datetime import datetime
 ts = lambda s: datetime.fromisoformat(s).timestamp()
 rows = {}

@@ -8831,3 +8831,11 @@ Kørsel `20261028_142844_rs485state` (motor stoppet, varme slukket, UL 0,04 V / 
 - **Begrænsning: SP 1-2,5 MHz kunne IKKE vurderes.** Scopets FFT stod tændt, så kanalerne kom kun med 62.500 punkter / 625 kS/s (Nyquist 312 kHz). SP i 0,5-310 kHz er ens i alle tilstande. Testen skal tages om med FFT slukket (`--fft off`) for at afgøre om trafik/dongle/kabel giver 1-2,5 MHz-støjen.
 - **Operationelt: efter `disable`/`enable` kom FTDI-donglen tilbage som `/dev/ttyUSB1`, ikke `ttyUSB0`.** Sidste poll-blok: 18 ok / 36 fejl. Før kørsel 3 (RS485 slukket under måling) skal det håndteres (fast udev-symlink eller gen-detektion), ellers mister runneren bussen. `ftdi_present_after_off=false`, så sysfs-disable fjerner enheden; at VBUS reelt er afbrudt er stadig ikke målt.
 - Scopeområder gendannet (UL 0,4 / AE 4,0).
+
+---
+**pi -> windows** (2026-10-28, stationær RS485-test gentaget med scope-FFT slukket)
+Kørsel `20261028_185036_rs485state` (500 k punkter, 5 MS/s, UL 0,04 / AE 0,4, 129 sweeps, tilstande idle/poll/idle/off/idle/poll, motor stoppet, varme slukket). Ikke uploadet. Ændrer min forrige besked (FFT var tændt dér): nu er 1-2,5 MHz synligt.
+- **SP 1-2,5 MHz er ens i alle seks tilstande: 35,5-36,0 mV rms** (idle 35,6 / poll 35,9 / off 36,0). UL og AE ens inden for ~1 % i alle bånd op til 2,5 MHz.
+- **Referencer ved 0 rpm, afgjort (|PV-SV|<=5):** manuel kørsel A 35,3 mV, Modbus-kørsel B 48,2 mV. Stationærtesten ligger altså på A-niveau, ikke B. **Støjen i B reproduceres ikke af trafik, donglens strøm (port off) eller kablet siddende på VFD'en ved stilstand.** Dermed vil en kørsel 3 med donglen slukket under måling sandsynligvis ikke fjerne noget.
+- Ikke testet endnu og dermed de tilbageværende kandidater: Modbus-skrivninger (run/stop/frekvens), VFD i run-tilstand ved 0 Hz, og varmen (relæ) i kombination med bussen. Forskel til A/B: varmen var slukket her.
+- Donglen kom tilbage som ttyUSB1 efter første test men ttyUSB0 efter denne; test-scriptet finder nu porten selv (`--fft-off` tilføjet). Scopeområder gendannet (UL 0,4 / AE 4,0), scopets FFT-visning er slukket.

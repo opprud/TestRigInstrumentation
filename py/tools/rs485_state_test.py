@@ -22,9 +22,15 @@ PY = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PY))
 import acquire_scope_data as asd                       # noqa: E402
 
-PORT_DEV = "/dev/ttyUSB0"
+import glob
+PORT_DEV = "/dev/ttyUSB0"      # the dongle may come back as ttyUSB1 after a sysfs disable/enable
 SYSFS_DISABLE = "/sys/bus/usb/devices/usb3/3-0:1.0/usb3-port2/disable"     # the FTDI RS485 cable (0403:6001)
 FINE = {"UL": 0.04, "AE": 0.4}
+
+
+def port_dev() -> str:
+    found = sorted(glob.glob("/dev/ttyUSB*"))
+    return found[0] if found else PORT_DEV
 
 
 def utc():
@@ -51,9 +57,9 @@ class Poller:
     def _run(self):
         from omron_temp_poll import E5CCTool
         from rs510_vfd_control import RS510VFDController
-        om = E5CCTool(port=PORT_DEV, baudrate=9600, parity="N", bytesize=8, stopbits=1, timeout=2.0, unit_id=2,
+        om = E5CCTool(port=port_dev(), baudrate=9600, parity="N", bytesize=8, stopbits=1, timeout=2.0, unit_id=2,
                       pv_address=0x2000, sv_address=0x2103, scale=1.0, debug=False)
-        vfd = RS510VFDController(port=PORT_DEV, slave_id=3, baudrate=9600, timeout=2.0, debug=False)
+        vfd = RS510VFDController(port=port_dev(), slave_id=3, baudrate=9600, timeout=2.0, debug=False)
         try:
             vfd.connect()
         except Exception:
@@ -78,6 +84,7 @@ class Poller:
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--fft-off", action="store_true", help="switch the scope FFT off so SP 1-2.5 MHz is visible")
     ap.add_argument("--sequence", default="idle,poll,idle,off,idle,poll")
     ap.add_argument("--state-sec", type=float, default=240)
     ap.add_argument("--lead-sec", type=float, default=60)
@@ -98,7 +105,7 @@ def main():
                           "acq_type": "NORM", "interval_sec": a.interval_sec,
                           "samples": int(total / a.interval_sec) + 4, "stop_event": ev}
     cfg["_profile_cfg"] = {"scope_channels": {k: {"volt_range": v} for k, v in FINE.items()}}
-    cfg["scope_fft"] = {}                                      # leave the scope's FFT as it is
+    cfg["scope_fft"] = {"enabled": False, "save": False} if a.fft_off else {}   # FFT on = 62.5 k points, nothing above 312 kHz
     before = {}
     for ch, src in (("UL", "CHAN1"), ("AE", "CHAN2")):
         before[ch] = float(asd.socket_query_line(ip, port, f":{src}:RANG?"))
@@ -136,7 +143,7 @@ def main():
         after = {ch: float(asd.socket_query_line(ip, port, f":{src}:RANG?")) for ch, src in (("UL", "CHAN1"), ("AE", "CHAN2"))}
         json.dump({"run_id": run_id, "states": states, "ranges_before": before, "ranges_after": after,
                    "fine_ranges": FINE, "elapsed_s": time.time() - t0}, open(run_dir / "states.json", "w"), indent=1)
-        print(f"[test] done. ranges before {before} after {after}; port present: {os.path.exists(PORT_DEV)}", flush=True)
+        print(f"[test] done. ranges before {before} after {after}; port present: {port_dev()}", flush=True)
 
 
 if __name__ == "__main__":
