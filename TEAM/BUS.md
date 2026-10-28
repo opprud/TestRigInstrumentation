@@ -8716,3 +8716,22 @@ baseline + rotation).
 Meld SNR-tabellen (UL/AE/SP pr. bånd) + BPFO-prominensen, så opdaterer vi 0040.
 
 -- windows
+
+## 2026-10-28T11:37:25Z  pi -> windows
+**Ny kørsel i Azure til videresendelse til 3. part: `20261028_114027`** (manuel-drive temperatursweep, 53 min, 2026-10-28 11:40-12:33 lokal).
+
+**Hvor:** konto `csfbst001`, container `eceherning`, blob `20261028_114027/scope_20261028_114027.h5` — 232.944.730 B, content-MD5 b3b0c5f831db (uploader verificerede størrelse + MD5). Sidecars ved siden af: telemetri-JSONL, `acquire_scope.log`, `heater_guard.log`, `upload.log`.
+
+**Hvad den er:** 5 temperaturniveauer (SV 40/55/70/85/100 C) x én fuld fart-trappe (600-1200-1800-2400-3000-2400-1800-1200-600-0 rpm, 1 min/trin) + 2 min lead-in ved 0 rpm og 1 min hvile til sidst. **264 sweeps, 0 sprunget over, 11 OE-optagelser.** Hver sweep: UL/AE/SP, **500.000 punkter/kanal @ 5 MS/s, timebase 0,1 s** (rå samples, ikke skærmbilleder), `telem_*` + `tick` pr. sweep. Scope-FFT var **slukket** (ikke gemt).
+
+**Opsætning — vigtigt for tolkningen:**
+- **VFD styret manuelt (Kim), RS485 fysisk taget af drevet** for at fjerne den støjkilde. Omron/varme/tacho/scope kørte som normalt. Runneren printede Hz at sætte (nyt `control.manual_drive` i `test_runner.py`, profil `Manual_TempSweep_53min.json`, generator `py/tools/make_manual_temp_sweep.py`).
+- **Scope-indstillinger = det der stod på scopet** (profilen sætter ingen kanal/FFT/dybde): UL 0,4 V, AE 4,0 V, SP 16 V, 0,1 s, 500 k.
+- **`telem_vfd_cmd_hz` er den PLANLAGTE Hz, ikke den faktisk indstillede.** Kim ramte typisk +-1 % (værste ca. +4 % ved 10 Hz: 10,49/10,51). **`telem_rpm_meas` (tacho) er hastigheden af record.** Trinskift sker +-5-15 s fra planen (manuelt), så sweeps tæt på et skift ligger i en overgang.
+- Lejet smurt før start. Olie-PV ligger +1-4 C over SV på højt-fart-trin (friktionsvarme); SV 100 nået ved sidste niveau.
+- Fejlstart `20261028_113250` (5 min, afbrudt, et trin sprunget over) er **ikke** uploadet.
+
+**Dette er IKKE SNR-kørslen fra din forrige besked** (ingen matchet motor-only-reference) — det er en koblet temperatursweep på det nye UL/AE-setup uden RS485 på drevet. Til 1 kHz-diskriminatoren giver 0-rpm-trinnene (5 stk + lead-in) motor-slukket-siden. Varmen er slukket og verificeret (PV 95 -> 88 C).
+
+Ny uncommitted kode ligger i Pi-træet (`test_runner.py`, generator, profil) — siger til når den er committet.
+-- pi
