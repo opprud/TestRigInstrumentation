@@ -768,6 +768,27 @@ instrument**: check the `[scope_fft] … scope reports DISP=` line in the first 
   40-100. Heater guard switched off and verified; PV fell 94 -> 85 C in 2 min. Channels 62,500 points
   (FFT on), timebase 0.1 s, UL 0.4 V, AE 5.0 V — the first run after the UL/AE move and the 00-07 fix.
 
+  **What its scope FFT (AE/CHAN2) shows** (analysed 2026-10-28):
+  - **The scope FFT is the same data as the waveform** — band rises computed from the stored AE samples
+    and from the stored scope FFT agree to 0.1 dB. It can be trusted as a second view, not a different one.
+  - **The 0 rpm floor is flat for the whole run: −92.6 ± 0.3 dB** (10th pct, 20-300 kHz) at every SV
+    40-100 C and in every staircase. **But it is the measurement floor, not the sensor's:** at 5 V range
+    it is white from 10 to 312 kHz (−82.8 dB per band) and AE's rest rms (0.0115 V) is at the 25 mV
+    quantisation step. So it proves the instrument chain is stable over 4.7 h and temperature; it cannot
+    show a sensor-floor change, and the heater's known AE contribution (~0.006 V) is below it — **no
+    heater duty-cycle effect is visible, which neither confirms nor refutes the 2026-10-02 entry.**
+  - **CONFIRMS the AE mid-band rise with oil temperature** (2026-10-03, `20261002_122423`), on a new
+    mounting, a new supply and a new data path. 40 -> 100 C, settled staircases: **1800 rpm** 10-50 kHz
+    +0.9 dB, **50-100 kHz +4.7 dB (1.72x)**, 100-200 kHz +2.1 dB — against 1.25x / 1.92x / 1.43x then;
+    **3000 rpm** +4.0 / **+6.3 (2.1x)** / +5.4 dB. 50-100 kHz rises most in both, and the rise grows with
+    speed; at 600 rpm it only appears at 100 C. Caveat: a monotonic ramp, so a one-way run-in cannot be
+    separated (see the 2026-09-24 cycling entry) — but run-in lowered emission there, the opposite sign.
+  - **CONFIRMS AE's 50/100/150 Hz are mains**: +7.1 / +5.0 / +2.9 dB over the local floor, identical at
+    0 rpm and at 2963 rpm. The 4.66 kHz VFD carrier (0048) is **not resolvable** on AE here (+2.9 vs +3.2
+    dB, inside the scatter) — SP remains where it shows.
+  - AE does not clip at 5 V: 0.0037 % of samples at the extreme value across the 138 sweeps at 2963 rpm
+    (peak 6.4 Vpp, ADC margin beyond the window).
+
 - **⚠️ 2026-10-27: the drive obeyed Modbus run/stop but IGNORED the frequency — 2963 rpm (50.00 Hz) at
   every step.** Commanded 30.25, 10.08 and 50.42 Hz across three runs, the tach read 2962.5-2962.8 rpm
   throughout and the drive's display read 50.00. Constant, so not the summing pot (that tracks the
