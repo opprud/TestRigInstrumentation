@@ -28,3 +28,14 @@ Detaljer: `docs/RS485_NOISE_COMPARISON_20261028.md`.
 - **Afhjælpning:** lavpasfiltrér SP ved ca. 1 MHz (eller analysér kun SP-bånd under 1 MHz), så forsvinder forskellen;
   UL/AE kræver ingenting. Til at markere berørte sweeps i stilstand duer SP-effekt i 2-2,5 MHz over gulvet
   (RS485-kørsel: 15 af 30 stopsweeps; manuel: 0 af 28).
+
+## Bliver UL/AE-signalet druknet? (signal over stilstandsgulv, `py/tools/rs485_compare/signal_over_floor.py`)
+- **Gulvet er scopets egen kvantisering, ikke common-mode:** hvilevarians er kun 5,5 dB (UL) / 4,8 dB (AE) over ren
+  kvantiseringsstøj (trin 2,0 mV UL, 20 mV AE). Dermed er "ingen RS485-støj på UL/AE" kun **ingen støj over scopets
+  gulv**; common-mode under ca. 1 mV (UL) / 10 mV (AE) kan ikke ses med de nuværende områder.
+- **Tydeligt over gulvet (≥ 15 dB ved ≥ 1800 rpm):** UL 0,5-20 kHz (20-50 dB), AE 10-200 kHz (16-34 dB).
+- **Druknet / ved gulvet (≤ 3 dB):** UL over 50 kHz og under 500 Hz ved 600 rpm; AE under 10 kHz og over 500 kHz.
+  AE ved 600 rpm kun 4-10 dB (20-200 kHz); AE 200-500 kHz først ved ≥ 1800 rpm (6-13 dB).
+- **RS485 på/af ændrer det ikke** (signal over gulv inden for få dB i de to kørsler).
+- UL-vinduet 0,4 V er ca. 2,6 × for bredt (max Vpp 0,15 V; hvilesignal 1,1 mV rms < ét ADC-trin på 2 mV): 0,2 V
+  ville sænke gulvet 6 dB. AE kan ikke indsnævres (spidser op til 4,6 V Vpp).
