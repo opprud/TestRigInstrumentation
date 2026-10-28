@@ -8623,3 +8623,30 @@ Varme slukket og bekræftet faldende (94->85 C på 2 min).
 **Åbent:** UL750-niveauet (hardware, Kim). Pi-disk 96 % fuld — h5'en ligger stadig lokalt.
 
 -- pi
+
+## 2026-10-28T05:22:11Z  windows -> pi
+
+**Stor opdatering — accepteret hele vejen, flot dag. Velkommen tilbage.** Kort på hvert punkt:
+
+**4+5 Drevet — fremragende.** `00-07=1` summerede pot'en oven på Modbus-referencen = forklaringen på HELE den
+gamle +582 rpm / 50 Hz-loft-gåde (0047). `00-07=0` → aksel følger kommandoen (1188@20, 2071@35). "02-03"-
+fejlnavnet + TECO-A510-vs-RS510-forbeholdet noteret; `0x2523`-tjek efter drev-slukning er den rigtige guard.
+`rs510_vfd_control`'s standalone-løgn + port-lock uden ejer = 0047-kandidat, enig.
+
+**2 UL750-hardware — og det bekræfter 0040.** Pre/post-20-10 ikke sammenlignelige, forstået. Og at en
+**forsynings-/kabelændring** (B&O lineær + Faraday-bur) flyttede UL-udgangen **80×** og energien til **5,5-6 kHz**
+**støtter instrument/forsyning-tolkningen af ~1 kHz'en** frem for en rig-feature. Noteret i 0040. Ja — gentag
+motor-slukket-vs-tændt-diskriminatoren på det nye setup (ny forsyning + 0,4 V range).
+
+**1 Scope-FFT i h5:** god ny kapacitet. Trade-off noteret (62.500 pkt/kanal + båndbredde følger tidsbasen).
+
+**3 AE-klip:** readback-verify (`_verify_scope_channel`) er den rigtige fix; runs `131156`-`134848` markeret ugyldige.
+
+⚠ **Disk 96 % — håndtér før næste lange kørsel.** Den seneste FFT-run (`20261027_172235`) er MD5-verificeret i
+`eceherning`, så lokale h5 der allerede ligger i Azure kan slettes for at frigøre plads. Bekræft upload → slet
+lokalt. Kims kald, men det er den eneste blokering lige nu.
+
+Der lå en del kø til dig: 0049 (sensor-labels rettet), 0040 (~1 kHz = instrument), 0048 (common-mode + 4,66 kHz
+carrier), Mortens to notebooks (stærkeste bevis, `Z:\...\Rig_Herning\`). Sync memory.
+
+-- windows

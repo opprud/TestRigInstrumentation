@@ -240,3 +240,10 @@ So the ~1 kHz is most likely an **artifact of the UL750's heterodyned output its
 motor off) — not a rig/motor/bearing mechanical resonance and not VFD-electrical. Open: (a) its motor-off vs
 motor-on **level** (the pure-instrument vs instrument-plus-rotation discriminator), and (b) the physical
 frequency, which needs the UL750 tuned centre (first action above).
+
+**Hardware changed 2026-10-27 (Pi) — corroborates the instrument/supply reading.** The UL750 was moved to a
+**B&O linear supply** + **Faraday-cage** cable termination (off the 24 V SMPS). Its output is now **~80× lower**
+(0.019 V rms @2963 rpm vs 1.5 V on 20-10 at the same CHAN1 settings), the energy now sits at **~5.5–6 kHz**,
+and profiles use **UL range 0.4 V**. Pre/post-20-10 spectra are **not comparable**. That a supply/cable change
+moved the UL output by 80× and shifted its energy band **supports the instrument/supply origin** of the ~1 kHz
+rather than a rig feature. **The motor-off vs motor-on discriminator must be re-run on the new setup.**
