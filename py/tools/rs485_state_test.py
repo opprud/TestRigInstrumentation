@@ -45,18 +45,36 @@ def ftdi_present() -> bool:
     return "0403:6001" in subprocess.run(["lsusb"], capture_output=True, text=True).stdout
 
 
+TACH_ABORT_RPM = 30.0
+
+
+def tach_rpm():
+    """rpm from the RP2040 (SPEED?), None if unreadable."""
+    try:
+        import re, serial
+        with serial.Serial("/dev/ttyACM0", 115200, timeout=1.0) as sp:
+            sp.write(b"SPEED?\r\n")
+            for _ in range(4):
+                m = re.search(r"rpm=([-\d.]+)", sp.readline().decode(errors="ignore"))
+                if m: return float(m.group(1))
+    except Exception:
+        pass
+    return None
+
+
 class Poller:
     """Same traffic pattern as test_runner: Omron PV+SV, VFD status, every tick_sec."""
     def __init__(self, tick_sec=5.0):
         self.tick = tick_sec; self.ok = 0; self.err = 0; self._ev = threading.Event(); self._t = None
+        self.mode = "poll"; self.abort = False; self.max_rpm = 0.0
 
-    def start(self):
-        self.ok = self.err = 0; self._ev.clear()
+    def start(self, mode="poll"):
+        self.mode = mode; self.ok = self.err = 0; self.max_rpm = 0.0; self._ev.clear()
         self._t = threading.Thread(target=self._run, daemon=True); self._t.start()
 
     def _run(self):
         from omron_temp_poll import E5CCTool
-        from rs510_vfd_control import RS510VFDController
+        from rs510_vfd_control import RS510VFDController, VFDCommand
         om = E5CCTool(port=port_dev(), baudrate=9600, parity="N", bytesize=8, stopbits=1, timeout=2.0, unit_id=2,
                       pv_address=0x2000, sv_address=0x2103, scale=1.0, debug=False)
         vfd = RS510VFDController(port=port_dev(), slave_id=3, baudrate=9600, timeout=2.0, debug=False)
@@ -64,13 +82,35 @@ class Poller:
             vfd.connect()
         except Exception:
             pass
+        if self.mode == "run":                  # drive in RUN at 0 Hz: the shaft must not turn
+            for fn in (lambda: vfd.set_frequency(0.0), lambda: vfd.set_run_command(VFDCommand.RUN_FORWARD)):
+                try: fn()
+                except Exception: self.err += 1
         while not self._ev.is_set():
+            if self.mode in ("write", "run"):   # same register writes the runner makes each tick
+                try:
+                    vfd.set_frequency(0.0); self.ok += 1
+                except Exception:
+                    self.err += 1
+            rpm = tach_rpm()
+            self.max_rpm = max(self.max_rpm, rpm or 0.0)
+            if rpm is not None and rpm > TACH_ABORT_RPM:
+                self.abort = True
+                for _ in range(3):
+                    try: vfd.stop(); vfd.set_frequency(0.0)
+                    except Exception: pass
+                    time.sleep(1)
+                print(f"[test] !! shaft turning ({rpm:.0f} rpm) - drive stopped, aborting", flush=True)
+                self._ev.set(); break
             for fn in (om.read_pv_c, om.read_sv_c, vfd.get_status):
                 try:
                     fn(); self.ok += 1
                 except Exception:
                     self.err += 1
             self._ev.wait(self.tick)
+        if self.mode == "run":
+            try: vfd.stop()
+            except Exception: pass
         for fn in (getattr(om, "close", None), getattr(vfd, "disconnect", None)):
             try:
                 fn and fn()
@@ -119,8 +159,8 @@ def main():
         for s in seq:
             rec = {"state": s, "start_utc": utc()}
             print(f"[test] {rec['start_utc']}  STATE {s} for {a.state_sec:.0f}s", flush=True)
-            if s == "poll":
-                poller.start()
+            if s in ("poll", "write", "run"):
+                poller.start(s)
             elif s == "off":
                 sysfs_disable(1); time.sleep(2); rec["ftdi_present_after_off"] = ftdi_present()
             elif s == "idle":
@@ -129,9 +169,13 @@ def main():
                     for _ in range(30):
                         if os.path.exists(PORT_DEV): break
                         time.sleep(1)
-            time.sleep(a.state_sec)
-            if s == "poll":
-                poller.stop(); rec["poll_ok"], rec["poll_err"] = poller.ok, poller.err
+            for _ in range(int(a.state_sec)):
+                if poller.abort: break
+                time.sleep(1)
+            if s in ("poll", "write", "run"):
+                poller.stop(); rec["poll_ok"], rec["poll_err"] = poller.ok, poller.err; rec["max_rpm"] = poller.max_rpm
+                if poller.abort:
+                    rec["end_utc"] = utc(); states.append(rec); break
             rec["end_utc"] = utc(); states.append(rec)
     finally:
         try: poller.stop()

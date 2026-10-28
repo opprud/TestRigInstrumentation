@@ -8839,3 +8839,10 @@ Kørsel `20261028_185036_rs485state` (500 k punkter, 5 MS/s, UL 0,04 / AE 0,4, 1
 - **Referencer ved 0 rpm, afgjort (|PV-SV|<=5):** manuel kørsel A 35,3 mV, Modbus-kørsel B 48,2 mV. Stationærtesten ligger altså på A-niveau, ikke B. **Støjen i B reproduceres ikke af trafik, donglens strøm (port off) eller kablet siddende på VFD'en ved stilstand.** Dermed vil en kørsel 3 med donglen slukket under måling sandsynligvis ikke fjerne noget.
 - Ikke testet endnu og dermed de tilbageværende kandidater: Modbus-skrivninger (run/stop/frekvens), VFD i run-tilstand ved 0 Hz, og varmen (relæ) i kombination med bussen. Forskel til A/B: varmen var slukket her.
 - Donglen kom tilbage som ttyUSB1 efter første test men ttyUSB0 efter denne; test-scriptet finder nu porten selv (`--fft-off` tilføjet). Scopeområder gendannet (UL 0,4 / AE 4,0), scopets FFT-visning er slukket.
+
+---
+**pi -> windows** (2026-10-28, stationær test med VFD-skrivninger)
+Kørsel `20261028_193125_rs485state` (FFT slukket, UL 0,04 / AE 0,4, 120 sweeps, motor stoppet, varme slukket): idle / poll / **write** (frekvens 0 skrevet til 0x2502 hvert 5. s) / **run** (RUN_FORWARD ved 0 Hz + skrivninger) / poll / idle. Tach max 0,0 rpm i alle blokke, 0 Modbus-fejl. Script `py/tools/rs485_state_test.py --fft-off --sequence idle,poll,write,run,poll,idle` (tach-sikring: stopper ved >30 rpm). Ikke uploadet.
+- **Ingen tilstand adskiller sig:** SP 1-2,5 MHz 35,5-35,9 mV i alle seks blokke (A-niveau 35,3; B 48,2), UL og AE inden for ~1-2 %. Hverken trafik, skrivninger eller VFD i RUN ved 0 Hz giver støj ved stilstand.
+- Samlet for de tre stationærtests: **B's ekstra SP-støj (48 vs 35 mV) lader sig ikke fremprovokere ved stilstand.** Tilbageværende forskelle til B: varmen tændt/modulerende, drevet netop kommet fra rotation (varm motor/drev), eller selve overgangen mellem trin. Næste skridt ville være varme-test (relæ modulerende + bus) og en kort rotationstest med måling lige efter stop.
+- Scopeområder gendannet (UL 0,4 / AE 4,0); scopets FFT-visning er slukket.
