@@ -996,6 +996,13 @@ instrument**: check the `[scope_fft] … scope reports DISP=` line in the first 
   the only copy in existence of the per-tick record and of the account of what went wrong (ticket 0013).
   **Anyone pruning `data/runs/` must delete the `.h5` only, never the folder.**
 
+- **2026-10-28: every run h5 up to `20261020_152350` is now Azure-only (Kim's OK).** 74 local `.h5`
+  (126.7 GB) deleted after verification against `eceherning`: **70 by full-file MD5 against the blob's
+  content-MD5, 4 (no blob MD5) by SHA-256 of three 4 MB ranges**; 0 mismatches. Disk 97 % -> 43 %. Each
+  run folder keeps its telemetry/logs and an `ARCHIVED.txt` naming blob, bytes and hash; full record in
+  `py/data/prune_h5_20261028.log`. Still local: `20261027_172235` (kept for analysis, also in Azure) and
+  the seven small 2026-10-27 test runs (not uploaded).
+
 - **Two Azure containers are in live use, and the dashboard points at the wrong one for archives.**
   Both live on account **`csfbst001`**. The **dashboard** uploads to container **`data`** (hard-coded in
   `react/src/hooks/useAzureUpload.js`); **`py/tools/upload_to_azure.py`** uploads to container
