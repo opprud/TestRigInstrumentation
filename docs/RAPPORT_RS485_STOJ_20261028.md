@@ -17,3 +17,14 @@ Detaljer: `docs/RS485_NOISE_COMPARISON_20261028.md`.
   stilstand, hvor bussen kører lige så meget, og RS485-kørslen kom efter den manuelle på samme leje, så det tilskrives
   ikke RS485.
 - Forbehold: n = 1 pr. betingelse, ingen ombytning af rækkefølge.
+
+## Kan støjen fjernes bagefter, så valid data kan skilles fra støj? Ja.
+- **Den ligger kun i toppen af SP-spektret**, 1-2,5 MHz, og vokser mod 2,5 MHz (+1 dB ved 1 MHz, +8 dB ved 2,25-2,5 MHz;
+  ligner HF-støj, der foldes ned fra over samplingsgrænsen på 2,5 MHz). SP under 1 MHz er uændret (+0,8 dB), UL og AE
+  uændret (total varians −0,05 / +0,07 dB).
+- **Den betyder noget, hvis SP bruges bredbånd i stilstand:** SP-Vpp i stilstand 0,40 V (manuel) mod 1,46 V (RS485,
+  berørte sweeps), rms 0,045 mod 0,068 V. Det er på størrelse med SP-Vpp ved 1176 rpm (1,33 V) og kan derfor se ud
+  som rotationssignal. Under rotation ses ingen forskel (støjen drukner i slæberingens egen støj).
+- **Afhjælpning:** lavpasfiltrér SP ved ca. 1 MHz (eller analysér kun SP-bånd under 1 MHz), så forsvinder forskellen;
+  UL/AE kræver ingenting. Til at markere berørte sweeps i stilstand duer SP-effekt i 2-2,5 MHz over gulvet
+  (RS485-kørsel: 15 af 30 stopsweeps; manuel: 0 af 28).
