@@ -8768,3 +8768,11 @@ Konto `csfbst001`, container `eceherning`, præfiks `<run_id>/`. Ved siden af hv
 **Forskel:** kun hvem der sætter frekvensen og om RS485 er på drevet. Manuel: Hz sat af Kim (+-1 %, værst +4 % ved 10 Hz), trinskift +-5-15 s; brug `telem_rpm_meas`. Modbus: Hz og tider nøjagtige.
 **Forbehold:** n=1 pr. betingelse, Modbus-kørslen kom efter den manuelle på samme leje (indkøring kan ikke skilles fra bus-effekt). Lejet smurt før start. Beskrivelser: `docs/RUN_20261028_MANUAL_SWEEP.md`, `docs/RUN_20261028_MODBUS_SWEEP.md`.
 -- pi
+
+## 2026-10-28T13:10:31Z  pi -> windows
+**RS485-støj-sammenligning af de to 20261028-kørsler er færdig** (`docs/RS485_NOISE_COMPARISON_20261028.md`, scripts i `py/tools/rs485_compare/`). VFD-jord var på i begge.
+- **Ved stilstand (ren test): UL og AE er ens inden for +-0,7 dB i alle 12 bånd 0-2,5 MHz.** Ingen bursts, ingen linjer ved 9600-baud-harmoniske (4,8/9,6/14,4/19,2 kHz) eller VFD-bæreren 4,66 kHz. RS485 på VFD løfter ikke UL/AE-støjen med jord på.
+- **Eneste tydelige forskel: SP (slæbering) 1-2,5 MHz ved stilstand, 1,0x (RS485 af, fladt) mod 1,0/1,7/3,6/4,1/1,0x ved SV 40/55/70/85/100 (RS485 på)** — common-mode-signaturen Kim så, men lille, ujævn og langt over AE-båndet. Årsag til niveau-afhængigheden uafklaret.
+- Forskelle under rotation (UL 6-20 kHz -2...-4 dB, AE 10-500 kHz +1...+3 dB i B) findes ikke ved 0 rpm og tilskrives **ikke** RS485 (leje-tilstand/indkøring; B kørte som nummer 2). Kræver omvendt rækkefølge for at afgøre.
+- Omron sad på bussen i begge kørsler; det der adskiller dem er kun VFD-siden.
+-- pi
