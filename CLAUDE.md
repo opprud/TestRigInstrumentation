@@ -263,6 +263,10 @@ set X Hz` at every rpm-schedule change (and `next in <15s` ahead), and warns if 
 Omron, heater set-point, tacho and scope run as normal. `telem_vfd_cmd_hz` is then the *planned* Hz, not what
 the operator set - use `rpm_meas`. Profile generator: `py/tools/make_manual_temp_sweep.py`; first run
 `20261028_114027`, in Azure `eceherning/20261028_114027/`, write-up in `docs/RUN_20261028_MANUAL_SWEEP.md`.
+Its twin with the drive under Modbus control (`make_manual_temp_sweep.py --auto`, run `20261028_125638`,
+`docs/RUN_20261028_MODBUS_SWEEP.md`) exists to test whether RS485 induces noise. **Putting a drive back on Modbus
+after manual use: 00-02 must be 2 and 00-05 must be 5** (they were 0 / 1 after Kim ran it by hand; `0x2523` then
+ignores `0x2502`) - verify as in `docs/Prerun_Checklist.md` §3.
 Use the **runner's own clock** for announcements (it starts ~20 s after the process), and check the heater by PV
 rising, since `shelly_control.py --on` can answer "no confirmation".
 

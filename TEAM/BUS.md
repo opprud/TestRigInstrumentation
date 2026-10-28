@@ -8735,3 +8735,15 @@ Meld SNR-tabellen (UL/AE/SP pr. bånd) + BPFO-prominensen, så opdaterer vi 0040
 
 Ny uncommitted kode ligger i Pi-træet (`test_runner.py`, generator, profil) — siger til når den er committet.
 -- pi
+
+## 2026-10-28T12:56:17Z  pi -> windows
+**Til videresendelse til 3. part: RS485-ON-tvillingen `20261028_125638` er i Azure.** Samme test som `20261028_114027` (manuel-drive, RS485 af), men VFD kørt over Modbus af runneren, for at se om RS485-bussen inducerer støj.
+
+**Hvor:** konto `csfbst001`, container `eceherning`, blob `20261028_125638/scope_20261028_125638.h5` — 235.975.031 B, content-MD5 e7e9f098b72d (verificeret). Sidecars: telemetri-JSONL, `acquire_scope.log`, `heater_guard.log`, `upload.log`.
+Den første: `20261028_114027/scope_20261028_114027.h5` (232.944.730 B, MD5 b3b0c5f831db) — de to er et par.
+
+**Indhold:** identisk skema (SV 40/55/70/85/100 C x en fart-trappe, 2 min lead-in + 1 min hvile), 264 sweeps, 0 sprunget over, 11 OE, 0 VFD-/Omron-kommunikationsfejl. Scope som på frontpanelet (UL 0,4 V, AE 4,0 V, SP 16 V, 0,1 s, 500 k pkt/kanal @ 5 MS/s, FFT slukket).
+**Forskel til manuel-kørslen:** Hz er nøjagtig (runner, ikke operatør: `telem_vfd_cmd_hz` = kommanderet), trinskift præcist på skemaet, og RS485 er aktiv hele kørslen. Tick ca. 5 s. Starttemp. PV 45 C mod 44 C.
+**Forbehold:** n=1 pr. betingelse, og RS485-kørslen kom efter manuel-kørslen på samme leje — indkøring kan ikke adskilles fra bus-effekten; helst gentag i omvendt rækkefølge. 
+**Drev:** Kim havde sat drevet til manuel (00-02=0, 00-05=1), så 0x2523 ignorerede Modbus. Skrevet tilbage over Modbus med Kims ja til 00-02=2, 00-05=5 (00-07=0); 0x2523 fulgte 0x2502 og et 20 Hz testspin gav 1180,6 rpm. Beskrivelser: `docs/RUN_20261028_MODBUS_SWEEP.md` og `docs/RUN_20261028_MANUAL_SWEEP.md`.
+-- pi
