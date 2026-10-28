@@ -188,6 +188,11 @@ class TestRunner:
         hz_rate_limit = float(control.get("hz_rate_limit_hz_per_s", 5.0))  # max delta per second
         max_missing_rpm_sec = float(control.get("max_missing_rpm_sec", 10.0))
         max_consecutive_modbus_errors = int(control.get("max_consecutive_modbus_errors", 10))
+        # manual_drive: the drive is run by hand (RS485 unplugged from it, e.g. to take that noise
+        # source off the bus). The runner never opens or writes the VFD; instead it PRINTS the
+        # frequency the operator must set whenever the schedule moves. Omron + tacho are unchanged.
+        manual_drive = bool(control.get("manual_drive", False))
+        manual_lead_sec = float(control.get("manual_lead_sec", 15.0))
 
         log_path = self._make_logfile(profile_name)
 
@@ -225,6 +230,7 @@ class TestRunner:
                 "hz_rate_limit_hz_per_s": hz_rate_limit,
                 "max_missing_rpm_sec": max_missing_rpm_sec,
                 "max_consecutive_modbus_errors": max_consecutive_modbus_errors,
+                "manual_drive": manual_drive,
             },
         }
         log_path.write_text(json.dumps(header) + "\n", encoding="utf-8")
@@ -253,6 +259,19 @@ class TestRunner:
 
         consecutive_modbus_errors = 0
 
+        # manual_drive bookkeeping
+        man_hz_shown: Optional[float] = None      # Hz last announced as "set this NOW"
+        man_next_shown: Optional[float] = None    # Hz last announced as "NEXT"
+        man_changed_t = 0.0
+        man_last_warn_t = -1e9
+
+        def _fmt_t(sec: float) -> str:
+            sec = int(round(sec))
+            return f"{sec // 60:02d}:{sec % 60:02d}"
+
+        def _operator(msg: str, bell: bool = False) -> None:
+            print(("\a" if bell else "") + f"[OPERATOR] {msg}", flush=True)
+
         # --- Init / open connections once ---
         if rs485_port:
             async with self._rs485_lock:
@@ -274,6 +293,8 @@ class TestRunner:
                     omron_tool = None
 
                 try:
+                    if manual_drive:
+                        raise RuntimeError("manual_drive: VFD is operated by hand")
                     vfd = self._RS510VFDController(
                         port=rs485_port,
                         slave_id=vfd_slave_id,
@@ -478,7 +499,48 @@ class TestRunner:
             i_term = None
             err = None
 
-            if rpm_target is not None and rpm_target > 0 and vfd is not None:
+            if manual_drive:
+                # Hz = target / calibration, clamped to the drive's own limit. No rate limit and
+                # no tacho feedback: a human is the actuator, the tacho is only a cross-check.
+                hz_cmd = _clamp(float(rpm_target or 0.0) / rpm_per_hz_guess, vfd_min_hz, vfd_max_hz)
+                last_hz_cmd = hz_cmd
+
+                if man_hz_shown is None or abs(hz_cmd - man_hz_shown) >= 0.005:
+                    man_hz_shown = hz_cmd
+                    man_changed_t = float(elapsed)
+                    if hz_cmd <= 0.0:
+                        _operator(f"{_fmt_t(elapsed)}  NOW: STOP the motor (0 Hz)", bell=True)
+                    else:
+                        _operator(f"{_fmt_t(elapsed)}  NOW: set {hz_cmd:.2f} Hz  "
+                                  f"(~{hz_cmd * rpm_per_hz_guess:.0f} rpm)", bell=True)
+
+                # Heads-up before the next change
+                nxt_rpm = _value_at(rpm_schedule, float(elapsed) + manual_lead_sec)
+                nxt_hz = _clamp(float(nxt_rpm or 0.0) / rpm_per_hz_guess, vfd_min_hz, vfd_max_hz)
+                if abs(nxt_hz - hz_cmd) >= 0.005:
+                    if man_next_shown is None or abs(nxt_hz - man_next_shown) >= 0.005:
+                        man_next_shown = nxt_hz
+                        what = "STOP (0 Hz)" if nxt_hz <= 0.0 else f"{nxt_hz:.2f} Hz"
+                        _operator(f"{_fmt_t(elapsed)}  next in <{manual_lead_sec:.0f}s: {what}")
+                else:
+                    man_next_shown = None
+
+                # Cross-check the shaft against what we asked for (the tacho is the speed of
+                # record; a drive that ignored the keypad shows up here, not in any readback).
+                if (float(elapsed) - man_changed_t) > 25.0 and (float(elapsed) - man_last_warn_t) > 30.0:
+                    exp_rpm = hz_cmd * rpm_per_hz_guess
+                    if rpm_meas is not None:
+                        if exp_rpm <= 0.0 and rpm_meas > 30.0:
+                            _operator(f"{_fmt_t(elapsed)}  tach reads {rpm_meas:.0f} rpm but motor "
+                                      f"should be STOPPED", bell=True)
+                            man_last_warn_t = float(elapsed)
+                        elif exp_rpm > 0.0 and abs(rpm_meas - exp_rpm) > max(60.0, 0.08 * exp_rpm):
+                            _operator(f"{_fmt_t(elapsed)}  tach reads {rpm_meas:.0f} rpm, expected "
+                                      f"~{exp_rpm:.0f} for {hz_cmd:.2f} Hz - check the drive display",
+                                      bell=True)
+                            man_last_warn_t = float(elapsed)
+
+            elif rpm_target is not None and rpm_target > 0 and vfd is not None:
                 # Ensure VFD is running
                 if not vfd_started:
                     # initial guess (feedforward) to get moving

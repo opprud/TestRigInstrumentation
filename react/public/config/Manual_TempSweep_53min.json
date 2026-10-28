@@ -1,0 +1,264 @@
+{
+ "name": "Manual temp sweep 40-100",
+ "description": "Manual-drive temperature sweep 40-100 C, 5 levels, 53 min. VFD operated by hand with RS485 unplugged from it; the runner prints the Hz to set. Scope settings are NOT touched (no scope_channels / scope_fft / acq_points): whatever is on the front panel is what is recorded. Heater must be switched on by hand.",
+ "duration_minutes": 53.0,
+ "bearing": {
+  "d_mm": 25,
+  "D_mm": 52,
+  "dpw_mm": 38.5
+ },
+ "oil": {
+  "viscosity_at_40C_cSt": 22,
+  "viscosity_at_100C_cSt": 0
+ },
+ "control": {
+  "rpm_per_hz_guess": 59.5,
+  "open_loop": true,
+  "manual_drive": true,
+  "vfd_max_hz": 50.0
+ },
+ "setpoints": {
+  "rpm": [
+   {
+    "time_sec": 0,
+    "value": 0
+   },
+   {
+    "time_sec": 120,
+    "value": 600
+   },
+   {
+    "time_sec": 180,
+    "value": 1200
+   },
+   {
+    "time_sec": 240,
+    "value": 1800
+   },
+   {
+    "time_sec": 300,
+    "value": 2400
+   },
+   {
+    "time_sec": 360,
+    "value": 3000
+   },
+   {
+    "time_sec": 420,
+    "value": 2400
+   },
+   {
+    "time_sec": 480,
+    "value": 1800
+   },
+   {
+    "time_sec": 540,
+    "value": 1200
+   },
+   {
+    "time_sec": 600,
+    "value": 600
+   },
+   {
+    "time_sec": 660,
+    "value": 0
+   },
+   {
+    "time_sec": 720,
+    "value": 600
+   },
+   {
+    "time_sec": 780,
+    "value": 1200
+   },
+   {
+    "time_sec": 840,
+    "value": 1800
+   },
+   {
+    "time_sec": 900,
+    "value": 2400
+   },
+   {
+    "time_sec": 960,
+    "value": 3000
+   },
+   {
+    "time_sec": 1020,
+    "value": 2400
+   },
+   {
+    "time_sec": 1080,
+    "value": 1800
+   },
+   {
+    "time_sec": 1140,
+    "value": 1200
+   },
+   {
+    "time_sec": 1200,
+    "value": 600
+   },
+   {
+    "time_sec": 1260,
+    "value": 0
+   },
+   {
+    "time_sec": 1320,
+    "value": 600
+   },
+   {
+    "time_sec": 1380,
+    "value": 1200
+   },
+   {
+    "time_sec": 1440,
+    "value": 1800
+   },
+   {
+    "time_sec": 1500,
+    "value": 2400
+   },
+   {
+    "time_sec": 1560,
+    "value": 3000
+   },
+   {
+    "time_sec": 1620,
+    "value": 2400
+   },
+   {
+    "time_sec": 1680,
+    "value": 1800
+   },
+   {
+    "time_sec": 1740,
+    "value": 1200
+   },
+   {
+    "time_sec": 1800,
+    "value": 600
+   },
+   {
+    "time_sec": 1860,
+    "value": 0
+   },
+   {
+    "time_sec": 1920,
+    "value": 600
+   },
+   {
+    "time_sec": 1980,
+    "value": 1200
+   },
+   {
+    "time_sec": 2040,
+    "value": 1800
+   },
+   {
+    "time_sec": 2100,
+    "value": 2400
+   },
+   {
+    "time_sec": 2160,
+    "value": 3000
+   },
+   {
+    "time_sec": 2220,
+    "value": 2400
+   },
+   {
+    "time_sec": 2280,
+    "value": 1800
+   },
+   {
+    "time_sec": 2340,
+    "value": 1200
+   },
+   {
+    "time_sec": 2400,
+    "value": 600
+   },
+   {
+    "time_sec": 2460,
+    "value": 0
+   },
+   {
+    "time_sec": 2520,
+    "value": 600
+   },
+   {
+    "time_sec": 2580,
+    "value": 1200
+   },
+   {
+    "time_sec": 2640,
+    "value": 1800
+   },
+   {
+    "time_sec": 2700,
+    "value": 2400
+   },
+   {
+    "time_sec": 2760,
+    "value": 3000
+   },
+   {
+    "time_sec": 2820,
+    "value": 2400
+   },
+   {
+    "time_sec": 2880,
+    "value": 1800
+   },
+   {
+    "time_sec": 2940,
+    "value": 1200
+   },
+   {
+    "time_sec": 3000,
+    "value": 600
+   },
+   {
+    "time_sec": 3060,
+    "value": 0
+   },
+   {
+    "time_sec": 3120,
+    "value": 0
+   }
+  ],
+  "temperature": [
+   {
+    "time_sec": 0,
+    "value": 40
+   },
+   {
+    "time_sec": 720,
+    "value": 55
+   },
+   {
+    "time_sec": 1320,
+    "value": 70
+   },
+   {
+    "time_sec": 1920,
+    "value": 85
+   },
+   {
+    "time_sec": 2520,
+    "value": 100
+   },
+   {
+    "time_sec": 3120,
+    "value": 25
+   }
+  ]
+ },
+ "acquisition": {
+  "scope_points": "MAX",
+  "samples_per_step": 3,
+  "interval_sec": 12,
+  "waveform_format": "WORD"
+ }
+}

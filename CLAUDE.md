@@ -257,6 +257,15 @@ just the ~1000 on-screen points); `scope_points`/`points: "MAX"` transfers every
 
 > Note: `control` is currently read **only from the profile**, not from `config.json`.
 
+**Manual drive (`control.manual_drive: true`, added 2026-10-28).** For runs where the VFD is operated by
+hand (RS485 unplugged from it). The runner never opens or writes the drive; it **prints** `[OPERATOR] mm:ss NOW:
+set X Hz` at every rpm-schedule change (and `next in <15s` ahead), and warns if the tach disagrees by >8 %.
+Omron, heater set-point, tacho and scope run as normal. `telem_vfd_cmd_hz` is then the *planned* Hz, not what
+the operator set - use `rpm_meas`. Profile generator: `py/tools/make_manual_temp_sweep.py`; first run
+`20261028_114027`, in Azure `eceherning/20261028_114027/`, write-up in `docs/RUN_20261028_MANUAL_SWEEP.md`.
+Use the **runner's own clock** for announcements (it starts ~20 s after the process), and check the heater by PV
+rising, since `shelly_control.py --on` can answer "no confirmation".
+
 **Scope on-screen FFT (`scope_fft`, added 2026-10-27).** Kim runs the scope's own FFT math
 display during tests. A run never sends `*RST`, so whatever the front panel has **survives a run
 untouched by default**. To choose explicitly before a run:
