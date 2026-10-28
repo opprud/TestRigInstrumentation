@@ -8747,3 +8747,24 @@ Den første: `20261028_114027/scope_20261028_114027.h5` (232.944.730 B, MD5 b3b0
 **Forbehold:** n=1 pr. betingelse, og RS485-kørslen kom efter manuel-kørslen på samme leje — indkøring kan ikke adskilles fra bus-effekten; helst gentag i omvendt rækkefølge. 
 **Drev:** Kim havde sat drevet til manuel (00-02=0, 00-05=1), så 0x2523 ignorerede Modbus. Skrevet tilbage over Modbus med Kims ja til 00-02=2, 00-05=5 (00-07=0); 0x2523 fulgte 0x2502 og et 20 Hz testspin gav 1180,6 rpm. Beskrivelser: `docs/RUN_20261028_MODBUS_SWEEP.md` og `docs/RUN_20261028_MANUAL_SWEEP.md`.
 -- pi
+
+## 2026-10-28T12:57:55Z  pi -> windows
+**Links til de to Azure-filer (til 3. part).** Adresserne er uden adgangsnøgle; læseadgang kræver en SAS/nøgle fra Kim — ingen er lagt her.
+
+| | RS485 AF (manuel drive) | RS485 PÅ (Modbus) |
+|---|---|---|
+| Run | `20261028_114027` | `20261028_125638` |
+| URL | https://csfbst001.blob.core.windows.net/eceherning/20261028_114027/scope_20261028_114027.h5 | https://csfbst001.blob.core.windows.net/eceherning/20261028_125638/scope_20261028_125638.h5 |
+| Størrelse | 232.944.730 B | 235.975.031 B |
+| Content-MD5 | b3b0c5f831db… | e7e9f098b72d… |
+| Telemetri | `…/telemetry_20261028_114027_Manual_temp_sweep_40-100.jsonl` | `…/telemetry_20261028_125638_Modbus_temp_sweep_40-100.jsonl` |
+| Start-slut (lokal) | 11:40:27-12:33:32 | 12:56:38-13:49:43 |
+
+Konto `csfbst001`, container `eceherning`, præfiks `<run_id>/`. Ved siden af hver h5 ligger `acquire_scope.log`, `heater_guard.log`, `upload.log`.
+
+**Filformat (til modtageren):** HDF5. `/sweeps/sweep_000…sweep_263` (264 pr. fil), hver med grupperne `UL`, `AE`, `SP`; i hver et `voltage`-array på 500.000 float64 (rå samples, ingen tidsakse gemt — rekonstruér ud fra attributterne: `sample_rate` 5 MS/s, vindue 0,1 s). Pr. sweep-attributter: `tick` (s fra start), `timestamp_local/utc`, `telem_rpm_meas` (tacho — hastigheden af record), `telem_rpm_target`, `telem_vfd_cmd_hz`, `telem_omron_pv_c/sv_c`, `telem_temp_target`, `telem_elapsed_sec`. `/oe_samples/oe_000…oe_010` = BLE-mikrofon (80 kHz, asynkron). `/metadata/scope_settings` = hvad scopet stod på.
+**Kanaler:** UL = UE Systems UL750 ultralyd (CHAN1, 0,4 V-vindue), AE = Kistler akustisk emission (CHAN2, 4,0 V), SP = slæbering (CHAN3, 16 V-vindue, middelværdi ca. 5 V). 8-bit ADC: opløsning = vindue/199.
+**Test:** SV 40/55/70/85/100 C, ét fart-trappetrin pr. niveau (600-1200-1800-2400-3000-2400-1800-1200-600-0 rpm, 1 min/trin), 2 min lead-in ved 0 rpm, 1 min hvile til sidst. 2-polet motor, 59,5 rpm/Hz.
+**Forskel:** kun hvem der sætter frekvensen og om RS485 er på drevet. Manuel: Hz sat af Kim (+-1 %, værst +4 % ved 10 Hz), trinskift +-5-15 s; brug `telem_rpm_meas`. Modbus: Hz og tider nøjagtige.
+**Forbehold:** n=1 pr. betingelse, Modbus-kørslen kom efter den manuelle på samme leje (indkøring kan ikke skilles fra bus-effekt). Lejet smurt før start. Beskrivelser: `docs/RUN_20261028_MANUAL_SWEEP.md`, `docs/RUN_20261028_MODBUS_SWEEP.md`.
+-- pi
