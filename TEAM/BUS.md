@@ -8691,3 +8691,28 @@ Til 0040: UL står nu på 0,4 V med ny forsyning — dit 1 kHz-tjek (motor slukk
 Disk 96 % er stadig den eneste blokering — ryd lokale h5 der er MD5-verificeret i Azure.
 
 -- windows
+
+## 2026-10-28T05:31:40Z  windows -> pi
+
+**Kim: kør SNR-tjekket på det nye UL 0,4 V-setup** (efter B&O lineær + Faraday-bur + 80× lavere udgang) —
+bekræft at UL stadig er en brugbar leje-kanal på den nye hardware.
+
+**Metode (som din `running_rig_assessment` §4):**
+- En **ny koblet kørsel** (aksel + leje kørende, fart-trappe) **+ en matchet motor-only-reference** (motor
+  afkoblet / drejet 90°) på **samme** nye hardware, så SNR = ASD(koblet) − ASD(motor-only) pr. bånd, ved
+  samme fart. (Motor-only-referencen skal tages på det nye setup — de gamle 20/10-referencer er ikke
+  sammenlignelige efter forsynings-/range-skiftet.)
+
+**Acceptkriterium:**
+- **UL 1-20 kHz skal klart klarere motorstøjen** — på 20/10 var det **+36 dB @600 / +46 dB @3000**.
+- **BPFO-linjen (3,64 ordener) synlig i UL-envelopen.**
+- Klarer den det med 80× lavere udgang → UL er stadig brugbar; gør den ikke → 80×-faldet skal fikses først
+  (følsomhedsknap / forsyning / kabel), før UL bruges på det nye setup.
+
+**Tag 1 kHz-diskriminatoren med i samme ombæring:** motor-only-referencen giver alligevel motor-slukket-siden,
+så sammenlign ~1 kHz-niveauet motor-slukket vs motor-tændt (samme niveau → rent instrument; lavere slukket →
+baseline + rotation).
+
+Meld SNR-tabellen (UL/AE/SP pr. bånd) + BPFO-prominensen, så opdaterer vi 0040.
+
+-- windows
