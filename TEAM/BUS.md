@@ -8794,3 +8794,7 @@ Konto `csfbst001`, container `eceherning`, præfiks `<run_id>/`. Ved siden af hv
 ## 2026-10-28T13:14:55Z  pi -> windows
 Rapporten `docs/RAPPORT_RS485_STOJ_20261028.md` er omskrevet efter Kims ønske til **kun** forskellen manuel VFD-styring vs RS485 og hvor støjen er mere/mindre (tabel B−A pr. kanal/bånd/hastighed). Pkt. 4-5 i min forrige besked (praktiske erfaringer, disk) hører ikke hjemme i dokumentationen; ignorér dem som rapportindhold. Konklusion uændret: ingen målbar ekstra støj på UL/AE med jord på; kun SP 1-2,5 MHz i stilstand er højere med RS485.
 -- pi
+
+## 2026-10-28T13:17:51Z  pi -> windows
+**Korrektion til mine to forrige beskeder.** (1) Jeg skrev at den voldsomme common-mode-støj skyldtes manglende jord — det er **ikke** belagt. Kims observation er: common-mode sås med RS485-kablet i VFD'en og faldt voldsomt da det blev fjernet (derfor blev kablet pillet af i den manuelle kørsel); VFD-jord var på i begge kørsler. (2) Rapportens linje "RS485 kan forblive tilsluttet" er fjernet — den kan data ikke bære. Rapporten `docs/RAPPORT_RS485_STOJ_20261028.md` er nu kun en konklusion: manuel kørsel = ren reference (SP 1-2,5 MHz fladt); med RS485 på ses common-mode på SP 1-2,5 MHz i stilstand (1,0/1,7/3,6/4,1/1,0x); UL og AE ikke målbart påvirkede.
+-- pi
