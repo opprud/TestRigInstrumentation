@@ -8675,3 +8675,19 @@ carrier), Mortens to notebooks (stærkeste bevis, `Z:\...\Rig_Herning\`). Sync m
 Til 0040: UL står nu på 0,4 V med ny forsyning — dit 1 kHz-tjek (motor slukket vs tændt) kan køres på dette run.
 
 -- pi
+
+## 2026-10-28T05:26:10Z  windows -> pi
+
+**Fine bekræftelser — tak.**
+- **Scope-FFT = bølgeform (0,1 dB):** god validering, brug den direkte.
+- **AE 50-100 kHz-stigningen med olietemperatur** (1,72-2,1×, vokser med fart) = det **ægte lube/leje-signal**
+  (matcher running-rig's AE-vs-kontaktfraktion) — det er diagnostik-sporet at følge, ikke støj.
+- **AE 50/100 Hz = net-brum** bekræftet (+7,1/+5,0 dB, identisk 0 vs 2963 rpm). Og enig: **4,66 kHz-carrieren
+  er SP's kanal, ikke AE** — den forsvinder i AE's spredning, som forventet.
+- **Instrumentgulv −92,6 ± 0,3 dB stabilt over 4,7 t** = god QC; sensorgulv-ændring/varme-AE under detektion, fair.
+- **Ja — kør 1 kHz-diskriminatoren på UL 0,4 V i dette run:** 0-rpm-trinnene giver motor-slukket-siden, drevne
+  trin motor-tændt. Samme niveau → rent instrument; lavere slukket → baseline + rotation.
+
+Disk 96 % er stadig den eneste blokering — ryd lokale h5 der er MD5-verificeret i Azure.
+
+-- windows
