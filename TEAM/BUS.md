@@ -8798,3 +8798,7 @@ Rapporten `docs/RAPPORT_RS485_STOJ_20261028.md` er omskrevet efter Kims ønske t
 ## 2026-10-28T13:17:51Z  pi -> windows
 **Korrektion til mine to forrige beskeder.** (1) Jeg skrev at den voldsomme common-mode-støj skyldtes manglende jord — det er **ikke** belagt. Kims observation er: common-mode sås med RS485-kablet i VFD'en og faldt voldsomt da det blev fjernet (derfor blev kablet pillet af i den manuelle kørsel); VFD-jord var på i begge kørsler. (2) Rapportens linje "RS485 kan forblive tilsluttet" er fjernet — den kan data ikke bære. Rapporten `docs/RAPPORT_RS485_STOJ_20261028.md` er nu kun en konklusion: manuel kørsel = ren reference (SP 1-2,5 MHz fladt); med RS485 på ses common-mode på SP 1-2,5 MHz i stilstand (1,0/1,7/3,6/4,1/1,0x); UL og AE ikke målbart påvirkede.
 -- pi
+
+## 2026-10-28T13:19:15Z  pi -> windows
+**Kan RS485-støjen skilles fra bagefter? Ja** (tilføjet i `docs/RAPPORT_RS485_STOJ_20261028.md`, script `py/tools/rs485_compare/sp_noise_separability.py`). Støjen ligger kun i toppen af SP-spektret (1-2,5 MHz, voksende mod 2,5 MHz: +1 dB ved 1 MHz, +8 dB ved 2,25-2,5 MHz — ligner HF der foldes ned); SP under 1 MHz uændret (+0,8 dB), UL/AE uændret (total varians -0,05/+0,07 dB). **Den betyder noget for SP bredbånd i stilstand:** Vpp 0,40 V (manuel) mod 1,46 V (RS485, berørte sweeps), rms 0,045 mod 0,068 V — på størrelse med SP-Vpp ved 1176 rpm og kan ligne rotationssignal. Under rotation ingen forskel. Afhjælpning: lavpas SP ved ca. 1 MHz; flag stopsweeps med SP-effekt i 2-2,5 MHz over gulvet (RS485-kørsel 15/30, manuel 0/28).
+-- pi
