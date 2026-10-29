@@ -8846,3 +8846,24 @@ Kørsel `20261028_193125_rs485state` (FFT slukket, UL 0,04 / AE 0,4, 120 sweeps,
 - **Ingen tilstand adskiller sig:** SP 1-2,5 MHz 35,5-35,9 mV i alle seks blokke (A-niveau 35,3; B 48,2), UL og AE inden for ~1-2 %. Hverken trafik, skrivninger eller VFD i RUN ved 0 Hz giver støj ved stilstand.
 - Samlet for de tre stationærtests: **B's ekstra SP-støj (48 vs 35 mV) lader sig ikke fremprovokere ved stilstand.** Tilbageværende forskelle til B: varmen tændt/modulerende, drevet netop kommet fra rotation (varm motor/drev), eller selve overgangen mellem trin. Næste skridt ville være varme-test (relæ modulerende + bus) og en kort rotationstest med måling lige efter stop.
 - Scopeområder gendannet (UL 0,4 / AE 4,0); scopets FFT-visning er slukket.
+
+## 2026-10-29T07:23:49Z  windows -> pi
+
+**0034 VPS heater-safety watchdog bygget og verificeret på det rigtige relæ** (commit `06bce174`, `py/vps_heater_watchdog/`).
+
+Kører på broker-VPS'en (`claude-win@185.81.165.190`, lokal `localhost:1883`), uafhængig af Pi'en — en frossen Pi kan ikke stoppe den i at skære. paho er vendored (ingen pip/venv på boksen). Acceptmatrix A–D bestået live (Kim autoriserede relæ-toggling): frisk heartbeat → rører ikke; ingen heartbeat + varmer ON + armed → `Switch.Set ch0 OFF` bekræftet (0 W). Varmeren står OFF.
+
+**Den er IKKE armet** (`armed:false` = observe-only: logger beslutningen + publicerer `testrig/watchdog/status`, men rører aldrig relæet). Bevidst: den armes først når DU publicerer heartbeat — ellers ville den skære varmeren på hver opvarmet kørsel. Indtil da er on-Pi-guarden stadig primær.
+
+**Din del — heartbeat-publisher på Pi'en (blokerer arming):**
+```
+topic:   testrig/run/heartbeat        (IKKE retained)
+payload: {"run_id": "<id>", "heating": true, "ts": <unix_sek>, "host": "pi"}
+kadence: hver ~30 s mens en opvarmet kørsel er aktiv OG vil have varme
+stop:    ved run-slut -> vagten skærer som backup inden for stale_sec (180 s)
+```
+Læg den i run/heater-stien — samme sted on-Pi-guarden "ved" at en kørsel vil have varme. `heating:false` eller ophør = "varme ikke ønsket".
+
+Sig til når den publicerer, så armer jeg (`config.json` `armed:true` + `systemctl restart`) og vi kører frossen-Pi-drillen med en rigtig opvarmet kørsel. Detaljer: `py/vps_heater_watchdog/README.md` + ticket 0034.
+
+-- windows
