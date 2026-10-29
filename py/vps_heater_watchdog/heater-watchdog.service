@@ -3,6 +3,8 @@ Description=Rig heater-safety watchdog (ticket 0034) — cuts Shelly ch0 when no
 Documentation=https://github.com/opprud/TestRigInstrumentation/blob/AutoDetectScope_moj/TEAM/tickets/0034-vps-heater-safety-watchdog.md
 After=network-online.target mosquitto.service
 Wants=network-online.target
+# Safety daemon: never give up restarting it (disable the start-rate limit).
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple
@@ -12,8 +14,6 @@ Environment=PYTHONPATH=/home/claude-win/heater-watchdog/vendor
 ExecStart=/usr/bin/python3 /home/claude-win/heater-watchdog/watchdog.py --config /home/claude-win/heater-watchdog/config.json
 Restart=always
 RestartSec=5
-# Safety daemon: never give up restarting it.
-StartLimitIntervalSec=0
 
 [Install]
 WantedBy=multi-user.target
