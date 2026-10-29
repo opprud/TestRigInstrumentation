@@ -1,0 +1,14 @@
+{
+  "mqtt": {"host": "localhost", "port": 1883, "username": "mqttuser", "password": "3711", "client_id": "heater_watchdog"},
+  "device_id": "shellypro4pm-c8f09e84cdf8",
+  "heater_channel": 0,
+  "heartbeat_topic": "testrig/run/heartbeat",
+  "status_topic": "testrig/watchdog/status",
+  "stale_sec": 180,
+  "poll_sec": 10,
+  "startup_grace_sec": 200,
+  "armed": false,
+  "maintenance_file": "/home/claude-win/heater-watchdog/MAINTENANCE",
+  "log_file": "/home/claude-win/heater-watchdog/logs/watchdog.log",
+  "pi_cycle_enabled": false
+}

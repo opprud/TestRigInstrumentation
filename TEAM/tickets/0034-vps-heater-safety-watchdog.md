@@ -3,7 +3,7 @@ id: 0034
 title: VPS heater-safety watchdog — independent daemon on the MQTT-broker VPS that switches the heater off after a test ends / when no live run wants heat
 area: ops / reliability / safety
 role: dev
-status: backlog
+status: in-progress
 depends_on: 0033
 branch:
 pr:
@@ -74,3 +74,45 @@ Scope decision at implementation.
 ## Owner / test
 - **Dev:** the VPS daemon + systemd unit + the Pi-side heartbeat publisher.
 - **Tester (Pi/Kim):** the frozen-Pi drill above, on the bench, before it guards a real overnight run.
+
+## Implementation log (2026-10-29, windows)
+
+VPS daemon built and verified on the live relay. Code in `py/vps_heater_watchdog/`
+(`watchdog.py`, `config.example.json`, `heater-watchdog.service`, `install_root.sh`, `README.md`).
+
+**Deployed** on the broker VPS under user `claude-win` at `/home/claude-win/heater-watchdog/`.
+paho-mqtt is **vendored** (`vendor/paho`, extracted from the wheel with `python3 -m zipfile`)
+because the VPS has neither `pip` nor `python3-venv` and both need root. Runs on stock
+`/usr/bin/python3` 3.10 with `PYTHONPATH=vendor`.
+
+**Design decisions**
+- **`armed` flag, default false (observe-only):** logs the decision and publishes
+  `testrig/watchdog/status` every cycle, but never actuates. Ships disarmed so it cannot cut a
+  live run before the Pi heartbeat publisher exists. The on-Pi guard stays primary until armed.
+- **Heater state is unknown-safe:** this Shelly keeps no retained channel state. Rule is "heat
+  not wanted AND (heater ON OR not confirmed OFF) → send OFF". Never gated on a confirmed-ON read.
+- **Startup grace** (`startup_grace_sec`, 200 s): after a (re)start with no heartbeat yet, hold
+  actuation one window so a live run can resume heartbeats before the watchdog acts.
+- **Maintenance override:** `touch ~/heater-watchdog/MAINTENANCE` stands the watchdog down for
+  deliberate bench heating; default (no file) = fail-safe.
+- **Omron SV-down not done here** — the VPS can't reach the RS485 Omron; relay cut is the hard
+  backstop and de-energises the heater regardless of SV. SV-down stays a Pi-side clean-end action.
+- **Pi power-cycle (ch3, from 0033) disabled** (`pi_cycle_enabled:false`).
+
+**Acceptance (live relay, heater toggled with Kim's authorisation):**
+| case | input | decision | relay |
+|---|---|---|---|
+| A | fresh heartbeat | `run-alive` | untouched |
+| B | no heartbeat, heater OFF | `off-confirmed` | untouched |
+| C | no heartbeat, heater ON, `armed:false` | `would-cut` (log only) | **stays ON** |
+| D | no heartbeat, heater ON, `armed:true` | `INTERVENTION → Switch.Set OFF` | **→ OFF, 0 W** |
+
+**Heartbeat contract for the Pi side (NOT yet implemented → blocks arming):**
+`testrig/run/heartbeat` (non-retained), `{"run_id","heating":true,"ts":<unix>,"host":"pi"}`,
+~30 s cadence while a heated run wants heat; stop at run-end.
+
+**Remaining**
+1. Install the systemd service (needs one root step on the VPS: `sudo bash install_root.sh`).
+2. Pi: implement the heartbeat publisher (contract above) in the run/heater path.
+3. Arm (`config.json` `armed:true` + restart) once heartbeats are confirmed live.
+4. Bench frozen-Pi drill with a real heated run before it guards overnight.
