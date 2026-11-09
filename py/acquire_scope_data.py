@@ -1707,6 +1707,12 @@ def main():
     # Arm the heater guard for this run before anything else can go wrong (ticket 0008).
     _arm_heater_guard(run_dir, profile_cfg)
 
+    # Heartbeat for the VPS watchdog (ticket 0034): its absence is what makes the watchdog cut the heater.
+    from heater_heartbeat import HeaterHeartbeat, profile_wants_heat
+    heartbeat = HeaterHeartbeat(run_id, profile_wants_heat(profile_cfg),
+                                log=lambda m: (print(m, flush=True), _event_log(m)))
+    heartbeat.start()
+
     stop_event = asyncio.Event()
     scope_stop_event = threading.Event()
 
@@ -1870,6 +1876,7 @@ def main():
         stop_event.set()
     finally:
         t.join(timeout=10.0)
+        heartbeat.stop()
 
     if scope_err["exc"] is not None:
         raise scope_err["exc"]

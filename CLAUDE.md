@@ -270,6 +270,14 @@ ignores `0x2502`) - verify as in `docs/Prerun_Checklist.md` §3.
 Use the **runner's own clock** for announcements (it starts ~20 s after the process), and check the heater by PV
 rising, since `shelly_control.py --on` can answer "no confirmation".
 
+**Heater heartbeat for the VPS watchdog (added 2026-11-09, ticket 0034).** `acquire_scope_data.py` starts
+`py/heater_heartbeat.py` right after the heater guard: while a run with a temperature schedule is alive it publishes
+`{"run_id", "heating": true, "ts", "host": "pi"}` to `testrig/run/heartbeat` (broker 185.81.165.190, not retained)
+every 30 s, and sends one `heating:false` at a clean end. The watchdog on the VPS cuts the relay when no fresh
+`heating:true` has been seen for 180 s - so a frozen Pi or killed run loses its heater without the Pi's help. Once the
+watchdog is **armed**, a run whose profile has no `setpoints.temperature` publishes nothing and the watchdog will cut the
+heater under it; a failed publish is logged once and is the safe direction.
+
 **Scope on-screen FFT (`scope_fft`, added 2026-10-27).** Kim runs the scope's own FFT math
 display during tests. A run never sends `*RST`, so whatever the front panel has **survives a run
 untouched by default**. To choose explicitly before a run:
