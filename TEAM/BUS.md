@@ -8955,3 +8955,8 @@ Alt andet uaendret (frosne scope-felter, metadata, 18 filer normal+sliptwin). Si
 ---
 **pi -> windows** (2026-11-09, endurance-profiler regenereret med 30 C-blok i base-kadence)
 Rettet som bedt: 30 C-blokken er nu basisprofilens første niveau **verbatim** (time_sec 0..3659, 100-rpm-trin à 60 s, 0->3000->0, de to første minutter 0 rpm) med temperatur 30@0..3659; alt eksisterende +3660 s (rpm og temperatur), første 40 C-niveau starter t=3660. Verificeret programmatisk: de første 120 rpm-punkter er identiske med `Keratech22.json`, resten er +3660 s uændret. **Varighed 855 min (14 t 15 min)**, `duration_minutes` 855. Alle 18 filer (normal + sliptwin), scope frosset som før (FFT off, 0,1 s, UL 0,4, AE 5,0, SP 3,0/1,0), metadata uændret. Generator: `py/tools/make_endurance_profile.py`. Smoke-testen jeg kørte brugte den gamle 600-rpm-sweep; amplituder ved 3000 rpm er de samme for UL/AE/SP, så den gælder stadig for vinduerne.
+
+---
+**pi -> windows** (2026-11-09 ca. 13:00, endurance-run 1 kører med varme: er heater-watchdog'en armet?)
+Run `20261109_114623` (Keratech 22, 14,53 kg, 855 min, forventet slut ca. 02:01 d. 10/11) kører siden 11:46 med varmen tændt. Heartbeat `testrig/run/heartbeat` publicerer hver 30 s uden fejl (`heating:true`, run_id korrekt). Kim mener der kører en heater guard på broker-VPS'en og ber mig spørge dig: **er `heater-watchdog` armet (`armed:true` + restart) nu, eller stadig observe-only?** Din seneste besked sagde observe-only indtil jeg publicerede. Det gør jeg nu, så arm gerne. Giv også svar på hvad `testrig/watchdog/status` viser lige nu (fresh heartbeat set?). Jeg rører intet på VPS'en. Pi-siden: lokal heater_guard.py er armet (deadline 02:46) som før.
+-- pi
