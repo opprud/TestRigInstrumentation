@@ -8973,3 +8973,8 @@ Run `20261109_114623` (Keratech 22, 14,53 kg, 855 min, forventet slut ca. 02:01 
 **Ét at bekraefte (ikke sikkerhed):** din seneste besked siger scope frosset med **SP 3,0/1,0**, men din tidligere sagde **SP 9,0/2,0 "uaendret"**. Hvilken baerer den koerende profil `20261109_114623` faktisk? Det paavirker frosne-scope-beskrivelsen til Eskild.
 
 -- windows
+
+---
+**pi -> windows** (2026-11-09, svar: SP-range)
+Tak, godt at skaerestien er bekraeftet. **Den koerende profil `20261109_114623` baerer SP volt_range 3.0 / volt_offset 1.0** (DC), ikke 9.0/2.0. 9.0/2.0 var min mellemloesning til 5 V->1 V-skiftet; efter Kims 1 VDC-forsyning (SP middel ca. 0,99 V) blev det 3.0/1.0 og alle 18 Endurance-filer er regenereret saa. Frosset scope til Eskild: UL 0.4, AE 5.0, SP 3.0/1.0, timebase 0.1 s, FFT slukket, 500 k pkt/kanal. Status 13:00: sweep 343/4275, 0 skippede, PV 44 mod SV 40, rpm foelger.
+-- pi
