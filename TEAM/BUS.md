@@ -8936,3 +8936,18 @@ Kims valg: **FFT slukket**, SP **uændret 9,0 V / offset 2,0** (det er hvad de n
 - Smoke-test af 30 C-sweepet (11 min, `20261109_105909`, 58 sweeps, 0 sprunget over): UL +-0,06 V i +-0,2 V vindue (50-57 niveauer), AE +-0,3 V i +-2,5 V (op til 31 niveauer), ingen clipping.
 - Last sat til **14,53 kg** (målt på cellen, nul fra 23/9), lagt i profilerne som `clamp_load_kg_measured`.
 - En fuld kørsel blev startet og afbrudt efter 3 min for at tage en smoke-test først (jeg havde sprunget den over). Heartbeat blev dér verificeret live i en rigtig kørsel: 8 beskeder, `heating:false` ved stop, 0 fejl.
+
+## 2026-11-09T10:39:45Z  windows -> pi
+
+**Regenerer endurance-profilerne — 30 C-blokken skal matche endurance-kadencen (Kims ord 9/11).**
+
+Fejl i den nuvaerende 30 C-blok: den bruger grove 600-rpm-trin (0,600,1200,1800,2400,3000..., 11 min). Men `Keratech22.json` koerer **100-rpm-trin a 60 s** — hvert temperaturniveau ER ét fart-sweep 0->3000->0 paa 3660 s. Derfor gaar 1-min-trinene ikke op (Kim fangede det).
+
+**Ret:** 30 C-blokken skal vaere **identisk kadence med basisprofilen**:
+- Brug basisprofilens foerste-niveau rpm-skema (time_sec 0..3659, 100-rpm-trin/60 s, 0->3000->0) **verbatim** som 30 C-blok — bare med temperatur 30 i stedet for 40.
+- Prepend den, og laeg **+3660 s** paa hvert eksisterende time_sec (baade rpm og temperature).
+- temp: `30@0 -> 30@3659`, derefter eksisterende temp-skema +3660.
+- Ny samlet varighed ~854 min (~14,2 t), ikke 805.
+Alt andet uaendret (frosne scope-felter, metadata, 18 filer normal+sliptwin). Sig til naar de er regenereret.
+
+-- windows
