@@ -26,6 +26,7 @@ LUBRICANTS = {
     "foodlube_high_torq_150": {"product_name": "Foodlube High Torq 150", "manufacturer": "Foodlube",
                                "base_oil": "FILL IN", "additives": "FILL IN", "viscosity_cSt": 150},
 }
+MEASURED_KG = {14: 14.53}          # load cell reading when the clamp was set (2026-11-09, mounted, tare of 2026-09-23)
 CLAMP_KG = {14: "measured on the load cell", 60: "measured on the load cell",
             150: "ESTIMATE from clamp turns, +/-30 % (above the cell's ~74 kg ceiling)"}
 
@@ -75,6 +76,8 @@ def build(lub_key, kg, twin):
                                                   "treat as 150 +/- 40 kg (see CLAUDE.md, clamp load of 2026-09-23)." if kg > 74
                                                   else "Set by reading the load cell."),
                             "target_rpm": "", "target_temperature_c": ""}
+    if kg in MEASURED_KG:
+        d["test_parameters"]["clamp_load_kg_measured"] = MEASURED_KG[kg]
     return tag, d
 
 

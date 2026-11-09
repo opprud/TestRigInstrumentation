@@ -6537,6 +6537,7 @@
     "clamp_load_uncertainty_pct": 5.0,
     "clamp_load_method": "Set by reading the load cell.",
     "target_rpm": "",
-    "target_temperature_c": ""
+    "target_temperature_c": "",
+    "clamp_load_kg_measured": 14.53
   }
 }
