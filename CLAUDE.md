@@ -273,9 +273,10 @@ rising, since `shelly_control.py --on` can answer "no confirmation".
 **Endurance-campaign profiles (2026-11-09).** `py/tools/make_endurance_profile.py` writes 18 files
 `react/public/config/Endurance_<lubricant>_<14|60|150>kg[_sliptwin].json`: the 13 h `Keratech22.json` with a 30 C speed sweep
 (0-3000-0 rpm, 1 min/step, 660 s) in front and everything else shifted +660 s (805 min). Scope frozen for the whole matrix:
-**FFT off**, timebase 0.1 s (500 k pts @ 5 MS/s), UL 0.4 V, AE 5.0 V, SP 9.0 V / offset 2.0. The profile's `bearing`,
+**FFT off**, timebase 0.1 s (500 k pts @ 5 MS/s), UL 0.4 V, AE 5.0 V, SP 3.0 V / offset 1.0 (slip ring excitation now **1 V**, set on the PSU - was 5 V). The profile's `bearing`,
 `lubricant` and `test_parameters` blocks are now **merged over config.json's into the HDF5 `/metadata`** (they were ignored
 before) - `clamp_load_kg`, `bias_v` (set by hand on the PSU, only logged), `slip_ring` connected|lifted, `start_temp_c`.
+**Slip-ring bias depends on the SHAFT ANGLE at standstill (found 2026-11-09):** with 1 V on, SP reads 0.99 V at every speed, but a stop can leave the shaft in an angle where the contact is lost and SP drops to ~0.05 V (1.3 Vpp of pickup) until the shaft is turned by hand. Check `mean(SP)` per sweep: ~1 V = bias present, ~0 = not. Do not read a 0-rpm SP level without it.
 Foodlube base oil / additives / dates are `FILL IN` in the generator - fill them before those runs.
 
 **Heater heartbeat for the VPS watchdog (added 2026-11-09, ticket 0034).** `acquire_scope_data.py` starts

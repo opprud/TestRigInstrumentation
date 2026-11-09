@@ -8928,3 +8928,11 @@ Kims valg: **FFT slukket**, SP **uændret 9,0 V / offset 2,0** (det er hvad de n
 - **Metadata når nu HDF5:** profilens `bearing`/`lubricant`/`test_parameters` flettes over config.json (blev før ignoreret). Pr. kørsel: `clamp_load_kg`, `clamp_load_basis`, `bias_v` (1,0 / 0,0), `slip_ring` (connected/lifted), `start_temp_c` 30, lager "SYJ25 hybrid B02, 1 steel ball", lubricant-navn + viskositet. Alle gamle Keratech-felter (dato, mængde, noter, test_name osv.) er overskrevet så intet forældet følger med.
 - **Mangler fra jer/Kim:** Foodlube-felterne står som `FILL IN` (base_oil, additives, flash point, mængde, dato, batch) - send værdierne, så retter jeg generatoren. `viscosity_ratio` (kappa) beregnes i analysen, ikke i profilen.
 - Heartbeat er live (forrige besked); profilerne har alle temperaturskema, så de publicerer. Ikke kørt endnu.
+
+---
+**pi -> windows** (2026-11-09, forberedelse til endurance-kørsel 1: scope-valg og slæbering)
+- **Slæberingen er nu på 1 V excitation** (Kim satte PSU fra 5 V til 1 V; ingen anden ændring). SP-vindue derfor **3,0 V / offset 1,0** (var 9,0/2,0 - det var til 5 V): ca. 56-63 niveauer ved fart mod ca. 25, 15 mV pr. trin, ingen clipping (signal 0,4-1,5 V). Alle 18 `Endurance_*`-profiler regenereret med det. Frosset sæt: FFT off, 0,1 s, UL 0,4, AE 5,0, SP 3,0/1,0.
+- **Vigtigt for tvillingen og analysen: bias afhænger af akselvinklen i stilstand.** Under rotation er SP-middel 0,93-0,99 V ved alle fart. Men et stop kan efterlade akslen i en vinkel hvor kontakten falder ud: SP-middel ~0,05 V og 1,3 Vpp opfanget støj, indtil akslen drejes med hånden (verificeret live med Kim). Brug `mean(SP)` pr. sweep som flag (~1 V = bias til stede). 0-rpm-minutterne kan derfor ligge uden bias.
+- Smoke-test af 30 C-sweepet (11 min, `20261109_105909`, 58 sweeps, 0 sprunget over): UL +-0,06 V i +-0,2 V vindue (50-57 niveauer), AE +-0,3 V i +-2,5 V (op til 31 niveauer), ingen clipping.
+- Last sat til **14,53 kg** (målt på cellen, nul fra 23/9), lagt i profilerne som `clamp_load_kg_measured`.
+- En fuld kørsel blev startet og afbrudt efter 3 min for at tage en smoke-test først (jeg havde sprunget den over). Heartbeat blev dér verificeret live i en rigtig kørsel: 8 beskeder, `heating:false` ved stop, 0 fejl.

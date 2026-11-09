@@ -6,8 +6,8 @@ added in front, the scope frozen for the whole matrix, and per-run metadata.
 
 Matrix: 3 lubricants x 3 clamp loads (14 / 60 / 150 kg).  Twin = same profile, slip-ring probe lifted and
 bias PSU off (slip_ring "lifted", bias_v 0.0); SP stays on as a noise reference.
-Frozen scope (Kim, 2026-11-09): scope FFT OFF (500 k pts @ 5 MS/s at 0.1 s), SP 9.0 V / offset 2.0 as in the
-live profiles, UL 0.4 V, AE 5.0 V. Bias 1 V is set by hand on the PSU - it is logged here, not controlled.
+Frozen scope (Kim, 2026-11-09): scope FFT OFF (500 k pts @ 5 MS/s at 0.1 s), SP 3.0 V / offset 1.0 (1 V bias; was 9.0/2.0 for the 5 V excitation)
+UL 0.4 V, AE 5.0 V. Bias 1 V is set by hand on the PSU - it is logged here, not controlled.
 """
 import copy, json
 from pathlib import Path
@@ -32,7 +32,7 @@ CLAMP_KG = {14: "measured on the load cell", 60: "measured on the load cell",
 
 SCOPE = {"UL": {"timebase_range": 0.1, "volt_range": 0.4, "volt_offset": 0.0, "coupling": "DC"},
          "AE": {"timebase_range": 0.1, "volt_range": 5.0, "volt_offset": 0.0, "coupling": "DC"},
-         "SP": {"timebase_range": 0.1, "volt_range": 9.0, "volt_offset": 2.0, "coupling": "DC"}}
+         "SP": {"timebase_range": 0.1, "volt_range": 3.0, "volt_offset": 1.0, "coupling": "DC"}}   # slip ring on a 1 V bias: ~0.4-1.5 V, 56-63 levels at speed
 
 
 def build(lub_key, kg, twin):
@@ -52,7 +52,7 @@ def build(lub_key, kg, twin):
     d["description"] = (f"Lubricant endurance matrix: {lub['product_name']}, clamp {kg} kg, SKF SYJ25 hybrid B02. "
                         f"A 30 C speed sweep (0-3000-0 rpm, 1 min/step, {SHIFT} s) precedes the existing 13 h Keratech22 profile, "
                         f"which is shifted by {SHIFT} s. Scope frozen across the matrix: FFT off, 500 k pts @ 5 MS/s, "
-                        f"UL 0.4 V, AE 5.0 V, SP 9.0 V / offset 2.0. "
+                        f"UL 0.4 V, AE 5.0 V, SP 3.0 V / offset 1.0. "
                         + ("SLIP-RING TWIN: probe lifted, bias PSU off." if twin else "Slip ring connected, bias 1.0 V set on the PSU."))
     d["scope_channels"] = copy.deepcopy(SCOPE)
     d["scope_fft"] = {"enabled": False, "save": False}

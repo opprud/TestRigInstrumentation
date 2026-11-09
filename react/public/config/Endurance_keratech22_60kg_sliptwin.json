@@ -1,6 +1,6 @@
 {
   "name": "Endurance keratech22_60kg_sliptwin",
-  "description": "Lubricant endurance matrix: Keratech 22, clamp 60 kg, SKF SYJ25 hybrid B02. A 30 C speed sweep (0-3000-0 rpm, 1 min/step, 660 s) precedes the existing 13 h Keratech22 profile, which is shifted by 660 s. Scope frozen across the matrix: FFT off, 500 k pts @ 5 MS/s, UL 0.4 V, AE 5.0 V, SP 9.0 V / offset 2.0. SLIP-RING TWIN: probe lifted, bias PSU off.",
+  "description": "Lubricant endurance matrix: Keratech 22, clamp 60 kg, SKF SYJ25 hybrid B02. A 30 C speed sweep (0-3000-0 rpm, 1 min/step, 660 s) precedes the existing 13 h Keratech22 profile, which is shifted by 660 s. Scope frozen across the matrix: FFT off, 500 k pts @ 5 MS/s, UL 0.4 V, AE 5.0 V, SP 3.0 V / offset 1.0. SLIP-RING TWIN: probe lifted, bias PSU off.",
   "duration_minutes": 805,
   "bearing": {
     "d_mm": 25,
@@ -6499,8 +6499,8 @@
     },
     "SP": {
       "timebase_range": 0.1,
-      "volt_range": 9.0,
-      "volt_offset": 2.0,
+      "volt_range": 3.0,
+      "volt_offset": 1.0,
       "coupling": "DC"
     }
   },
