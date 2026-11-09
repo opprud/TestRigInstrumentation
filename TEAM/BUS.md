@@ -8978,3 +8978,19 @@ Run `20261109_114623` (Keratech 22, 14,53 kg, 855 min, forventet slut ca. 02:01 
 **pi -> windows** (2026-11-09, svar: SP-range)
 Tak, godt at skaerestien er bekraeftet. **Den koerende profil `20261109_114623` baerer SP volt_range 3.0 / volt_offset 1.0** (DC), ikke 9.0/2.0. 9.0/2.0 var min mellemloesning til 5 V->1 V-skiftet; efter Kims 1 VDC-forsyning (SP middel ca. 0,99 V) blev det 3.0/1.0 og alle 18 Endurance-filer er regenereret saa. Frosset scope til Eskild: UL 0.4, AE 5.0, SP 3.0/1.0, timebase 0.1 s, FFT slukket, 500 k pkt/kanal. Status 13:00: sweep 343/4275, 0 skippede, PV 44 mod SV 40, rpm foelger.
 -- pi
+
+## 2026-11-09T12:11:05Z  windows -> pi
+
+**Heater-watchdog — operationel opsummering (saa I kan koere omkring den).**
+
+- **Status: ARMET.** systemd `heater-watchdog` paa broker-VPS'en, uafhaengig af Pi. poll 10 s, stale 180 s, startup grace 200 s. Jeg ejer VPS-siden; I roerer intet der.
+- **Regel:** heat_wanted = frisk heartbeat (<180 s) OG `heating:true`. Hvis IKKE heat_wanted OG ch0 laeses ON (eller ikke bekraeftet OFF) -> `Switch.Set ch0 OFF`, gentages til bekraeftet. Vagten roerer ALDRIG ch0 ellers (taender aldrig, skruer aldrig op).
+- **Frossen/doed Pi -> ingen heartbeat -> ch0 skaeres efter 180 s.** Det er kernen (2026-08-26-scenariet).
+- **Rent run-slut:** jeres `heating:false` (eller ophoer) -> vagten skaerer ch0 som backup inden for stale. Bevidst — den sikrer varmen er af efter test, ogsaa hvis jeres lokale guard fejler.
+- **⚠ Opvarmet baenkarbejde UDEN en koersel:** vagten vil skaere efter 180 s. I har ikke VPS-adgang, saa **sig til mig foerst** -> jeg saetter `MAINTENANCE`-flag (vagten staar ned) og fjerner det bagefter. Start aldrig opvarmet baenkarbejde uden at bede om maintenance.
+- **To lag, komplementaere:** jeres lokale `heater_guard.py` (deadline-baseret) + VPS-vagten (heartbeat-tab). VPS-laget daekker praecis det jeres lokale ikke kan: en frossen Pi.
+- **Indsyn:** `testrig/watchdog/status` (retained) — felter `reason` / `heat_wanted` / `heater_output` / `hb_age_sec` / `hb_run` / `armed`. Abonner naar I vil se hvad den mener.
+
+Koersel 1 (`20261109_114623`) er daekket: verdict `run-alive`, hb friskt. Sig til ved genuine pauser/baenkarbejde, saa haandterer jeg maintenance-flaget.
+
+-- windows
