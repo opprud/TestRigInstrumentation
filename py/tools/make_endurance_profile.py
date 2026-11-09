@@ -13,8 +13,7 @@ import copy, json
 from pathlib import Path
 
 CFG = Path(__file__).resolve().parents[2] / "react" / "public" / "config"
-SWEEP_RPM = [0, 600, 1200, 1800, 2400, 3000, 2400, 1800, 1200, 600, 0]     # 1 min per step
-SHIFT = 60 * len(SWEEP_RPM)                                                   # 660 s
+SHIFT = 3660        # the 30 C block is the base profile's first level verbatim (100 rpm steps, 60 s, 0->3000->0), only at 30 C
 START_TEMP_C = 30
 
 LUBRICANTS = {
@@ -39,8 +38,7 @@ def build(lub_key, kg, twin):
     base = json.loads((CFG / "Keratech22.json").read_text())
     d = copy.deepcopy(base)
     sp = base["setpoints"]
-    rpm = [{"time_sec": i * 60 + o, "value": v} for i, v in enumerate(SWEEP_RPM) for o in (0, 59)]
-    rpm[-1] = {"time_sec": SHIFT - 1, "value": 0}
+    rpm = [dict(p) for p in sp["rpm"] if p["time_sec"] < SHIFT]      # base level 1, verbatim
     temp = [{"time_sec": 0, "value": START_TEMP_C}, {"time_sec": SHIFT - 1, "value": START_TEMP_C}]
     d["setpoints"] = {"rpm": rpm + [{"time_sec": p["time_sec"] + SHIFT, "value": p["value"]} for p in sp["rpm"]],
                       "temperature": temp + [{"time_sec": p["time_sec"] + SHIFT, "value": p["value"]} for p in sp["temperature"]]}
@@ -50,7 +48,7 @@ def build(lub_key, kg, twin):
     tag = f"{lub_key}_{kg}kg" + ("_sliptwin" if twin else "")
     d["name"] = f"Endurance {tag}"
     d["description"] = (f"Lubricant endurance matrix: {lub['product_name']}, clamp {kg} kg, SKF SYJ25 hybrid B02. "
-                        f"A 30 C speed sweep (0-3000-0 rpm, 1 min/step, {SHIFT} s) precedes the existing 13 h Keratech22 profile, "
+                        f"A 30 C speed sweep (the base profile\'s first level verbatim: 100 rpm steps of 60 s, 0-3000-0, {SHIFT} s) precedes the existing 13 h Keratech22 profile, "
                         f"which is shifted by {SHIFT} s. Scope frozen across the matrix: FFT off, 500 k pts @ 5 MS/s, "
                         f"UL 0.4 V, AE 5.0 V, SP 3.0 V / offset 1.0. "
                         + ("SLIP-RING TWIN: probe lifted, bias PSU off." if twin else "Slip ring connected, bias 1.0 V set on the PSU."))

@@ -271,8 +271,9 @@ Use the **runner's own clock** for announcements (it starts ~20 s after the proc
 rising, since `shelly_control.py --on` can answer "no confirmation".
 
 **Endurance-campaign profiles (2026-11-09).** `py/tools/make_endurance_profile.py` writes 18 files
-`react/public/config/Endurance_<lubricant>_<14|60|150>kg[_sliptwin].json`: the 13 h `Keratech22.json` with a 30 C speed sweep
-(0-3000-0 rpm, 1 min/step, 660 s) in front and everything else shifted +660 s (805 min). Scope frozen for the whole matrix:
+`react/public/config/Endurance_<lubricant>_<14|60|150>kg[_sliptwin].json`: the 13 h `Keratech22.json` with a 30 C level in front
+(the base profile's first level verbatim: 100 rpm steps of 60 s, 0-3000-0, 3660 s, only at SV 30 C) and everything else shifted
++3660 s (855 min). The architect's correction 2026-11-09: an earlier 660 s / 600-rpm-step block did not match the base cadence. Scope frozen for the whole matrix:
 **FFT off**, timebase 0.1 s (500 k pts @ 5 MS/s), UL 0.4 V, AE 5.0 V, SP 3.0 V / offset 1.0 (slip ring excitation now **1 V**, set on the PSU - was 5 V). The profile's `bearing`,
 `lubricant` and `test_parameters` blocks are now **merged over config.json's into the HDF5 `/metadata`** (they were ignored
 before) - `clamp_load_kg`, `bias_v` (set by hand on the PSU, only logged), `slip_ring` connected|lifted, `start_temp_c`.

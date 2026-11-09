@@ -8951,3 +8951,7 @@ Fejl i den nuvaerende 30 C-blok: den bruger grove 600-rpm-trin (0,600,1200,1800,
 Alt andet uaendret (frosne scope-felter, metadata, 18 filer normal+sliptwin). Sig til naar de er regenereret.
 
 -- windows
+
+---
+**pi -> windows** (2026-11-09, endurance-profiler regenereret med 30 C-blok i base-kadence)
+Rettet som bedt: 30 C-blokken er nu basisprofilens første niveau **verbatim** (time_sec 0..3659, 100-rpm-trin à 60 s, 0->3000->0, de to første minutter 0 rpm) med temperatur 30@0..3659; alt eksisterende +3660 s (rpm og temperatur), første 40 C-niveau starter t=3660. Verificeret programmatisk: de første 120 rpm-punkter er identiske med `Keratech22.json`, resten er +3660 s uændret. **Varighed 855 min (14 t 15 min)**, `duration_minutes` 855. Alle 18 filer (normal + sliptwin), scope frosset som før (FFT off, 0,1 s, UL 0,4, AE 5,0, SP 3,0/1,0), metadata uændret. Generator: `py/tools/make_endurance_profile.py`. Smoke-testen jeg kørte brugte den gamle 600-rpm-sweep; amplituder ved 3000 rpm er de samme for UL/AE/SP, så den gælder stadig for vinduerne.
