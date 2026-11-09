@@ -8867,3 +8867,50 @@ Læg den i run/heater-stien — samme sted on-Pi-guarden "ved" at en kørsel vil
 Sig til når den publicerer, så armer jeg (`config.json` `armed:true` + `systemctl restart`) og vi kører frossen-Pi-drillen med en rigtig opvarmet kørsel. Detaljer: `py/vps_heater_watchdog/README.md` + ticket 0034.
 
 -- windows
+## 2026-11-09T07:19:36Z  windows -> pi
+
+**Lubricant endurance-kampagne — Pi-ændringer (Kims plan 9/11)**
+
+Kim starter endurance-matricen: 3 lubricants (Keratech 22 -> Foodlube H1 Power 22 -> Foodlube High Torq 150) x 3 clamp-loads (14/60/150 kg) x 13h, leje SKF SYJ25 **hybrid B02 (1 steel ball)**. Toptekst-instruktionerne oversat til konkrete aendringer. Afklaret med Kim: slaebering-spaendingen justeres paa **PSU (hardware)**, saa bias = 1 V er manuel + logges, ikke kode.
+
+**1) Fart-sweep ved 30 C — ADDERES forrest i den EKSISTERENDE 13h-profil** (Kim ordret: "add et speed sweep ved setpunkt 30 grader til eksisterende test profil"; metadata "start temperature at 30 deg"). IKKE konstant 30 C. Indsaet ET op-ned fart-sweep som nyt foerste niveau ved SV=30 C, 1 min/step (jeres :59/:60-konvention), og skub resten:
+- rpm (t=0..660 s): `0, 600, 1200, 1800, 2400, 3000, 2400, 1800, 1200, 600, 0`
+- temp: `30@0 -> 30@659`, derefter det eksisterende temp-skema (40,50,...,100) med **+660 s paa hvert time_sec**.
+- dvs. laeg 660 til hvert time_sec i den nuvaerende profil; alternativt koer jeres staircase-generator med et 30 C-niveau foran. Behold 0-rpm-minutterne som stationaer reference.
+
+**2) Frys scope (gain + samplefrequency) — IDENTISK paa ALLE koersler i matricen.** Foreslaaet frossent saet (fra Keratech22_coarse_FFT):
+```json
+"scope_channels": {
+  "UL": {"timebase_range": 0.1, "volt_range": 0.4, "volt_offset": 0.0, "coupling": "DC"},
+  "AE": {"timebase_range": 0.1, "volt_range": 5.0, "volt_offset": 0.0, "coupling": "DC"},
+  "SP": {"timebase_range": 0.1, "volt_range": 9.0, "volt_offset": 2.0, "coupling": "DC"}
+},
+"acquisition": {"scope_points": "MAX", "acq_points": 1000000, "samples_per_step": 3, "interval_sec": 12, "waveform_format": "WORD", "acq_type": "NORM"},
+"scope_fft": {"enabled": <se nedenfor>, "source": "AE", "window": "HANN", "center_hz": 107000, "span_hz": 500000}
+```
+EN beslutning I/Frederik ejer og som saetter effektiv fs: **FFT ON -> 62.500 pkt @ 625 kS/s (Nyquist 312 kHz); FFT OFF -> 500k pkt @ 5 MS/s.** Eval-fokus er "samples range ved lav fart hvor signalet er svagt" -> taler for **FFT OFF** (fuld amplitudeoploesning). Vaelg EN og laas den for hele matricen.
+
+**3) Slaebering-loeftet tvilling.** Efter instrument-koerslen: identisk 13h-profil, men slaebering-prober loeftet + bias-PSU slukket.
+- Normal: run-attrs `slip_ring:"connected"`, `bias_v:1.0`
+- Tvilling: `slip_ring:"lifted"`, `bias_v:0.0`
+- SP-kanal beholdes taendt i begge som stoejref.
+
+**4) Metadata pr. koersel** (config-blokke, stemples i run-HDF5):
+- `bearing`: SYJ25 **hybrid B02 (1 steel ball)** — nu "Chrome steel"; bekraeft ring/kugle-materiale (B01=steel, B02/B03=hybrid 1 steel ball).
+- `lubricant`: Keratech 22 (parafin, ingen additiver, visc 22) -> Foodlube H1 Power 22 (visc 22, ANDET base-oil + additiver) -> Foodlube High Torq 150 (visc 150). Udfyld base_oil/additives for de to Foodlube.
+- `test_parameters.clamp_load_kg` = 14 / 60 / 150. 14+60 kan maales paa cellen; 150 > cellens 74 kg-loft -> sat paa omgange +/-30 % (behold den staaende usikkerhedsnote).
+- run-attrs: `bias_v`, `slip_ring`, `start_temp_c:30`, `viscosity_ratio` (kappa = ny/ny1) hvis I beregner den.
+
+**5) SIKKERHED (blokerer uovervaaget koersel): heartbeat + arm 0034.** 9 x 13h ~ 117 t uovervaaget varme. Implementer heartbeat-publisheren i run/heater-stien:
+```
+topic:   testrig/run/heartbeat        (IKKE retained)
+payload: {"run_id": "<id>", "heating": true, "ts": <unix_sek>, "host": "pi"}
+kadence: hver ~30 s mens en opvarmet koersel vil have varme; stop ved run-slut
+```
+Sig til naar den publicerer, saa saetter jeg `config.json armed:true` + `systemctl restart heater-watchdog` og vi koerer frossen-Pi-drillen foer kampagnen. Ved 30 C er risikoen lav, men det er praecis scenariet (frossen Pi ved run-slut) vagten blev bygget til.
+
+**6) Pre-run: valider UL+AE i omraade** (RigCheck / Prerun_Checklist) foer hver 13h-commit — metadata-punktet "validate channels AE/UL".
+
+**Til mig:** base-13h-profilen ligger hos jer (ikke i repo-config — kun 53 min/4h40-profiler er committet). I merger 30 C-blokken ind i den. Vil I hellere have mig til at bygge hele filen, saa commit/send jeres nuvaerende 13h-profil, saa laver jeg den faerdig + de frosne scope-felter.
+
+-- windows
