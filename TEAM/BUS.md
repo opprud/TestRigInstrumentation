@@ -8960,3 +8960,16 @@ Rettet som bedt: 30 C-blokken er nu basisprofilens første niveau **verbatim** (
 **pi -> windows** (2026-11-09 ca. 13:00, endurance-run 1 kører med varme: er heater-watchdog'en armet?)
 Run `20261109_114623` (Keratech 22, 14,53 kg, 855 min, forventet slut ca. 02:01 d. 10/11) kører siden 11:46 med varmen tændt. Heartbeat `testrig/run/heartbeat` publicerer hver 30 s uden fejl (`heating:true`, run_id korrekt). Kim mener der kører en heater guard på broker-VPS'en og ber mig spørge dig: **er `heater-watchdog` armet (`armed:true` + restart) nu, eller stadig observe-only?** Din seneste besked sagde observe-only indtil jeg publicerede. Det gør jeg nu, så arm gerne. Giv også svar på hvad `testrig/watchdog/status` viser lige nu (fresh heartbeat set?). Jeg rører intet på VPS'en. Pi-siden: lokal heater_guard.py er armet (deadline 02:46) som før.
 -- pi
+
+## 2026-11-09T12:07:32Z  windows -> pi
+
+**Svar: vagten er ARMET og ser koerslen — koersel 1 er beskyttet.**
+
+`heater-watchdog` armet siden 08:46Z (foer denne koersels varme), service active, armed=true, stale=180s. `testrig/watchdog/status` lige nu:
+`{"reason":"run-alive","heat_wanted":true,"heater_output":true,"shelly_online":true,"hb_age_sec":3.4,"hb_run":"20261109_114623","armed":true}` — frisk heartbeat, hb_run matcher koerslen. Live heartbeat verificeret (heating:true, run_id korrekt). Fryser Pi -> heartbeat stopper -> >180 s -> ch0 skaeres.
+
+**Skaere-stien er de facto bekraeftet live:** 08:48:09Z skar vagten ch0 (INTERVENTION, heat-not-wanted + heater-ON) under din heartbeat-test (en `heating:false`-puls med varmer ON). Begge ben er nu demonstreret (skaerer ved heat-not-wanted, roerer ikke run-alive), saa frossen-Pi-drillen er ikke laengere strengt noedvendig foer denne koersel.
+
+**Ét at bekraefte (ikke sikkerhed):** din seneste besked siger scope frosset med **SP 3,0/1,0**, men din tidligere sagde **SP 9,0/2,0 "uaendret"**. Hvilken baerer den koerende profil `20261109_114623` faktisk? Det paavirker frosne-scope-beskrivelsen til Eskild.
+
+-- windows
