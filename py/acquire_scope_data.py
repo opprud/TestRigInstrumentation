@@ -1690,6 +1690,11 @@ def main():
     with open(args.profile, "r") as f:
         profile_cfg = json.load(f)
     scope_cfg["scope_fft"] = _resolve_scope_fft(scope_cfg, profile_cfg, args.fft)
+    # Per-run metadata carried by the profile (bearing / lubricant / test_parameters) overrides config.json's,
+    # so the HDF5 /metadata groups describe THIS run (lubricant matrix, clamp load, bias, slip_ring ...).
+    for _blk in ("bearing", "lubricant", "test_parameters"):
+        if isinstance(profile_cfg.get(_blk), dict):
+            scope_cfg[_blk] = {**(scope_cfg.get(_blk) or {}), **profile_cfg[_blk]}
 
     run_id = make_run_id()
 

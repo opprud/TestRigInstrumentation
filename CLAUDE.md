@@ -270,6 +270,14 @@ ignores `0x2502`) - verify as in `docs/Prerun_Checklist.md` §3.
 Use the **runner's own clock** for announcements (it starts ~20 s after the process), and check the heater by PV
 rising, since `shelly_control.py --on` can answer "no confirmation".
 
+**Endurance-campaign profiles (2026-11-09).** `py/tools/make_endurance_profile.py` writes 18 files
+`react/public/config/Endurance_<lubricant>_<14|60|150>kg[_sliptwin].json`: the 13 h `Keratech22.json` with a 30 C speed sweep
+(0-3000-0 rpm, 1 min/step, 660 s) in front and everything else shifted +660 s (805 min). Scope frozen for the whole matrix:
+**FFT off**, timebase 0.1 s (500 k pts @ 5 MS/s), UL 0.4 V, AE 5.0 V, SP 9.0 V / offset 2.0. The profile's `bearing`,
+`lubricant` and `test_parameters` blocks are now **merged over config.json's into the HDF5 `/metadata`** (they were ignored
+before) - `clamp_load_kg`, `bias_v` (set by hand on the PSU, only logged), `slip_ring` connected|lifted, `start_temp_c`.
+Foodlube base oil / additives / dates are `FILL IN` in the generator - fill them before those runs.
+
 **Heater heartbeat for the VPS watchdog (added 2026-11-09, ticket 0034).** `acquire_scope_data.py` starts
 `py/heater_heartbeat.py` right after the heater guard: while a run with a temperature schedule is alive it publishes
 `{"run_id", "heating": true, "ts", "host": "pi"}` to `testrig/run/heartbeat` (broker 185.81.165.190, not retained)
