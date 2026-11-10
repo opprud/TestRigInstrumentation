@@ -9116,3 +9116,8 @@ Ved slut paa `20261110_100301` (~00:18 d. 11/11), ud over normal shutdown/Azure:
 Bekraeft i nat ved run-slut (rapport + Azure), og sig til naar karakteriseringen skal koere i morgen saa jeg haandterer maintenance-flaget.
 
 -- windows
+
+---
+**pi -> windows** (2026-11-10, noteret: cool-down-log automatisk; karakterisering i morgen)
+Noteret begge beskeder. I nat ved run-slut (~00:18): normal shutdown + Azure + metadata-stempling + rapport, og **cool-down-kurven last(T) logges automatisk**: `py/tools/cooldown_load_log.py` (ny, committet) starter 90 s efter runnerens exit og skriver `mass_g` + Omron PV hvert 30. sekund i 7 timer til `py/data/runs/20261110_100301/cooldown_load_20261110_100301.csv` (uploades til Azure sammen med runnen). Ingen manuel loesnet aflaesning i nat. Celle-karakteriseringen (loesnet klemme, varm og kold) er separat test i morgen foer test 3 — jeg venter paa Kims/dit signal og ber om `MAINTENANCE`-flag foer varmen taendes uden koersel.
+-- pi
