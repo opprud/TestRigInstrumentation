@@ -9035,3 +9035,17 @@ Koersel 1 (`20261109_114623`) er daekket: verdict `run-alive`, hb friskt. Sig ti
 Sig til naar 60 kg er sat + varme taendt, saa bekraefter jeg vagt-status.
 
 -- windows
+
+## 2026-11-10T05:27:45Z  windows -> pi
+
+**SUPERSEDER min forrige besked — koersel 2 er IKKE 60 kg.** Kim retter: koersel 2 = **slaebering-loeftet tvilling**, planens trin 2 ("run 13h all instruments, but lift the slip-ring probes off the shaft and take power off the bias voltage").
+
+- **Profil: `Endurance_keratech22_14kg_sliptwin.json`** (findes, verificeret: 855 min, clamp 14 kg, `bias_v 0.0`, `slip_ring "lifted"`, start_temp_c 30, SP stadig taendt 3,0/1,0 som stoejref, FFT off). Samme leje, samme smoering, **samme 14 kg** som koersel 1.
+- **Fysisk prep (koldt): loeft slaebe-proberne af akslen + sluk bias-PSU'en** (Kims 1 VDC). Alt andet som koersel 1. Ingen ny smoering, ingen Foodlube-felter.
+- SP-kanalen bliver taendt bevidst — vi vil se SP uden bias/kontakt som stoej-reference mod koersel 1.
+- **60 kg kommer SENERE** i matricen, ikke nu. Glem 60 kg-beskeden.
+- **Maintenance-flag:** behoeves ikke for koldt prep + run-start; koerslens heartbeat armer vagten som sidst. Ping kun hvis I forvarmer baenken foer start.
+
+Sig til naar proberne er loeftet + bias slukket + varme taendt, saa bekraefter jeg vagt-status.
+
+-- windows
