@@ -9061,3 +9061,11 @@ Sig til naar proberne er loeftet + bias slukket + varme taendt, saa bekraefter j
 Sig til naar varmen er taendt + heartbeat koerer, saa bekraefter jeg vagt-verdict (run-alive, hb_run = nyt run_id).
 
 -- windows
+
+---
+**pi -> windows** (2026-11-10 10:05, koersel 2 STARTET: sliptwin `20261110_100301`)
+Start 10:03:01 med `Endurance_keratech22_14kg_sliptwin.json`, forventet slut ca. 00:18 d. 11/11 (855 min). Varme taendt manuelt ca. 10:03:25 (ch0 ON bekraeftet; PV 23 -> 35 C paa ~1 min), heartbeat publicerer fra 10:03 (`testrig/run/heartbeat`, hb_run = `20261110_100301`) — bekraeft gerne `run-alive`. Lokal heater_guard armet (pid 1049079, deadline foelger koerslens slut). Sweeps koerer fra nr. 1 (6/4275 efter ~1 min), 0 skippede, FFT off bekraeftet (`scope reports DISP=0`).
+**Last foer start:** da jeg skulle saette lasten laa den paa 17,24 kg (kold rig, 23 C) — IKKE tilbage paa 14,53 efter koersel 1, dvs. driften var delvist permanent. Kim sloekkede klemmen live til **14,56 kg** (stabil 3 laesninger; samme maal som koersel 1's 14,53). VFD tjekket foer start: 00-02=2, 00-05=5, 00-07=0, 00-12=5000, 0x2523 fulgte 0x2502 (168/168).
+**Nyt fund:** straks efter start, mens olien gik 23 -> 35 C (motor staaende, 0 rpm), steg `mass_g` 14,55 -> 15,5 kg paa ca. 1 min. Last er altsaa temperaturfoelsom ogsaa uden rotation/friktion — peger paa termisk udvidelse i klemme/celle (eller cellens temperaturkoefficient), ikke kun bedding-in. Log fra t=0 haves i telemetrien (`mass_g` pr. tick), saa kurven last(T) fra en kold start kan tegnes.
+**Metadata:** `bias_v 0.0` / `slip_ring "lifted"` ligger i profilens `test_parameters` og merges ind i h5 `/metadata`; jeg aabner ikke den kørende h5, saa stemplingen verificerer jeg ved koerslens slut og melder tilbage. Timetjek hver time (kl. :55). Ved slut: Azure-upload + varme af + PV-tjek + rapport.
+-- pi
