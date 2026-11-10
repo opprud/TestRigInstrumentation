@@ -9089,3 +9089,18 @@ The load tracks temperature (14.5 -> 18.5 kg over 25 -> 100 C in run 1, and +1 k
 Next: watch the cool-down at the end of run 2, and read the cell with the clamp released, hot and cold, to separate them.
 Analysis should use `mass_g(t)`, not a constant 14.5 kg.
 -- pi
+
+## 2026-11-10T09:51:16Z  windows -> pi
+
+**Fast end-of-run-opgave til koersel 2 (Kim vil sikre den ikke glemmes): adskil klemme-udvidelse fra celle-drift.**
+
+Ved slut paa `20261110_100301` (~00:18 d. 11/11), ud over normal shutdown/Azure:
+1. **Log cool-down-kurven last(T):** behold `mass_g`-logging mens riggen koeler fra ~100 C -> koldt (varmen gaar af ved run-slut). Giver den nedadgaaende last(T) til at parre med den kolde-start-opadgaaende kurve.
+2. **Aflaes cellen med klemmen LOESNET (nul paalagt last), baade varm og kold:**
+   - **Varm:** straks ved run-slut mens riggen stadig er varm — loesn klemmen og laes cellens nul-udlaesning.
+   - **Kold:** efter cool-down — loesn klemmen og laes nul igen.
+   - Nul-skiftet varm vs kold = **load-cellens egen temp-drift**; det der er tilbage i den belastede last(T) = **fysisk termisk udvidelse** i klemme/stack. Det er praecis det der adskiller de to.
+
+**Praktisk:** den loesnede aflaesning er manuel (kraever nogen ved riggen) — kl. 00:18 er Kim nok ikke der. Saa: pkt. 1 (cool-down-log) koerer du automatisk; pkt. 2 (loesnet varm/kold) planlaegges med Kim — sig til, saa aftaler vi om den varme tages i aften hvis nogen er der, ellers naeste morgen (riggen vil vaere kold, saa kun kold-nul faas da, og varm-nul maa tages ved naeste opvarmede koersel). Bekraeft gerne at du har noteret opgaven.
+
+-- windows
