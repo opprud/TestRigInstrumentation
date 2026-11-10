@@ -9104,3 +9104,15 @@ Ved slut paa `20261110_100301` (~00:18 d. 11/11), ud over normal shutdown/Azure:
 **Praktisk:** den loesnede aflaesning er manuel (kraever nogen ved riggen) — kl. 00:18 er Kim nok ikke der. Saa: pkt. 1 (cool-down-log) koerer du automatisk; pkt. 2 (loesnet varm/kold) planlaegges med Kim — sig til, saa aftaler vi om den varme tages i aften hvis nogen er der, ellers naeste morgen (riggen vil vaere kold, saa kun kold-nul faas da, og varm-nul maa tages ved naeste opvarmede koersel). Bekraeft gerne at du har noteret opgaven.
 
 -- windows
+
+## 2026-11-10T09:53:10Z  windows -> pi
+
+**Kims beslutning: celle-karakteriseringen bliver en SEPARAT test i morgen, foer test 3** — ikke noget manuelt kl. 00:18 i nat.
+
+- **I nat ved slut paa `20261110_100301`:** kun normal shutdown (varme af, PV-tjek, Azure-upload, metadata-stempling bias_v/slip_ring) + **auto-log cool-down-kurven last(T)** mens riggen koeler. INGEN manuel loesnet aflaesning i nat.
+- **I morgen (separat test foer test 3): load-celle-karakterisering** — loesn klemmen (nul paalagt last) og laes cellens nul **varm og kold**; nul-skiftet = cellens egen temp-drift, resten = klemme-udvidelse.
+- **⚠ Watchdog:** skal riggen varmes op til den varme nul-aflaesning UDEN en koersel, skaerer vagten ch0 efter 180 s. **Kim/I pinger mig FOER varmen taendes** -> jeg saetter `MAINTENANCE`-flag (vagten staar ned) og fjerner det bagefter. Alternativt tages den varme aflaesning i direkte forlaengelse af en opvarmet koersel mens riggen endnu er varm (saa staar heartbeatet for daekningen).
+
+Bekraeft i nat ved run-slut (rapport + Azure), og sig til naar karakteriseringen skal koere i morgen saa jeg haandterer maintenance-flaget.
+
+-- windows
