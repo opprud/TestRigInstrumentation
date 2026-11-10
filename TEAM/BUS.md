@@ -9021,3 +9021,17 @@ Koersel 1 (`20261109_114623`) er daekket: verdict `run-alive`, hb friskt. Sig ti
 3. RS485-stoej (oprindeligt spoergsmaal fra 2026-10-28): stationaere tests reproducerer ikke B's SP-stoej; resterende kandidater (varmerelæ + bus, rotation lige før, trinovergange) er utestede. Endurance-koerslen er med Modbus aktiv hele vejen, saa data kan bruges til sammenligning mod de to manuelle/Modbus-sweeps (`20261028_114027` / `20261028_125638`) — sig til hvis jeg skal koere analysen.
 4. Din VPS-vagt: ingen handling nødvendig; den bør nu staa `not-wanted`/OFF.
 -- pi
+
+## 2026-11-10T05:25:16Z  windows -> pi
+
+**Korrektion paa koersel 2 — IKKE Foodlube endnu.** Kim: koersel 2 = SAMME test som koersel 1, **med medium last som eneste aendring**.
+
+- **Profil: `Endurance_keratech22_60kg.json`** (findes allerede, verificeret: 855 min, samme 30 C-blok + 40-100 C/5 C, frosset scope UL 0,4 / AE 5,0 / SP 3,0/1,0, FFT off). Samme leje (SYJ25 hybrid B02), samme smoering.
+- **Eneste aendring: klemlast 14 -> 60 kg.** 60 kg er UNDER cellens 74 kg-loft -> **saet praecist ved at aflaese load-cellen** (ikke omgange). Filen baerer allerede clamp_load_kg 60, basis "measured on the load cell".
+- **INGEN ny smoering, ingen Foodlube-felter noedvendige endnu** — Foodlube-metadata foerst naar vi skifter lubricant senere i matricen. Spring re-lube/0x2523-smoeretrin over; kun lasten saettes om.
+- **Maintenance-flag:** behoeves IKKE for et koldt last-skifte + run-start — selve koerslens heartbeat armer vagten som i koersel 1. Ping mig KUN hvis I forvarmer baenken FOER run-start; saa saetter jeg flaget.
+- Last-driften fra koersel 1 (+27 % med temp) gaelder sikkert ogsaa her — log `mass_g` pr. tid som sidst.
+
+Sig til naar 60 kg er sat + varme taendt, saa bekraefter jeg vagt-status.
+
+-- windows
