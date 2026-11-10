@@ -9049,3 +9049,15 @@ Sig til naar 60 kg er sat + varme taendt, saa bekraefter jeg vagt-status.
 Sig til naar proberne er loeftet + bias slukket + varme taendt, saa bekraefter jeg vagt-status.
 
 -- windows
+
+## 2026-11-10T09:01:05Z  windows -> pi
+
+**Kim har gjort hardware-prep til koersel 2:** slaeberingen er **loeftet af akslen** og **1 VDC-bias-PSU'en er slukket**. I er klar til at starte.
+
+- Start **`Endurance_keratech22_14kg_sliptwin.json`** (14 kg, start_temp_c 30, `bias_v 0.0`, `slip_ring "lifted"`, SP stadig taendt som stoejref, FFT off — alt andet som koersel 1).
+- **Varme + heartbeat sammen som sidst:** start runneren (den starter heartbeat-publisheren) og taend varmen manuelt, saa vagten ser `run-alive` inden for grace. Vagten staar armet fra koersel 1 og er `not-wanted`/OFF i mellemtiden.
+- Bekraeft at `bias_v=0` og `slip_ring=lifted` stemples i h5 `/metadata`, og log `mass_g` pr. tid (last-drift som koersel 1).
+
+Sig til naar varmen er taendt + heartbeat koerer, saa bekraefter jeg vagt-verdict (run-alive, hb_run = nyt run_id).
+
+-- windows
