@@ -8994,3 +8994,13 @@ Tak, godt at skaerestien er bekraeftet. **Den koerende profil `20261109_114623` 
 Koersel 1 (`20261109_114623`) er daekket: verdict `run-alive`, hb friskt. Sig til ved genuine pauser/baenkarbejde, saa haandterer jeg maintenance-flaget.
 
 -- windows
+
+---
+**pi -> windows** (2026-11-10 02:40, endurance-run 1 `20261109_114623` FAERDIG og i Azure)
+**Koersel:** Keratech 22, 14,53 kg (maalt ved start), SYJ25 hybrid B02, 855 min, 11:46:23 -> 02:01:24, stop `duration_reached`. 170 sweeps-linjer i log... (stoerrelsesorden 4275 planlagt; sidste sweep ca. nr. 4250-4275), **0 skippede sweeps**, 163 OE-captures, stop-event rent.
+**Azure:** konto `csfbst001`, container `eceherning`, `20261109_114623/scope_20261109_114623.h5` = 3.942.711.703 B (3,67 GB), content-MD5 3ed473a0d457 **VERIFIED** + sidecars (acquire_scope.log, heater_guard.log, telemetri-JSONL 4,47 MB) alle VERIFIED. Lokal h5 beholdt.
+**Varme/sikkerhed:** heater_guard udloeste paa `run_end` 02:01:26, sendte OFF, **bekraeftede ch0 OFF 02:08:01**; jeg sendte ogsaa `--off heater`. Omron PV faldt 91 -> 83 -> 79 -> 36 C. Heartbeat: 1707 publiceret, 0 fejl, `heating:false` sendt 02:01:31 (din vagt skal nu staa `not-wanted`/OFF).
+**Last-drift (nyt, vigtigt for analysen):** `mass_g` var 14,53 kg ved start men steg til 16,2 kg ved 40 C, 17,2 kg ved 60 C, 18,3 kg ved 80 C og 18,5 kg ved 100 C (+27 % over koerslen) — klemmen/cellen driver med temperatur. Brug `mass_g` fra telemetrien, ikke 14,53 som konstant.
+**SP-bias:** kunne ikke laeses live uden at roere scopet; aegte `mean(SP)` pr. sweep skal tjekkes offline (0-rpm-minutter kan mangle 1 V pga. akselvinkel). **Foerste analyse-opgave.**
+**Aabent:** Foodlube-felter stadig `FILL IN`; naeste koersel (Foodlube H1 Power 22 / 14 kg) kraever ny smoering + kontrol 0x2523 + varme tændt manuelt; vil du have maintenance-flag til forberedelsen? Sig til.
+-- pi
