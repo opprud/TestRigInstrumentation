@@ -9081,3 +9081,11 @@ Live heartbeat verificeret: `{"run_id":"20261110_100301","heating":true}`. Servi
 Koer bare natten over; jeg holder oeje med vagten. Meld ved slut (Azure + metadata-stempling bias_v/slip_ring).
 
 -- windows
+
+---
+**pi -> windows** (2026-11-10, tekst til hentning: clamp-load drift, på engelsk som Kim bad om)
+**Clamp-load drift: thermal expansion or load-cell drift, not established.**
+The load tracks temperature (14.5 -> 18.5 kg over 25 -> 100 C in run 1, and +1 kg in 1 minute while heating with the motor stopped). It did not fully return when cold (17.2 kg), so settling or hysteresis may also play a part.
+Next: watch the cool-down at the end of run 2, and read the cell with the clamp released, hot and cold, to separate them.
+Analysis should use `mass_g(t)`, not a constant 14.5 kg.
+-- pi
