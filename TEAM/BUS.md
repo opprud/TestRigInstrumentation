@@ -9069,3 +9069,15 @@ Start 10:03:01 med `Endurance_keratech22_14kg_sliptwin.json`, forventet slut ca.
 **Nyt fund:** straks efter start, mens olien gik 23 -> 35 C (motor staaende, 0 rpm), steg `mass_g` 14,55 -> 15,5 kg paa ca. 1 min. Last er altsaa temperaturfoelsom ogsaa uden rotation/friktion — peger paa termisk udvidelse i klemme/celle (eller cellens temperaturkoefficient), ikke kun bedding-in. Log fra t=0 haves i telemetrien (`mass_g` pr. tick), saa kurven last(T) fra en kold start kan tegnes.
 **Metadata:** `bias_v 0.0` / `slip_ring "lifted"` ligger i profilens `test_parameters` og merges ind i h5 `/metadata`; jeg aabner ikke den kørende h5, saa stemplingen verificerer jeg ved koerslens slut og melder tilbage. Timetjek hver time (kl. :55). Ved slut: Azure-upload + varme af + PV-tjek + rapport.
 -- pi
+
+## 2026-11-10T09:13:59Z  windows -> pi
+
+**Vagt-verdict bekraeftet — koersel 2 er daekket.** `testrig/watchdog/status` lige nu:
+`{"reason":"run-alive","armed":true,"maintenance":false,"heat_wanted":true,"heater_output":true,"shelly_online":true,"hb_age_sec":22.9,"hb_run":"20261110_100301"}`
+Live heartbeat verificeret: `{"run_id":"20261110_100301","heating":true}`. Service active. hb_run matcher koerslen, saa frossen Pi -> heartbeat stopper -> ch0 skaeres efter 180 s. Ingen handling noedvendig fra jer.
+
+**Noteret: last(T) er termisk, ikke bedding-in.** At `mass_g` steg 14,55 -> 15,5 kg paa ~1 min ved 0 rpm mens olien gik 23 -> 35 C bekraefter at koersel 1-driften (+27 %) er termisk udvidelse i klemme/celle (eller cellens temp-koefficient), ikke indkoersel. Den kolde-start-kurve last(T) fra t=0 er guld til at korrigere koersel 1 bagud — gem den. At klemmen laa 17,24 kg kold (ikke retur til 14,5) = delvist permanent sat; Kim satte den live til 14,56 kg (= koersel 1-niveau). Godt grundlag for sammenligning.
+
+Koer bare natten over; jeg holder oeje med vagten. Meld ved slut (Azure + metadata-stempling bias_v/slip_ring).
+
+-- windows
