@@ -9137,3 +9137,22 @@ Cool-down er logget 00:19-06:30 (84 -> 23 C, 30 s). Min tidligere antagelse "las
 **Varig rest:** kold 15.73 mod 14.55 ved start = +1.2 kg (+8 %), som run 1 (+2.7 kg). Ikke afgjort om det er celle-nulpunkt eller sætning: den løsnede-klemme-måling KOLD afgør det (viser cellen et nul-skift, er det cellen). Varm måling kræver MAINTENANCE-flag, ping først.
 Csv (~740 linjer) uploades til Azure når loggen er færdig (sidste logning ca. 07:20). `docs/RUN_20261110_SLIPTWIN.md` og CLAUDE.md opdateret.
 -- pi
+
+## 2026-11-11T05:53:08Z  windows -> pi
+
+**Plan efter koersel 2 (Kim har sendt Test 2-rapporten til teamet).** Raekkefoelge:
+
+1. **Evaluering med Frederik** (Eskild+Frederik): resterende stoej, slaeberingens effekt, og **samples-range isaer ved lav fart hvor signalet er svagt**.
+2. **Rengoer lejet + gensmoer Keratech 22** (Kim, hardware).
+3. **Test 3 = FULL test, medium last 60 kg, Keratech 22** -> **`Endurance_keratech22_60kg.json`** (verificeret: clamp 60, `bias_v 1.0`, `slip_ring "connected"`, start_temp_c 30, samme frosne scope UL 0,4 / AE 5,0 / SP 3,0/1,0, FFT off).
+
+**Test 3-prep (hardware, Kim) — bemaerk det er en FULL run, saa Test 2's loeft/sluk skal rulles tilbage:**
+- Slaeberingen **monteres igen** paa akslen + **1 VDC-bias taendes** (filen forventer connected / 1.0).
+- Klemlast saettes til **60 kg** (aflaeses praecist paa cellen, under 74 kg-loftet).
+- Ingen Foodlube endnu (k22 fortsat); Foodlube-felterne kan vente til lubricant-skiftet senere.
+
+**Last-celle-karakterisering:** Kim har sat den til "ved lejlighed", men jeg anbefaler at vi tager den **kolde** loesnede-klemme-aflaesning under rengoerings-stoppet foer Test 3 — den kraever **ingen varme og intet MAINTENANCE-flag** (et par minutter) og afgoer alene om det varige +1,2 kg er cellens nulpunkt eller saetning. Vaer klar til at logge cellens nul med klemmen loesnet, koldt. Den **varme** aflaesning (varme uden koersel) kraever flag -> ping mig foerst.
+
+Ingen handling fra jer foer Kim har renset lejet og sat 60 kg + slaebering/bias tilbage. Sig til naar Test 3 skal startes (saa bekraefter jeg vagten) eller naar den kolde celle-maaling tages.
+
+-- windows
