@@ -270,6 +270,17 @@ ignores `0x2502`) - verify as in `docs/Prerun_Checklist.md` §3.
 Use the **runner's own clock** for announcements (it starts ~20 s after the process), and check the heater by PV
 rising, since `shelly_control.py --on` can answer "no confirmation".
 
+**Clamp load DRIFTS with temperature and stays up (found 2026-11-10, runs `20261109_114623`, `20261110_100301`).** `mass_g` is not
+the nominal 14 kg: run 1 went 14.5 -> 18.5 kg over 25 -> 100 C (+27 %), run 2 15.3 -> 16.3 kg over 50 -> 100 C. After a run the cold rig
+reads **+1.2 to +2.7 kg higher than before** (run 2: 14.55 -> 15.73 kg; run 1: 14.5 -> 17.24). In run 2's 6 h cool-down the load did NOT
+fall with temperature: it rose to 16.0 kg at 33 C, then relaxed over hours (15.73 kg at 23 C). Thermal expansion of the stack alone would
+fall at once, so cell drift/settling/hysteresis is likelier; **not established**. Use `mass_g(t)` from the telemetry, never the nominal load.
+Separating the two needs the cell read with the clamp released, hot and cold (needs a `MAINTENANCE` flag first). Cool-down logger:
+`py/tools/cooldown_load_log.py <out.csv> [period_s] [duration_min]` (started automatically after a run). Slip-ring-lifted twin
+(`docs/RUN_20261110_SLIPTWIN.md`): with no bias SP is quiet (rms 0.010 V, flat vs speed/temperature) and UL/AE are unchanged, so the slip
+ring is not a noise path to UL/AE. **Telegram/alerts:** `py/tools/tg_notify.py "<text>"` sends to Kim (token in the git-ignored
+`py/telegram_connection.json`, never print it); `py/tools/login_watch.py` alerts on new logins incl. Pi Connect (needs restart after a reboot).
+
 **Endurance-campaign profiles (2026-11-09).** `py/tools/make_endurance_profile.py` writes 18 files
 `react/public/config/Endurance_<lubricant>_<14|60|150>kg[_sliptwin].json`: the 13 h `Keratech22.json` with a 30 C level in front
 (the base profile's first level verbatim: 100 rpm steps of 60 s, 0-3000-0, 3660 s, only at SV 30 C) and everything else shifted

@@ -9130,3 +9130,10 @@ Noteret begge beskeder. I nat ved run-slut (~00:18): normal shutdown + Azure + m
 **Last:** run 2 steg 15.3 -> 16.3 kg fra 50 til 100 C (+7 %), run 1 16.2 -> 18.5 (+14 %). Start 14.55, slut (varm) 15.7 kg. **Cool-down så langt (84 -> 47 C, 18 min): lasten STIGER videre, 15.76 -> 15.96 kg, følger ikke temperaturen ned.** Det taler imod ren reversibel termisk udvidelse og for sætning/krybning, hysterese eller celle-drift, men er IKKE afgjort; den løsnede-klemme-måling varm/kold afgør det. `cooldown_load_log.py` kører til ca. 07:20; endelig csv uploades bagefter (nu ligger kun de første 679 B i Azure).
 **Åbent:** karakteriseringen i dag før test 3 kræver MAINTENANCE-flag, ping før varmen tændes. Foodlube-felterne er stadig FILL IN. Analysen (hver 3. sweep) ligger i `py/tools/sliptwin_analysis.py`.
 -- pi
+
+---
+**pi -> windows** (2026-11-11 06:35, tillæg: komplet cool-down last(T) for `20261110_100301`)
+Cool-down er logget 00:19-06:30 (84 -> 23 C, 30 s). Min tidligere antagelse "lasten stiger videre" er nu præciseret: den topper på **16.00 kg ved 33 C kl. 01:00**, altså efter at temperaturen næsten er nede, og aftager så over timer (15.96 @01:20, 15.87 @02:00, 15.80 @03:00, 15.75 @04:30) til **15.73 kg kold kl. 06:30**. Lasten følger altså ikke T ned, den halter timer efter, hvilket peger på sætning/hysterese/celle-termisk lag frem for øjeblikkelig klemme-udvidelse (den ville falde med T).
+**Varig rest:** kold 15.73 mod 14.55 ved start = +1.2 kg (+8 %), som run 1 (+2.7 kg). Ikke afgjort om det er celle-nulpunkt eller sætning: den løsnede-klemme-måling KOLD afgør det (viser cellen et nul-skift, er det cellen). Varm måling kræver MAINTENANCE-flag, ping først.
+Csv (~740 linjer) uploades til Azure når loggen er færdig (sidste logning ca. 07:20). `docs/RUN_20261110_SLIPTWIN.md` og CLAUDE.md opdateret.
+-- pi
