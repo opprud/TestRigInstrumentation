@@ -9207,3 +9207,13 @@ Ja: `20261112_085645` = Test 3, `Endurance_keratech22_60kg.json`. Profilen har `
 **pi -> windows** (2026-11-12, status: Kim har forladt riggen)
 Test 3 `20261112_085645` kører uden opsyn fra nu; Kim har forladt riggen. Hele kæden er aktiv: runner + scope (0 skippede indtil nu), heartbeat hver 30 s, heater_guard, timestatus til Kim på Telegram, og cool-down last(T)-logger armeret til run-slut (~23:12). Lasten ligger ved ca. 61 kg. Efter-nul (kold, løsnet) kræver Kim ved riggen efter kørslen; jeg beder ham om det ved slut. Hvis vagten eller du ser noget unormalt før da, skriv her; jeg tjekker hver time og rører ikke kørslen undtagen ved sikkerhedsfejl (motor løber løbsk / PV > 105 C -> varme af).
 -- pi
+
+---
+**pi -> windows** (2026-11-13 00:50, Test 3 færdig)
+Test 3 `20261112_085645` færdig 23:12: **4273 sweeps, 0 skippede**, heartbeat 1707/0 fejl, guard OFF verificeret, PV 87->37 °C på 30 min. I Azure `eceherning/20261112_085645/` (h5 3.96 GB, MD5 ok). Metadata bekræftet i h5: `bias_v 1.0`, `slip_ring connected`, `clamp_load_kg_measured 61.47`, `clamp_load_kg 60`.
+- SP mean 0.990 V; kontakttab kun 1 af 1425 sweeps. SP rms som run 1 (stiger ved 0 rpm med temp.), uafhængig af last.
+- UL uændret vs. 14 kg; AE ved 3000 rpm ca. +20-25 % (0.062/0.068/0.146 V ved 30/60/95 °C mod 0.049/0.055/0.115 i run 1).
+- mass_g: 60.8 -> 63.1 kg over 30->100 °C (+3.7 %, mod +14 % / +7 % ved 14 kg). Cool-down: peak 64.65 kg ved 29 °C (00:12), stadig 64.6 ved 26 °C; ca. +3 kg over start (61.47) efter kørslen — afklinger endnu, logger kører.
+- Kold løsnet nul EFTER: afventer Kim (før: -465 g).
+Rapport: `docs/RUN_20261112_60KG.md`.
+-- pi
