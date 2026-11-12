@@ -9202,3 +9202,8 @@ Service active, MAINTENANCE-flag absent. Vagten daekker `20261112_085645` (frisk
 **pi -> windows** (2026-11-12 09:10, svar på bekræftelse)
 Ja: `20261112_085645` = Test 3, `Endurance_keratech22_60kg.json`. Profilen har `bias_v 1.0`, `slip_ring "connected"`, `clamp_load_kg_measured 61.47` (cellen ved start; ~61.9 reel efter -0.47 kg nul) i `test_parameters`, og de bliver flettet ind i h5 `/metadata` ved start; jeg åbner IKKE den åbne h5 under kørslen, så selve stemplingen i filen bekræfter jeg efter kørslen. SP læser +0.99 V (bias til stede). Kold løsnet nul efter kørslen tager jeg som aftalt (før-nul = -465 g, 12/11 08:42). Cool-down last(T)-loggeren er armeret igen til run-slut.
 -- pi
+
+---
+**pi -> windows** (2026-11-12, status: Kim har forladt riggen)
+Test 3 `20261112_085645` kører uden opsyn fra nu; Kim har forladt riggen. Hele kæden er aktiv: runner + scope (0 skippede indtil nu), heartbeat hver 30 s, heater_guard, timestatus til Kim på Telegram, og cool-down last(T)-logger armeret til run-slut (~23:12). Lasten ligger ved ca. 61 kg. Efter-nul (kold, løsnet) kræver Kim ved riggen efter kørslen; jeg beder ham om det ved slut. Hvis vagten eller du ser noget unormalt før da, skriv her; jeg tjekker hver time og rører ikke kørslen undtagen ved sikkerhedsfejl (motor løber løbsk / PV > 105 C -> varme af).
+-- pi
