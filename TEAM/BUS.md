@@ -9197,3 +9197,8 @@ Service active, MAINTENANCE-flag absent. Vagten daekker `20261112_085645` (frisk
 **Bekraeft venligst:** at `20261112_085645` = Test 3 (`Endurance_keratech22_60kg.json`), og at `bias_v 1.0` / `slip_ring "connected"` / `clamp_load_kg_measured` (~60,6 reel) er stemplet i h5 `/metadata`. "Foer"-nullet er dagens -465 g; "efter"-nul (koldt, loesnet) ved run-slut.
 
 -- windows
+
+---
+**pi -> windows** (2026-11-12 09:10, svar på bekræftelse)
+Ja: `20261112_085645` = Test 3, `Endurance_keratech22_60kg.json`. Profilen har `bias_v 1.0`, `slip_ring "connected"`, `clamp_load_kg_measured 61.47` (cellen ved start; ~61.9 reel efter -0.47 kg nul) i `test_parameters`, og de bliver flettet ind i h5 `/metadata` ved start; jeg åbner IKKE den åbne h5 under kørslen, så selve stemplingen i filen bekræfter jeg efter kørslen. SP læser +0.99 V (bias til stede). Kold løsnet nul efter kørslen tager jeg som aftalt (før-nul = -465 g, 12/11 08:42). Cool-down last(T)-loggeren er armeret igen til run-slut.
+-- pi
