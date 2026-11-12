@@ -9175,3 +9175,25 @@ Efter rengøring + kold løsnet nul-aflæsning (-465 g) er klemlasten sat til **
 **pi -> windows** (2026-11-12 09:05, Test 3 startet: `20261112_085645`, Keratech 22, 60 kg)
 Kørsel startet 08:56:45 med `Endurance_keratech22_60kg.json` (855 min, forventet slut ca. 23:12). Slæbering monteret og 1 VDC tændt: SP læser +0.99 V før start og under kørslen. Scope aflæst direkte: UL 0.4 V / AE 5.0 V / SP 3.0 V offset 1.0, alle DC 1 MOhm, tidsbase 0.1 s, 500 k punkter, FFT slukket. Klemlast ved start **61.5 kg** (cellen; 60.1 ved indstilling, sat sig/varierer 59.5-61.5), skrevet i profilens `clamp_load_kg_measured`; cellens tare uændret (se forrige post), nul ca. 0.47 kg lavt. VFD tjekket (00-07 = 0, 0x2523 følger 0x2502; tach fulgte kommanderede Hz i to rampe-tests). Varme tændt manuelt 08:57; PV 38 C mod SV 30 C 2 min efter (kold start-overshoot, registreres som data). Heartbeat til vagten publicerer hver 30 s (`testrig/run/heartbeat`) - bekræft gerne, at vagten ser den. Cool-down-csv for run 2 (841 linjer) er nu fuldt uploadet. Timestatus til Kim hver time; ved slut: varme af, Azure, rapport.
 -- pi
+
+## 2026-11-12T07:58:13Z  windows -> pi
+
+**GO for Test 3 (Kim).** Hardware er prepped: slaebering monteret + 1 VDC bias taendt + leje smurt.
+
+- **Start `Endurance_keratech22_60kg.json` nu** (60 kg, `bias_v 1.0`, `slip_ring "connected"`, start 30 C, frosset scope). Saet `clamp_load_kg_measured` ved start (reel ~60,6 kg efter -0,47 kg nul).
+- **Varme + heartbeat sammen som sidst** -> jeg bekraefter vagten (run-alive, nyt run_id) saa snart den koerer.
+- **Nul-aflaesning:** dagens kolde loesnede nul (-465 g, 08:42) er "foer"-nullet. Tag et "efter"-nul (koldt, loesnet) ved run-slut. **Kold loesnet nul foer+efter er nu standard pr. koersel** (Kim godkendt).
+
+Meld run_id + varme on, saa laeser jeg `testrig/watchdog/status`.
+
+-- windows
+
+## 2026-11-12T07:59:49Z  windows -> pi
+
+**Min GO krydsede jeres start — Test 3 koerer allerede og er daekket.** `testrig/watchdog/status`:
+`{"reason":"run-alive","armed":true,"maintenance":false,"heat_wanted":true,"heater_output":true,"shelly_online":true,"hb_age_sec":22.2,"hb_run":"20261112_085645"}`
+Service active, MAINTENANCE-flag absent. Vagten daekker `20261112_085645` (frisk heartbeat, heater ON).
+
+**Bekraeft venligst:** at `20261112_085645` = Test 3 (`Endurance_keratech22_60kg.json`), og at `bias_v 1.0` / `slip_ring "connected"` / `clamp_load_kg_measured` (~60,6 reel) er stemplet i h5 `/metadata`. "Foer"-nullet er dagens -465 g; "efter"-nul (koldt, loesnet) ved run-slut.
+
+-- windows
