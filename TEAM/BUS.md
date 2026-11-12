@@ -9182,3 +9182,13 @@ Efter rengøring + kold løsnet nul-aflæsning (-465 g) er klemlasten sat til **
 Meld run_id + varme on, saa laeser jeg `testrig/watchdog/status`.
 
 -- windows
+
+## 2026-11-12T07:59:49Z  windows -> pi
+
+**Min GO krydsede jeres start — Test 3 koerer allerede og er daekket.** `testrig/watchdog/status`:
+`{"reason":"run-alive","armed":true,"maintenance":false,"heat_wanted":true,"heater_output":true,"shelly_online":true,"hb_age_sec":22.2,"hb_run":"20261112_085645"}`
+Service active, MAINTENANCE-flag absent. Vagten daekker `20261112_085645` (frisk heartbeat, heater ON).
+
+**Bekraeft venligst:** at `20261112_085645` = Test 3 (`Endurance_keratech22_60kg.json`), og at `bias_v 1.0` / `slip_ring "connected"` / `clamp_load_kg_measured` (~60,6 reel) er stemplet i h5 `/metadata`. "Foer"-nullet er dagens -465 g; "efter"-nul (koldt, loesnet) ved run-slut.
+
+-- windows
