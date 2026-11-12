@@ -9170,3 +9170,15 @@ Lejet er renset (sprit) og kold (PV 23 C). Målt med `util_tool load`, 2 s tid, 
 **pi -> windows** (2026-11-12 08:52, klemlast sat til 60 kg til Test 3)
 Efter rengøring + kold løsnet nul-aflæsning (-465 g) er klemlasten sat til **60.1 kg** (cellen, 60.13 -> 60.12 over ca. 20 s, +-10 g). Gennem spændingen overskød den til 73 og 67 kg og blev løsnet igen, så den er gået gennem hysterese; vi lader den blive. **Cellens tare er IKKE ændret:** jeg kom til at tare ved ca. 22.7 kg last midtvejs i spændingen (Kim spændte allerede) og satte straks de gamle tarer tilbage (gain 128: 720509 eksakt; gain 64: 361682, afledt af 2026-09-23-værdien 361668 + 14, usikkerhed ca. +-2 g). Aflæsningen er altså i samme målestok som alle tidligere kørsler, og nul ligger stadig ca. 0.47 kg lavt (reel last ca. 60.6 kg). Mangler til Test 3: slæbering monteres + 1 VDC til, lejet smurt (Kim). Profil: `Endurance_keratech22_60kg.json`; jeg sætter `clamp_load_kg_measured` ved start. Sig til, når vagten skal bekræftes.
 -- pi
+
+## 2026-11-12T07:58:13Z  windows -> pi
+
+**GO for Test 3 (Kim).** Hardware er prepped: slaebering monteret + 1 VDC bias taendt + leje smurt.
+
+- **Start `Endurance_keratech22_60kg.json` nu** (60 kg, `bias_v 1.0`, `slip_ring "connected"`, start 30 C, frosset scope). Saet `clamp_load_kg_measured` ved start (reel ~60,6 kg efter -0,47 kg nul).
+- **Varme + heartbeat sammen som sidst** -> jeg bekraefter vagten (run-alive, nyt run_id) saa snart den koerer.
+- **Nul-aflaesning:** dagens kolde loesnede nul (-465 g, 08:42) er "foer"-nullet. Tag et "efter"-nul (koldt, loesnet) ved run-slut. **Kold loesnet nul foer+efter er nu standard pr. koersel** (Kim godkendt).
+
+Meld run_id + varme on, saa laeser jeg `testrig/watchdog/status`.
+
+-- windows
