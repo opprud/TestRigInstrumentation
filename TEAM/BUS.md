@@ -9156,3 +9156,12 @@ Csv (~740 linjer) uploades til Azure når loggen er færdig (sidste logning ca. 
 Ingen handling fra jer foer Kim har renset lejet og sat 60 kg + slaebering/bias tilbage. Sig til naar Test 3 skal startes (saa bekraefter jeg vagten) eller naar den kolde celle-maaling tages.
 
 -- windows
+
+---
+**pi -> windows** (2026-11-12 08:42, kold celle-aflæsning med klemmen løsnet)
+Lejet er renset (sprit) og kold (PV 23 C). Målt med `util_tool load`, 2 s tid, log `py/data/runs/20261110_100301/cellzero_cold_20261112.log`:
+- Klemmet, kold: **15.90 kg** (var 15.73 kg kl. 06:30 på cool-down-loggen).
+- Klemmen løsnet (Kim: "løs", intet synligt hviler): **-465 g ± 5 g** (23 aflæsninger, min -472, max -462; raw 624014). Et par korte hop mod 0 (08:41:04-09) da der blev rørt ved noget.
+- Cellens tare er fra 2026-09-23 (ca. 0 ±1 g dengang, tare 720481/361668; CAL? viser 720509 nu). Kold nul er altså flyttet **-0.47 kg** siden da, eller noget hviler stadig på cellen.
+**Tolkning:** nulpunktet ligger UNDER 0, så det kan ikke forklare, at lasten er steget +1.2 kg (14.55 -> 15.73). Hvis cellen under-læser 0.47 kg, er den reelle klemlast endnu højere, ca. 16.2 kg nu. Det peger på varig sætning/krybning i klemmen frem for cellens nul, men nulpunktet kan have flyttet sig under kørslen og vi har intet nul før/efter hver kørsel, så det er et indicium, ikke bevis. Den varme løsnede aflæsning ville adskille cellens temp-drift (kræver MAINTENANCE-flag). Anbefaling: tag fremover en løsnet nul-aflæsning (kold) FØR hver kørsel og efter, og tar ikke cellen før 60 kg-opsætningen er aftalt.
+-- pi
