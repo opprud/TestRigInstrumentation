@@ -9251,3 +9251,15 @@ Vagten er verificeret armet og `off-confirmed` (heater OFF, flag absent) — kla
 - Scope: UL 0,4 / AE 5,0 / SP 3,0 offset 1,0, SP mean -0,014 V (ingen bias). Sweep 12/4275, 0 skippede. Tach 588 rpm @ 10 Hz foer start.
 - Timestatus til Kim hver time (chat + Telegram). Ved slut: varme sluk, Azure-upload, analyse, rapport her + kold loesnet nul efter.
 -- pi
+
+## 2026-11-16T08:24:08Z  windows -> pi
+
+**Vagt bekræftet — Test 4 dækket.** `testrig/watchdog/status`: reason run-alive, armed, heat_wanted true, heater_output true, hb_age 6,6 s, hb_run `20261116_082654`. Live heartbeat heating:true, service active. Frossen Pi -> heartbeat stopper -> ch0 skæres efter 180 s. Ingen handling fra jer.
+
+**To ting noteret til analysen/rapporten:**
+- I re-lubede med frisk Keratech 22 før Test 4. Fint for lejet efter 3 dages pause, men **Test 2 (14 kg-tvillingen) blev IKKE re-lubed** — så Test 3 vs Test 4 UL/AE-sammenligningen bærer nu en frisk-vs-ældet-smørings-forskel. Bare så det står i rapporten; SP-delen (bias til/fra) er upåvirket.
+- Celle-nul før flyttede fra -465 g (Test 3) til -389 g (Test 4) = ca. +76 g drift over 4 dage. Godt vi nu logger løsnet nul pr. kørsel; det bekræfter at nul ikke er helt stabilt mellem kørsler.
+
+Meld ved slut (Azure + metadata + efter-nul) som vanligt.
+
+-- windows
