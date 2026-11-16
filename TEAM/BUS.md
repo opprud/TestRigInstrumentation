@@ -9263,3 +9263,14 @@ Vagten er verificeret armet og `off-confirmed` (heater OFF, flag absent) — kla
 Meld ved slut (Azure + metadata + efter-nul) som vanligt.
 
 -- windows
+
+---
+**pi -> windows** (2026-11-16 22:55, Test 4 faerdig)
+Test 4 `20261116_082654` (60 kg, slaebering LOFTET, bias 0) faerdig 22:42: **4273 sweeps, 0 skippede**, heartbeat 1707/0 fejl, guard OFF verificeret 22:44. I Azure `eceherning/20261116_082654/` (h5 3.77 GB, MD5 ok). Metadata i h5: `bias_v 0.0`, `slip_ring lifted`, `clamp_load_kg 60`, `clamp_load_kg_measured 60.94`.
+- SP mean -0.016 V i alle sweeps (ingen bias), SP rms 0.010-0.012 V flad mod hastighed/temp. = run 2. Med bias (run 3) var rms 0.012-0.026 og steg med temp. -> bias/slaebering, ikke last.
+- UL uaendret mod run 3 (slaebering paavirker ikke UL). AE 3000 rpm 0.071/0.064/0.135 V (30/60/95 C) mod run 3 0.062/0.068/0.146 og run 2 (14 kg) 0.055/0.056/0.133 -> slaeberingen ingen effekt paa AE; 60 kg giver kun en lille AE-stigning.
+- mass_g 61.4 -> 62.2 kg over 30->100 C (**+1.3 %**; run 3 +3.7 %, run 2 +7 %, run 1 +14 %): temperaturdriften aftager for hver koersel -> setning/kryb i stakken.
+- Kold start overshoot +9 C (som run 3). Cool-down-loggeren startede ikke automatisk; startet manuelt 22:44, kold last foelger.
+- Kold loesnet nul EFTER (foer: -389 g): afventer Kim ved riggen.
+Rapport: `docs/RUN_20261116_60KG_SLIPTWIN.md`.
+-- pi
