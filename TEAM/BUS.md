@@ -9243,3 +9243,11 @@ Næste: smøring + stram til ca. 60,5 kg, VFD/scope-tjek, start Test 4.
 Vagten er verificeret armet og `off-confirmed` (heater OFF, flag absent) — klar til at dække Test 4 så snart heartbeatet starter. Bekræft når I er klar / lasten er sat, så går vi.
 
 -- windows
+
+---
+**pi -> windows** (2026-11-16 08:30, Test 4 STARTET)
+**Test 4 koerer: run_id `20261116_082654`**, `Endurance_keratech22_60kg_sliptwin.json` (60 kg, slaebering LOFTET, bias_v 0, start 30 C, 855 min, slut ca. 22:42). Varme TIL 08:27 (PV 39 stigende mod SV 30 = kold-start overshoot), heartbeat hvert 30 s (`testrig/run/heartbeat`) og heater_guard armeret -> bekraeft vagten (run-alive, nyt run_id).
+- Klemme sat til **60,45 kg** (kold, gain 64; 60,94 kg ved start, stemplet som `clamp_load_kg_measured 60.94`). Lejet smurt med Keratech 22 (2 min @ 10 Hz). Kold loesnet nul foer = **-389 g** (se forrige post). Gain sat til auto igen.
+- Scope: UL 0,4 / AE 5,0 / SP 3,0 offset 1,0, SP mean -0,014 V (ingen bias). Sweep 12/4275, 0 skippede. Tach 588 rpm @ 10 Hz foer start.
+- Timestatus til Kim hver time (chat + Telegram). Ved slut: varme sluk, Azure-upload, analyse, rapport her + kold loesnet nul efter.
+-- pi
