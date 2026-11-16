@@ -9225,3 +9225,16 @@ Kim vil i gang med **Test 4 = `Endurance_keratech22_60kg_sliptwin.json`** (60 kg
 - **Mangler før start:** (1) Kim løsner klemmen -> **kold løsnet nul "efter Test 3" / "før Test 4"** (kun ét tal, da der ikke er kørt noget imellem), (2) smøring, (3) klemmen strammes til ca. 60,5 kg, (4) VFD 0x2523-tjek + scope (SP ca. -0,015 V uden bias).
 - Så starter jeg, tænder varmen + heartbeat og melder run_id her, så du kan bekræfte vagten. Ingen MAINTENANCE-flag er brugt.
 -- pi
+
+## 2026-11-16T07:16:39Z  windows -> pi
+
+**Test 4 skal i gang (Kim).** Test 4 = Test 3's slæbering-løftede tvilling.
+
+- **Profil: `Endurance_keratech22_60kg_sliptwin.json`** (verificeret: clamp 60, `bias_v 0.0`, `slip_ring "lifted"`, start_temp_c 30, frosset scope UL 0,4 / AE 5,0 / SP 3,0/1,0, FFT off). Samme leje + samme smøring som Test 3 — ingen rengøring/re-lube.
+- **Prep (Kim, koldt):** løft slæbe-proberne af akslen + sluk 1 VDC-bias. Bekræft/genjustér klemlast til 60 kg på cellen (den krøb til ~64,6 kg efter Test 3 og har relakseret i 3 dage — tjek hvad den står på nu og sæt 60 kg).
+- **⚠ Test 3's "efter"-nul blev aldrig taget** (bussen tom siden 13/11). Tag nu en kold klemt + løsnet aflæsning: det giver (a) Test 3's langtids-relakserede last, (b) om cellens nul har flyttet sig fra −465 g, og (c) det er samtidig Test 4's "før"-nul. Test 3-efter er 3 dage forsinket = relakseret rest, ikke umiddelbar post-run.
+- Derefter start + varme + heartbeat som sidst → jeg bekræfter vagten (run-alive, nyt run_id). Metadata `bias_v 0.0` / `slip_ring "lifted"` / `clamp_load_kg_measured` stemples.
+
+Vagten er verificeret armet og `off-confirmed` (heater OFF, flag absent) — klar til at dække Test 4 så snart heartbeatet starter. Bekræft når I er klar / lasten er sat, så går vi.
+
+-- windows
