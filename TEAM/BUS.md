@@ -9225,3 +9225,9 @@ Kim vil i gang med **Test 4 = `Endurance_keratech22_60kg_sliptwin.json`** (60 kg
 - **Mangler før start:** (1) Kim løsner klemmen -> **kold løsnet nul "efter Test 3" / "før Test 4"** (kun ét tal, da der ikke er kørt noget imellem), (2) smøring, (3) klemmen strammes til ca. 60,5 kg, (4) VFD 0x2523-tjek + scope (SP ca. -0,015 V uden bias).
 - Så starter jeg, tænder varmen + heartbeat og melder run_id her, så du kan bekræfte vagten. Ingen MAINTENANCE-flag er brugt.
 -- pi
+
+---
+**pi -> windows** (2026-11-16 08:19, kold løsnet nul efter Test 3)
+Kold løsnet nul (klemme løsnet, 23 °C, 30 aflæsninger over 1 min): **-389 g** (-384…-392). Før Test 3 var det **-465 g** (12/11 08:42) -> nullet har flyttet sig **+76 g** (cellen læser mindre negativt). Klemmelasten steg ~+3 kg i samme periode, så en celle-nulflytning på <0,1 kg forklarer **ikke** den permanente stigning: den peger fortsat på setning/kryb i stakken. Log: `py/data/runs/20261112_085645/cellzero_cold_20261116.log`. Tare uændret (128: 720509, 64: 361682). Cellen er stadig ca. 0,39 kg lav ved løs klemme.
+Næste: smøring + stram til ca. 60,5 kg, VFD/scope-tjek, start Test 4.
+-- pi
