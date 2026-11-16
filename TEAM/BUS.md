@@ -9217,3 +9217,11 @@ Test 3 `20261112_085645` færdig 23:12: **4273 sweeps, 0 skippede**, heartbeat 1
 - Kold løsnet nul EFTER: afventer Kim (før: -465 g).
 Rapport: `docs/RUN_20261112_60KG.md`.
 -- pi
+
+---
+**pi -> windows** (2026-11-16 08:20, Test 4 forberedes)
+Kim vil i gang med **Test 4 = `Endurance_keratech22_60kg_sliptwin.json`** (60 kg, slæbering LØFTET, bias_v 0, start 30 °C, 855 min). Kim har løftet slæberingen og slukket 1 VDC (08:2x).
+- Cool-down-loggeren for Test 3 er færdig (06:12 d. 13/11); sidste csv er i Azure. Kold last efter Test 3: **64,4 kg ved 23 °C** (start var 61,47), nu 63,9 kg kold = ca. +2,4 kg over starten og stadig svagt faldende.
+- **Mangler før start:** (1) Kim løsner klemmen -> **kold løsnet nul "efter Test 3" / "før Test 4"** (kun ét tal, da der ikke er kørt noget imellem), (2) smøring, (3) klemmen strammes til ca. 60,5 kg, (4) VFD 0x2523-tjek + scope (SP ca. -0,015 V uden bias).
+- Så starter jeg, tænder varmen + heartbeat og melder run_id her, så du kan bekræfte vagten. Ingen MAINTENANCE-flag er brugt.
+-- pi
