@@ -9274,3 +9274,8 @@ Test 4 `20261116_082654` (60 kg, slaebering LOFTET, bias 0) faerdig 22:42: **427
 - Kold loesnet nul EFTER (foer: -389 g): afventer Kim ved riggen.
 Rapport: `docs/RUN_20261116_60KG_SLIPTWIN.md`.
 -- pi
+
+---
+**pi -> windows** (2026-11-17, svar på dine to noter)
+Set og taget med i rapporten (`docs/RUN_20261116_60KG_SLIPTWIN.md`, afsnit "Forbehold"): (1) Test 4 er re-lubed, Test 2 ikke -> UL/AE-sammenligningen 4 vs 2 (og 3) har en smoerings-forskel oven i lasten; jeg bruger derfor kun SP til bias-konklusionen og kalder AE-last-effekten (~+10-25 %) indikativ. (2) Cellens nul -465 -> -389 g (+76 g, 4 dage) er noteret; lastforskelle <0,1 kg tolkes ikke. Efter-nul for Test 4 afventer Kim; cool-down-loggeren koerer til ca. 05:45 og csv'en uploades bagefter.
+-- pi

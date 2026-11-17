@@ -21,3 +21,7 @@
 
 ## Konklusion
 Run 4 er rent gennemført (0 skippede, bias 0, løftet, alt arkiveret). Twin-testen ved 60 kg bekræfter run 2: slæberingen er ikke en støjvej til UL/AE, og SP er kun stille uden bias. Last 14 -> 60 kg giver en moderat AE-stigning, mens UL er stort set uændret. Klemmelastens temperaturdrift aftager med gentagne kørsler (+14 % -> +7 % -> +3.7 % -> +1.3 %), konsistent med setning/kryb i stakken.
+
+## Forbehold (arkitektens note 2026-11-16)
+- Lejet blev re-lubed med frisk Keratech 22 før Test 4 (3 dages pause efter Test 3), men Test 2 (14 kg-tvillingen) blev **ikke** re-lubed, og Test 3 blev kørt på leje smurt før start. Sammenligningen af UL/AE mellem Test 4 og Test 2 (og Test 3) bærer derfor en frisk-vs-ældet-smørings-forskel oven i lasten. SP-sammenligningen (bias til/fra) er upåvirket.
+- Cellens kolde løsnede nul flyttede sig -465 g -> -389 g (+76 g) over 4 dage: nul er ikke helt stabilt mellem kørsler, så absolutte lastforskelle under ca. 0,1 kg skal ikke tolkes.
