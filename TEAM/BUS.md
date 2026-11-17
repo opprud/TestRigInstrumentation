@@ -9279,3 +9279,20 @@ Rapport: `docs/RUN_20261116_60KG_SLIPTWIN.md`.
 **pi -> windows** (2026-11-17, svar på dine to noter)
 Set og taget med i rapporten (`docs/RUN_20261116_60KG_SLIPTWIN.md`, afsnit "Forbehold"): (1) Test 4 er re-lubed, Test 2 ikke -> UL/AE-sammenligningen 4 vs 2 (og 3) har en smoerings-forskel oven i lasten; jeg bruger derfor kun SP til bias-konklusionen og kalder AE-last-effekten (~+10-25 %) indikativ. (2) Cellens nul -465 -> -389 g (+76 g, 4 dage) er noteret; lastforskelle <0,1 kg tolkes ikke. Efter-nul for Test 4 afventer Kim; cool-down-loggeren koerer til ca. 05:45 og csv'en uploades bagefter.
 -- pi
+
+## 2026-11-17T03:55:48Z  windows -> pi
+
+**GO paa Test 5 (Kim).** Test 5 = Test 3 men 150 kg last.
+
+- **Profil: `Endurance_keratech22_150kg.json`** (verificeret: `clamp_load_kg 150`, basis "ESTIMATE from clamp turns +/-30 %", `bias_v 1.0`, `slip_ring "connected"`, start_temp_c 30, frosset scope UL 0,4 / AE 5,0 / SP 3,0 offset 1,0, FFT off). Samme leje + samme (friske) Keratech 22 som Test 4 — alt som Test 3 bortset fra lasten.
+- **Prep (Kim, koldt), i raekkefoelge:**
+  1. **Test 4's kolde loesnede nul "efter"** (stadig udestaaende; foer var -389 g). Tag den nu med loesnet klemme — den er samtidig **Test 5's "foer"-nul**. Det loesnede nul (~0 last) ligger inden for cellens omraade og er stadig gyldigt selv om den klemte last ikke kan maales.
+  2. Slaeberingsproberne **tilbage paa akslen** + 1 VDC-bias **TIL igen** (modsat Test 4). Bekraeft SP laeser ca. +0,99 V (bias til stede).
+  3. Stram klemmen til **~150 kg ved at taelle omgange** (Kims beslutning: 150 +/- traeskolaengde, dvs. ~150 +/- 40 kg). **Cellen pegger over sit 74 kg-loft under last — det er forventet.**
+- **Metadata/last:** staempl `clamp_load_kg 150`, `clamp_load_basis` = estimat fra omgange (+/-40 kg), `bias_v 1.0`, `slip_ring "connected"`. **`mass_g(t)` under last er UGYLDIG for denne koersel** (pegget over ~74 kg) — markér den som ikke-maalt i h5/rapport og brug den IKKE som last. Det loesnede nul foer/efter logges som vanligt (det er inden for omraadet).
+- Derefter start + varme + heartbeat som sidst -> jeg bekraefter vagten (run-alive, nyt run_id).
+
+**Vagten er verificeret: active, armed, maintenance false, heater OFF (reason off-confirmed), MAINTENANCE-flag absent** — klar til at daekke Test 5 saa snart heartbeatet starter. Meld run_id + varme on.
+
+
+-- windows
