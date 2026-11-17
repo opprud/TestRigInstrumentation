@@ -9317,3 +9317,12 @@ Plan: Kim monterer slaebering + taender 1 VDC -> jeg tjekker SP ca. 1 V -> klemm
 - **Smoke test (5 min, run 20261117_094228, ikke arkiveret):** 23 sweeps, 0 skippede. SP mean 0,990 V (bias til), rms 0,016; UL rms 0,001->0,020 V og AE 0,012->0,083 V stiger med hastighed (0-2960 rpm), ingen klipning, 500 k pkt/kanal. OE: capture oe_000 = mic_amb 74153 + mic_mch 74752 punkter @ 80 kHz. Foerste sweep ved 0 rpm: SP mean 0,67 V (delvist kontakttab i standstill-vinkel, rettede sig ved rotation). Smoke-guard afsluttet (heater OFF verificeret 09:49) saa den ikke kan slukke Test 5.
 - Timestatus til Kim hver time (chat + Telegram) og post her ved slut: varme sluk, Azure-upload, analyse, rapport, kold loesnet nul efter.
 -- pi
+
+---
+**pi -> windows** (2026-11-17 10:15, tidslinje 09:20-09:54 — alt siden forrige fulde melding)
+- 09:24 foerste kold-nul efter Test 4: +5,4 kg (cellen ikke helt loes) -> kasseret, gemt som `..._try1_partial.log`. 09:27 anden: **-424 g** (-422...-429), det gaeldende "efter Test 4"-nul (postet 09:30).
+- ~09:30 Kim bad om motor under rengoering: rampe 5->50 Hz paa 3 min (tach 707 rpm ved 31 s, 2935 rpm ved 184 s), holdt paa fuld hastighed til Kim sagde stop; stoppet bekraeftet (0 rpm, pulstaeller frossen 5269171). Lejet rengjort, **nyt Keratech 22** paafyldt (Kim).
+- Kim valgte Test 5 = `Endurance_keratech22_150kg.json`. Cell pinnet til gain 64 under stramning (gain 128 gaar i mætning); i gain 64 laa loes klemme paa -0,73 kg (mod -0,42 kg i 128: ca. 0,3 kg bandforskel, uden betydning ved store laster). Stramning logget live uden tare: 53,8 kg -> **71,9 kg** (stop, anker), derefter 4 blinde drej (cellen ERR 21 over loftet) = ca. 143 kg ~ samme som 2026-09-23. Gain sat tilbage til auto.
+- Kim monterede slaebering + tændte 1 VDC. 09:42-09:47 smoke test (5 min, run `20261117_094228`, 23 sweeps, 0 skippede, ikke arkiveret): SP 0,990 V (rms 0,016), UL/AE stiger med hastighed uden klipning, OE oe_000 mic_amb 74153 + mic_mch 74752 pkt @ 80 kHz; foerste sweep ved 0 rpm SP 0,67 V (delvist kontakttab, retter sig ved rotation). Smoke-guard sluttede selv 09:49 (heater OFF verificeret) saa den ikke slukker Test 5.
+- 09:54 Test 5 `20261117_095407` startet, varme tændt, PV 39 stigende, heartbeat kører, 0 skippede (se forrige post). Timestatus hver time til Kim (chat+Telegram); alt vigtigt meldes her.
+-- pi
