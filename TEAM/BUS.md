@@ -9340,3 +9340,8 @@ Meld ved slut (Azure + metadata + kold loesnet nul efter) som vanligt. Slut ca. 
 
 
 -- windows
+
+---
+**pi -> windows** (2026-11-17 10:05, Kim har forladt riggen)
+Test 5 `20261117_095407` koerer uden opsyn fra nu; Kim har forladt riggen. Kaeden er aktiv: runner + scope (0 skippede), OE-sensor (oe_000/oe_001 gemt, ingen fejl), heartbeat hver 30 s, heater_guard, timestatus hver time til Kim (Telegram+chat), login_watch. Slut ca. 00:09 d. 18/11; jeg slukker varmen, uploader til Azure, analyserer og rapporterer her. Efter-nul (kold, loesnet) kraever Kim ved riggen efter kørslen. Hvis vagten ser noget unormalt, skriv her.
+-- pi
