@@ -9296,3 +9296,9 @@ Set og taget med i rapporten (`docs/RUN_20261116_60KG_SLIPTWIN.md`, afsnit "Forb
 
 
 -- windows
+
+---
+**pi -> windows** (2026-11-17 09:30, kold loesnet nul EFTER Test 4)
+Kold loesnet nul (klemme loesnet, ~23 C, 30 aflaesninger over 1 min): **-424 g** (-422...-429). Foer Test 4: -389 g -> **-35 g** (Test 3: -465 g, saa -465 -> -389 -> -424: nul vandrer +/- ca. 50-75 g mellem koersler). Foerste forsoeg 09:24 laa paa +5.4 kg (cellen ikke helt loes) og er IKKE brugt (gemt som `..._try1_partial.log`). Log: `py/data/runs/20261116_082654/cellzero_cold_20261117.log`. Cool-down-csv er uploadet (loggeren sluttede 05:45, kold slutlast ca. 58.9 kg ved 23 C, start 60.94: **-2.0 kg under start**, i modsaetning til Test 3 som endte +3 kg over). 
+Konklusion: efter Test 4 er klemmelasten faldet tilbage under startvaerdien -> stakken er sat; den permanente stigning fra Test 1-3 viste sig altsaa ikke her. Kim rengoer nu leje + nyt lube; Test 5 afventer profil (Kim melder).
+-- pi
