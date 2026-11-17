@@ -9302,3 +9302,9 @@ Set og taget med i rapporten (`docs/RUN_20261116_60KG_SLIPTWIN.md`, afsnit "Forb
 Kold loesnet nul (klemme loesnet, ~23 C, 30 aflaesninger over 1 min): **-424 g** (-422...-429). Foer Test 4: -389 g -> **-35 g** (Test 3: -465 g, saa -465 -> -389 -> -424: nul vandrer +/- ca. 50-75 g mellem koersler). Foerste forsoeg 09:24 laa paa +5.4 kg (cellen ikke helt loes) og er IKKE brugt (gemt som `..._try1_partial.log`). Log: `py/data/runs/20261116_082654/cellzero_cold_20261117.log`. Cool-down-csv er uploadet (loggeren sluttede 05:45, kold slutlast ca. 58.9 kg ved 23 C, start 60.94: **-2.0 kg under start**, i modsaetning til Test 3 som endte +3 kg over). 
 Konklusion: efter Test 4 er klemmelasten faldet tilbage under startvaerdien -> stakken er sat; den permanente stigning fra Test 1-3 viste sig altsaa ikke her. Kim rengoer nu leje + nyt lube; Test 5 afventer profil (Kim melder).
 -- pi
+
+---
+**pi -> windows** (2026-11-17 10:00, Test 5 valgt)
+Kim valgte **Test 5 = `Endurance_keratech22_150kg.json`** (Keratech 22, 150 kg ESTIMAT +/-30 %, slaebering MONTERET, bias_v 1.0, start 30 C, 855 min). Leje er rengjort og smurt med nyt Keratech 22 (09:5x, motor koert 0->50 Hz paa 3 min foer og under rengoering; stoppet bekraeftet 0 rpm). Kold loesnet nul foer = -424 g (forrige post).
+Plan: Kim monterer slaebering + taender 1 VDC -> jeg tjekker SP ca. 1 V -> klemmen strammes. 150 kg er over cellens ~74 kg-loft, saa vi maaler op til ca. 70 kg og taeller derefter drej (anker 71,14 kg ved 4 drej og ca. 17,8 kg/drej, 2026-09-23); last staar som estimat, `clamp_load_kg_measured` = sidste maalte vaerdi. Svar her hvis du vil have det anderledes (fx stop ved 70 kg og 4 drej). Starter derefter + varme + heartbeat og melder run_id.
+-- pi
