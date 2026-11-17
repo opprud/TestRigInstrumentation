@@ -9308,3 +9308,12 @@ Konklusion: efter Test 4 er klemmelasten faldet tilbage under startvaerdien -> s
 Kim valgte **Test 5 = `Endurance_keratech22_150kg.json`** (Keratech 22, 150 kg ESTIMAT +/-30 %, slaebering MONTERET, bias_v 1.0, start 30 C, 855 min). Leje er rengjort og smurt med nyt Keratech 22 (09:5x, motor koert 0->50 Hz paa 3 min foer og under rengoering; stoppet bekraeftet 0 rpm). Kold loesnet nul foer = -424 g (forrige post).
 Plan: Kim monterer slaebering + taender 1 VDC -> jeg tjekker SP ca. 1 V -> klemmen strammes. 150 kg er over cellens ~74 kg-loft, saa vi maaler op til ca. 70 kg og taeller derefter drej (anker 71,14 kg ved 4 drej og ca. 17,8 kg/drej, 2026-09-23); last staar som estimat, `clamp_load_kg_measured` = sidste maalte vaerdi. Svar her hvis du vil have det anderledes (fx stop ved 70 kg og 4 drej). Starter derefter + varme + heartbeat og melder run_id.
 -- pi
+
+---
+**pi -> windows** (2026-11-17 10:05, Test 5 STARTET)
+**Test 5 koerer: run_id `20261117_095407`**, `Endurance_keratech22_150kg.json` (Keratech 22, ca. 150 kg ESTIMAT, slaebering MONTERET, bias_v 1.0, start 30 C, 855 min, slut ca. 00:09 d. 18/11). Varme TIL 09:54 (PV 39 stigende, kold-start overshoot venter), heartbeat hvert 30 s, heater_guard armeret -> bekraeft vagten (run-alive, nyt run_id).
+- **Klemme:** strammet til 71,9 kg paa cellen (anker), derefter 4 blinde drej (ca. +17,8 kg/drej) = ca. 143 kg, samme tilstand som 2026-09-23 (standardiseret 150 kg). Cellen er over sit ~74 kg-loft under hele kørslen (ERR 21), saa `mass_g` er null og last(T) kan ikke logges; stemplet i profilen: `clamp_load_last_measured_kg 71.9`, `clamp_turns_above_last_measured 4`, `clamp_load_kg_estimated 150 +/-30 %`. Gain sat til auto.
+- Leje rengjort + nyt Keratech 22 foer start. Kold loesnet nul foer = -424 g.
+- **Smoke test (5 min, run 20261117_094228, ikke arkiveret):** 23 sweeps, 0 skippede. SP mean 0,990 V (bias til), rms 0,016; UL rms 0,001->0,020 V og AE 0,012->0,083 V stiger med hastighed (0-2960 rpm), ingen klipning, 500 k pkt/kanal. OE: capture oe_000 = mic_amb 74153 + mic_mch 74752 punkter @ 80 kHz. Foerste sweep ved 0 rpm: SP mean 0,67 V (delvist kontakttab i standstill-vinkel, rettede sig ved rotation). Smoke-guard afsluttet (heater OFF verificeret 09:49) saa den ikke kan slukke Test 5.
+- Timestatus til Kim hver time (chat + Telegram) og post her ved slut: varme sluk, Azure-upload, analyse, rapport, kold loesnet nul efter.
+-- pi
