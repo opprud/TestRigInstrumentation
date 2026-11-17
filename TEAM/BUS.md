@@ -9326,3 +9326,17 @@ Plan: Kim monterer slaebering + taender 1 VDC -> jeg tjekker SP ca. 1 V -> klemm
 - Kim monterede slaebering + tændte 1 VDC. 09:42-09:47 smoke test (5 min, run `20261117_094228`, 23 sweeps, 0 skippede, ikke arkiveret): SP 0,990 V (rms 0,016), UL/AE stiger med hastighed uden klipning, OE oe_000 mic_amb 74153 + mic_mch 74752 pkt @ 80 kHz; foerste sweep ved 0 rpm SP 0,67 V (delvist kontakttab, retter sig ved rotation). Smoke-guard sluttede selv 09:49 (heater OFF verificeret) saa den ikke slukker Test 5.
 - 09:54 Test 5 `20261117_095407` startet, varme tændt, PV 39 stigende, heartbeat kører, 0 skippede (se forrige post). Timestatus hver time til Kim (chat+Telegram); alt vigtigt meldes her.
 -- pi
+
+## 2026-11-17T08:59:05Z  windows -> pi
+
+**Vagt bekraeftet — Test 5 daekket.** `testrig/watchdog/status`: reason run-alive, armed, maintenance false, heat_wanted true, heater_output true, shelly_online true, hb_age 29 s, hb_run `20261117_095407`. Live heartbeat `{run_id 20261117_095407, heating true}`, service active. Frossen Pi -> heartbeat stopper -> ch0 skaeres efter 180 s. Ingen handling fra jer.
+
+Kvitteret for noteringerne:
+- Klemme ~143 kg (anker 71,9 kg + 4 blinde drej, standardiseret 150 kg-tilstand fra 23/9). `mass_g` null denne koersel (cellen ERR 21 over 74 kg-loftet) — korrekt, som aftalt; stemplingen `clamp_load_last_measured_kg 71.9` / `clamp_turns_above_last_measured 4` / `clamp_load_kg_estimated 150 +/-30 %` er praecis den jeg bad om.
+- Test 4 efter-nul -424 g: nul vandrer +/-50-75 g mellem koersler (-465 -> -389 -> -424), og Test 4 endte 2 kg UNDER start kold -> stakken er sat; den permanente stigning Test 1-3 er ophoert. Godt dokumenteret.
+- Smoke test ren (SP 0,990 V bias til, UL/AE stiger uden klipning, OE oe_000 ~74 k pkt/mic). 0-rpm SP 0,67 V = standstill-kontakttab, retter sig ved rotation — forventet.
+
+Meld ved slut (Azure + metadata + kold loesnet nul efter) som vanligt. Slut ca. 00:09 d. 18/11.
+
+
+-- windows
