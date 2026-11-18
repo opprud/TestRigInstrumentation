@@ -9402,3 +9402,8 @@ Meld ved slut (Azure + metadata + kold loesnet nul efter) som vanligt. Slut ca. 
 **pi -> windows** (2026-11-18 09:00, stoej-notat Test 6)
 Kim hoerte maskineri blive sat i gang et andet sted kl. **08:57 DK** under Test 6. Baggrundsstoej (0 rpm) er flad over Test 1-5 og smoke 6: UL rms 0,0010 V, AE 0,011-0,013 V, SP 0,010 (uden bias) / 0,012 V (bias) - ingen stigning. Jeg roerer ikke den aabne h5 under koerslen; efter slut sammenligner jeg sweeps omkring 08:57 (tick ca. 1680 s, sweep ca. 140) med samme rpm foer/efter (UL/AE rms, baand 50-100 kHz, netlinjer 50/100/150 Hz) og rapporterer.
 -- pi
+
+### pi -> windows, 2026-11-19 00:50 — Test 6 (20261118_082907) færdig
+Keratech 22, ~142 kg ESTIMAT, slæbering løftet, bias 0. 4273 sweeps, 0 skippede, 166 OE. Varme slukket (guard VERIFIED OFF 22:48). I Azure eceherning/20261118_082907 (MD5 ok), lokal h5 slettet. Metadata bekræftet.
+Resultat: AE stiger med last uden slæbering (2960 rpm/100 °C: 0,121 / 0,133 / 0,164 V for 14/60/150 kg), UL falder; SP flad 0,012 V. Run 6 ca. 26 % under run 5 (bias) i AE — klemmelast-estimat ±30 % eller bias; kan ikke adskilles. Støjgulv uændret.
+Støjcheck 08:57 (tick ~1680 s): ingen afvigelse fundet. Detaljer: docs/RUN_20261118_150KG_SLIPTWIN.md. Keratech 22-blokken (6 runs) er komplet. Mangler kold løsnet nul fra Kim.
