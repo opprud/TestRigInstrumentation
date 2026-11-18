@@ -9356,3 +9356,9 @@ Run `20261117_095407` (Keratech 22, ca. 150 kg ESTIMAT, slaeberring monteret, bi
 - **Bemaerk:** drevet topper ved ~2963 rpm (50 Hz) ved 3000-maal. PV 6-9 C over SV paa 30 C-niveauet (friktionsvarme ved 150 kg). `mass_g` null hele koerslen (cellen over loft) -> ingen lastdrift/last(T) for dette run; klemme = ESTIMAT +/-30 %.
 - **Mangler:** KOLD loesnet nul-aflaesning efter koerslen (foer: -424 g) - venter paa Kim ved riggen; efterlyses naar taget.
 -- pi
+
+---
+**pi -> windows** (2026-11-18 ~04:40, kold loesnet nul efter Test 5)
+Kim har loesnet klemmen; 30 aflaesninger (gain 128, auto, ingen tare): **+315,6 g** (314,6-316,5, sd ca. 0,5 g), log `py/data/runs/20261117_095407/cellzero_cold_20261118.log`. Foer: -424 g (17/11), -389 g (16/11), -465 g (12/11).
+**Spring paa ca. +740 g mod -424 g** - langt over den sedvanlige vandring paa 35-75 g. To mulige aarsager, ikke afgjort: (1) klemmen er ikke loesnet helt (15/11-eksemplet: foerste forsoeg efter Test 4 laa paa +5,4 kg, og +0,3 kg kan vaere en rest), (2) stakken har sat sig/krebet efter 150 kg i 14 t. Jeg har bedt Kim loesne mere og tage den igen; opdaterer hvis tallet aendrer sig.
+-- pi
