@@ -1,0 +1,44 @@
+THE HDF5 FOR THIS RUN HAS BEEN DELETED LOCALLY. IT EXISTS IN AZURE.
+
+run_id      20260923_125909
+what        The post-rebuild BASELINE — first 13 h run after the 2026-09-02 rebuild.
+            793 min, 3964 sweeps, 0 skipped, 0 scope resets, 152 OE captures.
+            See docs/Maintenance_Log.md, 2026-09-23/24 entry.
+
+LOCATION
+  account    csfbst001
+  container  eceherning
+  blob       20260923_125909/scope_20260923_125909.h5
+  size       4262329006 bytes
+  md5        0c41ef4b3a2e65c41cf8135d25281817
+
+VERIFIED BEFORE DELETION, 2026-10-02 — and verified PROPERLY, unlike the August runs.
+  local  md5 0c41ef4b3a2e65c41cf8135d25281817   4262329006 bytes
+  azure  md5 0c41ef4b3a2e65c41cf8135d25281817   4262329006 bytes
+  Identical content-MD5 and identical byte count. The blob is PROVABLY byte-exact.
+
+  The three August 13 h runs (deleted 2026-08-27, ticket 0013) could only be checked by
+  size plus SHA-256 of three 4 MB ranges, because chunked block-blob upload set no
+  content-MD5 on them. They cannot be proven byte-exact again without a 114 GB download.
+  This one can, with one API call.
+
+WHAT IS STILL HERE, AND MUST STAY
+  telemetry_..._Keratech_22.jsonl   the per-tick record
+  acquire_scope.log                 the run's event log
+  heater_guard.log                  the guard's account of the shutdown
+  RUN_NOTES.txt                     configuration and findings
+  All four are ALSO in Azure under the same prefix. Keep the folder: ANYONE PRUNING
+  data/runs/ MUST DELETE THE .h5 ONLY, NEVER THE FOLDER (CLAUDE.md).
+
+WHY IT WAS DELETED
+  Kim's instruction, 2026-10-02, to free disk after the ticket-0046 block series had taken
+  free space from 72 GB down to 31 GB.
+
+  CORRECTION TO THE REASONING, made immediately after: THE DISK WAS NOT ACTUALLY TIGHT.
+  I justified this by "a 13 h run needs ~35 GB", which is OUT OF DATE. That figure comes
+  from the August runs, which stored the time axis as its own dataset. Since store.time_axis
+  was set false (ticket 0044, lossless — the attrs carry the ramp) a 13 h run is ~4.3 GB:
+  THIS run was 4,262,329,006 bytes for 793 minutes, i.e. 0.32 GB/h, not 2.7 GB/h.
+  31 GB free was room for seven such runs. The deletion was still fine — the blob is
+  provably byte-exact — but the urgency was my error, and docs/Prerun_Checklist.md carried
+  the same stale figure until it was corrected on 2026-10-02.

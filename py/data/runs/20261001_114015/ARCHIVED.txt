@@ -1,0 +1,3 @@
+scope_20261001_114015.h5 deleted locally 2026-10-28 after verification.
+  account csfbst001  container eceherning  blob 20261001_114015/scope_20261001_114015.h5
+  bytes 24840733  full MD5 f51789e23e1aa8117c095f9cf902be88  (blob content-MD5 f51789e23e1aa8117c095f9cf902be88)

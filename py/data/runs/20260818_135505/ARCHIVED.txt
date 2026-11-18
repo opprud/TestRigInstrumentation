@@ -1,0 +1,22 @@
+The HDF5 for this run is NOT lost — it was deleted from the Pi on 2026-08-27 to free SD space
+(Kim's instruction), after being verified against the Azure archive.
+
+  account    csfbst001
+  container  eceherning
+  blob       scope_20260818_135505.h5
+  size       37,747,161,391 bytes
+
+Verification before deletion: exact size match, plus SHA-256 of three 4 MB ranges
+(offset 0, midpoint, and the last 4 MB) fetched from the blob and compared against the local
+file — all identical. The blobs carry no content-MD5 (chunked upload), so a full checksum
+would have required downloading 114 GB.
+
+The telemetry JSONL and acquire_scope.log in this folder were deliberately KEPT: the uploader
+archives only the .h5, so these are the only per-tick record and the only account of what went
+wrong during the run (ticket 0013).
+
+To get the data back:
+  py/.venv/bin/python -c "import json;from azure.storage.blob import BlobServiceClient; \
+    cs=json.load(open('py/eceherning_connection.json'))['AZURE_CONNECTION_STRING']; \
+    BlobServiceClient.from_connection_string(cs).get_container_client('eceherning') \
+      .get_blob_client('scope_20260818_135505.h5')"

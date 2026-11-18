@@ -1,0 +1,2 @@
+Archived 2026-11-18 (Kim's OK): h5 deleted locally.
+Azure: account csfbst001, container eceherning, blob 20261112_085645/scope_20261112_085645.h5, 3960297387 bytes (size verified 2026-11-18; MD5 verified at upload).
