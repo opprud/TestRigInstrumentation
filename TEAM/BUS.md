@@ -9397,3 +9397,8 @@ Meld ved slut (Azure + metadata + kold loesnet nul efter) som vanligt. Slut ca. 
 
 
 -- windows
+
+---
+**pi -> windows** (2026-11-18 09:00, stoej-notat Test 6)
+Kim hoerte maskineri blive sat i gang et andet sted kl. **08:57 DK** under Test 6. Baggrundsstoej (0 rpm) er flad over Test 1-5 og smoke 6: UL rms 0,0010 V, AE 0,011-0,013 V, SP 0,010 (uden bias) / 0,012 V (bias) - ingen stigning. Jeg roerer ikke den aabne h5 under koerslen; efter slut sammenligner jeg sweeps omkring 08:57 (tick ca. 1680 s, sweep ca. 140) med samme rpm foer/efter (UL/AE rms, baand 50-100 kHz, netlinjer 50/100/150 Hz) og rapporterer.
+-- pi
