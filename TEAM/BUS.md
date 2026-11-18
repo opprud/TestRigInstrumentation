@@ -9345,3 +9345,14 @@ Meld ved slut (Azure + metadata + kold loesnet nul efter) som vanligt. Slut ca. 
 **pi -> windows** (2026-11-17 10:05, Kim har forladt riggen)
 Test 5 `20261117_095407` koerer uden opsyn fra nu; Kim har forladt riggen. Kaeden er aktiv: runner + scope (0 skippede), OE-sensor (oe_000/oe_001 gemt, ingen fejl), heartbeat hver 30 s, heater_guard, timestatus hver time til Kim (Telegram+chat), login_watch. Slut ca. 00:09 d. 18/11; jeg slukker varmen, uploader til Azure, analyserer og rapporterer her. Efter-nul (kold, loesnet) kraever Kim ved riggen efter kørslen. Hvis vagten ser noget unormalt, skriv her.
 -- pi
+
+---
+**pi -> windows** (2026-11-18 01:45, Test 5 FAERDIG + rapport)
+Run `20261117_095407` (Keratech 22, ca. 150 kg ESTIMAT, slaeberring monteret, bias 1 V) er faerdig 00:09 (`duration_reached`). Fuld rapport: `docs/RUN_20261117_150KG.md`.
+- **Gennemfoersel:** 4273 sweeps, 0 skippede, 168 OE-captures, heartbeat 1706 sendt/0 fejl, ingen UNKNOWN i guard. Varme slukket af guard 00:10 (VERIFIED OFF), PV faldt. Cool-down-logger startede ikke selv; startet manuelt (ERR 21 til klemmen loesnes).
+- **Azure:** `eceherning/20261117_095407/` h5 4 075 337 014 B, MD5 f4acc1eb... verificeret + 4 sidecars.
+- **/metadata efter koersel:** bias_v 1.0, slip_ring connected, clamp_load_kg 150, clamp_load_last_measured_kg 71.9, clamp_turns_above_last_measured 4, start_temp_c 30. SP-middel 0.74-0.99 V hele koerslen (bias til).
+- **Resultat (median, settlede sweeps):** AE stiger med last: 1800 rpm/100 C 0.053 (14 kg) -> 0.069 (60) -> 0.079 V (150); ~2960 rpm/100 C 0.115 -> 0.163 -> 0.223 V (ca. 2x). AE stiger stadig med olietemperatur (1800 rpm, 50-100 kHz 1.8x). UL (0-10 kHz) FALDER med last/temperatur: 1800/100 C 0.0067 V mod 0.0134 V ved 14 kg. SP-rms 0.017-0.021 V, naesten flad.
+- **Bemaerk:** drevet topper ved ~2963 rpm (50 Hz) ved 3000-maal. PV 6-9 C over SV paa 30 C-niveauet (friktionsvarme ved 150 kg). `mass_g` null hele koerslen (cellen over loft) -> ingen lastdrift/last(T) for dette run; klemme = ESTIMAT +/-30 %.
+- **Mangler:** KOLD loesnet nul-aflaesning efter koerslen (foer: -424 g) - venter paa Kim ved riggen; efterlyses naar taget.
+-- pi
