@@ -9367,3 +9367,14 @@ Kim har loesnet klemmen; 30 aflaesninger (gain 128, auto, ingen tare): **+315,6 
 **pi -> windows** (2026-11-18 ~04:50, kold nul efter Test 5, anden aflaesning)
 Efter Kim loesnede klemmen mere: 30 aflaesninger **-330,1 g** (-331,8 til -328,3), log `cellzero_cold_20261118_try2.log`. Den foerste (+316 g) var altsaa en delvist loesnet klemme (**ikke** staksaetning). Endeligt kold nul efter Test 5: **-330 g**, mod -424 g efter Test 4 = ca. +94 g, inden for den sedvanlige vandring paa 35-75 g (lidt over). Ingen tegn paa permanent forskydning efter 14 t ved ca. 150 kg. Test 5 er dermed lukket.
 -- pi
+
+---
+**pi -> windows** (2026-11-18 08:32, Test 6 STARTET - 150 kg slaeberring-twin)
+Alt siden Test 5-rapporten:
+- **Kold nul efter Test 5:** foerste +316 g (klemme delvist loesnet), efter mere loesning **-330 g** (-331,8..-328,3), +94 g mod -424 g. Ingen permanent staksaetning. Postet tidligere; her samlet.
+- **Klemmen sat til ca. 142 kg:** loes klemme laa paa -343 g (gain 64 pinnet); Kim strammede hurtigt til **66,3 kg** (anker, lidt under 71,9 sidst), derefter 4 + 1/4 blinde drej x 17,8 kg = ca. 142 kg (ESTIMAT +/-30 %, standardiseret "150 kg"). `clamp_load_last_measured_kg 66.3` og `clamp_turns_above_last_measured 4.25` er tilfoejet i `Endurance_keratech22_150kg_sliptwin.json` (committet). Gain sat tilbage til auto. Bemaerk: ankeret er ca. 5 kg lavere end Test 5; estimatet er ens inden for usikkerheden.
+- **Lejet smurt** foer start (Kim). Slaeberring LOEFTET, 1 V SLUKKET.
+- **Smoke test 6** (5 min, `20261118_082218`): 23 sweeps, 0 skippede, 500 k pkt paa UL/AE/SP. UL rms 0,0010 (hvile) -> 0,0207 V (2963 rpm); AE 0,0116 -> 0,086 V; SP middel -0,014 V i alle sweeps (ingen bias, rms 0,010-0,012 V flad), som forventet for twin. OE: oe_000 gemt med begge mikrofoner (74 k pkt). Metadata bias_v 0.0 / lifted. Stale smoke-guard afventet (VERIFIED OFF 08:29) foer Test 6.
+- **Test 6** `20261118_082907`, profil `Endurance_keratech22_150kg_sliptwin.json`, 855 min, start 08:29:07, slut ca. 22:44 d. 18/11. Varme taendt med haanden 08:29 (PV 34 -> 38 C, stiger), heartbeat/guard armeret, sweeps loeber (4275 planlagt), 91 GB fri disk. Timetjek hver time + Telegram; ved slut: varme sluk, Azure, analyse, rapport, kold nul.
+- **Oprydning:** Kim har tilladt at slette lokale h5 der er verificeret i Azure; gaelder runs 3, 4, 5 (MD5-verificeret i `eceherning`). ARCHIVED.txt lagt i hver mappe.
+-- pi
