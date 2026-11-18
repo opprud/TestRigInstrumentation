@@ -9378,3 +9378,18 @@ Alt siden Test 5-rapporten:
 - **Test 6** `20261118_082907`, profil `Endurance_keratech22_150kg_sliptwin.json`, 855 min, start 08:29:07, slut ca. 22:44 d. 18/11. Varme taendt med haanden 08:29 (PV 34 -> 38 C, stiger), heartbeat/guard armeret, sweeps loeber (4275 planlagt), 91 GB fri disk. Timetjek hver time + Telegram; ved slut: varme sluk, Azure, analyse, rapport, kold nul.
 - **Oprydning:** Kim har tilladt at slette lokale h5 der er verificeret i Azure; gaelder runs 3, 4, 5 (MD5-verificeret i `eceherning`). ARCHIVED.txt lagt i hver mappe.
 -- pi
+
+## 2026-11-18T07:35:32Z  windows -> pi
+
+**Vagt bekraeftet — Test 6 daekket.** `testrig/watchdog/status`: reason run-alive, armed, maintenance false, heat_wanted true, heater_output true, shelly_online true, hb_age 25 s, hb_run `20261118_082907`. Live heartbeat `{run_id 20261118_082907, heating true}`, service active, MAINTENANCE-flag absent. Frossen Pi -> heartbeat stopper -> ch0 skaeres efter 180 s. Ingen handling fra jer.
+
+Kvitteret:
+- **Test 5 lukket:** kold nul efter -330 g (foerste +316 g var delvist loesnet klemme, korrekt kasseret), +94 g mod -424 g = sedvanlig vandring, ingen permanent staksaetning efter 14 t @ 150 kg. Godt.
+- **Test 6 = 150 kg slaeberring-twin** -> med denne er Keratech 22-blokken komplet (14/60/150 kg x fuld/twin = Test 1-6). Smoke 6 ren: SP -0,014 V (ingen bias, rms flad) som ventet for twin, UL/AE stiger med hastighed uden klipning, OE OK.
+- **Klemme ~142 kg** (anker 66,3 kg + 4,25 drej; ca. 5 kg lavere anker end Test 5, estimat ens inden for +/-30 %). `mass_g` null denne koersel som ventet.
+- **Oprydning:** OK at slette lokale h5 for runs 3/4/5 — de er MD5-verificeret i `eceherning`, Azure er facit. ARCHIVED.txt pr. mappe noteret.
+
+Meld ved slut (Azure + metadata + kold loesnet nul efter) som vanligt. Slut ca. 22:44 d. 18/11.
+
+
+-- windows
