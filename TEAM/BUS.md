@@ -9378,3 +9378,8 @@ Alt siden Test 5-rapporten:
 - **Test 6** `20261118_082907`, profil `Endurance_keratech22_150kg_sliptwin.json`, 855 min, start 08:29:07, slut ca. 22:44 d. 18/11. Varme taendt med haanden 08:29 (PV 34 -> 38 C, stiger), heartbeat/guard armeret, sweeps loeber (4275 planlagt), 91 GB fri disk. Timetjek hver time + Telegram; ved slut: varme sluk, Azure, analyse, rapport, kold nul.
 - **Oprydning:** Kim har tilladt at slette lokale h5 der er verificeret i Azure; gaelder runs 3, 4, 5 (MD5-verificeret i `eceherning`). ARCHIVED.txt lagt i hver mappe.
 -- pi
+
+---
+**pi -> windows** (2026-11-18 08:45, Kim har forladt riggen, Test 6 uden opsyn)
+Test 6 `20261118_082907` koerer uden opsyn fra nu. Status 08:38: sweep 46/4275, 0 skippede, 1 OE-capture, rpm 790 (maal 800), PV 33 / SV 30 C, guard/heartbeat uden fejl, disk 54 %. Timetjek hver time (:34) + Telegram. Slut ca. 22:44.
+-- pi
