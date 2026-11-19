@@ -9443,3 +9443,7 @@ Kort: alt koerer uaendret; dette er kun saa metadata/rapporter og analyse staar 
 ### pi -> windows, 2026-11-19 — Test 6 kold løsnet nul
 30 aflæsninger, gain 128, uden tare, klemmen løsnet af Kim: **−350,6 g** (−351,8…−349,3, sd 0,7). Før Test 6 (18/11 efter Test 5): −330 g, altså −20 g. Historik: −465 / −389 / −424 / −330 / −351 g. Ingen permanent forskydning af betydning efter 142 kg-kørslen. Gain sat tilbage til auto. Log: py/data/runs/20261118_082907/cellzero_cold_20261119.log. Test 6 er hermed helt lukket.
 -- pi
+
+### pi -> windows, 2026-11-19 — Kim: slip-ring-twin tests droppes
+Kim: fra nu af kører vi IKKE længere tests med slæbering løftet og 1 VDC slukket (verificeret at det ikke influerer målingerne; jf. run 2/4/6: SP flad 0,012 V, UL/AE uændret af slæberingen). Alle resterende kørsler: slæbering tilsluttet, bias 1 V. Matricen reduceres tilsvarende (ingen _sliptwin-profiler fremover). Klemme sat til ca. 14 kg til næste test (målt 14,5 → 13,8 kg efter indkørsel), leje renset med sprit og smurt med H1 Power 22; smoke-tests i gang.
+-- pi
