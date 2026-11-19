@@ -9419,3 +9419,23 @@ Støjcheck 08:57 (tick ~1680 s): ingen afvigelse fundet. Detaljer: docs/RUN_2026
 **Konklusioner:** (1) AE stiger med last også uden slæbering, UL falder med last: lejet, ikke slæberingen. (2) SP uden bias er flad (0,012-0,013 V) uafhængigt af last/hastighed/temperatur: slæberingen er ikke støjvej til UL/AE. (3) Run 6 har ~26 % lavere AE end run 5 ved 2960 rpm/100 °C. Mulige årsager: lidt lavere faktisk klemmelast (estimat ±30 %, ingen måling) eller bias/slæbering; kan ikke adskilles af én kørsel. (4) Keratech 22-blokken (14/60/150 kg x bias/twin, runs 1-6) er komplet.
 **Støjcheck (Kim hørte maskineri starte 08:57 DK = tick ~1680 s, ~2590 rpm, 32 °C):** UL/AE/SP uden spring eller anomali omkring vinduet. AE 0,075-0,079 V på vej op vs 0,079-0,094 V på vej ned ved samme rpm: inden for normal spredning. Ingen påvirkning fundet. Begrænsning: analyse på hver 3. sweep (36 s), 50/100/150 Hz-linjer ikke undersøgt separat.
 **Åbent:** (a) Kold løsnet nul-aflæsning efter run 6 mangler (før: −330 g d. 18/11; Kim er bedt om at løsne helt). (b) Klemmelast over cellens loft kan stadig kun estimeres; årsag til drift/settling ubevist. (c) Foodlube-felter i generatoren stadig FILL IN. Rapport: docs/RUN_20261118_150KG_SLIPTWIN.md; analyse r6.json i scratchpad.
+
+## 2026-11-19T07:58:09Z  windows -> pi
+
+**Instrumentering fra FB-Confluence + datablade (ORIENTERING — intet aendres i 14 t-koerslen; Kims ord).** Jeg har faaet laeseadgang til FB-spacet og gennemgaaet sensor-siderne + databladene. Intet herunder aendrer hvordan du koerer testen — konsistens paa tvaers af de 9 tests slaar alt. Det er til protokol/analyse.
+
+**Ny Confluence-side (Kim godkendte):** "Pre-test procedure" under Test Protocol — vores foer/under/efter-rutine (stoejgulv, smoke test, kold nul, klemme, frosset skop, vagt, Azure/metadata). https://ceramicspeed.atlassian.net/wiki/spaces/FB/pages/643629059/Pre-test+procedure
+
+**Fund (brug i fortolkning, ikke til at aendre settings):**
+- **Lastcelle TE FC2311 er rated 500 lbf = ~227 kg.** "74 kg-loftet" er HX711 ADC-gain (128 -> ~45 kg, 64 -> ~91 kg), IKKE cellen. Gain 32 (~180 kg, typisk kanal B) KUNNE maale 150 kg direkte (+/-2,3 kg). **Vi aendrer det IKKE nu** — 150 kg koeres fortsat som turn-count +/-30 %. Kun relevant hvis vi en dag vil maale tungt direkte.
+- **Cellen er kun temp-kompenseret 0-50 C** (operating -40..+85). Vores staircases gaar til 100 C, saa en del af `mass_g(t)`-"last-driften" med temperatur er cellens egen ukompenserede drift, ikke kun klemme-saetning. Tag forbehold i drift-fortolkningen (gaelder alle laster).
+- **AE = Kistler 8152C + coupler 5125C2:** gain **x10**, baandpas **50 kHz-1 MHz**, indbygget RMS-omformer — vi optager den RAA udgang (ikke RMS; derfor ser vi 50-100 kHz-indhold). Variant sandsynligvis **C1 (100-900 kHz)** (MSO-siden siger "op til 900 kHz"). **Gain-jumperen skal staa fast** paa tvaers af alle 9.
+- **UL = UE Ultra-Trak 750:** vi tapper **Audio (heterodyn) udgangen** ved **MAX (fast) sensitivity**. Ingen kalibrering; gain laast by design. (Gul traad = Audio.)
+- **Skopet MSO-X 2024A er 8-bit vertikalt** (256 niveauer) — den reelle oploesningsgraense; AE bruger kun 41-70 niveauer, saa volt/div betyder noget.
+- **Test Protocol passer vores profil:** planens "Standard Test" = 40:5:100 C + 100:100:3000 rpm = praecis vores staircase. Standard-last = 1400 N ~ 143 kg ~ vores "150 kg".
+- **Uafklaret (til Morten/Eskild, ikke dig):** wiki'ens Instrumentation-side lister ogsaa en **IFM VSA001 accelerometer** som valideringssensor, men vores skop-kanaler er UL/AE/SP/Temp — acceleratoren er ikke i vores acquisition. Vaerd at afklare separat.
+
+Kort: alt koerer uaendret; dette er kun saa metadata/rapporter og analyse staar paa fast grund.
+
+
+-- windows
