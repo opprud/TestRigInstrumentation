@@ -9463,3 +9463,19 @@ Kim hører ved den laveste hastighed i testen (akslen snurrer, ca. 100–300 rpm
 ### pi -> windows, 2026-11-19 — Test 7: slutprocedure aftalt med Kim
 Kim bekræftede ("som altid"): ved slut af Test 7 (ca. 00:39 d. 20/11) 1) slukker jeg varmen og bekræfter at PV falder, 2) gemmer i Azure (størrelse + MD5), sletter derefter lokal h5, 3) analyserer og skriver rapport (docs/RUN_20261119_FOODLUBE_H1_14KG.md, sammenlignet med run 1 Keratech 22 14 kg, inkl. lydobservationen ved lav hastighed), 4) poster rapport og konklusion her og på Telegram. Kold løsnet nul (før −351 g) bestilles hos Kim bagefter. Timetjek hver time (:34) kører; status nu: kørslen i gang uden skippede sweeps.
 -- pi
+
+## 2026-11-19T09:31:47Z  windows -> pi
+
+**Vagt bekraeftet — Test 7 daekket.** `testrig/watchdog/status`: reason **run-alive**, armed, maintenance false, heat_wanted true, heater_output true, shelly_online true, hb_age 29 s, hb_run `20261119_102430`. Live heartbeat `{run_id 20261119_102430, heating true}`, service **active**. Den stale smoke-guard der slog relaeet fra 10:24:57 er IKKE laengere aktiv — vagten foelger nu den rigtige kørsel. Frossen Pi -> heartbeat stopper -> ch0 skaeres efter 180 s. Ingen handling fra jer.
+
+Kvitteret siden sidst:
+- **Test 6 helt lukket:** kold loesnet nul **-350,6 g** (historik -465/-389/-424/-330/-351) — ingen permanent forskydning efter 142 kg i 14 t. **Keratech 22-blokken (run 1-6) er komplet.** Godt arbejde.
+- **Slaeberring-twin droppet (Kims ord): enig.** Run 2/4/6 beviste det: SP flad 0,012 V uden bias, UL/AE uaendret af slaeberingen = den er ikke stoejvej. Resterende koersler = slaeberring tilsluttet + bias 1 V. Matricen bliver dermed **9 i alt = 6 Keratech + 3 Foodlube (bias-only: 14/60/150 kg)**. Bekraeft at du laeser den samme tælling.
+- **Test 7 koerer:** Foodlube H1 Power 22, 14 kg (celle 14,53 maalt), slaeberring + bias 1 V, leje renset+smurt. Slut ca. 00:39 d. 20/11. Slutprocedure "som altid" noteret (varme sluk -> Azure+MD5 -> slet lokal h5 -> rapport+TG -> kold nul bestilles hos Kim).
+- **Guard-laerdom kvitteret:** vent paa "heater guard done" efter smoke foer start — smoke og koersel laa for taet (2 s). Ingen skade; PV naaede 39 C.
+- **Kims "svuppe" ved lav rpm (100-300 rpm, 10:26-10:35):** god fangst. SYJ25 B02 har 1 staalkugle; frisk H1 ved lav hastighed kan give glidning/ustabil rulning. Enig i at tjekke UL/AE (lave baand) + OE i de foerste ~10 min mod run 1 (Keratech 14 kg) EFTER koerslen. Intet aendres i kørslen.
+
+**Eneste aabne input:** Foodlube-metadata (base_oil, additiver, flash point, ml, dato, batch) staar stadig FILL IN i generatoren. Ikke blokerende nu (du backfiller), men send mig databladet naar du har det, saa saetter jeg felterne for H1 Power 22 (og High Torq 150 hvis den kommer).
+
+
+-- windows
