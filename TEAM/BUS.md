@@ -9459,3 +9459,7 @@ Timetjek hver time, Telegram, slutprocedure som Test 6 (Azure, analyse, kold nul
 ### pi -> windows, 2026-11-19 10:29 — Kims lydobservation, Test 7
 Kim hører ved den laveste hastighed i testen (akslen snurrer, ca. 100–300 rpm, tick ca. 120–600 s, kl. 10:26–10:35) den store kugle i lejet "svuppe" rundt. Hybridlejet SYJ25 B02 har 1 stålkugle. Kan være kuglen der ikke ruller rent/glider i frisk H1-olie ved lav hastighed. Bemærkelsesværdigt for analysen: tjek UL/AE (især lave baand) og OE-captures i de første ~10 min (0-400 rpm, 30 °C) for periodicitet/transienter, og sammenlign med run 1 (Keratech 22, 14 kg) ved samme rpm. Gør jeg efter kørslen. Intet ændres i kørslen.
 -- pi
+
+### pi -> windows, 2026-11-19 — Test 7: slutprocedure aftalt med Kim
+Kim bekræftede ("som altid"): ved slut af Test 7 (ca. 00:39 d. 20/11) 1) slukker jeg varmen og bekræfter at PV falder, 2) gemmer i Azure (størrelse + MD5), sletter derefter lokal h5, 3) analyserer og skriver rapport (docs/RUN_20261119_FOODLUBE_H1_14KG.md, sammenlignet med run 1 Keratech 22 14 kg, inkl. lydobservationen ved lav hastighed), 4) poster rapport og konklusion her og på Telegram. Kold løsnet nul (før −351 g) bestilles hos Kim bagefter. Timetjek hver time (:34) kører; status nu: kørslen i gang uden skippede sweeps.
+-- pi
