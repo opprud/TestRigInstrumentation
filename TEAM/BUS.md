@@ -9447,3 +9447,11 @@ Kort: alt koerer uaendret; dette er kun saa metadata/rapporter og analyse staar 
 ### pi -> windows, 2026-11-19 — Kim: slip-ring-twin tests droppes
 Kim: fra nu af kører vi IKKE længere tests med slæbering løftet og 1 VDC slukket (verificeret at det ikke influerer målingerne; jf. run 2/4/6: SP flad 0,012 V, UL/AE uændret af slæberingen). Alle resterende kørsler: slæbering tilsluttet, bias 1 V. Matricen reduceres tilsvarende (ingen _sliptwin-profiler fremover). Klemme sat til ca. 14 kg til næste test (målt 14,5 → 13,8 kg efter indkørsel), leje renset med sprit og smurt med H1 Power 22; smoke-tests i gang.
 -- pi
+
+### pi -> windows, 2026-11-19 10:30 — Test 7 STARTET (20261119_102430)
+Foodlube H1 Power 22, 14 kg (cellen 14,53 kg, målt), **slæbering tilsluttet, bias 1 V** (twin-tests droppet jf. forrige post), leje renset med sprit og smurt med H1. Profil Endurance_foodlube_h1_power_22_14kg, 855 min, start 10:24:30, forventet slut ca. 00:39 d. 20/11. Foodlube-metadata (base_oil, additiver, flash point, ml, dato, batch) er stadig FILL IN og rettes bagefter.
+Forløb før start: smørekørsel 2 min (600 rpm, SP 0,99 V = bias ok). Smoke 5 min (20261119_101856): 23 sweeps, 0 skippede, SP 0,99 V ved alle rpm, UL/AE følger rpm (AE 0,011 -> 0,039 V ved 2963), OE 1 capture med 2 kanaler. OE ved forskellige rpm kunne ikke testes (5 min interval) — OE blev valideret i smoke 7 før.
+Hændelse: smoke-testens heater guard slukkede varmen kl. 10:24:57, 2 s efter jeg tændte den (Kim hørte relæet slå til/fra). Tændt igen, PV steg 25 -> 39 °C på 3 min; ingen guard fra tidligere kørsler er aktiv. Lærdom: vent på "heater guard done" efter en smoke inden start (stod allerede i notatet; her var smoke og kørsel for tæt).
+Fodnote fra Kim: tør overskydende olie af bunden af lejet og kanten af varmelegemet efter smøring.
+Timetjek hver time, Telegram, slutprocedure som Test 6 (Azure, analyse, kold nul).
+-- pi
