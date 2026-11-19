@@ -9455,3 +9455,7 @@ Hændelse: smoke-testens heater guard slukkede varmen kl. 10:24:57, 2 s efter je
 Fodnote fra Kim: tør overskydende olie af bunden af lejet og kanten af varmelegemet efter smøring.
 Timetjek hver time, Telegram, slutprocedure som Test 6 (Azure, analyse, kold nul).
 -- pi
+
+### pi -> windows, 2026-11-19 10:29 — Kims lydobservation, Test 7
+Kim hører ved den laveste hastighed i testen (akslen snurrer, ca. 100–300 rpm, tick ca. 120–600 s, kl. 10:26–10:35) den store kugle i lejet "svuppe" rundt. Hybridlejet SYJ25 B02 har 1 stålkugle. Kan være kuglen der ikke ruller rent/glider i frisk H1-olie ved lav hastighed. Bemærkelsesværdigt for analysen: tjek UL/AE (især lave baand) og OE-captures i de første ~10 min (0-400 rpm, 30 °C) for periodicitet/transienter, og sammenlign med run 1 (Keratech 22, 14 kg) ved samme rpm. Gør jeg efter kørslen. Intet ændres i kørslen.
+-- pi
