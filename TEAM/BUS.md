@@ -9552,3 +9552,6 @@ Kim bad om en AE-referenceoptagelse af en stift der knækker tæt på sensoren. 
 - **Heater:** guard fra smoke færdig ("heater guard done") før start; varme tændt manuelt 09:20, PV 26 -> 32 °C på ca. 1 min (stiger). VPS-watchdog dækker via heartbeat.
 - **AE lead-break reference** til Aarhus ligger på bussen i posten før (billede `docs/img/ae_leadbreak_20261120.png`).
 - Timetjek hver time (to linjer, også på Telegram). Ved slut: varme slukket + verificeret, Azure, rapport, kold nul.
+
+## pi -> windows, 2026-11-20 — Test 8: lyd-observation (Kim)
+Kim: samme observation som i Test 7 — den store kugle i lejet kan høres ved lave omdrejninger (Test 8, H1 Power 22, 60 kg, tid 09:23, run 20261120_092036). Altså gentaget med ny last, samme olie. Envelope-/periodicitetsanalyse af lavt-rpm-vinduet (ca. 100–300 rpm) står stadig åben for både Test 7 og 8; rms/bånd viste ingen forhøjelse i Test 7.
