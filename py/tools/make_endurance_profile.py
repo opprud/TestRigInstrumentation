@@ -24,10 +24,12 @@ LUBRICANTS = {
                    "viscosity_cSt_100C": None, "viscosity_index": None, "flash_point_c": 185},
     "foodlube_h1_power_22": {"product_name": "Foodlube H1 Power 22", "manufacturer": "ROCOL (ITW Ltd)", "base_oil": "Polyalphaolefin (PAO), synthetic",
                              "base_fluid": "PAO synthetic", "additives": "Antioxidant + anti-wear + Low-Carry-Over (LCO) anti-foam; NSF H1 reg 122180, ISO 21469, FDA 21 CFR 178.3570", "viscosity_cSt": 22,
-                             "viscosity_cSt_100C": 4.8, "viscosity_index": 147, "flash_point_c": "FILL IN from SDS (not on TDS)"},
+                             "viscosity_cSt_100C": 4.8, "viscosity_index": 147,
+                             "flash_point_c": ">150 (Foodlube Hi-Power Range SDS, Chemwatch 2015 - only published figure; current grade value TBC from ROCOL)", "autoignition_c": None},
     "foodlube_high_torq_150": {"product_name": "Foodlube High Torq 150", "manufacturer": "ROCOL (ITW Ltd)", "base_oil": "Polyalphaolefin (PAO), synthetic gear oil",
                                "base_fluid": "PAO synthetic", "additives": "SUPS start-up film + EP (FZG load stage 12) + anti-wear + anti-corrosion; NSF H1 reg 121604/122073/122072/122071, ISO 21469, PFAS-free", "viscosity_cSt": 150,
-                               "viscosity_cSt_100C": 17.7, "viscosity_index": 130, "flash_point_c": "FILL IN from SDS (not on TDS)"},
+                               "viscosity_cSt_100C": 17.7, "viscosity_index": 130,
+                               "flash_point_c": ">250 (ROCOL/ITW SDS v1.1, 2025-06-20)", "autoignition_c": ">270"},
 }
 MEASURED_KG = {14: 14.53}          # load cell reading when the clamp was set (2026-11-09, mounted, tare of 2026-09-23)
 CLAMP_KG = {14: "measured on the load cell", 60: "measured on the load cell",
