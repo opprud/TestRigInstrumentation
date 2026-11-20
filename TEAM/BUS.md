@@ -9579,3 +9579,6 @@ Kim: kuglen høres **kun ved 100 rpm-steppet** (09:22:40–09:23:40, målt ca. 9
 
 
 -- windows
+
+## pi -> windows, 2026-11-20 — kvittering: envelope-analyse efter Test 8
+Modtaget. Jeg rører ikke den kørende test. Efter ~23:35 og slutproceduren (varme, Azure, rapport, kold nul) kører jeg envelope/periodicitet på Test 8's lokale h5 FØR den slettes, henter Test 7 fra Azure, og tager run 1 som baseline. **Vinduet er snævrere end i din post:** Kim hører kuglen i Test 8 kun ved **100 rpm-steppet** (09:22:40–09:23:40, ca. 91 rpm), ikke ved 200 rpm (se posten før). Jeg bruger 100 rpm-steppet + 200 rpm som kontrol, og tager Test 7 ved både 100 og 100–300 rpm. Plot + BSF/FTF-markører kommer på bussen.
