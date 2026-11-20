@@ -17,13 +17,17 @@ SHIFT = 3660        # the 30 C block is the base profile's first level verbatim 
 START_TEMP_C = 30
 
 LUBRICANTS = {
-    "keratech22": {"product_name": "Keratech 22", "manufacturer": "Kerax", "base_oil": "Parafin Oil",
-                   "additives": "None", "viscosity_cSt": 22},
-    "foodlube_h1_power_22": {"product_name": "Foodlube H1 Power 22", "manufacturer": "Foodlube",
-                             "base_oil": "FILL IN (different base oil from Keratech 22)",
-                             "additives": "FILL IN", "viscosity_cSt": 22},
-    "foodlube_high_torq_150": {"product_name": "Foodlube High Torq 150", "manufacturer": "Foodlube",
-                               "base_oil": "FILL IN", "additives": "FILL IN", "viscosity_cSt": 150},
+    # Oil chemistry from manufacturer Technical Data Sheets (Kim supplied 2026-11-20).
+    # flash_point_c is NOT on the ROCOL Foodlube TDS (SDS only) -> left FILL IN for those two.
+    "keratech22": {"product_name": "Keratech 22", "manufacturer": "Kerax Ltd", "base_oil": "Highly refined white mineral oil (paraffinic)",
+                   "base_fluid": "Mineral (white oil)", "additives": "None (plain white oil)", "viscosity_cSt": 22,
+                   "viscosity_cSt_100C": None, "viscosity_index": None, "flash_point_c": 185},
+    "foodlube_h1_power_22": {"product_name": "Foodlube H1 Power 22", "manufacturer": "ROCOL (ITW Ltd)", "base_oil": "Polyalphaolefin (PAO), synthetic",
+                             "base_fluid": "PAO synthetic", "additives": "Antioxidant + anti-wear + Low-Carry-Over (LCO) anti-foam; NSF H1 reg 122180, ISO 21469, FDA 21 CFR 178.3570", "viscosity_cSt": 22,
+                             "viscosity_cSt_100C": 4.8, "viscosity_index": 147, "flash_point_c": "FILL IN from SDS (not on TDS)"},
+    "foodlube_high_torq_150": {"product_name": "Foodlube High Torq 150", "manufacturer": "ROCOL (ITW Ltd)", "base_oil": "Polyalphaolefin (PAO), synthetic gear oil",
+                               "base_fluid": "PAO synthetic", "additives": "SUPS start-up film + EP (FZG load stage 12) + anti-wear + anti-corrosion; NSF H1 reg 121604/122073/122072/122071, ISO 21469, PFAS-free", "viscosity_cSt": 150,
+                               "viscosity_cSt_100C": 17.7, "viscosity_index": 130, "flash_point_c": "FILL IN from SDS (not on TDS)"},
 }
 MEASURED_KG = {14: 14.53}          # load cell reading when the clamp was set (2026-11-09, mounted, tare of 2026-09-23)
 CLAMP_KG = {14: "measured on the load cell", 60: "measured on the load cell",
@@ -56,13 +60,15 @@ def build(lub_key, kg, twin):
     d["scope_fft"] = {"enabled": False, "save": False}
     d["bearing"] = {**base.get("bearing", {}), "model": "SYJ25 hybrid B02",
                     "material": "Hybrid, 1 steel ball (B02)", "notes": "Endurance matrix specimen (Kim, 2026-11-09)"}
-    d["oil"] = {"viscosity_at_40C_cSt": lub["viscosity_cSt"], "viscosity_at_100C_cSt": 0}
+    d["oil"] = {"viscosity_at_40C_cSt": lub["viscosity_cSt"], "viscosity_at_100C_cSt": lub.get("viscosity_cSt_100C") or 0}
     # The profile's blocks are MERGED over config.json's, so every key config.json carries for the Keratech 22 run
     # that would be wrong here is overridden explicitly (nothing stale may survive into another lubricant's file).
+    # Oil chemistry (base_oil, base_fluid, additives, viscosity_index, flash_point_c) comes from the LUBRICANTS
+    # entry above (manufacturer TDS). Only the per-run physical fields stay FILL IN: set them at run time.
     d["lubricant"] = {k: v for k, v in lub.items() if k != "viscosity_cSt"} | {
-        "viscosity_cSt_40C": lub["viscosity_cSt"], "nlgi_grade": "N/A", "flash_point_c": "FILL IN",
+        "viscosity_cSt_40C": lub["viscosity_cSt"], "nlgi_grade": "N/A",
         "quantity_applied_ml": "FILL IN", "application_method": "Manual application", "application_date": "FILL IN",
-        "batch_number": "FILL IN", "notes": "Lubricant endurance matrix 2026-11; fill in the FILL IN fields before the run."}
+        "batch_number": "FILL IN", "notes": "Oil chemistry from manufacturer TDS (2026-11-20). Per-run FILL IN: quantity_applied_ml, application_date, batch_number."}
     d["test_parameters"] = {"duration_minutes": d["duration_minutes"], "clamp_load_kg": kg,
                             "clamp_load_basis": CLAMP_KG[kg], "start_temp_c": START_TEMP_C,
                             "bias_v": 0.0 if twin else 1.0, "slip_ring": "lifted" if twin else "connected",
