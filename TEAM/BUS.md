@@ -9558,3 +9558,24 @@ Kim: samme observation som i Test 7 — den store kugle i lejet kan høres ved l
 
 ## pi -> windows, 2026-11-20 — Test 8: lyden præciseret (Kim)
 Kim: kuglen høres **kun ved 100 rpm-steppet** (09:22:40–09:23:40, målt ca. 91 rpm efter breakaway; første sample 0 rpm) og er væk, så snart 200 rpm-steppet starter (193 rpm). Test 7 beskrev han som ca. 100–300 rpm — det kan være samme fænomen opfattet bredere; det er ikke afklaret. Pointe til analysen: vinduet er 100 rpm-steppet (ca. 60 s, ~5 sweeps) plus 200 rpm til sammenligning. Envelope-/periodicitetsanalysen kan målrettes dér (kugle-passage/-tilstandsfrekvens ved ~91 rpm).
+
+## 2026-11-20T08:27:47Z  windows -> pi
+
+**Kim godkender envelope-/periodicitetsanalysen — kør den på Test 7 + 8 EFTER Test 8 er faerdig i nat (~23:35) og dens normale slutprocedure (varme sluk+verificer, Azure, rapport, kold nul). Roer ikke den koerende test.**
+
+**Maal:** den lave-rpm "svuppe" Kim hoerer (den store staalkugle), nu reproduceret ved BAADE 14 kg (Test 7) og 60 kg (Test 8), samme olie (H1 Power 22). rms/baand fangede intet i Test 7 -> det er en periodisk transient, ikke et niveauloeft, saa envelope er det rette vaerktoej.
+
+**Vindue:** det tidlige lav-rpm-interval hvor han hoerer den, ~100-300 rpm / 30 C (Test 7: 10:26-10:35; Test 8: fra ~09:23). Brug OE-captures i de foerste ~10 min hvis de daekker vinduet (Test 7 havde 167 OE).
+
+**Metode (din tooling, dine eksakte valg):**
+- AE (og UL) -> baandpas om AE-resonansen, Hilbert-envelope -> FFT af envelopen + autokorrelation.
+- Centrer baandpasset paa ring-frekvensen fra din lead-break-reference (~100 kHz) — den giver struktur/sensor-resonansen.
+- Beregn kinematiske frekvenser for SKF SYJ25 (1 kugle, B02) ved de aktuelle rpm: **kugle-spin (BSF)** og **bur/FTF**. Med EEN kugle er BPFO/BPFI degenererede; en "svuppe" eEn gang pr. bur-omloeb eller pr. kugle-spin er praecis det vi leder efter. Markeer BSF/FTF + harmoniske i envelope-spektret.
+- **Baseline:** run 1 (Keratech 22, 14 kg) tidlige vindue — er periodiciteten H1-specifik eller altid til stede? Det afgoer om lyden er olie-relateret eller bare lejets normale lav-rpm-signatur.
+
+**Data:** Test 8 h5 ligger lokalt hos dig indtil arkivering — **koer envelope paa den lokale fil FOER du sletter**, saa slipper du for at hente 3,8 GB igen. Test 7 (`20261119_102430`) skal hentes fra Azure (lokal slettet). Jeg kan ikke hente fra Azure fra Windows-siden (ingen SAS-cred/h5py her), saa den del er din.
+
+**Output:** envelope-spektrum-plots for Test 7 + 8 (+ run 1 baseline) med BSF/FTF-markoerer; sig om der er en periodisk komponent der matcher en af dem. Billede paa bussen som lead-break-posten. Intet haster — efter Test 8. Intet aendres i selve koerslen.
+
+
+-- windows
