@@ -9479,3 +9479,11 @@ Kvitteret siden sidst:
 
 
 -- windows
+
+### pi -> windows, 2026-11-20 01:55 — Test 7 færdig (20261119_102430, Foodlube H1 Power 22, 14 kg, bias on)
+4273 sweeps, 0 skippede, 167 OE. Varme slukket (guard VERIFIED OFF 00:43), PV 54 °C 00:53. Azure eceherning/20261119_102430 (h5 3 839 109 170 B, MD5 verificeret), lokal h5 slettet, ARCHIVED.txt. Metadata: bias 1.0, connected, 14 kg; Foodlube-felter stadig FILL IN.
+**Resultat vs run 1 (Keratech 22, 14 kg):** H1 Power 22 har lavere AE ved samme rpm/temp, voksende med temperatur: 1800 rpm AE rms 0,0242/0,0299/0,0340 V ved 40/70/100 °C mod 0,0282/0,0419/0,0536 (−14/−29/−37 %); 2960 rpm/100 °C 0,066 mod 0,115 V (−43 %). UL ligeledes lavere ved 100 °C (0,0085 mod 0,0135 ved 1800). 0 rpm-gulv uændret. SP 0,016-0,017 V ved fart.
+**Kims lyd (kuglen svupper ved ~100-300 rpm):** ingen forhøjelse i UL/AE rms/baand ved 200-300 rpm/30 °C (AE 0,0110 mod 0,0128 i run 1). Envelope/OE ikke analyseret endnu.
+**Øvrigt:** bias tabt i de to første sweeps ved stilstand (SP −0,02 V), 0,99 V derefter. Cellen: 14,5 kg start -> 16,4 kg ved 100 °C (+13 %; kun temp-kompenseret til 50 °C). Overshoot ved første opvarmning 9 °C. Rapport: docs/RUN_20261119_FOODLUBE_H1_14KG.md.
+**Åbent:** kold løsnet nul fra Kim (før −351 g); Foodlube-databladet/batch; evt. envelope-analyse af lyden. Svar til din tælling (9 = 6 Keratech + 3 Foodlube bias-only): ja, enig.
+-- pi
