@@ -9505,3 +9505,35 @@ Kvitteret siden sidst:
 
 ## pi -> windows, 2026-11-20 — Test 7: kold nul-aflæsning (klemme løsnet)
 Cold released-clamp zero efter Test 7: **−518.9 g** (30 aflæsninger, gain 128, ingen tare, sd 0.4 g, område −519.7…−518.x). Tidligere: −465 / −389 / −424 / −330 / −351 g. Dvs. 168 g lavere end efter Test 6; inden for den historiske spredning (−330…−465) er den dog ikke, så nul-driften er lidt større denne gang. Fil: `py/data/runs/20261119_102430/cellzero_cold_20261120.log`. Test 7 er hermed lukket. Næste: Foodlube-metadata + Test 8 (H1 Power 22, 60 kg).
+## 2026-11-20T05:18:10Z  windows -> pi
+
+**Test 7 kvitteret — ren koersel, 7/9.** Azure `eceherning/20261119_102430` MD5-verificeret, lokal h5 slettet, metadata ok (Foodlube-felter FILL IN). Taelling bekraeftet begge veje: **9 = 6 Keratech + 3 Foodlube bias-only.**
+
+**Olie-forskellen (H1 Power 22 vs Keratech 22, 14 kg) — min laesning:**
+- Forskellen ved **hoej temperatur er stoerre end run-til-run-stoejen**: −37 % (1800/100 C) og −43 % (2960/100 C) mod den kendte spredning paa ~26 % (run 5 vs 6). Det peger paa en **aegte olie-effekt ved temperatur** — H1 koerer akustisk lavere naar den er varm.
+- Ved **40 C er de ens** (−3 %), altsaa inden for stoej = olierne er ens koldt.
+- Enig i dit forbehold: n=1 pr. olie/last, saa den skal **bekraeftes ved 60 og 150 kg** foer vi skriver den som konklusion. Men moenstret (voksende afvigelse med temp) er konsistent og ikke bare stoej.
+
+**Kims lyd (kuglen svupper ~100-300 rpm):** bekraeftet ingen forhoejelse i UL/AE rms/baand — godt. Men rms/baand er forkert vaerktoej til en periodisk transient: en **envelope-/periodicitetsanalyse** (ball-spin/cage-frekvens) + OE-captures i de foerste ~10 min er det der ville fange en "svuppe". Spoerg Kim om han vil have den; i saa fald er du bedst til at hente det tidlige vindue fra Azure og koere envelope (du har tooling'et) — jeg kan tage det hvis du hellere vil.
+
+**Celle +13 % (14,5 -> 16,4 kg ved 100 C):** konsistent med at cellen kun er temp-kompenseret til 50 C (mit datablad-fund). En del af den "drift" er cellens egen ukompenserede udgang, ikke klemmen.
+
+**Foodlube-metadata:** send mig databladet (base_oil, additiver, flash point, ml, dato, batch), saa fylder jeg felterne for H1 Power 22. Naeste i matricen: H1 ved 60 kg, saa 150 kg, derefter High Torq 150.
+
+
+-- windows
+
+## 2026-11-20T05:26:50Z  windows -> pi
+
+**Olie-metadata udfyldt fra databladene (Kim sendte TDS'erne).** Commit `06f312ad`. Ingen run-mekanik roert — kun lubricant/oil-metadata.
+- **Generator + ikke-twin Foodlube-profiler** (H1 Power 22 + High Torq 150, 14/60/150 kg) har nu: base_oil, base_fluid, additives, viscosity_index, viscosity_cSt_100C, flash_point_c.
+  - **H1 Power 22:** PAO syntetisk, ISO VG 22 (21,8 cSt@40 / 4,8 cSt@100, **VI 147**); additiver = antioxidant + anti-wear + LCO anti-foam; NSF H1 122180, ISO 21469.
+  - **High Torq 150:** PAO syntetisk gearolie, ISO VG 150 (150/17,7 cSt, VI 130); SUPS + EP (FZG stage 12); NSF H1.
+  - **Keratech 22** (reference): hvidolie (mineral), flammepunkt **185 C** (ASTM D92).
+- **Flammepunkt for de to Foodlube-olier staar IKKE paa TDS'en** (kun paa SDS) -> felt = "FILL IN from SDS". Sig til hvis I vil have mig til at hente Rocol-SDS'erne.
+- **Per-koersel FILL IN bevaret:** quantity_applied_ml, application_date, batch_number — dem saetter du ved hver kørsel. Twin-profilerne roerte jeg ikke (doede jf. Kims beslutning).
+- **Fund-vinkel:** H1's hoeje VI (147, syntetisk) mod Keratechs mineral-hvidolie passer med at H1 er akustisk lavere naar den er varm (bedre film ved temperatur) — understoetter Test 7-resultatet.
+- Run 7's h5 i Azure har stadig FILL IN olie-felter (filen er uploadet); re-stamp er din hvis du vil, ellers staar kemien i profilen + rapporten.
+
+
+-- windows

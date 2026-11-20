@@ -12,7 +12,7 @@
   },
   "oil": {
     "viscosity_at_40C_cSt": 22,
-    "viscosity_at_100C_cSt": 0
+    "viscosity_at_100C_cSt": 4.8
   },
   "control": {
     "rpm_per_hz_guess": 59.5,
@@ -6902,17 +6902,20 @@
   },
   "lubricant": {
     "product_name": "Foodlube H1 Power 22",
-    "manufacturer": "Foodlube",
-    "base_oil": "FILL IN (different base oil from Keratech 22)",
-    "additives": "FILL IN",
+    "manufacturer": "ROCOL (ITW Ltd)",
+    "base_oil": "Polyalphaolefin (PAO), synthetic",
+    "additives": "Antioxidant + anti-wear + Low-Carry-Over (LCO) anti-foam; NSF H1 reg 122180, ISO 21469, FDA 21 CFR 178.3570",
     "viscosity_cSt_40C": 22,
     "nlgi_grade": "N/A",
-    "flash_point_c": "FILL IN",
+    "flash_point_c": ">150 (Foodlube Hi-Power Range SDS, Chemwatch 2015 - only published figure; current grade value TBC from ROCOL)",
     "quantity_applied_ml": "FILL IN",
     "application_method": "Manual application",
     "application_date": "FILL IN",
     "batch_number": "FILL IN",
-    "notes": "Lubricant endurance matrix 2026-11; fill in the FILL IN fields before the run."
+    "notes": "Oil chemistry from manufacturer TDS (2026-11-20). Per-run FILL IN: quantity_applied_ml, application_date, batch_number.",
+    "base_fluid": "PAO synthetic",
+    "viscosity_index": 147,
+    "autoignition_c": null
   },
   "test_parameters": {
     "duration_minutes": 855,
