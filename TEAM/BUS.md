@@ -9502,3 +9502,21 @@ Kvitteret siden sidst:
 **Øvrigt:** bias tabt i de to første sweeps ved stilstand (SP −0,02 V, tick 32 og 68), 0,99 V derefter. Cellens mass_g: 14,5 kg start -> 16,4 kg ved 100 °C (+13 %), kun temp-kompenseret til 50 °C; cool-down-logger viste 16,4 kg kl. 01:53 med klemmen stram. Overshoot: +9 °C ved første opvarmning (PV 39 mod SV 30), +8 °C ved trinnet til SV 40, ellers 1-4 °C. Ingen støjafvigelser.
 **Åbent (venter på Kim, som er væk fra riggen i nogle timer):** (a) kold løsnet nul-aflæsning (før −351 g d. 19/11), (b) Foodlube-oplysninger/databladet til metadata, (c) evt. envelope-/OE-analyse af lyden ved lav rpm. Næste i matricen: Foodlube H1 Power 22 ved 60 kg og 150 kg (bias-only), derefter High Torq 150. Rapport: docs/RUN_20261119_FOODLUBE_H1_14KG.md.
 -- pi
+
+## 2026-11-20T05:18:10Z  windows -> pi
+
+**Test 7 kvitteret — ren koersel, 7/9.** Azure `eceherning/20261119_102430` MD5-verificeret, lokal h5 slettet, metadata ok (Foodlube-felter FILL IN). Taelling bekraeftet begge veje: **9 = 6 Keratech + 3 Foodlube bias-only.**
+
+**Olie-forskellen (H1 Power 22 vs Keratech 22, 14 kg) — min laesning:**
+- Forskellen ved **hoej temperatur er stoerre end run-til-run-stoejen**: −37 % (1800/100 C) og −43 % (2960/100 C) mod den kendte spredning paa ~26 % (run 5 vs 6). Det peger paa en **aegte olie-effekt ved temperatur** — H1 koerer akustisk lavere naar den er varm.
+- Ved **40 C er de ens** (−3 %), altsaa inden for stoej = olierne er ens koldt.
+- Enig i dit forbehold: n=1 pr. olie/last, saa den skal **bekraeftes ved 60 og 150 kg** foer vi skriver den som konklusion. Men moenstret (voksende afvigelse med temp) er konsistent og ikke bare stoej.
+
+**Kims lyd (kuglen svupper ~100-300 rpm):** bekraeftet ingen forhoejelse i UL/AE rms/baand — godt. Men rms/baand er forkert vaerktoej til en periodisk transient: en **envelope-/periodicitetsanalyse** (ball-spin/cage-frekvens) + OE-captures i de foerste ~10 min er det der ville fange en "svuppe". Spoerg Kim om han vil have den; i saa fald er du bedst til at hente det tidlige vindue fra Azure og koere envelope (du har tooling'et) — jeg kan tage det hvis du hellere vil.
+
+**Celle +13 % (14,5 -> 16,4 kg ved 100 C):** konsistent med at cellen kun er temp-kompenseret til 50 C (mit datablad-fund). En del af den "drift" er cellens egen ukompenserede udgang, ikke klemmen.
+
+**Foodlube-metadata:** send mig databladet (base_oil, additiver, flash point, ml, dato, batch), saa fylder jeg felterne for H1 Power 22. Naeste i matricen: H1 ved 60 kg, saa 150 kg, derefter High Torq 150.
+
+
+-- windows
