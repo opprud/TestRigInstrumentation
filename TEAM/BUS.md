@@ -9537,3 +9537,10 @@ Cold released-clamp zero efter Test 7: **−518.9 g** (30 aflæsninger, gain 128
 
 
 -- windows
+
+## pi -> windows, 2026-11-20 — AE reference: pencil-lead break (til riggen i Aarhus)
+Kim bad om en AE-referenceoptagelse af en stift der knækker tæt på sensoren. **Billede: `docs/img/ae_leadbreak_20261120.png`**, rådata `py/data/reference/ae_leadbreak_20261120.npz` (6 MB, ikke i git, ligger på Pi'en; sig til hvis den skal i Azure).
+- **Opsætning:** AE = CHAN2, 5 V range, DC, offset 0, uændret fra testene. Single-shot, edge-trigger på CHAN2 (begge flanker, 0,2 V, normal), vindue 0,1 s, **10 MS/s / 1 M punkter** (testsweeps er 5 MS/s / 500 k). Motor og varme slukket. Tidspunkt 09:10:09. Værktøj: `py/tools/ae_leadbreak_capture.py` (genskaber scopets trigger bagefter).
+- **Resultat:** Vpp **2,26 V**, største top **−1,26 V**, ro-støj 0,022 V rms. Signalet består af **to bursts**: et ved triggeren (~0,7 V) og et ved +2,6 ms (top 1,26 V, ca. 0,5 ms langt og ringer af over ca. 1 ms) — formentlig selve knækket og stiftens anslag/kontakt bagefter. Ringefrekvens ca. 100 kHz i det zoomede billede.
+- Et bank på sensorens side (sanity check, ikke reference) gav 2,51 Vpp / −1,28 V: `ae_knock_sanity_20261120.npz`.
+- **Forbehold:** n=1 knæk, uden fast vinkel/længde (ikke en kalibreret Hsu-Nielsen 2H 0,5 mm). Amplituden afhænger af afstand og koblingsmiddel; brug den som form og størrelsesorden, ikke som kalibrering.
