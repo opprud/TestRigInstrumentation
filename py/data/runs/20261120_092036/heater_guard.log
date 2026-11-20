@@ -1,0 +1,21 @@
+[2026-11-20T09:20:36] heater guard armed: run=/home/aau/projects/ForeverBearing/sw/TestRigInstrumentation/py/data/runs/20261120_092036 channel=0/heater deadline=2026-11-21T00:20:36 stale=15.0min
+[2026-11-20T09:20:36] no telemetry file in /home/aau/projects/ForeverBearing/sw/TestRigInstrumentation/py/data/runs/20261120_092036 yet; will keep looking
+[2026-11-20T23:35:38] TRIGGER: run_end in telemetry (clean finish)
+[2026-11-20T23:35:39] switch-off attempt 1/12: rc=0 → Turning OFF: [0] Heater...
+✓ [0] Heater: OFF
+✓ [0] Heater: OFF
+[2026-11-20T23:35:39] API status unavailable (URLError(ConnectionRefusedError(111, 'Connection refused'))); falling back to MQTT CLI
+[2026-11-20T23:36:06] state UNKNOWN — command was sent, but could not confirm
+[2026-11-20T23:36:14] switch-off attempt 2/12: rc=0 → Turning OFF: [0] Heater...
+⚠ Command sent but no confirmation received within 5s
+[2026-11-20T23:36:14] API status unavailable (URLError(ConnectionRefusedError(111, 'Connection refused'))); falling back to MQTT CLI
+[2026-11-20T23:36:42] state UNKNOWN — command was sent, but could not confirm
+[2026-11-20T23:36:54] switch-off attempt 3/12: rc=0 → Turning OFF: [0] Heater...
+⚠ Command sent but no confirmation received within 5s
+[2026-11-20T23:36:54] API status unavailable (URLError(ConnectionRefusedError(111, 'Connection refused'))); falling back to MQTT CLI
+[2026-11-20T23:37:21] state UNKNOWN — command was sent, but could not confirm
+[2026-11-20T23:37:36] switch-off attempt 4/12: rc=0 → Turning OFF: [0] Heater...
+⚠ Command sent but no confirmation received within 5s
+[2026-11-20T23:37:36] API status unavailable (URLError(ConnectionRefusedError(111, 'Connection refused'))); falling back to MQTT CLI
+[2026-11-20T23:38:00] VERIFIED: channel 0 (heater) is OFF
+[2026-11-20T23:38:00] heater guard done
