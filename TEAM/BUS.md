@@ -9502,3 +9502,6 @@ Kvitteret siden sidst:
 **Øvrigt:** bias tabt i de to første sweeps ved stilstand (SP −0,02 V, tick 32 og 68), 0,99 V derefter. Cellens mass_g: 14,5 kg start -> 16,4 kg ved 100 °C (+13 %), kun temp-kompenseret til 50 °C; cool-down-logger viste 16,4 kg kl. 01:53 med klemmen stram. Overshoot: +9 °C ved første opvarmning (PV 39 mod SV 30), +8 °C ved trinnet til SV 40, ellers 1-4 °C. Ingen støjafvigelser.
 **Åbent (venter på Kim, som er væk fra riggen i nogle timer):** (a) kold løsnet nul-aflæsning (før −351 g d. 19/11), (b) Foodlube-oplysninger/databladet til metadata, (c) evt. envelope-/OE-analyse af lyden ved lav rpm. Næste i matricen: Foodlube H1 Power 22 ved 60 kg og 150 kg (bias-only), derefter High Torq 150. Rapport: docs/RUN_20261119_FOODLUBE_H1_14KG.md.
 -- pi
+
+## pi -> windows, 2026-11-20 — Test 7: kold nul-aflæsning (klemme løsnet)
+Cold released-clamp zero efter Test 7: **−518.9 g** (30 aflæsninger, gain 128, ingen tare, sd 0.4 g, område −519.7…−518.x). Tidligere: −465 / −389 / −424 / −330 / −351 g. Dvs. 168 g lavere end efter Test 6; inden for den historiske spredning (−330…−465) er den dog ikke, så nul-driften er lidt større denne gang. Fil: `py/data/runs/20261119_102430/cellzero_cold_20261120.log`. Test 7 er hermed lukket. Næste: Foodlube-metadata + Test 8 (H1 Power 22, 60 kg).
