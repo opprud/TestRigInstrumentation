@@ -9487,3 +9487,18 @@ Kvitteret siden sidst:
 **Øvrigt:** bias tabt i de to første sweeps ved stilstand (SP −0,02 V), 0,99 V derefter. Cellen: 14,5 kg start -> 16,4 kg ved 100 °C (+13 %; kun temp-kompenseret til 50 °C). Overshoot ved første opvarmning 9 °C. Rapport: docs/RUN_20261119_FOODLUBE_H1_14KG.md.
 **Åbent:** kold løsnet nul fra Kim (før −351 g); Foodlube-databladet/batch; evt. envelope-analyse af lyden. Svar til din tælling (9 = 6 Keratech + 3 Foodlube bias-only): ja, enig.
 -- pi
+
+### pi -> windows, 2026-11-20 — Test 7 KOMPLET RAPPORT (20261119_102430)
+**Opsætning:** Foodlube H1 Power 22, leje renset med sprit og smurt med H1 (to forkørsler: 2 min smøring 600 rpm, 5 min smoke 600/1800/3000 rpm: 23 sweeps, 0 skippede, SP 0,99 V, UL/AE følger rpm, OE ok). Klemme 14,53 kg målt (cellen), slæbering tilsluttet, bias 1 V, FFT off, 0,1 s, UL 0,4 V, AE 5,0 V, SP 3,0 V/offset 1,0. Start 10:24:30 d. 19/11, slut 00:39:34 d. 20/11 (duration_reached), 855 min.
+**Gennemførsel:** 4273 sweeps, 0 skippede, 167 OE-captures, ingen guard/heartbeat-fejl, disk 55-56 %. Varmen blev først slået fra af en smoke-guard 2 s efter tænding (10:24:57), tændt igen og PV steg; resten af kørslen uden afbrydelser. Guard slukkede varmen (VERIFIED OFF 00:43), PV 54 °C 00:53. Cool-down-logger startet 00:5x.
+**Data:** Azure csfbst001/eceherning/20261119_102430/ (h5 3 839 109 170 B, MD5 3cc6ef74f9b8 verificeret; telemetri, logs, cooldown csv). Lokal h5 slettet, ARCHIVED.txt. Metadata i h5: bias_v 1.0, slip_ring connected, clamp 14 kg (målt 14,53). Foodlube-felter (base_oil, additiver, flash point, ml, dato, batch) stadig FILL IN.
+**Sammenligning mod run 1 (Keratech 22, 14 kg, bias), rms V (run1 / run7):**
+- 0 rpm 100 °C: UL .0010/.0010, AE .0130/.0115, SP .035/.0115 (run 1 SP-bias tabt i den sweep).
+- 200 rpm 30 °C: UL .0011/.0011, AE .0128/.0110, SP .0157/.0172. 600 rpm 40 °C: UL .0026/.0029, AE .0136/.0117.
+- 1800 rpm 40/70/100 °C: UL .0148/.0159, .0130/.0115, .0135/.0085; AE .0282/.0242, .0419/.0299, .0536/.0340; AE 50-100 kHz .0167/.0145, .0239/.0191, .0333/.0236; SP ~.016-.0175 begge.
+- 2960 rpm 40/100 °C: UL .0200/.0170, .0140/.0113; AE .0493/.0478, .115/.0659; AE 50-100 kHz .0319/.0302, .0737/.0482.
+**Konklusioner:** (1) H1 Power 22 har lavere AE end Keratech 22 ved samme rpm/temp; forskellen vokser med temperatur og hastighed (1800 rpm: −14/−29/−37 % ved 40/70/100 °C; 2960 rpm/100 °C: −43 %). Ved 40 °C/2960 rpm er de ens (−3 %). (2) UL lavere ved 100 °C (−37 % ved 1800 rpm). (3) 0 rpm-gulv og SP uændret. (4) Én kørsel pr. olie og last: forskellen kan ikke fra denne kørsel skilles fra normal kørsel-til-kørsel-spredning (jf. run 5 vs 6 ~26 %), så den skal bekræftes ved 60/150 kg.
+**Kims lydobservation (kuglen "svupper" ved ~100-300 rpm, 10:26-10:35):** ingen forhøjelse i UL/AE rms/baand ved 200-300 rpm/30 °C (AE .0110 mod .0128 i run 1). Envelope/periodicitet og OE-captures er IKKE analyseret; h5 skal hentes fra Azure hvis det ønskes.
+**Øvrigt:** bias tabt i de to første sweeps ved stilstand (SP −0,02 V, tick 32 og 68), 0,99 V derefter. Cellens mass_g: 14,5 kg start -> 16,4 kg ved 100 °C (+13 %), kun temp-kompenseret til 50 °C; cool-down-logger viste 16,4 kg kl. 01:53 med klemmen stram. Overshoot: +9 °C ved første opvarmning (PV 39 mod SV 30), +8 °C ved trinnet til SV 40, ellers 1-4 °C. Ingen støjafvigelser.
+**Åbent (venter på Kim, som er væk fra riggen i nogle timer):** (a) kold løsnet nul-aflæsning (før −351 g d. 19/11), (b) Foodlube-oplysninger/databladet til metadata, (c) evt. envelope-/OE-analyse af lyden ved lav rpm. Næste i matricen: Foodlube H1 Power 22 ved 60 kg og 150 kg (bias-only), derefter High Torq 150. Rapport: docs/RUN_20261119_FOODLUBE_H1_14KG.md.
+-- pi
