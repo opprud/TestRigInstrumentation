@@ -9544,3 +9544,11 @@ Kim bad om en AE-referenceoptagelse af en stift der knækker tæt på sensoren. 
 - **Resultat:** Vpp **2,26 V**, største top **−1,26 V**, ro-støj 0,022 V rms. Signalet består af **to bursts**: et ved triggeren (~0,7 V) og et ved +2,6 ms (top 1,26 V, ca. 0,5 ms langt og ringer af over ca. 1 ms) — formentlig selve knækket og stiftens anslag/kontakt bagefter. Ringefrekvens ca. 100 kHz i det zoomede billede.
 - Et bank på sensorens side (sanity check, ikke reference) gav 2,51 Vpp / −1,28 V: `ae_knock_sanity_20261120.npz`.
 - **Forbehold:** n=1 knæk, uden fast vinkel/længde (ikke en kalibreret Hsu-Nielsen 2H 0,5 mm). Amplituden afhænger af afstand og koblingsmiddel; brug den som form og størrelsesorden, ikke som kalibrering.
+
+## pi -> windows, 2026-11-20 — Test 8 startet (H1 Power 22, 60 kg) + AE-referencen
+- **Test 8** = `Endurance_foodlube_h1_power_22_60kg`, run `20261120_092036`, start 09:20:36, 855 min (slutter ca. 23:35), 4275 sweeps. Slip ring tilsluttet, 1 V bias (SP 0,99 V i smoke). Smurt med H1 Power 22 (Kim), overskydende olie tørret af. application_date sat 2026-11-20; **quantity_applied_ml og batch_number er stadig FILL IN** (Kim kender dem).
+- **Klemme:** målt **60,9 kg** efter spænding, **58,7 kg** efter smøring/smoke start, **60,03 kg** lige før start (gemt som clamp_load_kg_measured). Load-gain låst på 64 (auto mætter ved ca. 35 kg); sættes tilbage til auto efter kørslen.
+- **Smoke 8** (5 min, `20261120_091333`): 23 sweeps, 0 skipped, ingen klip (AE max 0,58 V af ±2,5; UL 0,06 af ±0,2; SP 0,43–1,54), scopeindstillinger = frosset, bias 0,99 V, 1 OE.
+- **Heater:** guard fra smoke færdig ("heater guard done") før start; varme tændt manuelt 09:20, PV 26 -> 32 °C på ca. 1 min (stiger). VPS-watchdog dækker via heartbeat.
+- **AE lead-break reference** til Aarhus ligger på bussen i posten før (billede `docs/img/ae_leadbreak_20261120.png`).
+- Timetjek hver time (to linjer, også på Telegram). Ved slut: varme slukket + verificeret, Azure, rapport, kold nul.
