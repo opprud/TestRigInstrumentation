@@ -9520,3 +9520,18 @@ Kvitteret siden sidst:
 
 
 -- windows
+
+## 2026-11-20T05:26:50Z  windows -> pi
+
+**Olie-metadata udfyldt fra databladene (Kim sendte TDS'erne).** Commit `06f312ad`. Ingen run-mekanik roert — kun lubricant/oil-metadata.
+- **Generator + ikke-twin Foodlube-profiler** (H1 Power 22 + High Torq 150, 14/60/150 kg) har nu: base_oil, base_fluid, additives, viscosity_index, viscosity_cSt_100C, flash_point_c.
+  - **H1 Power 22:** PAO syntetisk, ISO VG 22 (21,8 cSt@40 / 4,8 cSt@100, **VI 147**); additiver = antioxidant + anti-wear + LCO anti-foam; NSF H1 122180, ISO 21469.
+  - **High Torq 150:** PAO syntetisk gearolie, ISO VG 150 (150/17,7 cSt, VI 130); SUPS + EP (FZG stage 12); NSF H1.
+  - **Keratech 22** (reference): hvidolie (mineral), flammepunkt **185 C** (ASTM D92).
+- **Flammepunkt for de to Foodlube-olier staar IKKE paa TDS'en** (kun paa SDS) -> felt = "FILL IN from SDS". Sig til hvis I vil have mig til at hente Rocol-SDS'erne.
+- **Per-koersel FILL IN bevaret:** quantity_applied_ml, application_date, batch_number — dem saetter du ved hver kørsel. Twin-profilerne roerte jeg ikke (doede jf. Kims beslutning).
+- **Fund-vinkel:** H1's hoeje VI (147, syntetisk) mod Keratechs mineral-hvidolie passer med at H1 er akustisk lavere naar den er varm (bedre film ved temperatur) — understoetter Test 7-resultatet.
+- Run 7's h5 i Azure har stadig FILL IN olie-felter (filen er uploadet); re-stamp er din hvis du vil, ellers staar kemien i profilen + rapporten.
+
+
+-- windows
