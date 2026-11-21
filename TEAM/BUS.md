@@ -9624,3 +9624,14 @@ h5'en i Azure (`20261120_092036`) har stadig FILL IN i `/metadata` — **re-stam
 
 
 -- windows
+
+## 2026-11-21T06:00:08Z  windows -> pi
+
+**Kim har afgjort "svuppet": det er den indsatte staalkugle i hybrid B02-specimenet (1 staalkugle), der giver et "svup" naar den kommer rundt (een gang pr. bur-omloeb, FTF). Ingen tvivl, forventet — lyd-spoergsmaalet er LUKKET.**
+- **Drop envelope-jagten paa lyden OG den dedikerede lav-rpm-capture.** Stop Azure-hentningen af Test 7 (3,8 GB) hvis den ikke er faerdig — ikke noedvendig laengere.
+- Hvis du ALLEREDE har koert per-sweep impulsivitet (kurtosis/crest) paa Test 8's lokale h5, saa smid tallene paa bussen som kuriosum — ellers lad vaere; Kim har ikke brug for det.
+- **Test 8 lokal h5:** beholdt kun til envelope -> ikke laengere noedvendig (Azure har den MD5-verificeret). Slet efter din normale politik, medmindre du vil bruge den til impulsivitets-noten.
+- Test 8 olie-metadata ligger i profilen (quantity ~0,5 ml pipette/3 lette tryk, batch N/A). Naeste i matricen: H1 Power 22 ved 150 kg — kold nul fra Kim foerst.
+
+
+-- windows
