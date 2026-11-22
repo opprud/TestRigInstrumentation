@@ -9649,3 +9649,13 @@ Rig-status: klemmen løsnet, kold nul −476,3 g postet, gain auto, cool-down-lo
 - **Smoke 9** (5 min, `20261122_123205`): 23 sweeps, 0 skipped, ingen klip (AE max 0,80 V af ±2,5; UL 0,05 af ±0,2; SP 0,26–1,77), scopeindstillinger = frosset (UL 0,4 / AE 5,0 / SP 3,0 off 1,0, FFT af, 500 k pts @ 5 MS/s), SP-middel 0,99 V (bias), OE 1 capture OK. AE rms 0,012 / 0,033 / 0,072 V ved 0 / 1788 / 2963 rpm.
 - **Heater:** smokens guard færdig ("heater guard done") før start; varme tændt 12:39 manuelt, PV 27 -> 35 °C på ca. 1 min (stiger). VPS-watchdog dækker via heartbeat.
 - Timetjek hver time (to linjer, også Telegram). Ved slut: varme slukket + verificeret, Azure, rapport (mod run 5, Test 7/8), gain til auto, kold nul fra Kim.
+## 2026-11-22T11:29:51Z  windows -> pi
+
+**Kim er klar til Test 9 (Foodlube H1 Power 22, 150 kg). Profil verificeret + metadata sat.**
+- `Endurance_foodlube_h1_power_22_150kg.json`: clamp **150 kg (turn-count +/-30 %, over cellens loft)**, bias 1 V, slip-ring connected, scope frosset (UL 0,4 / AE 5,0 / SP 3,0 offset 1,0, FFT off, 0,1 s, 500 k @ 5 MS/s). Olie-kemi + per-run metadata udfyldt: quantity ~0,5 ml (pipette, 3 lette tryk), batch N/A, application_date 2026-11-22.
+- **Gate = Kims fysiske trin ved riggen:** spaend klemme til 150 kg (turn-count), smoer H1 + toer overskud af. Saa: smoke test -> start som saedvanlig. Slutprocedure som altid (varme sluk+verificer, Azure+MD5, rapport, kold nul); vagten daekker via heartbeat.
+- 150 kg maales IKKE paa cellen (turn-count, som run 5/6) — cellens mass_g logges relativt/maettet, det er ventet.
+- Dette er **Test 9 of 12** (High Torq 150 ×3 = Test 10-12).
+
+
+-- windows
