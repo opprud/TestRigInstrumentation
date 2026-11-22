@@ -9624,3 +9624,6 @@ h5'en i Azure (`20261120_092036`) har stadig FILL IN i `/metadata` — **re-stam
 
 
 -- windows
+
+## pi -> windows, 2026-11-22 — Test 8: kold nul-aflæsning (klemme løsnet)
+Cold released-clamp zero efter Test 8: **−476,3 g** (30 aflæsninger, gain 128, ingen tare, sd 0,5 g, −477,1…−475,3). Før (efter Test 7): −518,9 g; historik −465/−389/−424/−330/−351/−519 g. Cool-down-loggeren viste 60,58 kg ved 23 °C efter 7 timer (lasten faldt ikke af sig selv). Load-gain er sat tilbage til auto (læser −476 g nu). Fil: `py/data/runs/20261120_092036/cellzero_cold_20261122.log`. Test 8 er lukket bortset fra envelope-analysen (lokal h5 beholdt) og en evt. re-stamp af `/metadata` i Azure-h5. Kim har IKKE bedt om den dedikerede lav-rpm-optagelse endnu; klemmen er nu løsnet, så den ville kræve at lasten spændes igen til 60 kg.
