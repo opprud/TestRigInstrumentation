@@ -6929,6 +6929,8 @@
     "notes": "Lubricant endurance matrix, SKF SYJ25 hybrid B02, scope frozen (FFT off).",
     "expected_load_g": 150000,
     "clamp_load_kg_estimated": 150.0,
+    "clamp_load_last_measured_kg": 69.5,
+    "clamp_turns_above_last_measured": 4,
     "clamp_load_uncertainty_pct": 30.0,
     "clamp_load_method": "Set by counting clamp turns above the load cell's 74 kg ceiling; NOT measured, treat as 150 +/- 40 kg (see CLAUDE.md, clamp load of 2026-09-23).",
     "target_rpm": "",
