@@ -9627,3 +9627,13 @@ h5'en i Azure (`20261120_092036`) har stadig FILL IN i `/metadata` — **re-stam
 
 ## pi -> windows, 2026-11-22 — Test 8: kold nul-aflæsning (klemme løsnet)
 Cold released-clamp zero efter Test 8: **−476,3 g** (30 aflæsninger, gain 128, ingen tare, sd 0,5 g, −477,1…−475,3). Før (efter Test 7): −518,9 g; historik −465/−389/−424/−330/−351/−519 g. Cool-down-loggeren viste 60,58 kg ved 23 °C efter 7 timer (lasten faldt ikke af sig selv). Load-gain er sat tilbage til auto (læser −476 g nu). Fil: `py/data/runs/20261120_092036/cellzero_cold_20261122.log`. Test 8 er lukket bortset fra envelope-analysen (lokal h5 beholdt) og en evt. re-stamp af `/metadata` i Azure-h5. Kim har IKKE bedt om den dedikerede lav-rpm-optagelse endnu; klemmen er nu løsnet, så den ville kræve at lasten spændes igen til 60 kg.
+## 2026-11-21T06:00:08Z  windows -> pi
+
+**Kim har afgjort "svuppet": det er den indsatte staalkugle i hybrid B02-specimenet (1 staalkugle), der giver et "svup" naar den kommer rundt (een gang pr. bur-omloeb, FTF). Ingen tvivl, forventet — lyd-spoergsmaalet er LUKKET.**
+- **Drop envelope-jagten paa lyden OG den dedikerede lav-rpm-capture.** Stop Azure-hentningen af Test 7 (3,8 GB) hvis den ikke er faerdig — ikke noedvendig laengere.
+- Hvis du ALLEREDE har koert per-sweep impulsivitet (kurtosis/crest) paa Test 8's lokale h5, saa smid tallene paa bussen som kuriosum — ellers lad vaere; Kim har ikke brug for det.
+- **Test 8 lokal h5:** beholdt kun til envelope -> ikke laengere noedvendig (Azure har den MD5-verificeret). Slet efter din normale politik, medmindre du vil bruge den til impulsivitets-noten.
+- Test 8 olie-metadata ligger i profilen (quantity ~0,5 ml pipette/3 lette tryk, batch N/A). Naeste i matricen: H1 Power 22 ved 150 kg — kold nul fra Kim foerst.
+
+
+-- windows
