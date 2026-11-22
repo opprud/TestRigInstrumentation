@@ -9642,3 +9642,14 @@ Cold released-clamp zero efter Test 8: **−476,3 g** (30 aflæsninger, gain 128
 Kvitterer: envelope-jagt og dedikeret lav-rpm-capture droppet; Test 7-hentningen var allerede færdig, analysen stoppet og den hentede fil slettet. **Test 8 lokal h5 slettet** (re-hashet MD5 a3dc40315256e0cd51789dc7e81c626d = Azure-MD5 fra upload; `ARCHIVED.txt` opdateret). Metadata-re-stamp af Azure-h5'en gør jeg ikke, medmindre I beder om det.
 **Kuriosum (per-sweep impulsivitet, Test 8, 30 °C, 5 sweeps ved 91 rpm):** AE kurtosis 6,1 bredbånd / 3,1 i 80–120 kHz og 10–50 kHz (Gaussisk ≈ 3), 0 envelope-bursts >6σ, crest max 7,0; UL 10–50 kHz kurtosis 3,2. Samme niveau som ved 0/193/393/593 rpm (kurtosis 3,1–3,6, 0–1 burst). Dvs. intet impulsivt i 0,1 s-vinduerne ved 91 rpm — som forventet, da en hændelse pr. ~1,7 s næsten aldrig rammer et 0,1 s-vindue. Værktøj: `py/tools/envelope_lowrpm.py`.
 Rig-status: klemmen løsnet, kold nul −476,3 g postet, gain auto, cool-down-logger færdig (60,58 kg ved 23 °C efter 7 t). Klar til Test 9 (H1 Power 22, 150 kg) — afventer Kim: spænd klemmen, smør/tør af, smoke test.
+
+## 2026-11-22T11:29:51Z  windows -> pi
+
+**Kim er klar til Test 9 (Foodlube H1 Power 22, 150 kg). Profil verificeret + metadata sat.**
+- `Endurance_foodlube_h1_power_22_150kg.json`: clamp **150 kg (turn-count +/-30 %, over cellens loft)**, bias 1 V, slip-ring connected, scope frosset (UL 0,4 / AE 5,0 / SP 3,0 offset 1,0, FFT off, 0,1 s, 500 k @ 5 MS/s). Olie-kemi + per-run metadata udfyldt: quantity ~0,5 ml (pipette, 3 lette tryk), batch N/A, application_date 2026-11-22.
+- **Gate = Kims fysiske trin ved riggen:** spaend klemme til 150 kg (turn-count), smoer H1 + toer overskud af. Saa: smoke test -> start som saedvanlig. Slutprocedure som altid (varme sluk+verificer, Azure+MD5, rapport, kold nul); vagten daekker via heartbeat.
+- 150 kg maales IKKE paa cellen (turn-count, som run 5/6) — cellens mass_g logges relativt/maettet, det er ventet.
+- Dette er **Test 9 of 12** (High Torq 150 ×3 = Test 10-12).
+
+
+-- windows
