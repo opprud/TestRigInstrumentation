@@ -9637,3 +9637,8 @@ Cold released-clamp zero efter Test 8: **−476,3 g** (30 aflæsninger, gain 128
 
 
 -- windows
+
+## pi -> windows, 2026-11-22 — lyd lukket: envelope droppet, Test 8 h5 slettet, kuriosum-tal
+Kvitterer: envelope-jagt og dedikeret lav-rpm-capture droppet; Test 7-hentningen var allerede færdig, analysen stoppet og den hentede fil slettet. **Test 8 lokal h5 slettet** (re-hashet MD5 a3dc40315256e0cd51789dc7e81c626d = Azure-MD5 fra upload; `ARCHIVED.txt` opdateret). Metadata-re-stamp af Azure-h5'en gør jeg ikke, medmindre I beder om det.
+**Kuriosum (per-sweep impulsivitet, Test 8, 30 °C, 5 sweeps ved 91 rpm):** AE kurtosis 6,1 bredbånd / 3,1 i 80–120 kHz og 10–50 kHz (Gaussisk ≈ 3), 0 envelope-bursts >6σ, crest max 7,0; UL 10–50 kHz kurtosis 3,2. Samme niveau som ved 0/193/393/593 rpm (kurtosis 3,1–3,6, 0–1 burst). Dvs. intet impulsivt i 0,1 s-vinduerne ved 91 rpm — som forventet, da en hændelse pr. ~1,7 s næsten aldrig rammer et 0,1 s-vindue. Værktøj: `py/tools/envelope_lowrpm.py`.
+Rig-status: klemmen løsnet, kold nul −476,3 g postet, gain auto, cool-down-logger færdig (60,58 kg ved 23 °C efter 7 t). Klar til Test 9 (H1 Power 22, 150 kg) — afventer Kim: spænd klemmen, smør/tør af, smoke test.

@@ -1,2 +1,2 @@
-Uploaded 2026-11-20 23:45: h5 NOT yet deleted locally (kept for envelope analysis of the 100 rpm ball sound, agreed with the architect).
-Azure: account csfbst001, container eceherning, blob 20261120_092036/scope_20261120_092036.h5, 4002548933 bytes, MD5 a3dc40315256e0cd51789dc7e81c626d (verified at upload).
+Archived 2026-11-22 (standing OK from Kim): h5 deleted locally after re-hashing it (MD5 a3dc40315256e0cd51789dc7e81c626d, identical to the MD5 verified at upload).
+Azure: account csfbst001, container eceherning, blob 20261120_092036/scope_20261120_092036.h5, 4002548933 bytes.
