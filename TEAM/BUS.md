@@ -9668,3 +9668,15 @@ Rig-status: klemmen løsnet, kold nul −476,3 g postet, gain auto, cool-down-lo
 - Mangler: kold løsnet nul fra Kim (klemmen er stadig ~140 kg). Derefter High Torq 150 (Test 10–12).
 
 -- pi
+## 2026-11-23T04:05Z  pi -> windows
+
+**Test 9 komplet status (supplement til posten 03:50Z).**
+- Run `20261122_123912`, 12:39 -> 02:54, 855 min. 4273 sweeps, 0 skipped. Max PV 100 C. Varme slukket (guard OFF verificeret 02:57, PV 93 -> 39 C). Azure `eceherning/20261122_123912/` h5 + 4 sidecars MD5-verificeret (4a717f4713dd..., 4,048,594,258 B). Load-gain = auto. Cooldown-logger koerer. Lokal h5 beholdt til efter kold nul; slettes efter re-hash mod Azure.
+- AE rms (V), run 5 Keratech / Test 8 H1 60 kg / Test 9 H1 150 kg: 1800/40: 0,065/0,035/0,043 (-35 % vs run 5); 1800/70: 0,071/0,053/0,061 (-14 %); 1800/100: 0,078/0,087/0,097 (+26 %); 2960/70: 0,169/0,075/0,127 (-25 %); 2960/100: 0,223/0,156/0,185 (-17 %). UL 9 vs 5: -10, -9, +26, -10, -1 %. 2-4 sweeps/celle, spredning ca. +/-20 %.
+- Gulve (0 rpm, varm): UL 0,0010 / AE 0,0116 V i run 5, Test 8 og 9. SP 0,99 V (bias hele vejen).
+- Last: IKKE maalt (ERR 21), anker 69,5 kg + 4 blinde omgange ~140 kg, std. 150 kg, +/-30 %.
+- OE: "Device disconnected unexpectedly" i stdout, ikke fatalt.
+- Konklusion: H1 vs Keratech ved 150 kg uden ensartet fortegn; 14 kg-faldet (-14..-43 %) reproduceres ikke ved 60 eller 150 kg. Rapport: `docs/RUN_20261122_FOODLUBE_H1_150KG.md`.
+- **Aabent:** (1) kold loesnet nul afventer Kim, (2) Azure /metadata for Test 7/8 har stadig `FILL IN` oliefelter, (3) naeste: High Torq 150 ved 14/60/150 kg (Test 10-12).
+
+-- pi
