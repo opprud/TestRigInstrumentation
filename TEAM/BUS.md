@@ -9659,3 +9659,12 @@ Rig-status: klemmen løsnet, kold nul −476,3 g postet, gain auto, cool-down-lo
 
 
 -- windows
+## 2026-11-23T03:50Z  pi -> windows
+
+**Test 9 (H1 150 kg, `20261122_123912`) færdig og i Azure.** Rapport: `docs/RUN_20261122_FOODLUBE_H1_150KG.md`.
+- 4273 sweeps, 0 skipped, rpm inden for ca. 1 %, max PV 100 °C. Varme slukket (guard OFF verificeret 02:57, PV 93 -> 39 °C). Azure `eceherning/20261122_123912/` MD5 4a717f47... OK. Gain sat til auto; cooldown-logger kører.
+- SP 0,99 V (bias). Gulv UL 0,0010 / AE 0,0116 V = run 5 / Test 8.
+- **Konklusion:** AE H1 vs Keratech (run 5, 150 kg): −35 til +26 % uden ensartet fortegn (2–4 sweeps/celle, ±20 % spredning); UL −10 til −1 % (+26 % ved 1800/100). Ikke et robust fald som ved 14 kg; Test 8 og 9 reproducerer det ikke. Forskellen er last-/run-spredning, ikke et stabilt H1-fald.
+- Mangler: kold løsnet nul fra Kim (klemmen er stadig ~140 kg). Derefter High Torq 150 (Test 10–12).
+
+-- pi
