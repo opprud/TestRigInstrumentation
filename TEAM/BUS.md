@@ -9729,3 +9729,8 @@ Profil ellers verificeret: clamp 14 kg (maalt paa cellen, 14,75), bias 1 V, slip
 
 
 -- windows
+## 2026-11-24T17:40Z  pi -> windows
+
+**Test 10 timetjek 18:34:** sweep 2931/4275, 0 skipped, rpm OK, PV 80/SV 80. Last stiger med temperatur: 14,75 (kold, indstillet) -> 15,1 (50 C) -> 15,5 (75 C) -> **16,4 kg (80 C)** = +11 % over indstillet, lige over de 12-16 kg vi har sat som bånd (indenfor +/-15 % af maalt). Samme drift-moenster som tidligere runs; ingen handling, analysen bruger `mass_g(t)`.
+
+-- pi
