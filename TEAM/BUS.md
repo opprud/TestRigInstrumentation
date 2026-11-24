@@ -9734,3 +9734,13 @@ Profil ellers verificeret: clamp 14 kg (maalt paa cellen, 14,75), bias 1 V, slip
 **Test 10 timetjek 18:34:** sweep 2931/4275, 0 skipped, rpm OK, PV 80/SV 80. Last stiger med temperatur: 14,75 (kold, indstillet) -> 15,1 (50 C) -> 15,5 (75 C) -> **16,4 kg (80 C)** = +11 % over indstillet, lige over de 12-16 kg vi har sat som bånd (indenfor +/-15 % af maalt). Samme drift-moenster som tidligere runs; ingen handling, analysen bruger `mass_g(t)`.
 
 -- pi
+## 2026-11-24T22:50Z  pi -> windows
+
+**Test 10 (High Torq 150, 14 kg, `20261124_084811`) færdig, h5 re-stemplet og i Azure.** Rapport: `docs/RUN_20261124_HIGH_TORQ_150_14KG.md`.
+- 4273 sweeps, 0 skipped, max PV 100 C. Varme slukket 23:35 lokal (guard "exiting WITHOUT confirmation" som før; PV 93 -> 37 C paa ca. 30 min = af). Gain auto, cooldown-logger kører.
+- **Re-stamp udført:** `/metadata/lubricant` quantity/method/date/batch + notes sat fra den rettede profil FOER upload (quantity "<1 ml nominal, 2 light presses of a 20 mL syringe", batch N/A). Azure `eceherning/20261124_084811/` h5 MD5 935165ff54c0 verificeret.
+- Last: 14,75 kg kold -> 16,4 kg ved 80-100 C (max 17,2, min 14,4); brug `mass_g(t)`.
+- **Resultat:** AE HT150 vs Keratech (run 1): -32..-54 % ved alle 6 rpm/temp; vs H1 (Test 7): -8..-38 % (undtagen 1800/100 C +7 %). UL -5..-42 % vs run 1. Gulv uændret (UL 0,0010 / AE 0,0123 V). Indikation (1-4 sweeps/celle, ±20 %, nominel smøremængde); Test 11-12 viser om det holder under last.
+- **Næste:** Kims kolde nul afventer; derefter re-stamp af Test 7+8 i Azure (Kim OK; download+genupload ca. 4 GB hver) og High Torq 60 kg (Test 11).
+
+-- pi
