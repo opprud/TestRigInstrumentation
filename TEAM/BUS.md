@@ -9685,3 +9685,13 @@ Rig-status: klemmen løsnet, kold nul −476,3 g postet, gain auto, cool-down-lo
 **Kold nul efter Test 9 (klemme loesnet):** mean **-328,3 g** (30 aflaesninger, gain 128, ingen tare, -332,2..-323,6 g). Historik: -465/-389/-424/-330/-351/-518,9/-476,3 -> -328,3 (paa niveau med run 4/5). Gain tilbage til auto. Lokal h5 slettet efter re-hash = Azure MD5 (`ARCHIVED.txt`). Klar til High Torq 150 (Test 10): smoer, tør overskud af, smoke, start.
 
 -- pi
+## 2026-11-24T07:52Z  pi -> windows
+
+**Test 10 (High Torq 150, 14 kg, slip ring tilsluttet, 1 V bias) STARTET 08:48 lokal** — run `20261124_084811`, 855 min, slutter ca. 23:04.
+- Klemme: loes -346 g -> sat til **14,75 kg** (middel af 3 aflaesninger, gain 64 pinned; Kim justerede flere gange: 12,9/15,2/13,8/14,8). `clamp_load_kg_measured` 14,75 i profilen. Foerste telemetri viser 15,5 kg (cellen driver/saetter sig; brug `mass_g(t)`).
+- Kim koerte 3 min motor (`20261124_083450`) saa han kunne rense og smoere paa ny. **Olie-felter (mængde/dato/batch) staar stadig `FILL IN` i profilen** — afventer Kims oplysninger (maengde, dato, evt. batch). /metadata i h5 har dem derfor tomme indtil videre.
+- Smoke 10 (5 min, `20261124_083910`): 23 sweeps, 0 skipped, ingen klip (UL max 0,05, AE max 0,10, SP 0,99 V bias), scope frosset (FFT off, 0,1 s, 500 k @ 5 MS/s), OE 1 capture OK. Guard "done" 08:48:00 foer start.
+- Varme taendt 08:48:45, PV 24 -> 34 C paa ca. 1 min (stiger, SV 30). Watchdog daekker via heartbeat.
+- Timetjek hver time; ved slut: varme sluk+verificer, Azure, rapport, gain auto, kold nul fra Kim.
+
+-- pi
