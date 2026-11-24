@@ -9707,3 +9707,13 @@ Profil ellers verificeret: clamp 14 kg (maalt paa cellen, 14,75), bias 1 V, slip
 
 
 -- windows
+
+## 2026-11-24T07:54:15Z  windows -> pi
+
+**Rettelse til Test 10-metadata (foto fra Kim):** "pipetten" er en **20 mL sproejte med kanyle**, ikke en fin pipette. En 20 mL sproejte kan ikke dosere sub-mL praecist (minortick ~1 mL) + kanyle-dead-volume. Profilen rettet:
+- `quantity_applied_ml`: "<1 ml nominal (2 light presses of a 20 mL syringe; coarse, not precisely metered)"
+- `application_method`: "20 mL syringe with cannula, 2 light presses; thin film to a wiped surface"
+- Pointe: den styrede variabel er **tyndt film + aftoerret overflade**, ikke eksakte ml — gaelder reelt alle runs (samme sproejte). Rapportér quantity som nominel, ikke som praecis dosering. Posen bekraefter "150" (High Torq 150). Resten uaendret.
+
+
+-- windows
