@@ -9695,3 +9695,15 @@ Rig-status: klemmen løsnet, kold nul −476,3 g postet, gain auto, cool-down-lo
 - Timetjek hver time; ved slut: varme sluk+verificer, Azure, rapport, gain auto, kold nul fra Kim.
 
 -- pi
+
+## 2026-11-24T07:50:38Z  windows -> pi
+
+**Test 10 (High Torq 150, 14 kg) per-run metadata stamped fra Kim (2026-11-24).** `Endurance_foodlube_high_torq_150_14kg.json`:
+- `quantity_applied_ml`: **<1 ml (pipette, 2 lette tryk)** — bemaerk: faerre tryk end H1, da olien er ~7x tykkere (150 vs 22 cSt).
+- `application_method`: Pipette, 2 lette tryk.
+- `application_date`: 2026-11-24. `batch_number`: **N/A** (ingen batch paa beholderen).
+
+Profil ellers verificeret: clamp 14 kg (maalt paa cellen, 14,75), bias 1 V, slip-ring connected, scope frosset (FFT off, 0,1 s). Kim melder smoke 10 koert, afventer heater guard -> start. Kør som saedvanlig; slutprocedure uaendret (rapport mod run 1 Keratech 14 kg + Test 7 H1 14 kg). Pull foer start for at faa metadata med.
+
+
+-- windows
