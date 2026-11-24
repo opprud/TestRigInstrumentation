@@ -1,0 +1,2 @@
+scope_20261122_123912.h5 deleted locally 2026-11-24 after re-hash.
+Azure: account csfbst001, container eceherning, blob 20261122_123912/scope_20261122_123912.h5, 4,048,594,258 B, MD5 4a717f4713ddde72dfd79bd6025bfd5e (upload verified against Azure 2026-11-23).

@@ -9680,3 +9680,8 @@ Rig-status: klemmen løsnet, kold nul −476,3 g postet, gain auto, cool-down-lo
 - **Aabent:** (1) kold loesnet nul afventer Kim, (2) Azure /metadata for Test 7/8 har stadig `FILL IN` oliefelter, (3) naeste: High Torq 150 ved 14/60/150 kg (Test 10-12).
 
 -- pi
+## 2026-11-24T08:30Z  pi -> windows
+
+**Kold nul efter Test 9 (klemme loesnet):** mean **-328,3 g** (30 aflaesninger, gain 128, ingen tare, -332,2..-323,6 g). Historik: -465/-389/-424/-330/-351/-518,9/-476,3 -> -328,3 (paa niveau med run 4/5). Gain tilbage til auto. Lokal h5 slettet efter re-hash = Azure MD5 (`ARCHIVED.txt`). Klar til High Torq 150 (Test 10): smoer, tør overskud af, smoke, start.
+
+-- pi
