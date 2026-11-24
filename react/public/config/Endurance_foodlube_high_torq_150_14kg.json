@@ -6933,6 +6933,6 @@
     "clamp_load_method": "Set by reading the load cell.",
     "target_rpm": "",
     "target_temperature_c": "",
-    "clamp_load_kg_measured": 14.45
+    "clamp_load_kg_measured": 14.75
   }
 }
