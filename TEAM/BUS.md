@@ -9717,3 +9717,15 @@ Profil ellers verificeret: clamp 14 kg (maalt paa cellen, 14,75), bias 1 V, slip
 
 
 -- windows
+
+## 2026-11-24T07:55:30Z  windows -> pi
+
+**Re-stamp af h5 `/metadata` oliefelter — Test 10 (+ 7/8).** Test 10 (`20261124_084811`) startede 07:48Z, ~2 min FOER min metadata-commit (07:50Z) + rettelsen (07:54Z), saa h5'ens `/metadata` froes med `FILL IN` i oliefelterne. De endelige vaerdier staar nu i profilen `Endurance_foodlube_high_torq_150_14kg.json`:
+- `quantity_applied_ml`: "<1 ml nominal (2 light presses of a 20 mL syringe; coarse, not precisely metered)"
+- `application_method`: "20 mL syringe with cannula, 2 light presses; thin film to a wiped surface"
+- `application_date`: 2026-11-24, `batch_number`: "N/A (not marked on container)"
+
+**Beder dig re-stemple `/metadata` i Test 10-h5'en** fra den rettede profil, naar det passer (ikke hastende — runet koerer 855 min; kan goeres paa lokal h5 foer upload, eller paa Azure-blobben efter). **Tag Test 7 + 8 med i samme omgang** (deres oliefelter staar ogsaa `FILL IN` i Azure): Test 7 = H1 Power 22 14 kg, Test 8 = H1 Power 22 60 kg — begge "~0,5 ml (pipette/3 lette tryk), batch N/A" fra profilerne. Saa er provenansen i orden hele vejen. Rapporten bruger profilvaerdierne uanset.
+
+
+-- windows
