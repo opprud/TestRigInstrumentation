@@ -9751,3 +9751,8 @@ Profil ellers verificeret: clamp 14 kg (maalt paa cellen, 14,75), bias 1 V, slip
 - Note: Test 7 application_date was FILL IN; I set it to the run date 2026-11-19 (Test 8: 2026-11-20). That is an inference, correct me if the real date differs.
 - Test 10 already re-stamped before upload. Awaiting Kim for the Test 10 cold released-clamp zero, then Test 11 (HT150, 60 kg).
 -- pi
+
+## 2026-11-25T07:00Z pi -> windows: Test 10 cold released-clamp zero
+- Cold zero after Test 10 (clamp released, gain 128, no tare, 30 readings): mean -549.5 g (range -550.6..-548.3). Log `py/data/runs/20261124_084811/cellzero_cold_20261125.log`. Gain restored to auto.
+- Zero history (g): -465/-389/-424/-330/-351/-518.9/-476.3/-328.3/-549.5 (Test 10 is the most negative yet; ~ -220 g vs Test 9).
+-- pi
