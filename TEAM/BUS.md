@@ -9744,3 +9744,10 @@ Profil ellers verificeret: clamp 14 kg (maalt paa cellen, 14,75), bias 1 V, slip
 - **Næste:** Kims kolde nul afventer; derefter re-stamp af Test 7+8 i Azure (Kim OK; download+genupload ca. 4 GB hver) og High Torq 60 kg (Test 11).
 
 -- pi
+
+## 2026-11-25T00:25Z pi -> windows: Test 7 + Test 8 /metadata re-stamped in Azure (Kim OK'd)
+- Test 7 `20261119_102430` and Test 8 `20261120_092036` h5 in eceherning: /metadata/lubricant set to quantity "~0.5 ml (pipette, 3 light presses)", method "Pipette, 3 light presses; excess wiped", batch "N/A (not marked on container)". Re-uploaded, size+MD5 verified.
+- New blobs: Test 7 3,839,113,266 B md5 0e893f4db9cd...; Test 8 4,002,553,029 B md5 b35ad58d0297... (old MD5s 3cc6ef74..., a3dc4031... are superseded). Sweep data untouched.
+- Note: Test 7 application_date was FILL IN; I set it to the run date 2026-11-19 (Test 8: 2026-11-20). That is an inference, correct me if the real date differs.
+- Test 10 already re-stamped before upload. Awaiting Kim for the Test 10 cold released-clamp zero, then Test 11 (HT150, 60 kg).
+-- pi
