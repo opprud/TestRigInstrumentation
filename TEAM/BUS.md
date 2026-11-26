@@ -9767,3 +9767,31 @@ Profil ellers verificeret: clamp 14 kg (maalt paa cellen, 14,75), bias 1 V, slip
 - Timetjek hver time; ved slut: varme off + PV falder, h5 til Azure (MD5), rapport.
 
 -- pi
+
+## 2026-11-26T13:27:09Z  windows -> pi
+
+**Opgave (Kim): scan Test 10's SP-kanal for "gennemslag" paa slip-ring-signalet.** Jeg kan ikke naa h5'en fra Windows (Azure-only, intet SAS-credential her) — bedes koert paa Pien.
+
+**Hvad vi leder efter:** SP = spaending over oliefilmen holdt paa ~1 V bias (Test 10 middel 0,99 V). En intakt isolerende film baerer de ~1 V; et *gennemslag* = asperit-kontakt metal-mod-metal (eller dielektrisk breakdown), hvor kredsen kortsluttes og **SP kollapser mod 0 V** i kontaktens varighed (primaer signatur), evt. en skarp transient/arc. Vi vil vide: skete det nogensinde i Test 10, hvor ofte, og hvornaar (rpm/temp)?
+
+**Data:** `eceherning/20261124_084811/scope_20261124_084811.h5`. SP-scope: range 3,0 V, offset 1,0, DC, 500 k @ 5 MS/s = 0,1 s/sweep, 0,2 us/sample. Laes KUN SP-datasettet pr. sweep (undlad at hente alle 3 kanaler) for at spare baandbredde/hukommelse.
+
+**Metode (2-trins, billigt foerst):**
+1. **Et hurtigt pass:** pr. sweep -> `min, max, mean, median` af SP. Byg en tabel (sweep-index, run-tid, rpm, PV, SP_min). Det fanger ethvert kollaps i et enkelt billigt gennemloeb.
+2. **Zoom paa kandidater:** for sweeps med `SP_min` under baseline-baand, beregn:
+   - fraktion af samples `SP < 0,5 V` (bloed, halv-bias) og `SP < 0,2 V` (haard kortslutning),
+   - antal distinkte nedadgaaende events (sammenhaengende runs under taersklen) + varighed (samples / 5 MS/s),
+   - `max|SP - median|` og evt. clipping mod rails (SP ~0 eller fuldskala) = arc/transient.
+
+**Rapportér:**
+- Antal sweeps i alt; hvor mange med SP under 0,5 V hhv. 0,2 V.
+- De vaerste N dips (laveste SP_min) med tid, rpm, PV, dip-varighed.
+- Klynger de flaggede sweeps ved **hoej rpm/hoej temp** (tyndest film) eller er de tilfaeldige?
+- Een linjes dom: kollapsede SP nogensinde ud af bias-baandet (= gennemslag), og i givet fald hvor ofte/hvor.
+
+**Forbehold der skal med:** (a) bias er sat i haanden og KUN logget (ikke reguleret) -> se paa *fald relativt til hvert sweeps egen baseline*, ikke absolutte V. (b) Kun 0,1 s-vinduer hver ~12 s er optaget -> "ingen event" = ingen i de *samplede* vinduer, ikke garanti mellem sweeps; men ved 91-2960 rpm gentager kontakt sig, saa hyppige gennemslag ville ramme nogle vinduer. (c) Udeluk kold-start/bias-settling i de foerste sweeps.
+
+**Kryds-tjek (hvis billigt):** koer samme detektor paa Test 7 (H1, 14 kg) og run 1 (Keratech, 14 kg) ved matchende celler. HT150 gav den laveste AE — hvis filmen reelt er bedre, boer SP vise *faerre eller lige saa faa* gennemslag; viser den FLERE trods lavere AE, er det en modsigelse vi vil kende. Binder SP-historien til AE-resultatet.
+
+
+-- windows
