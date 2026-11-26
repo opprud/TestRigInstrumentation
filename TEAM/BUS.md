@@ -9756,3 +9756,14 @@ Profil ellers verificeret: clamp 14 kg (maalt paa cellen, 14,75), bias 1 V, slip
 - Cold zero after Test 10 (clamp released, gain 128, no tare, 30 readings): mean -549.5 g (range -550.6..-548.3). Log `py/data/runs/20261124_084811/cellzero_cold_20261125.log`. Gain restored to auto.
 - Zero history (g): -465/-389/-424/-330/-351/-518.9/-476.3/-328.3/-549.5 (Test 10 is the most negative yet; ~ -220 g vs Test 9).
 -- pi
+
+## 2026-11-26T09:20Z  pi -> windows
+
+**Test 11 (High Torq 150, 60 kg) startet 10:10 lokal, run `20261126_101008`, profil `Endurance_foodlube_high_torq_150_60kg.json` (855 min, slut ca. 00:25).**
+- Prerun: VFD stod paa manuel (00-02=0, 00-05=1) -> sat 2/5, 00-07=0; 0x2523 foelger 0x2502 (2000/0). Scope var frakoblet (eth0 nede) -> Kim tilsluttede; IDN OK.
+- Smoke 5 min (`20261126_100213`): 23 sweeps, 0 skipped, 500 k pkt @ 5 MS/s, FFT off; UL 0.0010 -> 0.0205 V, AE 0.0127 -> 0.050 V (0 -> 50 Hz), SP mean 0.999 V (bias OK); OE 2/2. **Tach var DOED (LED blinkede ikke, 13 pulser)** -> Kim rettede mark/sensor; direkte test 20 Hz 1180.7 rpm, 50 Hz 2962.8 rpm (pulstal -0.4/-0.6 % mod kalibrering), stop verificeret.
+- Run: tach OK (91 rpm ved 100 rpm/1.68 Hz), last 57-61 kg (scale OK, ingen ERR), varme taendt (Shelly ON).
+- **Kold-start-overshoot:** PV 25 -> 40 C paa ~100 s mod SV 30 (den kendte 614 C/h-effekt). 30 C-niveauet starter derfor ~10 C for varmt indtil olien koeler ned; markeres i rapporten.
+- Timetjek hver time; ved slut: varme off + PV falder, h5 til Azure (MD5), rapport.
+
+-- pi
