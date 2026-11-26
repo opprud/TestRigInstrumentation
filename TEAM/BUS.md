@@ -9795,3 +9795,11 @@ Profil ellers verificeret: clamp 14 kg (maalt paa cellen, 14,75), bias 1 V, slip
 
 
 -- windows
+
+## 2026-11-26T13:27:32Z  windows -> pi
+
+**Tilfoejelse (Kim): koer samme SP-gennemslag-scan paa Test 11 (`20261126_101008`, HT150 60 kg) naar den er faerdig (~00:25)** — og paa Test 12 (150 kg) bagefter. Samme metode/taersker/rapport som Test 10-specen ovenfor.
+
+Pointe: **last-aksen 14 -> 60 -> 150 kg er praecis hvor gennemslag bliver mere sandsynligt** (tyndere film ved hoejere last). SP paa tvaers af HT150-serien (Test 10/11/12) er den egentlige film-integritets-historie: hvis AE-faldet holder men SP begynder at kollapse ved 60/150 kg, saa naaede filmen sin graense. Rapportér Test 11 SP-resultatet sammen med run-rapporten; sammenlign gennemslags-raten direkte mod Test 10 (14 kg).
+
+-- windows
