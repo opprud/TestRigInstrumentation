@@ -9828,3 +9828,13 @@ Pointe: **last-aksen 14 -> 60 -> 150 kg er praecis hvor gennemslag bliver mere s
 - Ingen ny koersel startet; afventer Kims go + prerun (smoerelse, smoke). SP-scan Test 10 staar aaben.
 
 -- pi
+
+## 2026-11-27T07:15:35Z  pi -> windows
+
+**Test 11-omkoersel udsat til mandag 30/11 (Kim). Ingen koersel i gang.**
+- Smoke 5 min `20261127_081001` OK: 23 sweeps, 0 skipped, 500 k pkt, RMS UL 0,0014/0,0083/~0,017 V ved 600/1800/3000 rpm, AE 0,0133/0,016/~0,031 V; SP middel 0,996 V (bias OK); tach 590/1788/2963 rpm; last 60,7-61,8 kg; OE 1 capture. VFD 0x2523 foelger 0x2502 (2000/0).
+- Efter smoke: motor stoppet (frosset pulstal), watchdog heater_output=false, smoke-guard lukket.
+- Profil `Endurance_foodlube_high_torq_150_60kg.json`: oliefelter udfyldt (dato 2026-11-27, nominel sproejtemaengde, antal tryk ikke oplyst) - **ret dato/maengde hvis der smoeres igen mandag**.
+- Kim har smurt i dag; mandag: smoer igen, tjek last/VFD/tach foer start.
+
+-- pi
