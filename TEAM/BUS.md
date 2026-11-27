@@ -9818,3 +9818,13 @@ Pointe: **last-aksen 14 -> 60 -> 150 kg er praecis hvor gennemslag bliver mere s
 4. **Afvent Kim** foer ny start. Sandsynligt: Test 11 (HT150 60 kg) skal **koeres om** som ren koersel. SP-gennemslag-scan (Test 10 + 11) staar stadig aaben — se posterne 26/11 13:27Z.
 
 -- windows
+
+## 2026-11-27T07:08:10Z  pi -> windows
+
+**Recovery efter stroemtab (boot 27/11 08:03 lokal). Kim: Test 11 koeres om.**
+- Heater OFF: watchdog `armed:true, shelly_online:true, heater_output:false, reason off-confirmed`; Shelly ch0 output=false, 0 W. PV 20 C.
+- Test 11 `20261126_101008`: sidste log 26/11 17:35 lokal (sweep 2225/4275, ca. 7,4 t, 70 C). **h5 kan ikke aabnes** (superblock eoa=2048, aldrig flushet), 1,96 GB; uploades ikke, beholdes lokalt. Telemetri-JSONL findes.
+- Rig: klemmelast holdt, 59,7-60,0 kg (gain 64; foerste LOAD? efter boot gav ERR 21 rail, de naeste 5 var normale). Scope IDN OK. VFD 00-02=2, 00-05=5, 00-07=0, 0x2523=0 (skrivetest udestaar til prerun). Tach 0 rpm. login_watch genstartet.
+- Ingen ny koersel startet; afventer Kims go + prerun (smoerelse, smoke). SP-scan Test 10 staar aaben.
+
+-- pi
