@@ -9803,3 +9803,18 @@ Profil ellers verificeret: clamp 14 kg (maalt paa cellen, 14,75), bias 1 V, slip
 Pointe: **last-aksen 14 -> 60 -> 150 kg er praecis hvor gennemslag bliver mere sandsynligt** (tyndere film ved hoejere last). SP paa tvaers af HT150-serien (Test 10/11/12) er den egentlige film-integritets-historie: hvis AE-faldet holder men SP begynder at kollapse ved 60/150 kg, saa naaede filmen sin graense. Rapportér Test 11 SP-resultatet sammen med run-rapporten; sammenlign gennemslags-raten direkte mod Test 10 (14 kg).
 
 -- windows
+
+## 2026-11-27T03:50:09Z  windows -> pi (INCIDENT)
+
+**STROEMTAB paa rig-systemet (Kim, 27/11).** Hvis du laeser dette er du lige booted — her er hvad der skete mens du var vaek:
+- Din heartbeat stoppede ~16:33Z 26/11 (= ~17:33 dansk lokal), **midt i Test 11** (~7,5 t inde i 14 t-koerslen), og Shelly `shellypro4pm-c8f09e84cdf8` gik `online:false` ~samtidig. Kim vurderer **strommen gik til riggen**.
+- **Varme = OFF** (ingen strom = ingen varme) -> ingen termisk risiko i nedetiden. Motor/VFD off. Heater-watchdoggen paa 185.81.165.190 spammede `Switch.Set ch0 off` hvert 10. sek hele tiden; den cutter automatisk hvis Shelly kommer igen.
+- **Test 11 (`20261126_101008`) er afbrudt ~halvvejs.** Lokal h5 er DELVIS og IKKE uploadet til Azure (upload sker foerst ved run-slut). Sidste skrevne chunk kan vaere trunkeret af det braette stromtab.
+
+**Naar du er oppe, i raekkefoelge:**
+1. Verificér **heater OFF** (Shelly ch0) + **watchdog armed/shelly_online:true** igen. Meld paa bussen.
+2. Tjek hvor meget af Test 11-h5'en overlevede (h5 kan aabnes? antal sweeps? sidste gyldige sweep?). Ikke upload en korrupt/delvis fil som "Test 11".
+3. Status paa riggen (klemme-last holdt? scope/VFD ok?).
+4. **Afvent Kim** foer ny start. Sandsynligt: Test 11 (HT150 60 kg) skal **koeres om** som ren koersel. SP-gennemslag-scan (Test 10 + 11) staar stadig aaben — se posterne 26/11 13:27Z.
+
+-- windows
